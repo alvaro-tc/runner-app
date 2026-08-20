@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paceup/core/error/failure.dart';
@@ -10,43 +7,7 @@ import 'package:paceup/core/network/server_clock.dart';
 import 'package:paceup/core/network/session_controller.dart';
 import 'package:paceup/core/storage/token_storage.dart';
 
-/// Adaptador de mentira: responde lo que diga [handler], sin socket ninguno.
-class _FakeAdapter implements HttpClientAdapter {
-  _FakeAdapter(this.handler);
-
-  final Future<ResponseBody> Function(RequestOptions) handler;
-
-  @override
-  void close({bool force = false}) {}
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) => handler(options);
-}
-
-ResponseBody _json(Object body, int status) => ResponseBody.fromString(
-  jsonEncode(body),
-  status,
-  headers: {
-    Headers.contentTypeHeader: [Headers.jsonContentType],
-  },
-);
-
-ResponseBody _envelope(Object data, {int status = 200}) => _json({
-  'data': data,
-  'meta': {
-    'requestId': 'req-1',
-    'timestamp': DateTime.utc(2026, 8, 20, 12).toIso8601String(),
-  },
-}, status);
-
-ResponseBody _error(String code, {int status = 400}) => _json({
-  'error': {'code': code, 'message': 'texto humano', 'details': <Object?>[]},
-  'meta': {'requestId': 'req-1'},
-}, status);
+import '../fake_http.dart';
 
 class _MemoryStorage implements TokenStorage {
   String? access = 'viejo';
@@ -156,8 +117,10 @@ void main() {
       Future<ResponseBody> handler(RequestOptions o) async {
         if (o.path == '/auth/refresh') {
           refreshes++;
-          if (refreshFalla) return _error('TOKEN_REUSE_DETECTED', status: 401);
-          return _envelope({
+          if (refreshFalla) {
+            return errorBody('TOKEN_REUSE_DETECTED', status: 401);
+          }
+          return envelope({
             'accessToken': 'nuevo',
             'refreshToken': 'refresh-nuevo',
             'expiresIn': 900,
@@ -165,12 +128,12 @@ void main() {
         }
         // El recurso protegido solo acepta el token nuevo.
         return o.headers['Authorization'] == 'Bearer nuevo'
-            ? _envelope({'ok': true})
-            : _error('UNAUTHORIZED', status: 401);
+            ? envelope({'ok': true})
+            : errorBody('UNAUTHORIZED', status: 401);
       }
 
       final refreshClient = Dio(BaseOptions(baseUrl: 'http://test'))
-        ..httpClientAdapter = _FakeAdapter(handler);
+        ..httpClientAdapter = FakeAdapter(handler);
       final session = SessionController(
         storage: storage,
         refreshClient: refreshClient,
@@ -179,7 +142,7 @@ void main() {
         session: session,
         clock: ServerClock(),
         baseUrl: 'http://test',
-      )..httpClientAdapter = _FakeAdapter(handler);
+      )..httpClientAdapter = FakeAdapter(handler);
     }
 
     test('diez 401 en paralelo disparan UN solo refresh', () async {
@@ -217,22 +180,25 @@ void main() {
     });
   });
 
-  test('el sobre se abre y el reloj se sincroniza con meta.timestamp', () async {
-    final clock = ServerClock();
-    final session = SessionController(
-      storage: _MemoryStorage(),
-      refreshClient: Dio(),
-    );
-    final dio = buildApiClient(
-      session: session,
-      clock: clock,
-      baseUrl: 'http://test',
-    )..httpClientAdapter = _FakeAdapter((o) async => _envelope({'valor': 42}));
+  test(
+    'el sobre se abre y el reloj se sincroniza con meta.timestamp',
+    () async {
+      final clock = ServerClock();
+      final session = SessionController(
+        storage: _MemoryStorage(),
+        refreshClient: Dio(),
+      );
+      final dio = buildApiClient(
+        session: session,
+        clock: clock,
+        baseUrl: 'http://test',
+      )..httpClientAdapter = FakeAdapter((o) async => envelope({'valor': 42}));
 
-    final res = await dio.get<dynamic>('/config/app');
+      final res = await dio.get<dynamic>('/config/app');
 
-    expect(res.data, {'valor': 42});
-    expect(clock.now().year, 2026);
-    expect(clock.now().hour, 12);
-  });
+      expect(res.data, {'valor': 42});
+      expect(clock.now().year, 2026);
+      expect(clock.now().hour, 12);
+    },
+  );
 }

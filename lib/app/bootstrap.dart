@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
+import 'package:paceup/core/sync/sync_providers.dart';
 import 'package:paceup/features/train/data/repositories/hive_training_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,13 +27,24 @@ Future<void> bootstrap(Widget Function() builder) async {
   final prefs = await SharedPreferences.getInstance();
   final training = await HiveTrainingRepository.open();
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-        trainingRepositoryProvider.overrideWithValue(training),
-      ],
-      child: builder(),
-    ),
+  final container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      trainingRepositoryProvider.overrideWithValue(training),
+    ],
   );
+
+  // La cola se drena al arrancar y cada vez que la app vuelve al frente: es
+  // cuando hay mas probabilidad de que haya vuelto la cobertura. Sin escuchar
+  // la conectividad —una dependencia mas para adivinar lo que el primer
+  // reintento averigua solo.
+  // ponytail: si hiciera falta drenar en cuanto vuelve la red, connectivity_plus.
+  void drenar() => unawaited(container.read(syncServiceProvider).drain());
+
+  drenar();
+
+  // Vive lo que vive el proceso: no hay a quien devolverselo.
+  AppLifecycleListener(onResume: drenar);
+
+  runApp(UncontrolledProviderScope(container: container, child: builder()));
 }

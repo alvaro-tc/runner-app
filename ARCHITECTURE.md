@@ -232,6 +232,44 @@ Los modelos de la API son `freezed` + `json_serializable`
 unidades crudas del servidor —metros, segundos, centavos, ISO-8601 UTC—. El
 formateo es de `core/formatters`.
 
+### Local y offline (Fase 20)
+
+`core/db/app_database.dart` es la base local, en **drift** (SQLite). Tres tablas:
+
+| Tabla | Para qué |
+|---|---|
+| `outbox_entries` | Escrituras hechas sin red: método, ruta, body, `Idempotency-Key`, intentos y `next_attempt_at` |
+| `pending_workouts` | Entrenamientos grabados offline, a la espera de `POST /workouts/sync` |
+| `cached_docs` | Respuestas crudas de GET por clave, para que la pantalla abra con datos |
+
+La regla en una línea: **leer de local, refrescar desde red, escribir en la
+outbox.** `core/sync/offline_first.dart` implementa la lectura
+(`readThrough` emite la cache y después lo fresco; sin red pero con cache el
+fallo se traga) y `core/sync/sync_service.dart` el drenado.
+
+Lo que no es negociable:
+
+- **La `Idempotency-Key` se guarda en la fila, no en memoria.** Su trabajo es
+  sobrevivir a la conexión que se corta después de mandar el checkout pero
+  antes de recibir la respuesta. Si se pierde en ese hueco, el reintento es un
+  segundo cobro.
+- **Los entrenamientos tienen su propia tabla**, no van por la outbox:
+  `/workouts/sync` sube lotes de hasta 50 y resuelve **cada item por separado**
+  (`created` / `duplicated` / `rejected`). Una fila de outbox por petición no
+  sabría qué hacer con un rechazo en el sexto de cincuenta. `duplicated` no es
+  un error: se cierra la fila igual.
+- **Un `4xx` se descarta con log.** El servidor no va a cambiar de opinión y
+  dejar la entrada en la cola bloquearía para siempre todo lo encolado detrás.
+  Sin red o con `5xx`, en cambio, se reintenta con backoff exponencial (5 s,
+  doblando, tope de 30 min) y el drenado se corta ahí.
+
+El drenado se dispara al arrancar y cada vez que la app vuelve al frente
+(`AppLifecycleListener` en `bootstrap()`). No se escucha la conectividad: es una
+dependencia más para adivinar lo que el primer reintento averigua solo.
+
+`hive_ce` sigue vivo **sólo** para `HiveTrainingRepository`, que es datos falsos;
+desaparece en la Fase 22 cuando ese repositorio pase a drift + API.
+
 ## 10. Datos de prueba
 
 `core/constants/fake_data_seed.dart` genera todo el dataset anclado a
