@@ -4,7 +4,8 @@ import 'package:paceup/core/services/preferences_provider.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
 import 'package:paceup/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:paceup/features/auth/domain/repositories/auth_repository.dart';
-import 'package:paceup/features/home/data/repositories/fake_home_repositories.dart';
+import 'package:paceup/features/home/data/datasources/home_api.dart';
+import 'package:paceup/features/home/data/repositories/remote_home_repositories.dart';
 import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
 import 'package:paceup/features/profile/data/repositories/local_profile_repository.dart';
 import 'package:paceup/features/profile/domain/repositories/profile_repository.dart';
@@ -26,12 +27,22 @@ final authRepositoryProvider = Provider<AuthRepository>(
   ),
 );
 
-final marathonRepositoryProvider = Provider<MarathonRepository>(
-  (ref) => FakeMarathonRepository(),
+final homeApiProvider = Provider<HomeApi>(
+  (ref) => HomeApi(ref.watch(dioProvider)),
 );
 
-final trainingPlanRepositoryProvider = Provider<TrainingPlanRepository>(
-  (ref) => FakeTrainingPlanRepository(),
+final marathonRepositoryProvider = Provider<MarathonRepository>(
+  (ref) => RemoteMarathonRepository(
+    ref.watch(homeApiProvider),
+    ref.watch(appDatabaseProvider),
+  ),
+);
+
+final homeRepositoryProvider = Provider<HomeRepository>(
+  (ref) => RemoteHomeRepository(
+    ref.watch(homeApiProvider),
+    ref.watch(appDatabaseProvider),
+  ),
 );
 
 final raceRepositoryProvider = Provider<RaceRepository>(

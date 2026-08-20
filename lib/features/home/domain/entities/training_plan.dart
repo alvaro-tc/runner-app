@@ -4,6 +4,7 @@ enum SessionType {
   easy('Run Easy'),
   tempo('Tempo'),
   intervals('Intervals'),
+  recovery('Recovery'),
   long('Long Run'),
   rest('Rest'),
   race('Race Day');
@@ -87,20 +88,27 @@ class TrainingWeek {
       sessions.fold(0, (sum, s) => sum + s.targetDistanceKm);
 }
 
+/// El plan activo **sin** sus semanas: la API las sirve de una en una
+/// (`/training-plans/me/current?week=`) y traerse las dieciseis para pintar una
+/// seria bajarse el plan entero en cada arranque.
 @immutable
-class TrainingPlan {
-  const TrainingPlan({
+class PlanOverview {
+  const PlanOverview({
     required this.id,
     required this.name,
-    required this.weeks,
-    required this.activeWeekIndex,
+    required this.totalWeeks,
+    required this.currentWeek,
+    required this.totalSessions,
+    required this.completedSessions,
   });
 
   final String id;
   final String name;
-  final List<TrainingWeek> weeks;
-  final int activeWeekIndex;
+  final int totalWeeks;
 
-  TrainingWeek weekAt(int index) =>
-      weeks.firstWhere((w) => w.index == index, orElse: () => weeks.first);
+  /// `null` si el plan aun no empezo o ya termino.
+  final int? currentWeek;
+
+  final int totalSessions;
+  final int completedSessions;
 }

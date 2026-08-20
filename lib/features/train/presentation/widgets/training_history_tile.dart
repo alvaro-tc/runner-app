@@ -7,7 +7,7 @@ import 'package:paceup/features/train/domain/entities/training_run.dart';
 import 'package:paceup/shared/widgets/organisms/route_map_view.dart';
 
 IconData iconForSessionType(SessionType type) => switch (type) {
-  SessionType.easy => Icons.self_improvement_rounded,
+  SessionType.easy || SessionType.recovery => Icons.self_improvement_rounded,
   SessionType.tempo => Icons.speed_rounded,
   SessionType.intervals => Icons.timer_outlined,
   SessionType.long => Icons.landscape_outlined,

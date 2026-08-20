@@ -17,15 +17,18 @@ cambio de una línea por repositorio (ver
 
 ```bash
 flutter pub get
-flutter run
+make run          # contra el backend de produccion (.env)
+make run-local    # contra el backend en esta maquina (.env.local)
 ```
 
-Al arrancar por primera vez verás el onboarding. Cualquier email con una
-contraseña de 8 caracteres o más inicia sesión.
+Al arrancar por primera vez verás el onboarding. La sesión ya es real: entra
+con `runner@test.com` / `Test1234!` (las demás cuentas y el estado de cada
+entorno, en [docs/cuentas-de-prueba.md](docs/cuentas-de-prueba.md)).
 
 ## Comandos
 
 ```bash
+make run              # flutter run --dart-define-from-file=.env
 make fmt              # dart format .
 make analyze          # flutter analyze
 make test             # flutter test
@@ -86,5 +89,7 @@ del design system con un interruptor de tema.
 
 ## Documentación
 
+- [docs/cuentas-de-prueba.md](docs/cuentas-de-prueba.md) — cuentas sembradas,
+  cómo apuntar la app a cada backend y estado de producción.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — capas, convenciones, cómo añadir una
   feature, cómo sustituir los fakes y las desviaciones respecto al brief.

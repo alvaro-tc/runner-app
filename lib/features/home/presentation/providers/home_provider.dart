@@ -11,76 +11,82 @@ class HomeData {
   const HomeData({
     required this.nextMarathon,
     required this.plan,
+    required this.week,
     required this.selectedWeekIndex,
+    required this.todaySession,
   });
 
-  final Marathon nextMarathon;
-  final TrainingPlan plan;
+  /// `null` cuando no hay ninguna carrera por delante en el catalogo.
+  final Marathon? nextMarathon;
+
+  /// `null` mientras el usuario no tenga un plan activo.
+  final PlanOverview? plan;
+
+  /// La semana que se esta mirando. Sin plan, la tira Mon-Sun sigue teniendo
+  /// sus siete casillas con lo que se corrio.
+  final TrainingWeek week;
+
   final int selectedWeekIndex;
+  final PlannedSession? todaySession;
 
-  TrainingWeek get week => plan.weekAt(selectedWeekIndex);
-
-  /// The card at the bottom of Home: today's session if the selected week
-  /// contains today, otherwise the first real session of that week.
-  PlannedSession get focusSession {
-    final today = DateTime.now();
-    final isToday = week.sessions.any(
-      (s) =>
-          s.date.year == today.year &&
-          s.date.month == today.month &&
-          s.date.day == today.day,
-    );
-    if (isToday) {
-      return week.sessions.firstWhere(
-        (s) =>
-            s.date.year == today.year &&
-            s.date.month == today.month &&
-            s.date.day == today.day,
-      );
+  /// La tarjeta de abajo: la sesion de hoy si la hay, y si no la primera de
+  /// verdad de la semana que se esta mirando.
+  PlannedSession? get focusSession {
+    if (todaySession != null && selectedWeekIndex == week.index) {
+      return todaySession;
     }
-    return week.sessions.firstWhere(
-      (s) => !s.type.isRest,
-      orElse: () => week.sessions.first,
-    );
+    final reales = week.sessions.where((s) => !s.type.isRest);
+    return reales.isEmpty ? null : reales.first;
   }
 
-  HomeData copyWith({TrainingPlan? plan, int? selectedWeekIndex}) => HomeData(
+  HomeData copyWith({TrainingWeek? week, int? selectedWeekIndex}) => HomeData(
     nextMarathon: nextMarathon,
-    plan: plan ?? this.plan,
+    plan: plan,
+    week: week ?? this.week,
     selectedWeekIndex: selectedWeekIndex ?? this.selectedWeekIndex,
+    todaySession: todaySession,
   );
 }
 
 class HomeNotifier extends AsyncNotifier<HomeData> {
   @override
   Future<HomeData> build() async {
-    final marathon =
-        (await ref.watch(marathonRepositoryProvider).fetchFeatured()).unwrap();
-    final plan = (await ref.watch(trainingPlanRepositoryProvider).fetchPlan())
+    final resumen = (await ref.watch(homeRepositoryProvider).fetchSummary())
         .unwrap();
     return HomeData(
-      nextMarathon: marathon,
-      plan: plan,
-      selectedWeekIndex: plan.activeWeekIndex,
+      nextMarathon: resumen.featuredMarathon,
+      plan: resumen.plan,
+      week: resumen.week,
+      selectedWeekIndex: resumen.week.index,
+      todaySession: resumen.todaySession,
     );
   }
 
-  void selectWeek(int index) {
+  /// Cada semana es una consulta: el plan puede tener dieciseis y traerlas
+  /// todas para pintar una seria bajarse el plan entero en cada arranque.
+  Future<void> selectWeek(int index) async {
     final data = state.value;
-    if (data == null) return;
-    state = AsyncData(data.copyWith(selectedWeekIndex: index));
+    if (data == null || index == data.selectedWeekIndex) return;
+
+    final result = await ref.read(homeRepositoryProvider).fetchPlanWeek(index);
+    result.fold(
+      (week) => state = AsyncData(
+        data.copyWith(week: week, selectedWeekIndex: index),
+      ),
+      (_) {},
+    );
   }
 
   Future<void> toggleSession(
     String sessionId, {
     required bool completed,
   }) async {
-    final data = state.value;
-    if (data == null) return;
     final result = await ref
-        .read(trainingPlanRepositoryProvider)
+        .read(homeRepositoryProvider)
         .setSessionCompleted(sessionId: sessionId, completed: completed);
-    result.fold((plan) => state = AsyncData(data.copyWith(plan: plan)), (_) {});
+    // El servidor recalcula progreso y contadores: se relee en vez de
+    // adivinar como quedo la semana.
+    result.fold((_) => unawaited(refresh()), (_) {});
   }
 
   Future<void> refresh() async {

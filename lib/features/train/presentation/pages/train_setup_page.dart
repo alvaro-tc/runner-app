@@ -49,10 +49,10 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
   PlannedSession? get _plannedSession {
     final data = ref.watch(homeProvider).value;
     if (data == null) return null;
-    for (final week in data.plan.weeks) {
-      for (final session in week.sessions) {
-        if (session.id == widget.sessionId) return session;
-      }
+    // Solo la semana cargada: una sesion se arranca desde el Home, y el Home
+    // ensena una semana cada vez.
+    for (final session in data.week.sessions) {
+      if (session.id == widget.sessionId) return session;
     }
     return null;
   }

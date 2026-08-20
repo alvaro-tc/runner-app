@@ -30,9 +30,6 @@ abstract final class FakeDataSeed {
   }
 
   /// Monday of the week containing [d].
-  static DateTime _weekStart(DateTime d) =>
-      _atMidnight(d).subtract(Duration(days: d.weekday - 1));
-
   // -------------------------------------------------------------- profile
 
   static final UserProfile profile = UserProfile(
@@ -291,83 +288,6 @@ abstract final class FakeDataSeed {
   ];
 
   static Marathon get featuredMarathon => marathons.first;
-
-  // ------------------------------------------------------------- the plan
-
-  /// 12-week build-up with week 4 active — the week containing today.
-  static final TrainingPlan plan = _buildPlan();
-
-  static TrainingPlan _buildPlan() {
-    const activeIndex = 4;
-    final activeStart = _weekStart(now);
-    final weeks = <TrainingWeek>[];
-
-    for (var w = 1; w <= 12; w++) {
-      final start = activeStart.add(Duration(days: (w - activeIndex) * 7));
-      final sessions = <PlannedSession>[];
-      for (var d = 0; d < 7; d++) {
-        final date = start.add(Duration(days: d));
-        final template = _weekTemplate[d];
-        final scale = 1 + (w - activeIndex) * 0.06;
-        final distance = template.km * scale;
-        final isPast = date.isBefore(_atMidnight(now));
-        sessions.add(
-          PlannedSession(
-            id: 'w$w-d$d',
-            date: date,
-            type: template.type,
-            targetDistanceKm: template.type.isRest
-                ? 0
-                : double.parse(distance.toStringAsFixed(1)),
-            targetDuration: Duration(
-              minutes: template.type.isRest ? 0 : (distance * 6.4).round(),
-            ),
-            targetPace: const PaceRange(
-              Duration(minutes: 6, seconds: 10),
-              Duration(minutes: 6, seconds: 30),
-            ),
-            routeName: template.route,
-            completionRatio: template.type.isRest
-                ? 0
-                : isPast
-                ? 1
-                : date.isAtSameMomentAs(_atMidnight(now))
-                ? 0.35
-                : 0,
-            isCompleted: !template.type.isRest && isPast,
-          ),
-        );
-      }
-      weeks.add(TrainingWeek(index: w, startDate: start, sessions: sessions));
-    }
-    return TrainingPlan(
-      id: 'plan-nyc-12w',
-      name: 'NY Halloween build-up',
-      weeks: weeks,
-      activeWeekIndex: activeIndex,
-    );
-  }
-
-  /// Mon…Sun shape of a training week, matching the Home reference strip.
-  static const _weekTemplate = <({double km, SessionType type, String? route})>[
-    (km: 5, type: SessionType.easy, route: 'Senayan Loop (7.4 km)'),
-    (km: 8, type: SessionType.tempo, route: 'Sudirman Out & Back'),
-    (km: 6, type: SessionType.easy, route: 'Kanal Banjir Timur'),
-    (km: 14, type: SessionType.long, route: 'Ragunan Long Loop'),
-    (km: 4, type: SessionType.intervals, route: 'GBK Track'),
-    (km: 0, type: SessionType.rest, route: null),
-    (km: 5, type: SessionType.easy, route: 'Senayan Loop (7.4 km)'),
-  ];
-
-  /// Today's card on Home.
-  static PlannedSession get todaySession {
-    final week = plan.weekAt(plan.activeWeekIndex);
-    final today = _atMidnight(now);
-    return week.sessions.firstWhere(
-      (s) => _atMidnight(s.date) == today,
-      orElse: () => week.sessions.first,
-    );
-  }
 
   // ------------------------------------------------------------- history
 

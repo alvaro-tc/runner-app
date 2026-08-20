@@ -61,12 +61,15 @@ class _HomeBody extends ConsumerWidget {
           data: (p) => "${p.firstName}'s Training Plan",
           orElse: () => 'Your Training Plan',
         );
+    final marathon = data.nextMarathon;
     // Fall back to a freshly computed value so the pill never flashes zeroes
     // while the ticker's first event is in flight.
-    final remaining =
-        ref.watch(countdownProvider(data.nextMarathon.date)).value ??
-        data.nextMarathon.date.difference(ref.watch(nowProvider)());
+    final remaining = marathon == null
+        ? Duration.zero
+        : ref.watch(countdownProvider(marathon.date)).value ??
+              marathon.date.difference(ref.watch(nowProvider)());
     final session = data.focusSession;
+    final plan = data.plan;
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -79,48 +82,55 @@ class _HomeBody extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Upcoming Marathon In',
-                style: context.text.headingLg,
+        // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
+        if (marathon != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Upcoming Marathon In',
+                  style: context.text.headingLg,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            CountdownPill(remaining: remaining),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        MarathonHeroCard(
-          marathon: data.nextMarathon,
-          onTap: () =>
-              context.push(Routes.marathonDetailOf(data.nextMarathon.id)),
-        ),
-        const SizedBox(height: AppSpacing.xl),
+              const SizedBox(width: AppSpacing.sm),
+              CountdownPill(remaining: remaining),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          MarathonHeroCard(
+            marathon: marathon,
+            onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+        ],
         SectionHeader(
           title: planTitle,
-          action: _WeekPicker(
-            weekCount: data.plan.weeks.length,
-            selected: data.selectedWeekIndex,
-            onSelected: (i) => ref.read(homeProvider.notifier).selectWeek(i),
-          ),
+          action: plan == null
+              ? null
+              : _WeekPicker(
+                  weekCount: plan.totalWeeks,
+                  selected: data.selectedWeekIndex,
+                  onSelected: (i) =>
+                      ref.read(homeProvider.notifier).selectWeek(i),
+                ),
         ),
         const SizedBox(height: AppSpacing.md),
+        // La tira existe con plan y sin el: lo corrido se pinta igual.
         WeeklyPlanStrip(week: data.week),
         const SizedBox(height: AppSpacing.xl),
-        TodaySessionCard(
-          session: session,
-          onToggleCompleted: (value) => ref
-              .read(homeProvider.notifier)
-              .toggleSession(session.id, completed: value),
-          onReschedule: () => context.showSnack(
-            'Rescheduling arrives with the plan editor. '
-            'Start the run whenever suits you today.',
+        if (session != null)
+          TodaySessionCard(
+            session: session,
+            onToggleCompleted: (value) => ref
+                .read(homeProvider.notifier)
+                .toggleSession(session.id, completed: value),
+            onReschedule: () => context.showSnack(
+              'Rescheduling arrives with the plan editor. '
+              'Start the run whenever suits you today.',
+            ),
+            onStart: () =>
+                context.push('${Routes.trainSetup}?session=${session.id}'),
           ),
-          onStart: () =>
-              context.push('${Routes.trainSetup}?session=${session.id}'),
-        ),
         SizedBox(height: c.isDark ? AppSpacing.base : AppSpacing.base),
       ],
     );

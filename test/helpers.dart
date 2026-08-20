@@ -1,15 +1,18 @@
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paceup/app/app.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/constants/fake_data_seed.dart';
+import 'package:paceup/core/db/app_database.dart';
 import 'package:paceup/core/network/api_client.dart';
 import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/location_service.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
 import 'package:paceup/core/storage/token_storage.dart';
+import 'package:paceup/core/sync/sync_providers.dart';
 import 'package:paceup/core/utils/result.dart';
 import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
 import 'package:paceup/features/home/presentation/providers/home_provider.dart';
@@ -19,6 +22,7 @@ import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/fake_http.dart';
+import 'fake_api.dart';
 
 /// In-memory stand-in for the Hive-backed repository, so widget tests never
 /// touch the file system.
@@ -80,26 +84,6 @@ class MemoryTokenStorage implements TokenStorage {
   Future<String> deviceId() async => 'device-test';
 }
 
-/// Backend de mentira para `/auth/*`: acepta cualquier credencial.
-Future<ResponseBody> fakeAuthBackend(RequestOptions req) async {
-  const user = {
-    'id': 'u1',
-    'email': 'pandu@paceup.app',
-    'name': 'Pandu',
-    'role': 'runner',
-  };
-  return switch (req.path) {
-    '/auth/login' || '/auth/register' => envelope({
-      'accessToken': 'access-1',
-      'refreshToken': 'refresh-1',
-      'expiresIn': 900,
-      'user': user,
-    }),
-    '/auth/me' => envelope(user),
-    _ => envelope(<String, Object?>{}),
-  };
-}
-
 /// Boots the real app with test doubles for anything that needs a platform.
 Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
@@ -113,13 +97,20 @@ Future<ProviderContainer> pumpApp(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(instance),
       initialSessionProvider.overrideWithValue(signedIn),
+      // En memoria: `driftDatabase` pide un directorio al sistema y en un test
+      // de widget no hay plataforma que lo de.
+      appDatabaseProvider.overrideWith((ref) {
+        final db = AppDatabase(NativeDatabase.memory());
+        ref.onDispose(db.close);
+        return db;
+      }),
       tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
       // Ni un socket sale de un test de widget.
       dioProvider.overrideWith((ref) {
         return buildApiClient(
           session: ref.watch(sessionControllerProvider),
           clock: ref.watch(serverClockProvider),
-        )..httpClientAdapter = FakeAdapter(api ?? fakeAuthBackend);
+        )..httpClientAdapter = FakeAdapter(api ?? fakeBackend);
       }),
       trainingRepositoryProvider.overrideWithValue(
         InMemoryTrainingRepository(),

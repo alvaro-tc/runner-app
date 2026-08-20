@@ -332,6 +332,33 @@ para guardar el par de tokens, `AppDatabase.wipe()` para borrar lo local.
 Los tests de widget no abren sockets: `pumpApp` inyecta un `Dio` con
 `FakeAdapter` y un `TokenStorage` en memoria.
 
+### Home y maratones conectados (Fase 22.2)
+
+`GET /home/summary` es **una** peticion para las cinco cosas que pinta la
+pantalla. `HomeApi` devuelve el JSON crudo y `home_mappers.dart` lo convierte en
+entidades: es el unico sitio donde metros, segundos y centavos dejan de serlo.
+
+- **La tira Mon-Sun se construye desde `week.days`, no desde las sesiones**: son
+  siempre siete casillas, un dia sin sesion tambien ocupa la suya, y los
+  kilometros corridos de verdad solo estan ahi. El anillo cruza lo corrido con
+  lo planificado.
+- **El plan se sirve por semanas.** `PlanOverview` sustituye a `TrainingPlan`:
+  traerse las dieciseis semanas para pintar una seria bajarse el plan entero en
+  cada arranque. Cambiar de semana en el selector es una consulta a
+  `/training-plans/me/current?week=`.
+- **Nada es obligatorio**: sin carrera por delante no hay cuenta atras, sin plan
+  activo no hay selector ni tarjeta del dia, y la pantalla se pinta igual.
+- **La lectura es offline-first** via `readThrough`: se emite la cache y despues
+  la red; sin red, se queda con la cache y el fallo solo sube cuando no hay ni
+  eso. La lista de maratones viaja dentro de un documento (`{items: [...]}`)
+  porque la cache guarda documentos, no listas.
+- **El pronostico llega como un numero** y la tarjeta pinta un rango: la banda
+  sale de la confianza que declara el servidor (±4/8/12 %).
+
+Pendiente de backend: **no hay forma de desmarcar una sesion** —la API solo
+tiene `complete`—, asi que desmarcar el check devuelve un error en vez de
+fingir que se guardo.
+
 ## 10. Datos de prueba
 
 `core/constants/fake_data_seed.dart` genera todo el dataset anclado a
@@ -362,6 +389,10 @@ Los goldens se regeneran con `flutter test --update-goldens`. Cargan Poppins y
 MaterialIcons explícitamente; sin eso el texto y los iconos saldrían como cajas.
 El reloj se congela con `nowProvider`, así que la cuenta atrás de Home no cambia
 entre ejecuciones.
+
+Los goldens de Home ya no dependen de la fecha: la pantalla sale de
+`test/fake_api.dart`, un `/home/summary` fijo con fechas sin zona horaria. Los
+de Races siguen saliendo del seed y por eso siguen siendo frágiles.
 
 **Limitación conocida:** `FakeDataSeed` se ancla a `DateTime.now()`, de modo que
 la fecha de la sesión del día y el día resaltado de la tira semanal cambian al
