@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:paceup/app/dependencies.dart';
+import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
+import 'package:paceup/core/storage/token_storage.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
+import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
 import 'package:paceup/features/train/data/repositories/hive_training_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,9 +30,17 @@ Future<void> bootstrap(Widget Function() builder) async {
   final prefs = await SharedPreferences.getInstance();
   final training = await HiveTrainingRepository.open();
 
+  // Con refresh token guardado hay sesion: dura 60 dias y rota sola, asi que
+  // el arranque no necesita red para saber a que pantalla ir. Si resultara
+  // estar revocado, lo dira el primer 401 y el router mandara a Welcome.
+  final tokens = SecureTokenStorage();
+  final huboSesion = (await tokens.readRefreshToken())?.isNotEmpty ?? false;
+
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
+      tokenStorageProvider.overrideWithValue(tokens),
+      initialSessionProvider.overrideWithValue(huboSesion),
       trainingRepositoryProvider.overrideWithValue(training),
     ],
   );

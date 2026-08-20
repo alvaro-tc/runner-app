@@ -270,6 +270,68 @@ dependencia más para adivinar lo que el primer reintento averigua solo.
 `hive_ce` sigue vivo **sólo** para `HiveTrainingRepository`, que es datos falsos;
 desaparece en la Fase 22 cuando ese repositorio pase a drift + API.
 
+### Tracking GPS (Fase 21)
+
+`features/tracking/` graba un entrenamiento: `TrackingService` con
+`start` / `pause` / `resume` / `stop` / `discard` y un `stream` de puntos para
+el mapa. El GPS lo pone `core/services/location_service.dart` —**`geolocator`,
+que ya estaba**: servicio en primer plano en Android y `UIBackgroundModes` en
+iOS, sin paquete de pago (el porqué, en `running-api/docs/decisiones.md`).
+
+El camino de un punto:
+
+```
+GPS (1 Hz, se descarta accuracy > 30 m)
+  └─▶ pending_positions (drift)   ← SIEMPRE, y primero
+        └─▶ cada 20 s: POST /tracking/sessions/:id/positions
+```
+
+Lo que no es negociable:
+
+- **Primero la fila, después la red.** Un entrenamiento perdido no se puede
+  volver a correr. Si la sesión remota ni siquiera pudo abrirse —correr sin
+  cobertura—, se graba igual y el entrenamiento entero sube por
+  `/workouts/sync` al terminar.
+- **La ingesta se autentica con el `ingestToken` de la sesión**, no con el JWT:
+  el credencial que sale del teléfono cada veinte segundos durante una carrera
+  tiene que ser el de menor alcance posible. El token se guarda **con los
+  puntos**, porque la cola puede drenarse horas después. Por eso `/tracking/`
+  está en `publicApiPaths`: no lleva JWT, y su 401 no significa que la sesión
+  del usuario caducó.
+- **Lotes, nunca punto por punto.** El envío lo hace el mismo `SyncService` que
+  todo lo demás, así que reintentos y backoff viven en un único sitio. Un lote
+  reenviado es inofensivo: el servidor deduplica por `clientPointId`.
+- **Sesión cerrada o token inválido → el lote se descarta.** Esos puntos no van
+  a entrar nunca y dejarlos bloquearía la cola de las sesiones siguientes.
+- **En pausa se apaga el sensor entero**, que ahorra más que cualquier
+  `distanceFilter`. Pausar, reanudar y descartar, si fallan, van a la outbox:
+  no valen un entrenamiento y su error no sube a la UI.
+- **Permisos en dos tiempos**: `whileInUse` para empezar, y `always` después,
+  cuando ya hay una grabación que lo justifica. Denegado el segundo, se graba
+  igual y se avisa (`backgroundDenied`); no se bloquea nada.
+
+### Auth conectado (Fase 22.1)
+
+`RemoteAuthRepository` sustituye al fake: `AuthApi` para hablar, `SessionController`
+para guardar el par de tokens, `AppDatabase.wipe()` para borrar lo local.
+
+- **La sesión inicial se resuelve en `bootstrap()`**, leyendo el refresh token
+  del almacén seguro (`initialSessionProvider`). Es una lectura asíncrona y el
+  guard del router es síncrono: sin ese dato, quien ya estaba dentro vería
+  Welcome un instante antes del primer frame de Home.
+- **Cerrar sesión borra el dispositivo pase lo que pase.** Si `/auth/logout`
+  falla, el peor caso es un refresh token vivo que ya nadie tiene; al revés
+  —tokens y caché que se quedan porque no había red— es la sesión de uno
+  visible para el siguiente.
+- **La sesión también muere sola**: `AuthNotifier` escucha
+  `SessionController.expired` (refresh rechazado), pone el estado a `false` y
+  limpia la caché. El router hace el resto.
+- `onboardingSeenAt` llega en el usuario del login: quien ya vio los slides no
+  los vuelve a ver aunque haya reinstalado.
+
+Los tests de widget no abren sockets: `pumpApp` inyecta un `Dio` con
+`FakeAdapter` y un `TokenStorage` en memoria.
+
 ## 10. Datos de prueba
 
 `core/constants/fake_data_seed.dart` genera todo el dataset anclado a

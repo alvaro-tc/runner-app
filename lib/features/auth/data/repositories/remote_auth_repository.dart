@@ -1,0 +1,71 @@
+import 'package:paceup/core/db/app_database.dart';
+import 'package:paceup/core/error/failure.dart';
+import 'package:paceup/core/network/session_controller.dart';
+import 'package:paceup/core/storage/token_storage.dart';
+import 'package:paceup/core/utils/result.dart';
+import 'package:paceup/features/auth/data/datasources/auth_api.dart';
+import 'package:paceup/features/auth/data/models/auth_models.dart';
+import 'package:paceup/features/auth/domain/repositories/auth_repository.dart';
+
+/// `/auth/*` de verdad. Aqui se decide lo que el [AuthApi] no decide: cuando se
+/// guardan los tokens y cuando se borra lo local.
+class RemoteAuthRepository implements AuthRepository {
+  RemoteAuthRepository({
+    required this.api,
+    required this.session,
+    required this.storage,
+    required this.db,
+  });
+
+  final AuthApi api;
+  final SessionController session;
+  final TokenStorage storage;
+  final AppDatabase db;
+
+  @override
+  Future<Result<AuthUser>> signIn({
+    required String email,
+    required String password,
+  }) => guard(
+    () => _entrar(() => api.login(email: email, password: password)),
+  );
+
+  @override
+  Future<Result<AuthUser>> signUp({
+    required String fullName,
+    required String email,
+    required String password,
+  }) => guard(
+    () => _entrar(
+      () => api.register(name: fullName, email: email, password: password),
+    ),
+  );
+
+  /// Los tokens se guardan **antes** de cualquier otra llamada: `/auth/me` ya
+  /// necesita ir firmada.
+  Future<AuthUser> _entrar(Future<AuthSession> Function() login) async {
+    final sesion = await login();
+    await session.saveTokens(
+      accessToken: sesion.accessToken,
+      refreshToken: sesion.refreshToken,
+    );
+    return sesion.user ?? await api.me();
+  }
+
+  /// Cerrar sesion **siempre** limpia el dispositivo, responda el servidor lo
+  /// que responda: si falla la llamada, el peor caso es un refresh token vivo
+  /// en el servidor que ya nadie tiene. Al reves —tokens que se quedan en el
+  /// telefono porque no habia red— es la cache de un usuario visible para el
+  /// siguiente.
+  @override
+  Future<Result<void>> signOut() => guard(() async {
+    final refresh = await storage.readRefreshToken();
+    try {
+      if (refresh != null && refresh.isNotEmpty) await api.logout(refresh);
+    } on Failure catch (_) {
+      // Sin red o token ya muerto: da igual, lo local se borra igual.
+    }
+    await session.clear();
+    await db.wipe();
+  });
+}

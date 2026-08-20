@@ -1409,6 +1409,733 @@ class CachedDocsCompanion extends UpdateCompanion<CachedDoc> {
   }
 }
 
+class $PendingPositionsTable extends PendingPositions
+    with TableInfo<$PendingPositionsTable, PendingPosition> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingPositionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientPointIdMeta = const VerificationMeta(
+    'clientPointId',
+  );
+  @override
+  late final GeneratedColumn<String> clientPointId = GeneratedColumn<String>(
+    'client_point_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ingestTokenMeta = const VerificationMeta(
+    'ingestToken',
+  );
+  @override
+  late final GeneratedColumn<String> ingestToken = GeneratedColumn<String>(
+    'ingest_token',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordedAtMeta = const VerificationMeta(
+    'recordedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> recordedAt = GeneratedColumn<DateTime>(
+    'recorded_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latMeta = const VerificationMeta('lat');
+  @override
+  late final GeneratedColumn<double> lat = GeneratedColumn<double>(
+    'lat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lngMeta = const VerificationMeta('lng');
+  @override
+  late final GeneratedColumn<double> lng = GeneratedColumn<double>(
+    'lng',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _altitudeMeta = const VerificationMeta(
+    'altitude',
+  );
+  @override
+  late final GeneratedColumn<double> altitude = GeneratedColumn<double>(
+    'altitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _speedMeta = const VerificationMeta('speed');
+  @override
+  late final GeneratedColumn<double> speed = GeneratedColumn<double>(
+    'speed',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _accuracyMeta = const VerificationMeta(
+    'accuracy',
+  );
+  @override
+  late final GeneratedColumn<double> accuracy = GeneratedColumn<double>(
+    'accuracy',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _headingMeta = const VerificationMeta(
+    'heading',
+  );
+  @override
+  late final GeneratedColumn<double> heading = GeneratedColumn<double>(
+    'heading',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _nextAttemptAtMeta = const VerificationMeta(
+    'nextAttemptAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextAttemptAt =
+      GeneratedColumn<DateTime>(
+        'next_attempt_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientPointId,
+    sessionId,
+    ingestToken,
+    recordedAt,
+    lat,
+    lng,
+    altitude,
+    speed,
+    accuracy,
+    heading,
+    attempts,
+    nextAttemptAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_positions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingPosition> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_point_id')) {
+      context.handle(
+        _clientPointIdMeta,
+        clientPointId.isAcceptableOrUnknown(
+          data['client_point_id']!,
+          _clientPointIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_clientPointIdMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('ingest_token')) {
+      context.handle(
+        _ingestTokenMeta,
+        ingestToken.isAcceptableOrUnknown(
+          data['ingest_token']!,
+          _ingestTokenMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ingestTokenMeta);
+    }
+    if (data.containsKey('recorded_at')) {
+      context.handle(
+        _recordedAtMeta,
+        recordedAt.isAcceptableOrUnknown(data['recorded_at']!, _recordedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedAtMeta);
+    }
+    if (data.containsKey('lat')) {
+      context.handle(
+        _latMeta,
+        lat.isAcceptableOrUnknown(data['lat']!, _latMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latMeta);
+    }
+    if (data.containsKey('lng')) {
+      context.handle(
+        _lngMeta,
+        lng.isAcceptableOrUnknown(data['lng']!, _lngMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lngMeta);
+    }
+    if (data.containsKey('altitude')) {
+      context.handle(
+        _altitudeMeta,
+        altitude.isAcceptableOrUnknown(data['altitude']!, _altitudeMeta),
+      );
+    }
+    if (data.containsKey('speed')) {
+      context.handle(
+        _speedMeta,
+        speed.isAcceptableOrUnknown(data['speed']!, _speedMeta),
+      );
+    }
+    if (data.containsKey('accuracy')) {
+      context.handle(
+        _accuracyMeta,
+        accuracy.isAcceptableOrUnknown(data['accuracy']!, _accuracyMeta),
+      );
+    }
+    if (data.containsKey('heading')) {
+      context.handle(
+        _headingMeta,
+        heading.isAcceptableOrUnknown(data['heading']!, _headingMeta),
+      );
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
+    if (data.containsKey('next_attempt_at')) {
+      context.handle(
+        _nextAttemptAtMeta,
+        nextAttemptAt.isAcceptableOrUnknown(
+          data['next_attempt_at']!,
+          _nextAttemptAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nextAttemptAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientPointId};
+  @override
+  PendingPosition map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingPosition(
+      clientPointId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_point_id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
+      ingestToken: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ingest_token'],
+      )!,
+      recordedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}recorded_at'],
+      )!,
+      lat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lat'],
+      )!,
+      lng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lng'],
+      )!,
+      altitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}altitude'],
+      ),
+      speed: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}speed'],
+      ),
+      accuracy: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}accuracy'],
+      ),
+      heading: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}heading'],
+      ),
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
+      nextAttemptAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_attempt_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PendingPositionsTable createAlias(String alias) {
+    return $PendingPositionsTable(attachedDatabase, alias);
+  }
+}
+
+class PendingPosition extends DataClass implements Insertable<PendingPosition> {
+  /// Lo que hace seguro reenviar un lote: el servidor ignora los repetidos.
+  final String clientPointId;
+  final String sessionId;
+
+  /// El credencial de esa sesion, guardado con los puntos: la cola puede
+  /// drenarse horas despues, con la app reabierta y el servicio ya muerto.
+  final String ingestToken;
+  final DateTime recordedAt;
+  final double lat;
+  final double lng;
+  final double? altitude;
+  final double? speed;
+  final double? accuracy;
+  final double? heading;
+  final int attempts;
+  final DateTime nextAttemptAt;
+  const PendingPosition({
+    required this.clientPointId,
+    required this.sessionId,
+    required this.ingestToken,
+    required this.recordedAt,
+    required this.lat,
+    required this.lng,
+    this.altitude,
+    this.speed,
+    this.accuracy,
+    this.heading,
+    required this.attempts,
+    required this.nextAttemptAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_point_id'] = Variable<String>(clientPointId);
+    map['session_id'] = Variable<String>(sessionId);
+    map['ingest_token'] = Variable<String>(ingestToken);
+    map['recorded_at'] = Variable<DateTime>(recordedAt);
+    map['lat'] = Variable<double>(lat);
+    map['lng'] = Variable<double>(lng);
+    if (!nullToAbsent || altitude != null) {
+      map['altitude'] = Variable<double>(altitude);
+    }
+    if (!nullToAbsent || speed != null) {
+      map['speed'] = Variable<double>(speed);
+    }
+    if (!nullToAbsent || accuracy != null) {
+      map['accuracy'] = Variable<double>(accuracy);
+    }
+    if (!nullToAbsent || heading != null) {
+      map['heading'] = Variable<double>(heading);
+    }
+    map['attempts'] = Variable<int>(attempts);
+    map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt);
+    return map;
+  }
+
+  PendingPositionsCompanion toCompanion(bool nullToAbsent) {
+    return PendingPositionsCompanion(
+      clientPointId: Value(clientPointId),
+      sessionId: Value(sessionId),
+      ingestToken: Value(ingestToken),
+      recordedAt: Value(recordedAt),
+      lat: Value(lat),
+      lng: Value(lng),
+      altitude: altitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(altitude),
+      speed: speed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(speed),
+      accuracy: accuracy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accuracy),
+      heading: heading == null && nullToAbsent
+          ? const Value.absent()
+          : Value(heading),
+      attempts: Value(attempts),
+      nextAttemptAt: Value(nextAttemptAt),
+    );
+  }
+
+  factory PendingPosition.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingPosition(
+      clientPointId: serializer.fromJson<String>(json['clientPointId']),
+      sessionId: serializer.fromJson<String>(json['sessionId']),
+      ingestToken: serializer.fromJson<String>(json['ingestToken']),
+      recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+      lat: serializer.fromJson<double>(json['lat']),
+      lng: serializer.fromJson<double>(json['lng']),
+      altitude: serializer.fromJson<double?>(json['altitude']),
+      speed: serializer.fromJson<double?>(json['speed']),
+      accuracy: serializer.fromJson<double?>(json['accuracy']),
+      heading: serializer.fromJson<double?>(json['heading']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      nextAttemptAt: serializer.fromJson<DateTime>(json['nextAttemptAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientPointId': serializer.toJson<String>(clientPointId),
+      'sessionId': serializer.toJson<String>(sessionId),
+      'ingestToken': serializer.toJson<String>(ingestToken),
+      'recordedAt': serializer.toJson<DateTime>(recordedAt),
+      'lat': serializer.toJson<double>(lat),
+      'lng': serializer.toJson<double>(lng),
+      'altitude': serializer.toJson<double?>(altitude),
+      'speed': serializer.toJson<double?>(speed),
+      'accuracy': serializer.toJson<double?>(accuracy),
+      'heading': serializer.toJson<double?>(heading),
+      'attempts': serializer.toJson<int>(attempts),
+      'nextAttemptAt': serializer.toJson<DateTime>(nextAttemptAt),
+    };
+  }
+
+  PendingPosition copyWith({
+    String? clientPointId,
+    String? sessionId,
+    String? ingestToken,
+    DateTime? recordedAt,
+    double? lat,
+    double? lng,
+    Value<double?> altitude = const Value.absent(),
+    Value<double?> speed = const Value.absent(),
+    Value<double?> accuracy = const Value.absent(),
+    Value<double?> heading = const Value.absent(),
+    int? attempts,
+    DateTime? nextAttemptAt,
+  }) => PendingPosition(
+    clientPointId: clientPointId ?? this.clientPointId,
+    sessionId: sessionId ?? this.sessionId,
+    ingestToken: ingestToken ?? this.ingestToken,
+    recordedAt: recordedAt ?? this.recordedAt,
+    lat: lat ?? this.lat,
+    lng: lng ?? this.lng,
+    altitude: altitude.present ? altitude.value : this.altitude,
+    speed: speed.present ? speed.value : this.speed,
+    accuracy: accuracy.present ? accuracy.value : this.accuracy,
+    heading: heading.present ? heading.value : this.heading,
+    attempts: attempts ?? this.attempts,
+    nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
+  );
+  PendingPosition copyWithCompanion(PendingPositionsCompanion data) {
+    return PendingPosition(
+      clientPointId: data.clientPointId.present
+          ? data.clientPointId.value
+          : this.clientPointId,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      ingestToken: data.ingestToken.present
+          ? data.ingestToken.value
+          : this.ingestToken,
+      recordedAt: data.recordedAt.present
+          ? data.recordedAt.value
+          : this.recordedAt,
+      lat: data.lat.present ? data.lat.value : this.lat,
+      lng: data.lng.present ? data.lng.value : this.lng,
+      altitude: data.altitude.present ? data.altitude.value : this.altitude,
+      speed: data.speed.present ? data.speed.value : this.speed,
+      accuracy: data.accuracy.present ? data.accuracy.value : this.accuracy,
+      heading: data.heading.present ? data.heading.value : this.heading,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      nextAttemptAt: data.nextAttemptAt.present
+          ? data.nextAttemptAt.value
+          : this.nextAttemptAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingPosition(')
+          ..write('clientPointId: $clientPointId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('ingestToken: $ingestToken, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('altitude: $altitude, ')
+          ..write('speed: $speed, ')
+          ..write('accuracy: $accuracy, ')
+          ..write('heading: $heading, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAttemptAt: $nextAttemptAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientPointId,
+    sessionId,
+    ingestToken,
+    recordedAt,
+    lat,
+    lng,
+    altitude,
+    speed,
+    accuracy,
+    heading,
+    attempts,
+    nextAttemptAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingPosition &&
+          other.clientPointId == this.clientPointId &&
+          other.sessionId == this.sessionId &&
+          other.ingestToken == this.ingestToken &&
+          other.recordedAt == this.recordedAt &&
+          other.lat == this.lat &&
+          other.lng == this.lng &&
+          other.altitude == this.altitude &&
+          other.speed == this.speed &&
+          other.accuracy == this.accuracy &&
+          other.heading == this.heading &&
+          other.attempts == this.attempts &&
+          other.nextAttemptAt == this.nextAttemptAt);
+}
+
+class PendingPositionsCompanion extends UpdateCompanion<PendingPosition> {
+  final Value<String> clientPointId;
+  final Value<String> sessionId;
+  final Value<String> ingestToken;
+  final Value<DateTime> recordedAt;
+  final Value<double> lat;
+  final Value<double> lng;
+  final Value<double?> altitude;
+  final Value<double?> speed;
+  final Value<double?> accuracy;
+  final Value<double?> heading;
+  final Value<int> attempts;
+  final Value<DateTime> nextAttemptAt;
+  final Value<int> rowid;
+  const PendingPositionsCompanion({
+    this.clientPointId = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.ingestToken = const Value.absent(),
+    this.recordedAt = const Value.absent(),
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
+    this.altitude = const Value.absent(),
+    this.speed = const Value.absent(),
+    this.accuracy = const Value.absent(),
+    this.heading = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.nextAttemptAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PendingPositionsCompanion.insert({
+    required String clientPointId,
+    required String sessionId,
+    required String ingestToken,
+    required DateTime recordedAt,
+    required double lat,
+    required double lng,
+    this.altitude = const Value.absent(),
+    this.speed = const Value.absent(),
+    this.accuracy = const Value.absent(),
+    this.heading = const Value.absent(),
+    this.attempts = const Value.absent(),
+    required DateTime nextAttemptAt,
+    this.rowid = const Value.absent(),
+  }) : clientPointId = Value(clientPointId),
+       sessionId = Value(sessionId),
+       ingestToken = Value(ingestToken),
+       recordedAt = Value(recordedAt),
+       lat = Value(lat),
+       lng = Value(lng),
+       nextAttemptAt = Value(nextAttemptAt);
+  static Insertable<PendingPosition> custom({
+    Expression<String>? clientPointId,
+    Expression<String>? sessionId,
+    Expression<String>? ingestToken,
+    Expression<DateTime>? recordedAt,
+    Expression<double>? lat,
+    Expression<double>? lng,
+    Expression<double>? altitude,
+    Expression<double>? speed,
+    Expression<double>? accuracy,
+    Expression<double>? heading,
+    Expression<int>? attempts,
+    Expression<DateTime>? nextAttemptAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientPointId != null) 'client_point_id': clientPointId,
+      if (sessionId != null) 'session_id': sessionId,
+      if (ingestToken != null) 'ingest_token': ingestToken,
+      if (recordedAt != null) 'recorded_at': recordedAt,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
+      if (altitude != null) 'altitude': altitude,
+      if (speed != null) 'speed': speed,
+      if (accuracy != null) 'accuracy': accuracy,
+      if (heading != null) 'heading': heading,
+      if (attempts != null) 'attempts': attempts,
+      if (nextAttemptAt != null) 'next_attempt_at': nextAttemptAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PendingPositionsCompanion copyWith({
+    Value<String>? clientPointId,
+    Value<String>? sessionId,
+    Value<String>? ingestToken,
+    Value<DateTime>? recordedAt,
+    Value<double>? lat,
+    Value<double>? lng,
+    Value<double?>? altitude,
+    Value<double?>? speed,
+    Value<double?>? accuracy,
+    Value<double?>? heading,
+    Value<int>? attempts,
+    Value<DateTime>? nextAttemptAt,
+    Value<int>? rowid,
+  }) {
+    return PendingPositionsCompanion(
+      clientPointId: clientPointId ?? this.clientPointId,
+      sessionId: sessionId ?? this.sessionId,
+      ingestToken: ingestToken ?? this.ingestToken,
+      recordedAt: recordedAt ?? this.recordedAt,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      altitude: altitude ?? this.altitude,
+      speed: speed ?? this.speed,
+      accuracy: accuracy ?? this.accuracy,
+      heading: heading ?? this.heading,
+      attempts: attempts ?? this.attempts,
+      nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientPointId.present) {
+      map['client_point_id'] = Variable<String>(clientPointId.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (ingestToken.present) {
+      map['ingest_token'] = Variable<String>(ingestToken.value);
+    }
+    if (recordedAt.present) {
+      map['recorded_at'] = Variable<DateTime>(recordedAt.value);
+    }
+    if (lat.present) {
+      map['lat'] = Variable<double>(lat.value);
+    }
+    if (lng.present) {
+      map['lng'] = Variable<double>(lng.value);
+    }
+    if (altitude.present) {
+      map['altitude'] = Variable<double>(altitude.value);
+    }
+    if (speed.present) {
+      map['speed'] = Variable<double>(speed.value);
+    }
+    if (accuracy.present) {
+      map['accuracy'] = Variable<double>(accuracy.value);
+    }
+    if (heading.present) {
+      map['heading'] = Variable<double>(heading.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (nextAttemptAt.present) {
+      map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingPositionsCompanion(')
+          ..write('clientPointId: $clientPointId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('ingestToken: $ingestToken, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('altitude: $altitude, ')
+          ..write('speed: $speed, ')
+          ..write('accuracy: $accuracy, ')
+          ..write('heading: $heading, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAttemptAt: $nextAttemptAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1417,6 +2144,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $CachedDocsTable cachedDocs = $CachedDocsTable(this);
+  late final $PendingPositionsTable pendingPositions = $PendingPositionsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1425,6 +2155,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     outboxEntries,
     pendingWorkouts,
     cachedDocs,
+    pendingPositions,
   ];
 }
 
@@ -2151,6 +2882,353 @@ typedef $$CachedDocsTableProcessedTableManager =
       CachedDoc,
       PrefetchHooks Function()
     >;
+typedef $$PendingPositionsTableCreateCompanionBuilder =
+    PendingPositionsCompanion Function({
+      required String clientPointId,
+      required String sessionId,
+      required String ingestToken,
+      required DateTime recordedAt,
+      required double lat,
+      required double lng,
+      Value<double?> altitude,
+      Value<double?> speed,
+      Value<double?> accuracy,
+      Value<double?> heading,
+      Value<int> attempts,
+      required DateTime nextAttemptAt,
+      Value<int> rowid,
+    });
+typedef $$PendingPositionsTableUpdateCompanionBuilder =
+    PendingPositionsCompanion Function({
+      Value<String> clientPointId,
+      Value<String> sessionId,
+      Value<String> ingestToken,
+      Value<DateTime> recordedAt,
+      Value<double> lat,
+      Value<double> lng,
+      Value<double?> altitude,
+      Value<double?> speed,
+      Value<double?> accuracy,
+      Value<double?> heading,
+      Value<int> attempts,
+      Value<DateTime> nextAttemptAt,
+      Value<int> rowid,
+    });
+
+class $$PendingPositionsTableFilterComposer
+    extends Composer<_$AppDatabase, $PendingPositionsTable> {
+  $$PendingPositionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get clientPointId => $composableBuilder(
+    column: $table.clientPointId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ingestToken => $composableBuilder(
+    column: $table.ingestToken,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get altitude => $composableBuilder(
+    column: $table.altitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get speed => $composableBuilder(
+    column: $table.speed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accuracy => $composableBuilder(
+    column: $table.accuracy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get heading => $composableBuilder(
+    column: $table.heading,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PendingPositionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PendingPositionsTable> {
+  $$PendingPositionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get clientPointId => $composableBuilder(
+    column: $table.clientPointId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ingestToken => $composableBuilder(
+    column: $table.ingestToken,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get altitude => $composableBuilder(
+    column: $table.altitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get speed => $composableBuilder(
+    column: $table.speed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get accuracy => $composableBuilder(
+    column: $table.accuracy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get heading => $composableBuilder(
+    column: $table.heading,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingPositionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PendingPositionsTable> {
+  $$PendingPositionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get clientPointId => $composableBuilder(
+    column: $table.clientPointId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sessionId =>
+      $composableBuilder(column: $table.sessionId, builder: (column) => column);
+
+  GeneratedColumn<String> get ingestToken => $composableBuilder(
+    column: $table.ingestToken,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get lat =>
+      $composableBuilder(column: $table.lat, builder: (column) => column);
+
+  GeneratedColumn<double> get lng =>
+      $composableBuilder(column: $table.lng, builder: (column) => column);
+
+  GeneratedColumn<double> get altitude =>
+      $composableBuilder(column: $table.altitude, builder: (column) => column);
+
+  GeneratedColumn<double> get speed =>
+      $composableBuilder(column: $table.speed, builder: (column) => column);
+
+  GeneratedColumn<double> get accuracy =>
+      $composableBuilder(column: $table.accuracy, builder: (column) => column);
+
+  GeneratedColumn<double> get heading =>
+      $composableBuilder(column: $table.heading, builder: (column) => column);
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => column,
+  );
+}
+
+class $$PendingPositionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PendingPositionsTable,
+          PendingPosition,
+          $$PendingPositionsTableFilterComposer,
+          $$PendingPositionsTableOrderingComposer,
+          $$PendingPositionsTableAnnotationComposer,
+          $$PendingPositionsTableCreateCompanionBuilder,
+          $$PendingPositionsTableUpdateCompanionBuilder,
+          (
+            PendingPosition,
+            BaseReferences<
+              _$AppDatabase,
+              $PendingPositionsTable,
+              PendingPosition
+            >,
+          ),
+          PendingPosition,
+          PrefetchHooks Function()
+        > {
+  $$PendingPositionsTableTableManager(
+    _$AppDatabase db,
+    $PendingPositionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingPositionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingPositionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingPositionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> clientPointId = const Value.absent(),
+                Value<String> sessionId = const Value.absent(),
+                Value<String> ingestToken = const Value.absent(),
+                Value<DateTime> recordedAt = const Value.absent(),
+                Value<double> lat = const Value.absent(),
+                Value<double> lng = const Value.absent(),
+                Value<double?> altitude = const Value.absent(),
+                Value<double?> speed = const Value.absent(),
+                Value<double?> accuracy = const Value.absent(),
+                Value<double?> heading = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<DateTime> nextAttemptAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PendingPositionsCompanion(
+                clientPointId: clientPointId,
+                sessionId: sessionId,
+                ingestToken: ingestToken,
+                recordedAt: recordedAt,
+                lat: lat,
+                lng: lng,
+                altitude: altitude,
+                speed: speed,
+                accuracy: accuracy,
+                heading: heading,
+                attempts: attempts,
+                nextAttemptAt: nextAttemptAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String clientPointId,
+                required String sessionId,
+                required String ingestToken,
+                required DateTime recordedAt,
+                required double lat,
+                required double lng,
+                Value<double?> altitude = const Value.absent(),
+                Value<double?> speed = const Value.absent(),
+                Value<double?> accuracy = const Value.absent(),
+                Value<double?> heading = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                required DateTime nextAttemptAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PendingPositionsCompanion.insert(
+                clientPointId: clientPointId,
+                sessionId: sessionId,
+                ingestToken: ingestToken,
+                recordedAt: recordedAt,
+                lat: lat,
+                lng: lng,
+                altitude: altitude,
+                speed: speed,
+                accuracy: accuracy,
+                heading: heading,
+                attempts: attempts,
+                nextAttemptAt: nextAttemptAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingPositionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PendingPositionsTable,
+      PendingPosition,
+      $$PendingPositionsTableFilterComposer,
+      $$PendingPositionsTableOrderingComposer,
+      $$PendingPositionsTableAnnotationComposer,
+      $$PendingPositionsTableCreateCompanionBuilder,
+      $$PendingPositionsTableUpdateCompanionBuilder,
+      (
+        PendingPosition,
+        BaseReferences<_$AppDatabase, $PendingPositionsTable, PendingPosition>,
+      ),
+      PendingPosition,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2161,4 +3239,6 @@ class $AppDatabaseManager {
       $$PendingWorkoutsTableTableManager(_db, _db.pendingWorkouts);
   $$CachedDocsTableTableManager get cachedDocs =>
       $$CachedDocsTableTableManager(_db, _db.cachedDocs);
+  $$PendingPositionsTableTableManager get pendingPositions =>
+      $$PendingPositionsTableTableManager(_db, _db.pendingPositions);
 }

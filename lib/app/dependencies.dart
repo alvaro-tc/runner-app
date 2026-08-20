@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
-import 'package:paceup/features/auth/data/repositories/fake_auth_repository.dart';
+import 'package:paceup/core/sync/sync_providers.dart';
+import 'package:paceup/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:paceup/features/auth/domain/repositories/auth_repository.dart';
 import 'package:paceup/features/home/data/repositories/fake_home_repositories.dart';
 import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
@@ -16,7 +18,12 @@ import 'package:paceup/features/train/domain/repositories/training_repository.da
 /// and nothing above the data layer moves.
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => FakeAuthRepository(ref.watch(sharedPreferencesProvider)),
+  (ref) => RemoteAuthRepository(
+    api: ref.watch(authApiProvider),
+    session: ref.watch(sessionControllerProvider),
+    storage: ref.watch(tokenStorageProvider),
+    db: ref.watch(appDatabaseProvider),
+  ),
 );
 
 final marathonRepositoryProvider = Provider<MarathonRepository>(

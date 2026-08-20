@@ -1,17 +1,24 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paceup/app/app.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/constants/fake_data_seed.dart';
+import 'package:paceup/core/network/api_client.dart';
+import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/location_service.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
+import 'package:paceup/core/storage/token_storage.dart';
 import 'package:paceup/core/utils/result.dart';
+import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
 import 'package:paceup/features/home/presentation/providers/home_provider.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 import 'package:paceup/features/train/domain/repositories/training_repository.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'core/fake_http.dart';
 
 /// In-memory stand-in for the Hive-backed repository, so widget tests never
 /// touch the file system.
@@ -43,16 +50,77 @@ class InMemoryTrainingRepository implements TrainingRepository {
   }
 }
 
+/// Tokens en memoria: en los tests no hay Keychain ni Keystore.
+class MemoryTokenStorage implements TokenStorage {
+  String? access;
+  String? refresh;
+
+  @override
+  Future<String?> readAccessToken() async => access;
+
+  @override
+  Future<String?> readRefreshToken() async => refresh;
+
+  @override
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    access = accessToken;
+    refresh = refreshToken;
+  }
+
+  @override
+  Future<void> clearTokens() async {
+    access = null;
+    refresh = null;
+  }
+
+  @override
+  Future<String> deviceId() async => 'device-test';
+}
+
+/// Backend de mentira para `/auth/*`: acepta cualquier credencial.
+Future<ResponseBody> fakeAuthBackend(RequestOptions req) async {
+  const user = {
+    'id': 'u1',
+    'email': 'pandu@paceup.app',
+    'name': 'Pandu',
+    'role': 'runner',
+  };
+  return switch (req.path) {
+    '/auth/login' || '/auth/register' => envelope({
+      'accessToken': 'access-1',
+      'refreshToken': 'refresh-1',
+      'expiresIn': 900,
+      'user': user,
+    }),
+    '/auth/me' => envelope(user),
+    _ => envelope(<String, Object?>{}),
+  };
+}
+
 /// Boots the real app with test doubles for anything that needs a platform.
 Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   Map<String, Object> prefs = const {},
+  bool signedIn = false,
+  Future<ResponseBody> Function(RequestOptions)? api,
 }) async {
   SharedPreferences.setMockInitialValues(prefs);
   final instance = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(instance),
+      initialSessionProvider.overrideWithValue(signedIn),
+      tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
+      // Ni un socket sale de un test de widget.
+      dioProvider.overrideWith((ref) {
+        return buildApiClient(
+          session: ref.watch(sessionControllerProvider),
+          clock: ref.watch(serverClockProvider),
+        )..httpClientAdapter = FakeAdapter(api ?? fakeAuthBackend);
+      }),
       trainingRepositoryProvider.overrideWithValue(
         InMemoryTrainingRepository(),
       ),

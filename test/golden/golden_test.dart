@@ -24,7 +24,7 @@ void main() {
 
     testWidgets('home ($suffix)', (tester) async {
       await _phone(tester);
-      await pumpApp(tester, prefs: _signedIn(theme));
+      await pumpApp(tester, prefs: _signedIn(theme), signedIn: true);
       await _settleFakes(tester);
       await expectLater(
         find.byType(MaterialApp),
@@ -35,7 +35,7 @@ void main() {
 
     testWidgets('races ($suffix)', (tester) async {
       await _phone(tester);
-      final container = await pumpApp(tester, prefs: _signedIn(theme));
+      final container = await pumpApp(tester, prefs: _signedIn(theme), signedIn: true);
       await _settleFakes(tester);
       container.read(routerProvider).go(Routes.races);
       await _settleFakes(tester);
@@ -48,7 +48,7 @@ void main() {
 
     testWidgets('profile ($suffix)', (tester) async {
       await _phone(tester);
-      final container = await pumpApp(tester, prefs: _signedIn(theme));
+      final container = await pumpApp(tester, prefs: _signedIn(theme), signedIn: true);
       await _settleFakes(tester);
       container.read(routerProvider).go(Routes.profile);
       await _settleFakes(tester);
@@ -63,7 +63,6 @@ void main() {
 
 Map<String, Object> _signedIn(ThemeMode mode) => {
   'settings.onboardingSeen': true,
-  'auth.signedIn': true,
   'settings.themeMode': mode.name,
 };
 

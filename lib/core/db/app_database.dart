@@ -62,13 +62,49 @@ class CachedDocs extends Table {
   Set<Column<Object>> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [OutboxEntries, PendingWorkouts, CachedDocs])
+/// Puntos de GPS grabados, a la espera de `POST /tracking/sessions/:id/positions`.
+///
+/// **Se escribe aqui antes de intentar mandarlo.** Un entrenamiento que se
+/// pierde no se puede volver a correr: la red es opcional, la fila no.
+class PendingPositions extends Table {
+  /// Lo que hace seguro reenviar un lote: el servidor ignora los repetidos.
+  TextColumn get clientPointId => text()();
+  TextColumn get sessionId => text()();
+
+  /// El credencial de esa sesion, guardado con los puntos: la cola puede
+  /// drenarse horas despues, con la app reabierta y el servicio ya muerto.
+  TextColumn get ingestToken => text()();
+  DateTimeColumn get recordedAt => dateTime()();
+  RealColumn get lat => real()();
+  RealColumn get lng => real()();
+  RealColumn get altitude => real().nullable()();
+  RealColumn get speed => real().nullable()();
+  RealColumn get accuracy => real().nullable()();
+  RealColumn get heading => real().nullable()();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  DateTimeColumn get nextAttemptAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {clientPointId};
+}
+
+@DriftDatabase(
+  tables: [OutboxEntries, PendingWorkouts, CachedDocs, PendingPositions],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'paceup'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) await m.createTable(pendingPositions);
+    },
+  );
 
   // ─── Outbox ──────────────────────────────────────────────────────────────
 
@@ -181,6 +217,65 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  // ─── Posiciones pendientes ───────────────────────────────────────────────
+
+  /// Guarda el lote recien grabado. `insertOnConflictUpdate` para que un punto
+  /// repetido por el propio GPS no reviente la grabacion entera.
+  Future<void> queuePositions(Iterable<PendingPositionsCompanion> puntos) =>
+      batch(
+        (b) => b.insertAll(
+          pendingPositions,
+          puntos.toList(),
+          mode: InsertMode.insertOrReplace,
+        ),
+      );
+
+  /// El proximo lote a mandar, de **una sola sesion**: el endpoint es por
+  /// sesion, y mezclar dos en un request no tendria a donde ir.
+  Future<List<PendingPosition>> duePositions(
+    DateTime now, {
+    int limit = 300,
+  }) async {
+    final primera =
+        await (select(pendingPositions)
+              ..where((t) => t.nextAttemptAt.isSmallerOrEqualValue(now))
+              ..orderBy([(t) => OrderingTerm.asc(t.recordedAt)])
+              ..limit(1))
+            .getSingleOrNull();
+    if (primera == null) return const [];
+
+    return (select(pendingPositions)
+          ..where(
+            (t) =>
+                t.sessionId.equals(primera.sessionId) &
+                t.nextAttemptAt.isSmallerOrEqualValue(now),
+          )
+          ..orderBy([(t) => OrderingTerm.asc(t.recordedAt)])
+          ..limit(limit))
+        .get();
+  }
+
+  /// Aceptado o duplicado da igual: el punto ya esta en el servidor, que es la
+  /// fuente de verdad del recorrido. Guardarlo dos veces no sirve para nada.
+  Future<void> deletePositions(Iterable<String> ids) =>
+      (delete(pendingPositions)..where((t) => t.clientPointId.isIn(ids))).go();
+
+  Future<void> retryPositionsLater(
+    Iterable<String> ids,
+    DateTime nextAttemptAt,
+  ) {
+    final huecos = ids.map((_) => '?').join(',');
+    return customUpdate(
+      'UPDATE pending_positions SET attempts = attempts + 1, '
+      'next_attempt_at = ? WHERE client_point_id IN ($huecos)',
+      variables: [
+        Variable<DateTime>(nextAttemptAt),
+        for (final id in ids) Variable<String>(id),
+      ],
+      updates: {pendingPositions},
+    );
+  }
+
   // ─── Cache de documentos ─────────────────────────────────────────────────
 
   Future<Map<String, dynamic>?> readDoc(String key) async {
@@ -205,5 +300,6 @@ class AppDatabase extends _$AppDatabase {
     await delete(cachedDocs).go();
     await delete(outboxEntries).go();
     await delete(pendingWorkouts).go();
+    await delete(pendingPositions).go();
   }
 }

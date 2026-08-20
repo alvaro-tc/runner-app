@@ -11,6 +11,8 @@ class GeoPoint {
     required this.timestamp,
     this.altitude = 0,
     this.accuracy = 5,
+    this.speed,
+    this.heading,
   });
 
   factory GeoPoint.fromJson(Map<String, dynamic> json) => GeoPoint(
@@ -26,6 +28,11 @@ class GeoPoint {
   final DateTime timestamp;
   final double altitude;
   final double accuracy;
+
+  /// Lo que reporta el sensor, m/s y grados. Nulos cuando el dispositivo no lo
+  /// da: el servidor los acepta opcionales y no se inventan aqui.
+  final double? speed;
+  final double? heading;
 
   Map<String, dynamic> toJson() => {
     'lat': lat,

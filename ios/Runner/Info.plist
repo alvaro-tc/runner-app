@@ -16,6 +16,8 @@
 	<string>6.0</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PaceUp reads your position only while a run is recording, so it can draw your route and work out your pace.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PaceUp keeps recording your route while your phone is in your pocket or the screen is off, so a run does not stop when you leave the app.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

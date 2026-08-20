@@ -2,6 +2,11 @@
     <!-- Live run tracking draws the route while the app is in use. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Recording keeps going with the app off screen: on Android that needs a
+         foreground service of type `location`, and `always` on top of it. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <!-- The screen stays on for the duration of a recording session. -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- Map tiles and, later, the real API. -->

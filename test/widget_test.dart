@@ -51,7 +51,8 @@ void main() {
   testWidgets('a signed-in user goes straight to home', (tester) async {
     await pumpApp(
       tester,
-      prefs: {'settings.onboardingSeen': true, 'auth.signedIn': true},
+      prefs: {'settings.onboardingSeen': true},
+      signedIn: true,
     );
     // Home keeps a one-second countdown running, so it never "settles";
     // pump past the repository latency instead.

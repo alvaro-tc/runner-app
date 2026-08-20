@@ -19,7 +19,10 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    if (!isPublicPath(options.path)) {
+    // Si la peticion ya trae credencial propio —la ingesta trae el de la
+    // sesion— no se le pisa.
+    if (!isPublicPath(options.path) &&
+        options.headers['Authorization'] == null) {
       final token = await _session.accessToken();
       if (token != null) options.headers['Authorization'] = 'Bearer $token';
     }

@@ -9,6 +9,8 @@ import 'package:paceup/core/error/failure.dart';
 /// Cuantas cosas se movieron en un drenado. Lo devuelve [SyncService.drain]
 /// para que los tests —y manana un indicador en la UI— sepan que paso.
 typedef SyncReport = ({
+  int positionsSent,
+  int positionsDropped,
   int workoutsSynced,
   int workoutsRejected,
   int outboxSent,
@@ -45,6 +47,8 @@ class SyncService {
   Future<SyncReport> drain({DateTime? now}) async {
     if (_drenando) {
       return const (
+        positionsSent: 0,
+        positionsDropped: 0,
         workoutsSynced: 0,
         workoutsRejected: 0,
         outboxSent: 0,
@@ -55,18 +59,84 @@ class SyncService {
     _drenando = true;
     try {
       final ahora = now ?? DateTime.now();
+      // Las posiciones primero: pueden ser de una carrera que se esta
+      // corriendo ahora mismo, y ahi el retraso se ve.
+      final posiciones = await _drainPositions(ahora);
       final workouts = await _drainWorkouts(ahora);
       final outbox = await _drainOutbox(ahora);
       return (
+        positionsSent: posiciones.$1,
+        positionsDropped: posiciones.$2,
         workoutsSynced: workouts.$1,
         workoutsRejected: workouts.$2,
         outboxSent: outbox.$1,
         outboxDropped: outbox.$2,
-        pendingLeft: workouts.$3 || outbox.$3,
+        pendingLeft: posiciones.$3 || workouts.$3 || outbox.$3,
       );
     } finally {
       _drenando = false;
     }
+  }
+
+  // ─── Posiciones ────────────────────────────────────────────────────────────
+
+  /// Sube un lote de puntos de **una** sesion. Reenviar es seguro: el servidor
+  /// deduplica por `clientPointId`, asi que un lote repetido cuenta como
+  /// `duplicated` y no duplica nada.
+  Future<(int, int, bool)> _drainPositions(DateTime now) async {
+    final lote = await _db.duePositions(now);
+    if (lote.isEmpty) return (0, 0, false);
+
+    final ids = lote.map((p) => p.clientPointId);
+    try {
+      await _dio.post<dynamic>(
+        '/tracking/sessions/${lote.first.sessionId}/positions',
+        data: {
+          'points': [
+            for (final p in lote)
+              {
+                'clientPointId': p.clientPointId,
+                'recordedAt': p.recordedAt.toUtc().toIso8601String(),
+                'lat': p.lat,
+                'lng': p.lng,
+                if (p.altitude != null) 'altitude': p.altitude,
+                if (p.speed != null) 'speed': p.speed,
+                if (p.accuracy != null) 'accuracy': p.accuracy,
+                if (p.heading != null) 'heading': p.heading,
+              },
+          ],
+        },
+        // El credencial es el de la sesion, no el JWT del usuario.
+        options: Options(
+          headers: {'Authorization': 'Bearer ${lote.first.ingestToken}'},
+        ),
+      );
+    } on DioException catch (e) {
+      final status = e.response?.statusCode ?? 0;
+      if (e.error is NetworkFailure || status >= 500) {
+        await _db.retryPositionsLater(
+          ids,
+          backoffFrom(now, lote.first.attempts),
+        );
+        return (0, 0, true);
+      }
+
+      // Token invalido o sesion ya cerrada: estos puntos no van a entrar
+      // nunca. Se borran, porque si no bloquean la cola de las sesiones
+      // siguientes para siempre.
+      await _db.deletePositions(ids);
+      developer.log(
+        'lote de ${lote.length} puntos descartado: ${e.error ?? e}',
+        name: 'sync',
+      );
+      return (0, lote.length, false);
+    }
+
+    // Aceptado o duplicado da igual: ya estan en el servidor, que es la fuente
+    // de verdad del recorrido.
+    await _db.deletePositions(ids);
+    final quedan = await _db.duePositions(now, limit: 1);
+    return (lote.length, 0, quedan.isNotEmpty);
   }
 
   // ─── Entrenamientos ────────────────────────────────────────────────────────

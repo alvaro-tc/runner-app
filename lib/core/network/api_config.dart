@@ -26,6 +26,10 @@ const publicApiPaths = <String>[
   '/config/app',
   '/marathons',
   '/links/',
+  // La ingesta lleva el `ingestToken` de la sesion en `Authorization`: ni se le
+  // pone el JWT encima, ni un 401 suyo significa que la sesion del usuario
+  // caduco —significa que el token de ingesta no vale—.
+  '/tracking/',
 ];
 
 bool isPublicPath(String path) =>
