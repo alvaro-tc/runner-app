@@ -63,7 +63,7 @@ Crea el backend en `running-api/`, hermana de `running-app/`. No metas el backen
 
 | Parámetro | Valor |
 |---|---|
-| Despliegue | **VPS propio** (Linux, Docker Compose, proxy inverso con TLS) |
+| Despliegue | **VPS propio** (Linux, instalacion nativa con systemd + proxy inverso con TLS). **Sin Docker.** |
 | Moneda | **BOB** (boliviano). Montos en centavos, formato `Bs 1.234,56` en el cliente |
 | Zona horaria por defecto | `America/La_Paz` |
 | Service fee | **Opcional y configurable**: el admin puede desactivarlo por completo |
@@ -102,9 +102,9 @@ Requisitos que me importan especialmente:
 | Panel admin | **AdminJS** con adaptador de Prisma (sección 9) |
 | Imágenes | `sharp` (avatares, tarjetas de resultado). Nada de Puppeteer |
 | PDF | `pdfkit` (comprobantes) |
-| Tests | Jest (unit) + Supertest (e2e) contra Postgres en Docker |
-| Contenedores | `docker-compose.yml`: `postgres`, `redis`, `api`, `caddy` |
-| Proxy / TLS | **Caddy** (certificados automáticos, menos fricción que nginx + certbot en un VPS) |
+| Tests | Jest (unit) + Supertest (e2e) contra una base Postgres de test local |
+| Servicios | `postgres` y `redis` instalados nativamente (paquetes del sistema o binarios), `api` como servicio systemd |
+| Proxy / TLS | **Caddy** instalado como paquete del sistema (certificados automáticos, menos fricción que nginx + certbot en un VPS) |
 | Lint/format | ESLint + Prettier. **Sin husky ni git hooks** (regla 0.1) |
 
 ---
@@ -142,10 +142,9 @@ Requisitos que me importan especialmente:
     despliegue.md
     decisiones.md
     flutter-integracion.md
-  /docker
-    docker-compose.yml
-    docker-compose.prod.yml
+  /deploy
     Caddyfile
+    running-api.service      # unidad systemd
 ```
 
 Reglas transversales:
@@ -465,13 +464,14 @@ Personaliza AdminJS en español y limita las columnas visibles a lo útil; no me
 
 Documenta todo en `docs/despliegue.md`.
 
-- `docker-compose.yml` (desarrollo): `postgres`, `redis`, `api` con hot reload.
-- `docker-compose.prod.yml`: `postgres`, `redis`, `api` (build multi-stage, imagen final slim, usuario no-root), `caddy`.
+- **Sin Docker.** Todo se instala nativamente en el VPS: `postgres`, `redis`, Node (via `nvm` o paquete oficial) y `caddy` desde los repos del sistema. Documenta los comandos exactos de instalacion y las versiones fijadas.
+- Desarrollo local: `postgres` y `redis` instalados en la máquina (o el servicio gestionado que uses) + `npm run dev` con hot reload. Documenta el `DATABASE_URL` y `REDIS_URL` de ejemplo.
+- Producción: la API corre como **servicio systemd** (`deploy/running-api.service`) con usuario dedicado no-root, `WorkingDirectory` en el release, `Restart=always`, `EnvironmentFile=/etc/running-api/.env.production` y logs a journald.
 - **Caddy** como proxy inverso con TLS automático (Let's Encrypt), configuración en `Caddyfile`: dominio de API, headers de seguridad, compresión, y `/uploads` servido como estático.
 - Variables de entorno en `.env.production` (fuera del repo), validadas con zod al arrancar: si falta algo, el proceso muere con mensaje claro.
 - **Backups**: script `scripts/backup-db.sh` con `pg_dump` comprimido + rotación de 7 días, y su línea de cron documentada. Incluye el comando de restauración probado.
-- Migraciones en el arranque del contenedor: `prisma migrate deploy` (nunca `migrate dev` en producción).
-- Healthcheck en compose apuntando a `/health`; política `restart: unless-stopped`.
+- Migraciones en el despliegue: `prisma migrate deploy` como paso previo al `systemctl restart` (nunca `migrate dev` en producción).
+- Healthcheck externo apuntando a `/health` (cron o el propio `ExecStartPost`); systemd con `Restart=always` y `RestartSec=5`.
 - **Dimensionamiento**: estima RAM/CPU y anótalo. Un VPS de 2 vCPU / 4 GB debería sobrar; indica en qué punto (usuarios concurrentes, corredores simultáneos) haría falta crecer.
 - Logs rotados, sin secretos. Redacta `password`, `token`, `authorization`, `card` en pino.
 - Sección de checklist de seguridad del VPS: firewall (solo 80/443/22), sin Postgres expuesto al exterior, SSH por clave, `fail2ban`.
@@ -516,7 +516,7 @@ Después del backend, en fases separadas, dentro de `running-app/`:
 - **Autorización a nivel de recurso**: un usuario jamás debe leer el workout, la inscripción o las posiciones de otro. Escribe **tests e2e explícitos** que lo intenten y esperen `403/404`.
 - Los datos de ubicación son sensibles: política de retención documentada en `docs/decisiones.md`.
 - Tests mínimos: unitarios en `QuoteService` (con fee activo y desactivado), `PredictionService`, cálculo de métricas, instanciación de planes y rotación de refresh tokens. E2E en auth, inscripción completa con pago, sync de workouts e ingesta de posiciones.
-- `README.md`: requisitos, `docker compose up`, migraciones, seeds, cómo apuntar Flutter al backend local (incluido `10.0.2.2` para el emulador Android), credenciales de prueba.
+- `README.md`: requisitos (Node, Postgres, Redis instalados localmente), arranque con `npm run dev`, migraciones, seeds, cómo apuntar Flutter al backend local (incluido `10.0.2.2` para el emulador Android), credenciales de prueba.
 - Scripts npm: `dev`, `build`, `start`, `test`, `test:e2e`, `db:migrate`, `db:seed`, `db:reset`, `lint`, `format`.
 
 ---
@@ -528,7 +528,7 @@ Ejecuta **una fase por vez**. Al terminar, aplica el protocolo 0.2 y espera.
 | # | Fase | Entregable |
 |---|---|---|
 | 0 | **Plan** | Lee todo, resuelve las preguntas de la sección 15 y presenta el plan detallado. **Sin código.** |
-| 1 | Andamiaje | `running-api/` con NestJS + TS estricto, config tipada con zod, logger, filtros de error, sobre de respuesta, Swagger, docker-compose (postgres + redis), `/health` |
+| 1 | Andamiaje | `running-api/` con NestJS + TS estricto, config tipada con zod, logger, filtros de error, sobre de respuesta, Swagger, conexión a Postgres + Redis locales, `/health` |
 | 2 | Esquema de datos | `schema.prisma` completo, primera migración, particionado de `positions`, Prisma service |
 | 3 | Auth | Registro, login, refresh rotativo 60 días, logout, sesiones, recuperación, guards, rol admin + tests |
 | 4 | Usuarios y perfil | Perfil, preferencias, avatar, zapatillas, salud, highlights |
@@ -545,7 +545,7 @@ Ejecuta **una fase por vez**. Al terminar, aplica el protocolo 0.2 y espera.
 | 15 | Panel admin | AdminJS + endpoints `/api/v1/admin/*`, acciones personalizadas |
 | 16 | Transversales | Deep links, `/config/app`, notificaciones stub, rate limiting, borrado de cuenta |
 | 17 | Seeds + docs + tests | Seeds completos, `docs/*`, README, suite e2e verde |
-| 18 | Despliegue | compose de producción, Caddy, backups, checklist de seguridad, guía paso a paso del VPS |
+| 18 | Despliegue | servicio systemd, Caddy, script de release, backups, checklist de seguridad, guía paso a paso del VPS |
 | 19 | Flutter: capa de datos | Dio, interceptores, modelos, repositorios, secure storage |
 | 20 | Flutter: local + offline | Drift, outbox, sincronización |
 | 21 | Flutter: tracking | Servicio de GPS, permisos, background, doble escritura, envío por lotes |

@@ -193,6 +193,45 @@ Casos particulares:
 - **`RouteMapView`** encapsula `flutter_map`. Cambiar a
   `google_maps_flutter` es una edición dentro de ese único archivo.
 
+### La capa de red (Fase 19)
+
+`core/network/` es el cliente de la API. Un solo `Dio`, inyectado por
+`network_providers.dart`, con los interceptores en este orden:
+
+| # | Interceptor | Qué hace |
+|---|---|---|
+| 1 | `AuthInterceptor` | Adjunta `Bearer <access>` salvo en rutas públicas |
+| 2 | `RefreshInterceptor` | Ante `401`, renueva y reintenta la original |
+| 3 | `RetryInterceptor` | Backoff exponencial en errores de red y `5xx`, sólo sobre peticiones repetibles |
+| 4 | `EnvelopeInterceptor` | Abre el sobre `{ data, meta }` y sincroniza `ServerClock` |
+| 5 | `ErrorInterceptor` | Traduce el error a `Failure` mapeando **por `error.code`** |
+| 6 | `DebugLogInterceptor` | Log en debug, sin volcar `Authorization` |
+
+Tres detalles que no son negociables:
+
+- **El refresh es single-flight.** El refresh token rota en cada uso: si diez
+  peticiones en vuelo reciben `401` y cada una renueva por su cuenta, nueve
+  llegan con un token ya rotado, el backend lo lee —bien— como robo y revoca la
+  cadena entera del dispositivo. El mutex vive en `SessionController` y hay un
+  test que lo comprueba (`test/core/network/network_test.dart`).
+- **`SessionController` usa un `Dio` sin interceptores** para llamar a
+  `/auth/refresh`. Con ellos, un `401` de ese endpoint dispararía otro refresh.
+- **Las cuentas regresivas se calculan con `ServerClock.now()`**, alimentado por
+  `meta.timestamp`, no con el reloj del teléfono.
+
+Los tokens y el `deviceId` viven en `flutter_secure_storage`
+(`core/storage/token_storage.dart`), nunca en `SharedPreferences`: de ahí un
+backup de Android se lleva la sesión. `TokenStorage` es una interfaz para poder
+inyectar una versión en memoria en los tests, donde no hay Keychain.
+
+La URL base sale de `--dart-define=API_BASE_URL`; sin definir cae al backend
+local (`10.0.2.2` en el emulador de Android, que es el alias del host).
+
+Los modelos de la API son `freezed` + `json_serializable`
+(`features/auth/data/models/`, `core/config/app_config.dart`) y hablan en las
+unidades crudas del servidor —metros, segundos, centavos, ISO-8601 UTC—. El
+formateo es de `core/formatters`.
+
 ## 10. Datos de prueba
 
 `core/constants/fake_data_seed.dart` genera todo el dataset anclado a

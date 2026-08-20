@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Diffs que el runner de goldens regenera en cada corrida
+test/golden/failures/
