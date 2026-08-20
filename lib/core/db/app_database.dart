@@ -93,7 +93,19 @@ class PendingPositions extends Table {
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-    : super(executor ?? driftDatabase(name: 'paceup'));
+    : super(
+        executor ??
+            driftDatabase(
+              name: 'paceup',
+              // En web el wasm y el worker viven en `web/`; sin esto
+              // `driftDatabase` lanza al construirse y no llega ni el primer
+              // frame.
+              web: DriftWebOptions(
+                sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+                driftWorker: Uri.parse('drift_worker.js'),
+              ),
+            ),
+      );
 
   @override
   int get schemaVersion => 2;

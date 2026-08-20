@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.paceup.paceup"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage pide API 37; el default de Flutter aun va por 36.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
