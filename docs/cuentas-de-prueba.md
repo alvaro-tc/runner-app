@@ -54,30 +54,68 @@ usar la IP del equipo en la red:
 flutter run --dart-define=API_BASE_URL=http://192.168.1.50:3000/api/v1
 ```
 
-## Estado de producción (20-08-2026)
+## En Chrome contra el backend real
 
-`https://runner-app.tumype.com/api/v1` responde, pero **todo lo que toca la
-base de datos devuelve `500 INTERNAL_ERROR`**:
+```bash
+make run-web      # flutter run -d chrome --web-port=5000 --dart-define-from-file=.env
+```
+
+**El puerto va fijo a propósito.** El navegador exige que el origen esté
+autorizado por el backend, y `flutter run -d chrome` elige un puerto distinto
+cada vez: uno aleatorio no se puede meter en una lista blanca. Hay que añadirlo
+en el VPS, en `/etc/running-api/.env.production`:
+
+```
+CORS_ORIGINS=https://runner-app.tumype.com,http://localhost:5000
+```
+
+```bash
+sudo systemctl restart running-api
+```
+
+Sin eso, Chrome bloquea cada petición y la app se queda en el esqueleto de
+carga —el backend responde `200`, pero el navegador tira la respuesta—. Se
+comprueba así, que hoy **no** devuelve la cabecera:
+
+```bash
+curl -sI -H "Origin: http://localhost:5000"   https://runner-app.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
+```
+
+Qué no funciona igual en web, para que no sorprenda:
+
+| Pieza | En Chrome |
+|---|---|
+| Grabar un entrenamiento en segundo plano | No. El GPS del navegador se para al cambiar de pestaña |
+| Tokens | Van a `localStorage`, no al Keychain: para mirar pantallas vale, para juzgar seguridad no |
+| Mapas y el resto de la UI | Igual que en el teléfono |
+
+Web es para ver pantallas rápido. Lo que se prueba de verdad —tracking,
+permisos, segundo plano— se prueba en un teléfono.
+
+## Estado de producción (20-08-2026, 22:16)
+
+`https://runner-app.tumype.com/api/v1` **funciona**. Lo que falla es que la
+base está vacía: falta sembrarla.
 
 | Petición | Respuesta |
 |---|---|
-| `GET /health` | `200` — el proceso está vivo |
-| `GET /api/v1/config/app` | `500 INTERNAL_ERROR` |
-| `GET /api/v1/marathons` | `500 INTERNAL_ERROR` |
-| `POST /api/v1/auth/login` | `500 INTERNAL_ERROR` |
+| `GET /health` | `200` |
+| `GET /api/v1/config/app` | `200` — BOB, `America/La_Paz`, `serviceFee: null` |
+| `GET /api/v1/marathons` | `200` con `data: []` — **catálogo vacío** |
+| `POST /api/v1/auth/login` (`runner@test.com`) | `401 INVALID_CREDENTIALS` — **la cuenta no existe** |
+| `GET /api/v1/home/summary` sin token | `401 UNAUTHORIZED` — el guard responde bien |
 
-Que `/health` conteste y el resto no apunta a la conexión con Postgres o a las
-migraciones, no a la app Flutter. Qué mirar en el VPS:
+Un solo comando en el VPS lo arregla:
 
 ```bash
-journalctl -u running-api -n 100 --no-pager   # la traza real, con su requestId
-sudo -u postgres psql -c '\l'                 # la base existe?
-cd /srv/running-api && npx prisma migrate deploy
-npm run db:seed                               # sin esto no hay cuentas de prueba
+cd /srv/running-api && npm run db:seed
 ```
 
-Los `requestId` de las pruebas de arriba —`d6944417…`, `e2c82d55…`,
-`73dba757…`— están en los logs del servidor y llevan a la excepción exacta.
+Mientras tanto la app abre y llega al login, pero no hay con qué entrar. Dos
+salidas: sembrar, o crear una cuenta desde la pantalla de registro de la propia
+app —el alta funciona igual, solo que esa cuenta nace sin entrenamientos ni
+inscripciones—.
 
-Hasta que eso se arregle, la app contra producción no pasa de la pantalla de
-login. Con `make run-local` y el backend en la máquina funciona igual.
+`serviceFee: null` significa que el cargo por servicio está **desactivado**: la
+UI no debe pintar esa línea. Sembrando queda activo al 10 % con mínimo Bs 5, que
+es lo que hace falta para probar activarlo y desactivarlo.

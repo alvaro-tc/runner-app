@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 
 /// Base URL de la API.
@@ -10,7 +8,9 @@ import 'package:flutter/foundation.dart';
 String get apiBaseUrl {
   const fromEnv = String.fromEnvironment('API_BASE_URL');
   if (fromEnv.isNotEmpty) return fromEnv;
-  final esAndroid = !kIsWeb && Platform.isAndroid;
+  // `defaultTargetPlatform` y no `dart:io`: importar `Platform` rompe la
+  // compilacion a web, donde esa biblioteca no existe.
+  final esAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   return esAndroid
       ? 'http://10.0.2.2:3000/api/v1'
       : 'http://localhost:3000/api/v1';

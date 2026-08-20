@@ -3,32 +3,99 @@
 App móvil de running en Flutter: plan de entrenamiento, seguimiento de carreras
 en vivo con GPS, historial persistente e inscripción a maratones.
 
-Front-end completo. Toda la data viene de repositorios en memoria con latencia
-simulada; la capa de datos está diseñada para que pasar a una API real sea un
-cambio de una línea por repositorio (ver
+Los datos salen de [`running-api`](../running-api). Auth, Home y el catálogo de
+maratones ya hablan con el backend real; Train, Races y Profile siguen con
+repositorios en memoria hasta sus fases (ver
 [ARCHITECTURE.md](ARCHITECTURE.md#9-sustituir-los-fakes-por-una-api-real)).
 
 ## Requisitos
 
 - Flutter 3.44 o superior (Dart 3.12)
-- Android SDK y/o Xcode
+- Android SDK y/o Xcode. Para la web, solo Chrome
+- Un backend al que apuntar: el de producción o
+  [`running-api`](../running-api) corriendo en local
 
 ## Puesta en marcha
 
 ```bash
 flutter pub get
-make run          # contra el backend de produccion (.env)
-make run-local    # contra el backend en esta maquina (.env.local)
+make run          # movil, contra el backend de produccion
+make run-web      # Chrome, contra el backend de produccion
+make run-local    # movil, contra el backend de esta maquina
 ```
 
 Al arrancar por primera vez verás el onboarding. La sesión ya es real: entra
-con `runner@test.com` / `Test1234!` (las demás cuentas y el estado de cada
-entorno, en [docs/cuentas-de-prueba.md](docs/cuentas-de-prueba.md)).
+con `runner@test.com` / `Test1234!` (las demás cuentas, en
+[docs/cuentas-de-prueba.md](docs/cuentas-de-prueba.md)).
+
+### A qué backend apunta cada comando
+
+La URL base **no se escribe en el código**: entra como constante de
+compilación desde un archivo de la raíz del repo. `--dart-define-from-file` es
+de Flutter, no hace falta ningún paquete.
+
+| Comando | Archivo | URL base |
+|---|---|---|
+| `make run` / `make run-web` | `.env` | `https://runner-app.tumype.com/api/v1` |
+| `make run-local` | `.env.local` | `http://10.0.2.2:3000/api/v1` |
+
+Lo que hay en esos archivos se **incrusta en el binario**: ahí no va nunca un
+secreto. Desde un teléfono físico contra un backend local, `10.0.2.2` no sirve
+—solo existe dentro del emulador de Android—, hay que usar la IP del equipo:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://192.168.1.50:3000/api/v1
+```
+
+### En Chrome contra el backend real
+
+```bash
+make run-web
+```
+
+**El puerto va fijo (5000) a propósito.** El navegador exige que el origen esté
+autorizado por el servidor, y `flutter run -d chrome` elegiría uno distinto cada
+vez: un puerto aleatorio no se puede meter en una lista blanca. En el backend,
+`/etc/running-api/.env.production`:
+
+```
+CORS_ORIGINS=https://runner-app.tumype.com,http://localhost:5000
+```
+
+```bash
+sudo systemctl restart running-api
+```
+
+Sin eso Chrome bloquea cada petición y la app se queda en el esqueleto de
+carga: el servidor responde `200` y el navegador tira la respuesta. Se
+comprueba con
+
+```bash
+curl -sI -H "Origin: http://localhost:5000"   https://runner-app.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
+```
+
+En web no todo se comporta igual: el GPS del navegador se para al cambiar de
+pestaña —no hay grabación en segundo plano— y los tokens van a `localStorage`,
+no al Keychain. Sirve para ver pantallas rápido; el tracking se prueba en un
+teléfono.
+
+### Backend en local
+
+```bash
+cd ../running-api
+npm install && npx prisma migrate deploy && npm run db:seed
+npm run dev            # escucha en :3000
+```
+
+y en otra terminal, `make run-local`. Sin `db:seed` no hay maratones ni cuentas
+de prueba: la app arranca, pero no hay con qué entrar.
 
 ## Comandos
 
 ```bash
-make run              # flutter run --dart-define-from-file=.env
+make run              # movil contra produccion
+make run-web          # Chrome contra produccion, puerto 5000
+make run-local        # movil contra localhost:3000
 make fmt              # dart format .
 make analyze          # flutter analyze
 make test             # flutter test

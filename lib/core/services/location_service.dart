@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +50,7 @@ class GeolocatorLocationService implements LocationService {
   /// stream se para entero, que ahorra mas que filtrar por distancia.
   static LocationSettings get _settings {
     if (kIsWeb) return const LocationSettings(accuracy: LocationAccuracy.high);
-    if (Platform.isAndroid) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
         intervalDuration: const Duration(seconds: 1),
         // Sin servicio en primer plano, Android mata el stream a los pocos
@@ -63,7 +62,8 @@ class GeolocatorLocationService implements LocationService {
         ),
       );
     }
-    if (Platform.isIOS || Platform.isMacOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       // `allowBackgroundLocationUpdates` y no pausar solo ya son el default de
       // geolocator; explicitarlos aqui es repetirlos.
       return AppleSettings(
