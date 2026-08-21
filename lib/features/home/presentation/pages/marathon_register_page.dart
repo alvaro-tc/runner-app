@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
@@ -9,7 +10,8 @@ import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
 import 'package:paceup/features/profile/domain/entities/user_profile.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
-import 'package:paceup/features/races/presentation/providers/races_provider.dart';
+import 'package:paceup/features/races/domain/entities/registration.dart';
+import 'package:paceup/features/races/presentation/providers/registration_provider.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -18,8 +20,17 @@ import 'package:paceup/shared/widgets/atoms/skeleton.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
 import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
-/// Three-step entry flow: details, category and extras, then review and pay.
-/// Payment is a mock selection — no card data is ever collected.
+/// Alta en una maraton, en los mismos tres pasos que lleva el servidor:
+/// datos, categoria y extras, y pago.
+///
+/// **Aqui no se suma dinero.** Cada paso guarda contra la API y devuelve el
+/// desglose vigente; lo que se pinta es ese desglose. Un total calculado en el
+/// movil se desvia en cuanto cambia un precio o un cargo por servicio, y el
+/// usuario acabaria viendo un numero y pagando otro.
+///
+/// El pago es **simulado**: el proveedor responde por el numero de tarjeta
+/// (4242…4242 aprueba, 4000…0002 rechaza, 4000…0069 dice vencida), asi que los
+/// tres caminos se pueden probar de verdad sin un banco detras.
 class MarathonRegisterPage extends ConsumerStatefulWidget {
   const MarathonRegisterPage({required this.marathonId, super.key});
 
@@ -31,41 +42,55 @@ class MarathonRegisterPage extends ConsumerStatefulWidget {
 }
 
 class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
-  static const _serviceFee = Money(4.5);
   static const _shirtSizes = ['XS', 'S', 'M', 'L', 'XL'];
-  static const _paymentMethods = ['Card •••• 4242', 'Wallet'];
+
+  /// Tarjeta que el proveedor simulado aprueba. Va precargada porque este
+  /// checkout es de prueba y escribir dieciseis digitos a mano en cada pasada
+  /// no prueba nada que no pruebe esto.
+  static const _tarjetaDeEjemplo = '4242 4242 4242 4242';
 
   final _page = PageController();
+  final _docId = TextEditingController();
+  final _phone = TextEditingController();
   final _emergencyName = TextEditingController();
   final _emergencyPhone = TextEditingController();
+  final _cardNumber = TextEditingController(text: _tarjetaDeEjemplo);
+  final _cardHolder = TextEditingController();
+  final _cardExpiry = TextEditingController(text: '12/30');
+  final _cardCvv = TextEditingController(text: '123');
 
   int _step = 0;
   String _shirtSize = 'M';
   String? _categoryId;
   final _selectedExtras = <String>{};
-  String _paymentMethod = _paymentMethods.first;
+  RacePaymentMethod _method = RacePaymentMethod.card;
   bool _acceptedTerms = false;
-  bool _submitting = false;
-  String? _submitError;
 
   @override
   void dispose() {
     _page.dispose();
+    _docId.dispose();
+    _phone.dispose();
     _emergencyName.dispose();
     _emergencyPhone.dispose();
+    _cardNumber.dispose();
+    _cardHolder.dispose();
+    _cardExpiry.dispose();
+    _cardCvv.dispose();
     super.dispose();
   }
 
-  Money _total(Marathon marathon) {
-    var amount = marathon.entryFee.amount + _serviceFee.amount;
-    final category = marathon.categories
-        .where((c) => c.id == _categoryId)
-        .firstOrNull;
-    if (category != null) amount += category.surcharge.amount;
-    for (final extra in marathon.extras) {
-      if (_selectedExtras.contains(extra.id)) amount += extra.price.amount;
-    }
-    return Money(amount, marathon.entryFee.currency);
+  RegistrationFlowNotifier get _flow =>
+      ref.read(registrationFlowProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    // Descarta el borrador de otra maraton que hubiera quedado a medias en esta
+    // misma pantalla. Con la misma maraton no toca nada: el flujo se retoma.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _flow.openFor(widget.marathonId),
+    );
   }
 
   void _goTo(int step) {
@@ -77,38 +102,78 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     );
   }
 
-  Future<void> _submit(Marathon marathon) async {
-    setState(() {
-      _submitting = true;
-      _submitError = null;
-    });
-    final (entry, failure) = await ref
-        .read(racesProvider.notifier)
-        .register(
-          marathon: marathon,
-          amountPaid: _total(marathon),
-          paymentMethod: _paymentMethod,
-        );
-    if (!mounted) return;
-    setState(() => _submitting = false);
+  /// Guarda el paso actual contra la API y solo entonces avanza.
+  ///
+  /// Avanzar primero y guardar despues dejaria al usuario en la pantalla de
+  /// pago con un borrador que el servidor no llego a aceptar.
+  Future<void> _next(Marathon marathon, UserProfile? profile) async {
+    final ok = switch (_step) {
+      0 => await _flow.submitPersonalData(_datosPersonales(profile)),
+      1 => await _flow.submitCategoryAndExtras(
+        categoryId: _categoryId,
+        extras: [
+          for (final id in _selectedExtras) ExtraSelection(extraId: id),
+        ],
+      ),
+      _ => false,
+    };
 
-    if (failure != null || entry == null) {
-      setState(() => _submitError = failure?.message);
-      return;
-    }
+    if (ok && mounted) _goTo(_step + 1);
+  }
+
+  RegistrationPersonalData _datosPersonales(UserProfile? profile) =>
+      RegistrationPersonalData(
+        fullName: profile?.fullName.trim().isNotEmpty ?? false
+            ? profile!.fullName
+            : 'Corredor',
+        docId: _docId.text.trim(),
+        phone: _phone.text.trim(),
+        emergencyContactName: _emergencyName.text.trim(),
+        emergencyContactPhone: _emergencyPhone.text.trim(),
+        shirtSize: _shirtSize,
+      );
+
+  Future<void> _pay(Marathon marathon) async {
+    final confirmada = await _flow.pay(
+      method: _method,
+      card: _method == RacePaymentMethod.card ? _tarjeta() : null,
+    );
+    if (!mounted) return;
+
+    final estado = ref.read(registrationFlowProvider);
+    if (!confirmada) return;
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => _SuccessDialog(
-        bibNumber: entry.bibNumber,
+        bibNumber: estado.registration?.bibNumber ?? '—',
         marathonName: marathon.name,
         onViewRace: () => context
           ..pop()
-          ..go(Routes.raceDetailOf(entry.id)),
+          ..go(Routes.raceDetailOf(estado.registration!.id)),
         onHome: () => context
           ..pop()
           ..go(Routes.home),
       ),
+    );
+  }
+
+  /// La caducidad se escribe `MM/AA` y viaja como dos enteros.
+  CardDetails _tarjeta() {
+    final partes = _cardExpiry.text.split('/');
+    final mes = int.tryParse(partes.first.trim()) ?? 12;
+    final anio = int.tryParse(partes.length > 1 ? partes[1].trim() : '') ?? 30;
+
+    return CardDetails(
+      number: _cardNumber.text,
+      holder: _cardHolder.text.trim().isEmpty
+          ? 'CORREDOR PACEUP'
+          : _cardHolder.text.trim(),
+      expMonth: mes,
+      // Dos digitos son este siglo: `30` es 2030, no el ano 30.
+      expYear: anio < 100 ? 2000 + anio : anio,
+      cvv: _cardCvv.text.trim(),
     );
   }
 
@@ -142,6 +207,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   Widget _body(Marathon marathon, UserProfile? profile) {
     _categoryId ??= marathon.categories.firstOrNull?.id;
+    final flow = ref.watch(registrationFlowProvider);
+
     return Column(
       children: [
         _Stepper(step: _step),
@@ -152,11 +219,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             children: [
               _detailsStep(profile),
               _categoryStep(marathon),
-              _reviewStep(marathon),
+              _reviewStep(marathon, flow),
             ],
           ),
         ),
-        _footer(marathon),
+        _footer(marathon, profile, flow),
       ],
     );
   }
@@ -184,6 +251,24 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         _ReadOnlyField(label: 'Gender', value: profile?.gender.label ?? '—'),
         const SizedBox(height: AppSpacing.sm),
         AppTextField(
+          label: 'ID number',
+          controller: _docId,
+          hint: 'Goes on your bib record',
+          textInputAction: TextInputAction.next,
+          // El boton de continuar depende de este campo: sin repintar, se
+          // quedaria gris con el documento ya escrito.
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          label: 'Phone',
+          controller: _phone,
+          hint: '+591 70000000',
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
           label: 'Emergency contact name',
           controller: _emergencyName,
           hint: 'Who should we call?',
@@ -193,7 +278,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         AppTextField(
           label: 'Emergency contact phone',
           controller: _emergencyPhone,
-          hint: '+62 812 0000 0000',
+          hint: '+591 70000001',
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -271,12 +356,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   // ----------------------------------------------------------- step three
 
-  Widget _reviewStep(Marathon marathon) {
+  Widget _reviewStep(Marathon marathon, RegistrationFlowState flow) {
     final c = context.colors;
-    final category = marathon.categories
-        .where((c) => c.id == _categoryId)
-        .firstOrNull;
-    final total = _total(marathon);
+    final quote = flow.quote;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
@@ -290,47 +372,75 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: c.border),
           ),
-          child: Column(
-            children: [
-              SessionSummaryRow(
-                label:
-                    'Entry fee${category == null ? '' : ' · ${category.label}'}',
-                value: Fmt.money(
-                  marathon.entryFee.amount + (category?.surcharge.amount ?? 0),
-                  total.currency,
+          // El desglose es el que devolvio el servidor, linea por linea. Es lo
+          // mismo que va a cobrar, asi que no puede diferir.
+          child: quote == null
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  child: Skeleton(width: 160, height: 16),
+                )
+              : Column(
+                  children: [
+                    for (final linea in quote.lines)
+                      SessionSummaryRow(
+                        label: linea.quantity > 1
+                            ? '${linea.label} × ${linea.quantity}'
+                            : linea.label,
+                        value: Fmt.money(
+                          linea.amount.amount,
+                          linea.amount.currency,
+                        ),
+                      ),
+                    // Sin cargo por servicio la linea **no se pinta**: un
+                    // "Bs 0,00" promete un cargo que hoy no se cobra.
+                    if (quote.serviceFee != null)
+                      SessionSummaryRow(
+                        label: quote.serviceFeeLabel ?? 'Service fee',
+                        value: Fmt.money(
+                          quote.serviceFee!.amount,
+                          quote.serviceFee!.currency,
+                        ),
+                      ),
+                    const AppDivider(),
+                    SessionSummaryRow(
+                      label: 'Total',
+                      value: Fmt.money(
+                        quote.total.amount,
+                        quote.total.currency,
+                      ),
+                      emphasise: true,
+                    ),
+                  ],
                 ),
-              ),
-              for (final extra in marathon.extras)
-                if (_selectedExtras.contains(extra.id))
-                  SessionSummaryRow(
-                    label: extra.label,
-                    value: Fmt.money(extra.price.amount, total.currency),
-                  ),
-              SessionSummaryRow(
-                label: 'Service fee',
-                value: Fmt.money(_serviceFee.amount, total.currency),
-              ),
-              const AppDivider(),
-              SessionSummaryRow(
-                label: 'Total',
-                value: Fmt.money(total.amount, total.currency),
-                emphasise: true,
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text('Payment method', style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),
-        for (final method in _paymentMethods)
+        for (final method in RacePaymentMethod.values)
           _SelectableTile(
-            title: method,
-            subtitle: method.startsWith('Card')
-                ? 'Charged when your place is confirmed'
-                : 'Uses your PaceUp balance',
-            selected: _paymentMethod == method,
-            onTap: () => setState(() => _paymentMethod = method),
+            title: method.label,
+            subtitle: switch (method) {
+              RacePaymentMethod.card => 'Charged the moment your place is taken',
+              RacePaymentMethod.qr => 'Scan and pay; we wait for the bank',
+              RacePaymentMethod.bankTransfer =>
+                'Transfer and wait for the organiser to confirm',
+            },
+            selected: _method == method,
+            onTap: () => setState(() => _method = method),
           ),
+        if (_method == RacePaymentMethod.card) ...[
+          const SizedBox(height: AppSpacing.md),
+          _CardForm(
+            number: _cardNumber,
+            holder: _cardHolder,
+            expiry: _cardExpiry,
+            cvv: _cardCvv,
+          ),
+        ],
+        if (flow.isAwaitingPayment) ...[
+          const SizedBox(height: AppSpacing.md),
+          _PendingPayment(payment: flow.payment!),
+        ],
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
@@ -347,20 +457,51 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             ),
           ],
         ),
-        if (_submitError != null) ...[
+        if (flow.error != null) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
-            _submitError!,
+            _mensajeDeError(flow),
             style: context.text.bodySm.copyWith(color: c.error),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton(
+            label: 'Try another card',
+            variant: AppButtonVariant.outline,
+            onPressed: _flow.retryPayment,
           ),
         ],
       ],
     );
   }
 
-  Widget _footer(Marathon marathon) {
+  /// El texto del servidor ya es humano; lo que se traduce aqui es el motivo
+  /// del rechazo, que llega como codigo estable.
+  String _mensajeDeError(RegistrationFlowState flow) {
+    final motivo = flow.payment?.failureReason;
+
+    return switch (motivo) {
+      'card_declined' => 'The bank turned this card down. Try another one.',
+      'expired_card' => 'That card is expired.',
+      'invalid_card' => 'Those card details do not look right.',
+      'qr_expired' => 'The QR expired before it was paid. Generate a new one.',
+      _ => flow.error?.message ?? 'Payment could not be completed.',
+    };
+  }
+
+  Widget _footer(
+    Marathon marathon,
+    UserProfile? profile,
+    RegistrationFlowState flow,
+  ) {
     final c = context.colors;
     final isLast = _step == 2;
+    final total = flow.quote?.total;
+    final puedeAvanzar = switch (_step) {
+      0 => _docId.text.trim().isNotEmpty,
+      1 => marathon.categories.isEmpty || _categoryId != null,
+      _ => _acceptedTerms && !flow.isAwaitingPayment,
+    };
+
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenH,
@@ -385,7 +526,14 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                   style: context.text.labelSm.copyWith(color: c.textSecondary),
                 ),
                 Text(
-                  Fmt.money(_total(marathon).amount, _total(marathon).currency),
+                  total == null
+                      // Antes del paso 1 no hay borrador: lo unico honesto que
+                      // se puede mostrar es el precio de catalogo.
+                      ? Fmt.money(
+                          marathon.entryFee.amount,
+                          marathon.entryFee.currency,
+                        )
+                      : Fmt.money(total.amount, total.currency),
                   style: context.text.headingMd,
                 ),
               ],
@@ -394,14 +542,139 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             Expanded(
               child: AppButton(
                 label: isLast ? 'Pay and register' : 'Continue',
-                isLoading: _submitting,
-                onPressed: isLast
-                    ? (_acceptedTerms ? () => _submit(marathon) : null)
-                    : () => _goTo(_step + 1),
+                isLoading: flow.busy,
+                onPressed: !puedeAvanzar
+                    ? null
+                    : isLast
+                    ? () => _pay(marathon)
+                    : () => _next(marathon, profile),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Datos de tarjeta. Viajan una sola vez y no se guardan: de todo esto solo
+/// sobreviven la marca y los cuatro ultimos digitos, y eso lo decide el
+/// servidor.
+class _CardForm extends StatelessWidget {
+  const _CardForm({
+    required this.number,
+    required this.holder,
+    required this.expiry,
+    required this.cvv,
+  });
+
+  final TextEditingController number;
+  final TextEditingController holder;
+  final TextEditingController expiry;
+  final TextEditingController cvv;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AppTextField(
+          label: 'Card number',
+          controller: number,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[\d ]')),
+            LengthLimitingTextInputFormatter(23),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          label: 'Cardholder',
+          controller: holder,
+          hint: 'As printed on the card',
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          children: [
+            Expanded(
+              child: AppTextField(
+                label: 'Expiry',
+                controller: expiry,
+                hint: 'MM/YY',
+                keyboardType: TextInputType.datetime,
+                textInputAction: TextInputAction.next,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: AppTextField(
+                label: 'CVV',
+                controller: cvv,
+                isPassword: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Cobro abierto: QR que hay que escanear, o transferencia por confirmar.
+///
+/// La pantalla sondea sola —lo hace el notifier— asi que aqui no hay ningun
+/// boton de "ya pague": lo unico que se puede hacer es esperar.
+class _PendingPayment extends StatelessWidget {
+  const _PendingPayment({required this.payment});
+
+  final PaymentInfo payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: c.warningBg,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        children: [
+          if (payment.qrImageUrl != null)
+            Image.network(
+              payment.qrImageUrl!,
+              height: 180,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          if (payment.bankReference != null)
+            Text(
+              'Reference: ${payment.bankReference}',
+              style: context.text.titleMd,
+            ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Waiting for the payment to clear…',
+                style: context.text.bodySm.copyWith(color: c.textSecondary),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

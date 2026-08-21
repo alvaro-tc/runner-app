@@ -18,6 +18,7 @@ abstract final class Routes {
 
   static const races = '/races';
   static const raceDetail = '/races/:id';
+  static const raceStart = '/races/:id/start';
 
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
@@ -31,4 +32,5 @@ abstract final class Routes {
   static String trainSummaryOf(String id) => '/train/summary/$id';
   static String trainHistoryOf(String id) => '/train/history/$id';
   static String raceDetailOf(String id) => '/races/$id';
+  static String raceStartOf(String id) => '/races/$id/start';
 }

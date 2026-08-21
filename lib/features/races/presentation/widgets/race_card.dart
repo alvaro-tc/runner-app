@@ -85,14 +85,20 @@ class RaceCard extends StatelessWidget {
                   children: [
                     AppBadge(
                       label: switch (entry.paymentStatus) {
-                        PaymentStatus.paid =>
-                          'Paid ${Fmt.money(entry.amountPaid.amount, entry.amountPaid.currency)}',
+                        // El monto solo esta en el detalle: la lista no trae
+                        // los cobros. Sin el se dice "Paid" a secas, en vez de
+                        // un "Paid 0,00" que seria mentira.
+                        PaymentStatus.paid => entry.amountPaid.amount == 0
+                            ? 'Paid'
+                            : 'Paid ${Fmt.money(entry.amountPaid.amount, entry.amountPaid.currency)}',
                         PaymentStatus.pending => 'Payment pending',
+                        PaymentStatus.failed => 'Payment failed',
                         PaymentStatus.refunded => 'Refunded',
                       },
                       tone: switch (entry.paymentStatus) {
                         PaymentStatus.paid => AppTone.success,
                         PaymentStatus.pending => AppTone.warning,
+                        PaymentStatus.failed => AppTone.error,
                         PaymentStatus.refunded => AppTone.error,
                       },
                     ),

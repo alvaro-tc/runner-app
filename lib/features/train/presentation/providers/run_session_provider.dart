@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/core/services/location_service.dart';
 import 'package:paceup/core/utils/route_generator.dart';
 import 'package:paceup/features/home/domain/entities/training_plan.dart';
+import 'package:paceup/features/tracking/tracking_providers.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 enum RunStatus { idle, countdown, running, paused, finished }
@@ -17,6 +18,8 @@ class RunGoal {
     this.distanceKm,
     this.duration,
     this.sessionId,
+    this.registrationId,
+    this.officialRoute = const [],
     this.laps,
     this.lapPace,
     this.title = 'Free run',
@@ -24,18 +27,45 @@ class RunGoal {
 
   static const free = RunGoal(type: RunGoalType.free);
 
+  /// Correr una maraton en la que ya se esta inscrito.
+  ///
+  /// [registrationId] es lo que convierte la sesion en carrera del lado del
+  /// servidor: sin el, los puntos son un entrenamiento cualquiera y no salen
+  /// en el mapa en vivo ni dan resultado oficial.
+  factory RunGoal.race({
+    required String registrationId,
+    required String title,
+    required double distanceKm,
+    List<GeoPoint> officialRoute = const [],
+  }) => RunGoal(
+    type: RunGoalType.race,
+    registrationId: registrationId,
+    title: title,
+    distanceKm: distanceKm,
+    officialRoute: officialRoute,
+  );
+
   final RunGoalType type;
   final double? distanceKm;
   final Duration? duration;
   final String? sessionId;
 
+  /// Solo en carrera. Es lo que se manda al arrancar la sesion remota.
+  final String? registrationId;
+
+  /// El trazado oficial, para dibujarlo debajo del recorrido real y que el
+  /// corredor vea si se salio.
+  final List<GeoPoint> officialRoute;
+
   /// Interval sessions show a lap tracker at the top of the map.
   final int? laps;
   final Duration? lapPace;
   final String title;
+
+  bool get isRace => type == RunGoalType.race;
 }
 
-enum RunGoalType { free, planSession, distance, time }
+enum RunGoalType { free, planSession, distance, time, race }
 
 @immutable
 class RunSessionState {
@@ -96,7 +126,7 @@ class RunSessionState {
 
   /// 0..1 towards the goal, or null for a free run.
   double? get goalProgress => switch (goal.type) {
-    RunGoalType.distance || RunGoalType.planSession =>
+    RunGoalType.distance || RunGoalType.planSession || RunGoalType.race =>
       goal.distanceKm == null
           ? null
           : (distanceKm / goal.distanceKm!).clamp(0.0, 1.0),
@@ -137,8 +167,16 @@ class RunSessionState {
   );
 }
 
-/// Owns the live run: GPS subscription, the clock, distance accumulation and
-/// split generation. The UI only reads the state and calls the four verbs.
+/// Lleva la sesion en marcha: el reloj, la distancia acumulada y los parciales.
+///
+/// **El GPS y la subida no son suyos**: los lleva [TrackingService], que abre la
+/// sesion en el servidor, escribe cada punto en la base local antes de
+/// intentar mandarlo y sube por lotes. Este notifier se cuelga de su stream.
+///
+/// Estan separados a proposito. Una grabacion no puede depender de que una
+/// pantalla siga montada, y un segundo `locationService.track()` aqui abriria
+/// una segunda suscripcion al GPS: el doble de bateria y dos series de puntos
+/// que no cuadran entre si.
 class RunSessionNotifier extends Notifier<RunSessionState> {
   StreamSubscription<GeoPoint>? _gps;
   Timer? _ticker;
@@ -194,8 +232,19 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     _pausedAt = null;
     state = state.copyWith(status: RunStatus.running, countdownValue: 0);
 
+    final tracking = ref.read(trackingServiceProvider);
+    // Escuchar ANTES de arrancar: el primer punto puede llegar en el mismo
+    // microtask en que se abre el GPS, y perderlo se nota en el mapa.
+    _gps = tracking.stream.listen(_onPoint);
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-    _gps = ref.read(locationServiceProvider).track().listen(_onPoint);
+
+    // `start` no lanza si el servidor no contesta: devuelve `null` y graba en
+    // local. Correr sin cobertura tiene que funcionar igual.
+    await tracking.start(
+      type: goal.isRace ? 'race' : 'free_run',
+      planSessionId: goal.type == RunGoalType.planSession ? goal.sessionId : null,
+      registrationId: goal.registrationId,
+    );
   }
 
   void _tick() {
@@ -252,6 +301,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     if (state.status != RunStatus.running) return;
     _pausedAt = DateTime.now();
     state = state.copyWith(status: RunStatus.paused);
+    unawaited(ref.read(trackingServiceProvider).pause());
   }
 
   void resume() {
@@ -261,11 +311,19 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       _pausedAt = null;
     }
     state = state.copyWith(status: RunStatus.running);
+    unawaited(ref.read(trackingServiceProvider).resume());
   }
 
-  /// Stops recording and returns the finished run, ready to be persisted.
-  TrainingRun finish() {
+  /// Cierra la grabacion y devuelve el entrenamiento, listo para guardar.
+  ///
+  /// El cierre remoto va primero: es el que consolida las metricas oficiales
+  /// desde los puntos que recibio el servidor. Lo que se devuelve aqui son los
+  /// numeros del telefono, que es lo que se pinta al instante y lo que queda en
+  /// el historial local si no hubo red.
+  Future<TrainingRun> finish({int? feeling, String? notes}) async {
     _teardown();
+    await ref.read(trackingServiceProvider).stop(feeling: feeling, notes: notes);
+
     final started = _startedAt ?? DateTime.now();
     final elapsed = state.elapsed;
     state = state.copyWith(status: RunStatus.finished);
@@ -283,9 +341,10 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       route: state.route,
       splits: state.splits,
       type: switch (state.goal.type) {
-        RunGoalType.planSession => SessionType.easy,
-        RunGoalType.distance => SessionType.easy,
+        RunGoalType.race => SessionType.race,
         RunGoalType.time => SessionType.tempo,
+        RunGoalType.planSession ||
+        RunGoalType.distance ||
         RunGoalType.free => SessionType.easy,
       },
       title: _titleFor(started),
@@ -293,10 +352,13 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     );
   }
 
-  void discard() {
+  /// Tira la grabacion, aqui y en el servidor. Los puntos de algo que el
+  /// usuario descarto no se guardan en ningun sitio.
+  Future<void> discard() async {
     _teardown();
     _startedAt = null;
     state = const RunSessionState.initial();
+    await ref.read(trackingServiceProvider).discard();
   }
 
   static String _titleFor(DateTime at) {

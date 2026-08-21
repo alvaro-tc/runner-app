@@ -13,6 +13,7 @@ import 'package:paceup/features/train/domain/entities/training_run.dart';
 class RouteMapView extends StatefulWidget {
   const RouteMapView({
     required this.route,
+    this.guideRoute = const [],
     this.follow,
     this.interactive = true,
     this.showStartFinish = true,
@@ -22,6 +23,13 @@ class RouteMapView extends StatefulWidget {
   });
 
   final List<GeoPoint> route;
+
+  /// Trazado de referencia, dibujado **debajo** del recorrido real y en gris.
+  ///
+  /// Es el circuito oficial de una carrera. Va aparte de [route] porque no es
+  /// por donde se paso: es por donde habria que pasar, y pintarlo igual haria
+  /// imposible ver si el corredor se salio.
+  final List<GeoPoint> guideRoute;
 
   /// When set, the camera keeps this position centred (live session).
   final GeoPoint? follow;
@@ -61,11 +69,14 @@ class RouteMapViewState extends State<RouteMapView> {
   }
 
   void _fitRoute() {
-    if (widget.route.length < 2) return;
+    // Con guia, el encuadre la incluye: al empezar una carrera no hay recorrido
+    // todavia y el mapa se abriria en ninguna parte.
+    final puntos = [...widget.guideRoute, ...widget.route];
+    if (puntos.length < 2) return;
     _controller.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds.fromPoints([
-          for (final p in widget.route) LatLng(p.lat, p.lng),
+          for (final p in puntos) LatLng(p.lat, p.lng),
         ]),
         padding: const EdgeInsets.all(AppSpacing.xxl),
       ),
@@ -76,11 +87,13 @@ class RouteMapViewState extends State<RouteMapView> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final points = [for (final p in widget.route) LatLng(p.lat, p.lng)];
+    final guide = [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+    final encuadre = points.isEmpty ? guide : points;
     final center = widget.follow != null
         ? LatLng(widget.follow!.lat, widget.follow!.lng)
-        : points.isEmpty
+        : encuadre.isEmpty
         ? const LatLng(-6.2088, 106.8456)
-        : points[points.length ~/ 2];
+        : encuadre[encuadre.length ~/ 2];
 
     return ColoredBox(
       color: c.primaryContainer,
@@ -105,6 +118,17 @@ class RouteMapViewState extends State<RouteMapView> {
             userAgentPackageName: 'com.paceup.app',
             tileBuilder: c.isDark ? _darkenTile : null,
           ),
+          // La guia primero: va por debajo del recorrido real.
+          if (guide.length > 1)
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                  points: guide,
+                  strokeWidth: 5,
+                  color: c.textSecondary.withValues(alpha: 0.45),
+                ),
+              ],
+            ),
           if (points.length > 1)
             PolylineLayer(
               polylines: [
@@ -125,10 +149,16 @@ class RouteMapViewState extends State<RouteMapView> {
     final c = context.colors;
     final markers = <Marker>[];
 
-    if (widget.showStartFinish && points.length > 1) {
+    // Con guia, la largada y la meta son las del circuito oficial: son puntos
+    // fijos de la carrera, no los extremos de lo que se lleve corrido.
+    final banderas = widget.guideRoute.isEmpty
+        ? points
+        : [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+
+    if (widget.showStartFinish && banderas.length > 1) {
       markers
-        ..add(_flag(points.first, Icons.flag_rounded, c.success))
-        ..add(_flag(points.last, Icons.sports_score_rounded, c.error));
+        ..add(_flag(banderas.first, Icons.flag_rounded, c.success))
+        ..add(_flag(banderas.last, Icons.sports_score_rounded, c.error));
     }
 
     final every = widget.markerEveryKm;

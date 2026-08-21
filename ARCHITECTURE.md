@@ -372,6 +372,10 @@ correctas se abra cuando se abra la app:
 - 4 inscripciones: 2 completadas con resultados, 1 próxima pagada, 1 pendiente
   de pago.
 
+**Ya no alimenta a Races.** «Mis carreras», el detalle y toda la inscripción
+salen de la API (`RemoteRaceRepository`); el seed queda para el historial de
+entrenamientos, que sigue siendo local hasta la primera sincronización.
+
 `RouteGenerator` construye un bucle armónico, lo escala al kilometraje pedido y
 reparte marcas de tiempo según el ritmo objetivo con una deriva de ±4 %. De ahí
 salen distancia (Haversine), desnivel y splits por kilómetro.
@@ -380,7 +384,7 @@ salen distancia (Haversine), desnivel y splits por kilómetro.
 
 | Tipo | Qué cubre |
 |---|---|
-| Unitarias | formatters, Haversine, generación de splits, totales de Races |
+| Unitarias | formatters, Haversine, generación de splits, totales de Races, mapeo de carreras e inscripción (`race_repository_test`), flujo de alta y claves de idempotencia (`registration_flow_test`), costura sesión ↔ tracking (`run_session_test`) |
 | Widget | `AppButton`, `AppProgressRing`, `CountdownPill`, `RaceCard` |
 | Golden | Home, Races y Profile en claro y oscuro |
 | Integración | onboarding → welcome → sign in → home, con guards |
@@ -390,9 +394,9 @@ MaterialIcons explícitamente; sin eso el texto y los iconos saldrían como caja
 El reloj se congela con `nowProvider`, así que la cuenta atrás de Home no cambia
 entre ejecuciones.
 
-Los goldens de Home ya no dependen de la fecha: la pantalla sale de
-`test/fake_api.dart`, un `/home/summary` fijo con fechas sin zona horaria. Los
-de Races siguen saliendo del seed y por eso siguen siendo frágiles.
+Los goldens de Home y de Races ya no dependen de la fecha ni del seed: las dos
+pantallas salen de `test/fake_api.dart`, con `/home/summary`, `/races/me` y
+`/races/me/summary` fijos y fechas sin zona horaria.
 
 **Limitación conocida:** `FakeDataSeed` se ancla a `DateTime.now()`, de modo que
 la fecha de la sesión del día y el día resaltado de la tira semanal cambian al

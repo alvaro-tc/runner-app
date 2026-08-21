@@ -12,6 +12,19 @@ import 'core/fake_http.dart';
 Future<ResponseBody> fakeBackend(RequestOptions req) async {
   final path = req.path;
   if (path.startsWith('/marathons/')) return envelope(marathonDetail);
+  if (path.startsWith('/registrations/') && path.endsWith('/payments')) {
+    return envelope([_pago]);
+  }
+  // `/races/me` y su resumen caen en el switch; esto es el detalle de UNA
+  // carrera, cuya clave es el id de la inscripcion.
+  if (path.startsWith('/races/') && !path.startsWith('/races/me')) {
+    final id = path.substring('/races/'.length);
+    final carrera = misCarreras.firstWhere(
+      (c) => c['registrationId'] == id,
+      orElse: () => misCarreras.first,
+    );
+    return envelope({...carrera, ...raceDetailExtras});
+  }
   return switch (path) {
     '/auth/login' || '/auth/register' => envelope({
       'accessToken': 'access-1',
@@ -22,6 +35,8 @@ Future<ResponseBody> fakeBackend(RequestOptions req) async {
     '/auth/me' => envelope(_usuario),
     '/home/summary' => envelope(homeSummary),
     '/marathons' => envelope([_maraton]),
+    '/races/me' => envelope(misCarreras),
+    '/races/me/summary' => envelope(racesSummary),
     _ => envelope(<String, Object?>{}),
   };
 }
@@ -90,6 +105,123 @@ const marathonDetail = {
       'available': true,
     },
   ],
+};
+
+/// Lo que la lista de carreras necesita de la maraton: la API la manda
+/// recortada, sin precio ni cupos.
+const _maratonDeCarrera = {
+  'id': 'm1',
+  'slug': 'media-maraton-santa-cruz',
+  'name': 'Media Maraton Santa Cruz',
+  'city': 'Santa Cruz de la Sierra',
+  'startsAt': '2026-09-12T10:00:00',
+  'timezone': 'America/La_Paz',
+  'distanceMeters': 21097,
+  'coverUrl': null,
+  'kitPickup': null,
+};
+
+const _maratonCorrida = {
+  'id': 'm0',
+  'slug': 'maraton-la-paz-3600',
+  'name': 'Maraton La Paz 3600',
+  'city': 'La Paz',
+  'startsAt': '2026-05-10T11:00:00',
+  'timezone': 'America/La_Paz',
+  'distanceMeters': 42195,
+  'coverUrl': null,
+  'kitPickup': null,
+};
+
+/// `GET /registrations/:id/payments`. Un solo cobro, con tarjeta y cobrado.
+const _pago = {
+  'id': 'pay1',
+  'registrationId': 'r1',
+  'method': 'card',
+  'status': 'paid',
+  'amountCents': 22500,
+  'currency': 'BOB',
+  'methodDetails': {'brand': 'visa', 'last4': '4242'},
+  'failureReason': null,
+  'expiresAt': null,
+  'paidAt': '2026-07-01T12:00:00',
+  'refundedAt': null,
+  'createdAt': '2026-07-01T12:00:00',
+};
+
+/// `GET /races/me`: una carrera por delante y una ya corrida.
+const misCarreras = [
+  {
+    'registrationId': 'r1',
+    'marathon': _maratonDeCarrera,
+    'bibNumber': 'MSC-0042',
+    'categoryName': 'General',
+    'status': 'upcoming',
+    'paymentStatus': 'paid',
+    'registeredAt': '2026-07-01T12:00:00',
+    'result': null,
+  },
+  {
+    'registrationId': 'r0',
+    'marathon': _maratonCorrida,
+    'bibNumber': 'MLP-0117',
+    'categoryName': 'General',
+    'status': 'completed',
+    'paymentStatus': 'paid',
+    'registeredAt': '2026-03-02T12:00:00',
+    'result': {
+      'finishTimeSeconds': 14760,
+      'chipTimeSeconds': 14700,
+      'distanceMeters': 42195,
+      'avgPaceSecPerKm': 349,
+      'avgSpeedMps': 2.86,
+      'elevationGainMeters': 520,
+      'bestKmIndex': 12,
+      'overallRank': 214,
+      'categoryRank': 31,
+      'finishers': 1180,
+      'finishedAt': '2026-05-10T15:06:00',
+      'shareCardUrl': null,
+      'workoutId': 'w0',
+    },
+  },
+];
+
+/// Lo que el detalle agrega sobre el resumen: recorrido y parciales.
+const raceDetailExtras = {
+  'splits': [
+    {
+      'index': 0,
+      'distanceMeters': 1000,
+      'durationSeconds': 345,
+      'paceSecPerKm': 345,
+      'elevationGainMeters': 12,
+    },
+    {
+      'index': 1,
+      'distanceMeters': 1000,
+      'durationSeconds': 352,
+      'paceSecPerKm': 352,
+      'elevationGainMeters': 18,
+    },
+  ],
+  'checkpoints': <Object?>[],
+  'routeGeoJson': {
+    'type': 'LineString',
+    'coordinates': [
+      [-63.1821, -17.7833],
+      [-63.1801, -17.7813],
+    ],
+  },
+};
+
+const racesSummary = {
+  'racesCompleted': 1,
+  'racesUpcoming': 1,
+  'totalDistanceMeters': 42195,
+  'totalSpentCents': 22500,
+  'currency': 'BOB',
+  'nextRace': null,
 };
 
 /// Semana del 10 al 16 de agosto de 2026 — la que contiene el reloj congelado

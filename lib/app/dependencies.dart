@@ -9,7 +9,8 @@ import 'package:paceup/features/home/data/repositories/remote_home_repositories.
 import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
 import 'package:paceup/features/profile/data/repositories/local_profile_repository.dart';
 import 'package:paceup/features/profile/domain/repositories/profile_repository.dart';
-import 'package:paceup/features/races/data/repositories/fake_race_repository.dart';
+import 'package:paceup/features/races/data/datasources/races_api.dart';
+import 'package:paceup/features/races/data/repositories/remote_race_repository.dart';
 import 'package:paceup/features/races/domain/repositories/race_repository.dart';
 import 'package:paceup/features/train/domain/repositories/training_repository.dart';
 
@@ -45,8 +46,12 @@ final homeRepositoryProvider = Provider<HomeRepository>(
   ),
 );
 
+final racesApiProvider = Provider<RacesApi>(
+  (ref) => RacesApi(ref.watch(dioProvider)),
+);
+
 final raceRepositoryProvider = Provider<RaceRepository>(
-  (ref) => FakeRaceRepository(),
+  (ref) => RemoteRaceRepository(ref.watch(racesApiProvider)),
 );
 
 final profileRepositoryProvider = Provider<ProfileRepository>(

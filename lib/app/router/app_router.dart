@@ -19,6 +19,7 @@ import 'package:paceup/features/profile/presentation/pages/profile_edit_page.dar
 import 'package:paceup/features/profile/presentation/pages/profile_page.dart';
 import 'package:paceup/features/profile/presentation/pages/profile_settings_page.dart';
 import 'package:paceup/features/races/presentation/pages/race_detail_page.dart';
+import 'package:paceup/features/races/presentation/pages/race_start_page.dart';
 import 'package:paceup/features/races/presentation/pages/races_page.dart';
 import 'package:paceup/features/train/presentation/pages/run_session_page.dart';
 import 'package:paceup/features/train/presentation/pages/run_summary_page.dart';
@@ -145,6 +146,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: ':id',
                     builder: (context, state) =>
                         RaceDetailPage(entryId: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: 'start',
+                        builder: (context, state) => RaceStartPage(
+                          registrationId: state.pathParameters['id']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

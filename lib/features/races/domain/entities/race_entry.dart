@@ -5,6 +5,7 @@ import 'package:paceup/features/train/domain/entities/training_run.dart';
 enum PaymentStatus {
   paid('Paid'),
   pending('Payment pending'),
+  failed('Payment failed'),
   refunded('Refunded');
 
   const PaymentStatus(this.label);
@@ -78,6 +79,14 @@ class RaceEntry {
 
   bool get isUpcoming => status == RaceEntryStatus.upcoming;
   bool get hasResult => result != null;
+
+  /// Si se puede largar esta carrera.
+  ///
+  /// El servidor rechaza la largada de una inscripcion sin confirmar, asi que
+  /// esto no es la regla: es lo mismo dicho antes, para no ofrecer un boton que
+  /// solo puede acabar en error.
+  bool get canStart =>
+      isUpcoming && paymentStatus == PaymentStatus.paid && result == null;
 }
 
 /// Aggregates shown in the "My Races" header. Derived, never stored.

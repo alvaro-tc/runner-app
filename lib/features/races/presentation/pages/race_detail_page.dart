@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
+import 'package:paceup/core/error/failure.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/services/settings_provider.dart';
@@ -26,8 +27,7 @@ class RaceDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.watch(racesProvider);
-    final entry = ref.watch(raceEntryProvider(entryId));
+    final entry = ref.watch(raceDetailProvider(entryId));
 
     return Scaffold(
       appBar: AppBar(
@@ -42,14 +42,16 @@ class RaceDetailPage extends ConsumerWidget {
         ),
         title: const Text('My race'),
       ),
-      body: entries.isLoading && entry == null
-          ? const Center(child: Skeleton(width: 180, height: 20))
-          : entry == null
-          ? ErrorStateView(
-              message: 'We could not find that registration.',
-              onRetry: () => context.go(Routes.races),
-            )
-          : _Body(entry: entry),
+      body: entry.when(
+        loading: () => const Center(child: Skeleton(width: 180, height: 20)),
+        error: (error, _) => ErrorStateView(
+          message: error is Failure
+              ? error.message
+              : 'We could not find that registration.',
+          onRetry: () => ref.invalidate(raceDetailProvider(entryId)),
+        ),
+        data: (data) => _Body(entry: data),
+      ),
     );
   }
 }
@@ -177,6 +179,7 @@ class _Body extends ConsumerWidget {
                 valueColor: switch (entry.paymentStatus) {
                   PaymentStatus.paid => c.success,
                   PaymentStatus.pending => c.warning,
+                  PaymentStatus.failed => c.error,
                   PaymentStatus.refunded => c.error,
                 },
               ),
@@ -202,6 +205,14 @@ class _Body extends ConsumerWidget {
                 context.showSnack('A shareable finisher card is on the way.'),
           ),
         ] else if (entry.isUpcoming) ...[
+          if (entry.canStart) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(
+              label: 'Go to the start line',
+              icon: Icons.play_arrow_rounded,
+              onPressed: () => context.push(Routes.raceStartOf(entry.id)),
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           AppButton(
             label: 'Cancel registration',

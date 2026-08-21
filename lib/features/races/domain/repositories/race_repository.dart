@@ -1,19 +1,53 @@
 import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
+import 'package:paceup/features/races/domain/entities/registration.dart';
 
+/// Mis carreras y el camino para llegar a tener una.
+///
+/// La inscripcion son **tres pasos con estado en el servidor**, no una llamada:
+/// el borrador se puede retomar donde se dejo, el precio lo recalcula la API en
+/// cada cambio y el cobro lleva su clave de idempotencia. Por eso son cinco
+/// metodos y no un `register(...)` — meterlos en uno obligaria al movil a
+/// guardarse el paso intermedio, que es justo lo que se pierde al cerrar la app.
 abstract interface class RaceRepository {
   Future<Result<List<RaceEntry>>> fetchEntries();
 
-  Future<Result<RaceEntry>> fetchById(String id);
+  Future<Result<RaceEntry>> fetchById(String registrationId);
 
-  /// Creates an entry from a completed registration flow and returns it with
-  /// its generated bib number.
-  Future<Result<RaceEntry>> register({
-    required Marathon marathon,
-    required Money amountPaid,
-    required String paymentMethod,
+  /// Los totales de la cabecera. Vienen del servidor y **no** se derivan de la
+  /// lista: el gasto sale de los cobros, que la lista no trae.
+  Future<Result<RaceTotals>> fetchTotals();
+
+  // ─── Inscripcion ─────────────────────────────────────────────────────────
+
+  /// Paso 1. Devuelve el borrador que ya hubiera para esa maraton en vez de
+  /// abrir un segundo.
+  Future<Result<Registration>> startRegistration({
+    required String marathonId,
+    required RegistrationPersonalData data,
   });
 
-  Future<Result<void>> cancel(String entryId);
+  /// Paso 2. [extras] es la seleccion **completa**: reemplaza a la anterior.
+  Future<Result<Registration>> setCategoryAndExtras({
+    required String registrationId,
+    String? categoryId,
+    required List<ExtraSelection> extras,
+  });
+
+  /// El total vigente. Se pide en cada cambio del paso 2.
+  Future<Result<RegistrationQuote>> quote(String registrationId);
+
+  /// Paso 3. [idempotencyKey] tiene que ser la misma en cada reintento del
+  /// mismo cobro, o se cobra dos veces.
+  Future<Result<CheckoutOutcome>> checkout({
+    required String registrationId,
+    required RacePaymentMethod method,
+    required String idempotencyKey,
+    CardDetails? card,
+  });
+
+  /// Sondeo del cobro pendiente (QR y transferencia).
+  Future<Result<PaymentInfo>> pollPayment(String paymentId);
+
+  Future<Result<void>> cancel(String registrationId);
 }

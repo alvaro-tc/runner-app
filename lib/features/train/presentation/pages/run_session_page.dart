@@ -68,14 +68,15 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
       ),
     );
     if (discard ?? false) {
-      ref.read(runSessionProvider.notifier).discard();
+      await ref.read(runSessionProvider.notifier).discard();
       return true;
     }
     return false;
   }
 
   Future<void> _finish() async {
-    final run = ref.read(runSessionProvider.notifier).finish();
+    final run = await ref.read(runSessionProvider.notifier).finish();
+    if (!mounted) return;
     final error = await ref.read(historyProvider.notifier).save(run);
     if (!mounted) return;
     if (error != null) {
@@ -103,8 +104,11 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
               child: RouteMapView(
                 key: _mapKey,
                 route: state.route,
+                // En carrera, el circuito oficial va debajo: es como se ve si
+                // uno se salio del recorrido.
+                guideRoute: state.goal.officialRoute,
                 follow: state.lastPoint,
-                showStartFinish: false,
+                showStartFinish: state.goal.isRace,
               ),
             ),
             SafeArea(
