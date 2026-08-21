@@ -46,7 +46,6 @@ class RaceCard extends StatelessWidget {
                         height: 60,
                         child: EventImage(
                           imageUrl: entry.marathon.heroImageUrl,
-                          seedText: entry.marathon.id,
                         ),
                       ),
                     ),

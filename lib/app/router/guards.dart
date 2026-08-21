@@ -11,7 +11,8 @@ const _authRoutes = {
   Routes.forgotPassword,
 };
 
-/// Onboarding first, then a session, then the app. Debug-only routes are let
+/// Onboarding first, then a session, then the app. Los slides preceden a cada
+/// login: quien ya tiene sesion viva entra directo. Debug-only routes are let
 /// through untouched so the component showcase stays reachable.
 String? appGuard(Ref ref, GoRouterState state) {
   final location = state.matchedLocation;
@@ -20,7 +21,7 @@ String? appGuard(Ref ref, GoRouterState state) {
   final onboardingSeen = ref.read(settingsProvider).onboardingSeen;
   final signedIn = ref.read(authProvider);
 
-  if (!onboardingSeen) {
+  if (!signedIn && !onboardingSeen) {
     return location == Routes.onboarding ? null : Routes.onboarding;
   }
   if (location == Routes.onboarding) {

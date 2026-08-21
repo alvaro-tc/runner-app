@@ -62,7 +62,6 @@ void main() {
 }
 
 Map<String, Object> _signedIn(ThemeMode mode) => {
-  'settings.onboardingSeen': true,
   'settings.themeMode': mode.name,
 };
 

@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/error/failure.dart';
 import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habia sesion al arrancar. Se resuelve en `bootstrap()` leyendo el refresh
 /// token del almacen seguro —una lectura asincrona que no puede hacerse dentro
@@ -46,11 +44,6 @@ class AuthNotifier extends Notifier<bool> {
   Failure? _aplicar(Object resultado) {
     if (resultado is Failure) return resultado;
     state = true;
-    // El backend manda: quien ya vio los slides no los vuelve a ver aunque
-    // haya reinstalado la app.
-    if ((resultado as AuthUser).onboardingSeenAt != null) {
-      unawaited(ref.read(settingsProvider.notifier).markOnboardingSeen());
-    }
     return null;
   }
 

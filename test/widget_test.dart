@@ -24,6 +24,7 @@ void main() {
 
     expect(find.byType(WelcomePage), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
+    expect(find.byType(HomePage), findsNothing);
   });
 
   testWidgets('walking the slides swaps Next for Get started', (tester) async {
@@ -39,21 +40,9 @@ void main() {
     expect(find.text('Get started'), findsOneWidget);
   });
 
-  testWidgets('an onboarded visitor is sent to welcome, not home', (
-    tester,
-  ) async {
-    await pumpApp(tester, prefs: {'settings.onboardingSeen': true});
-    await tester.pump();
-    expect(find.byType(WelcomePage), findsOneWidget);
-    expect(find.byType(HomePage), findsNothing);
-  });
-
   testWidgets('a signed-in user goes straight to home', (tester) async {
-    await pumpApp(
-      tester,
-      prefs: {'settings.onboardingSeen': true},
-      signedIn: true,
-    );
+    // Con sesion viva los slides no se interponen: el guard los salta.
+    await pumpApp(tester, signedIn: true);
     // Home keeps a one-second countdown running, so it never "settles";
     // pump past the repository latency instead.
     await tester.pump();
@@ -63,8 +52,10 @@ void main() {
   });
 
   testWidgets('signing in reaches home', (tester) async {
-    await pumpApp(tester, prefs: {'settings.onboardingSeen': true});
+    await pumpApp(tester);
     await tester.pump();
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
@@ -84,8 +75,10 @@ void main() {
   testWidgets('a short password is rejected before any request', (
     tester,
   ) async {
-    await pumpApp(tester, prefs: {'settings.onboardingSeen': true});
+    await pumpApp(tester);
     await tester.pump();
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
 

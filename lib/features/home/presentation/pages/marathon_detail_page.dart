@@ -89,7 +89,6 @@ class _Content extends StatelessWidget {
                   tag: 'marathon-${marathon.id}',
                   child: EventImage(
                     imageUrl: marathon.heroImageUrl,
-                    seedText: marathon.id,
                   ),
                 ),
                 DecoratedBox(

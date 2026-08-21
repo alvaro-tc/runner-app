@@ -117,7 +117,6 @@ class _Body extends ConsumerWidget {
               children: [
                 EventImage(
                   imageUrl: entry.marathon.heroImageUrl,
-                  seedText: entry.marathon.id,
                 ),
                 DecoratedBox(
                   decoration: BoxDecoration(gradient: c.heroOverlay),

@@ -51,9 +51,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     super.dispose();
   }
 
-  Future<void> _finish() async {
-    await ref.read(settingsProvider.notifier).markOnboardingSeen();
-    if (mounted) context.go(Routes.welcome);
+  void _finish() {
+    ref.read(settingsProvider.notifier).markOnboardingSeen();
+    context.go(Routes.welcome);
   }
 
   void _next() {

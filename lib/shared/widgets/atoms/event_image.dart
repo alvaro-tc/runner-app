@@ -1,87 +1,45 @@
-import 'dart:math' as math;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 
-/// Event artwork. Falls back to a painted brand pattern whenever the entity has
-/// no image URL (which is every record in the fake data layer) or the download
-/// fails, so no screen ever renders a grey box.
+/// Afiche del evento. Si no hay imagen —o la descarga falla— pinta un degradado
+/// de marca con el icono, no un trazado: el hueco tiene que leerse como "falta
+/// el afiche", nunca como un mapa del recorrido.
 class EventImage extends StatelessWidget {
   const EventImage({
     required this.imageUrl,
-    required this.seedText,
     this.icon = Icons.directions_run_rounded,
+    this.fit = BoxFit.cover,
     super.key,
   });
 
   final String imageUrl;
-
-  /// Drives the generated pattern so each event looks consistently different.
-  final String seedText;
   final IconData icon;
 
-  @override
-  Widget build(BuildContext context) {
-    if (imageUrl.isEmpty) return _fallback(context);
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (context, _) => _fallback(context),
-      errorWidget: (context, _, _) => _fallback(context),
-    );
-  }
+  /// `contain` cuando el afiche es vertical y recortarlo se comeria la mitad
+  /// del cartel; el degradado de atras rellena lo que sobre.
+  final BoxFit fit;
 
-  Widget _fallback(BuildContext context) => CustomPaint(
-    painter: _PatternPainter(
-      seed: seedText.hashCode,
-      gradient: context.colors.routeGradient,
-      lineColor: context.colors.onPrimary.withValues(alpha: 0.16),
-    ),
-    child: Center(
-      child: Icon(
-        icon,
-        size: 48,
-        color: context.colors.onPrimary.withValues(alpha: 0.7),
-      ),
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(gradient: context.colors.routeGradient),
+    child: imageUrl.isEmpty
+        ? _placeholder(context)
+        : CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: fit,
+            width: double.infinity,
+            height: double.infinity,
+            placeholder: (context, _) => _placeholder(context),
+            errorWidget: (context, _, _) => _placeholder(context),
+          ),
+  );
+
+  Widget _placeholder(BuildContext context) => Center(
+    child: Icon(
+      icon,
+      size: 48,
+      color: context.colors.onPrimary.withValues(alpha: 0.7),
     ),
   );
-}
-
-class _PatternPainter extends CustomPainter {
-  _PatternPainter({
-    required this.seed,
-    required this.gradient,
-    required this.lineColor,
-  });
-
-  final int seed;
-  final Gradient gradient;
-  final Color lineColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
-
-    final rnd = math.Random(seed);
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
-      ..color = lineColor;
-
-    // A few sweeping route-like curves, deterministic per seed.
-    for (var i = 0; i < 4; i++) {
-      final path = Path()..moveTo(-20, size.height * rnd.nextDouble());
-      for (var x = 0.0; x <= size.width + 20; x += size.width / 5) {
-        path.lineTo(x, size.height * (0.15 + 0.7 * rnd.nextDouble()));
-      }
-      canvas.drawPath(path, stroke);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_PatternPainter old) =>
-      old.seed != seed || old.lineColor != lineColor;
 }

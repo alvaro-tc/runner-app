@@ -40,7 +40,6 @@ class AppSettings {
 class SettingsNotifier extends Notifier<AppSettings> {
   static const _kTheme = 'settings.themeMode';
   static const _kUnit = 'settings.distanceUnit';
-  static const _kOnboarding = 'settings.onboardingSeen';
 
   @override
   AppSettings build() {
@@ -54,7 +53,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
         (u) => u.name == prefs.getString(_kUnit),
         orElse: () => DistanceUnit.km,
       ),
-      onboardingSeen: prefs.getBool(_kOnboarding) ?? false,
+      // Los slides son parte del arranque, no un tramite que se firma una vez:
+      // se ven en cada sesion nueva. Por eso el flag vive solo en memoria.
+      onboardingSeen: false,
     );
   }
 
@@ -68,10 +69,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await ref.read(sharedPreferencesProvider).setString(_kUnit, unit.name);
   }
 
-  Future<void> markOnboardingSeen() async {
-    state = state.copyWith(onboardingSeen: true);
-    await ref.read(sharedPreferencesProvider).setBool(_kOnboarding, true);
-  }
+  void markOnboardingSeen() => state = state.copyWith(onboardingSeen: true);
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
