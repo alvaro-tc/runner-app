@@ -1,4 +1,4 @@
-﻿.PHONY: run run-web run-local goldens fmt analyze test
+﻿.PHONY: run run-web run-local apk goldens fmt analyze test
 
 # Contra el backend de produccion (runner-app.tumype.com).
 run:
@@ -12,6 +12,12 @@ run-web:
 # Contra el backend levantado en esta maquina.
 run-local:
 	flutter run --dart-define-from-file=.env.local
+
+# El APK de release. El `--dart-define-from-file` NO es opcional: sin el, la
+# URL que queda incrustada es `10.0.2.2`, que solo existe para el emulador, y
+# en un telefono real no conecta con nada.
+apk:
+	flutter build apk --release --dart-define-from-file=.env
 
 goldens:
 	flutter test --update-goldens
