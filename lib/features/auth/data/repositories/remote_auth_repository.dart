@@ -24,22 +24,48 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<Result<AuthUser>> signIn({
-    required String email,
+    required String identifier,
     required String password,
   }) => guard(
-    () => _entrar(() => api.login(email: email, password: password)),
+    () => _entrar(
+      () => api.login(identifier: identifier, password: password),
+    ),
   );
 
   @override
   Future<Result<AuthUser>> signUp({
     required String fullName,
-    required String email,
     required String password,
+    String? email,
+    String? ci,
   }) => guard(
     () => _entrar(
-      () => api.register(name: fullName, email: email, password: password),
+      () => api.register(
+        name: fullName,
+        password: password,
+        email: email,
+        ci: ci,
+      ),
     ),
   );
+
+  @override
+  Future<Result<AuthUser>> currentUser() => guard(api.me);
+
+  /// El cambio **no** cierra esta sesion —lo garantiza el servidor— asi que no
+  /// hay que reescribir tokens: basta con releer el usuario para que
+  /// `mustChangePassword` deje de bloquear la navegacion.
+  @override
+  Future<Result<AuthUser>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) => guard(() async {
+    await api.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+    return api.me();
+  });
 
   /// Los tokens se guardan **antes** de cualquier otra llamada: `/auth/me` ya
   /// necesita ir firmada.

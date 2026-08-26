@@ -167,10 +167,47 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
           return true;
         }
 
-        if (salida.payment.state == RacePaymentState.pending) _sondear();
+        // El QR manual **no se sondea**: al otro lado no hay un banco que
+        // responda en segundos, hay una persona que va a mirar una imagen
+        // cuando pueda. Sondear cada dos segundos durante cinco minutos solo
+        // gastaria bateria para no ver ningun cambio.
+        if (salida.payment.state == RacePaymentState.pending &&
+            !salida.payment.method.needsProof) {
+          _sondear();
+        }
         return false;
       },
       (fallo) {
+        state = state.copyWith(busy: false, error: fallo);
+        return false;
+      },
+    );
+  }
+
+  /// Sube el comprobante del pago por QR. **Temporal.**
+  ///
+  /// No confirma nada: el cobro sigue pendiente y pasa a esperar a que un
+  /// organizador mire la imagen. Devuelve `true` si la subida entro.
+  Future<bool> uploadProof({required String filePath, String? reference}) async {
+    final pago = state.payment;
+    if (pago == null || state.busy) return false;
+
+    state = state.copyWith(busy: true, clearError: true);
+
+    final resultado = await ref
+        .read(raceRepositoryProvider)
+        .uploadProof(
+          paymentId: pago.id,
+          filePath: filePath,
+          reference: reference,
+        );
+
+    return resultado.fold(
+      (PaymentInfo actualizado) {
+        state = state.copyWith(payment: actualizado, busy: false);
+        return true;
+      },
+      (Failure fallo) {
         state = state.copyWith(busy: false, error: fallo);
         return false;
       },

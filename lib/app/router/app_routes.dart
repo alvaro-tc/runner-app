@@ -5,6 +5,9 @@ abstract final class Routes {
   static const signIn = '/sign-in';
   static const signUp = '/sign-up';
   static const forgotPassword = '/forgot-password';
+  /// Puerta obligatoria para quien entro con una contrasena que no eligio
+  /// (alta desde la web: usuario CI, contrasena CI).
+  static const changePassword = '/change-password';
 
   static const home = '/home';
   static const marathonDetail = '/home/marathon/:id';

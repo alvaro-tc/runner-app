@@ -53,6 +53,8 @@ class Marathon {
     this.predictedFinishMax,
     this.categories = const [],
     this.extras = const [],
+    this.paymentQrUrl,
+    this.paymentQrInstructions,
   });
 
   final String id;
@@ -79,6 +81,14 @@ class Marathon {
   /// Distances the event offers, when it runs more than one.
   final List<RaceCategory> categories;
   final List<RaceExtra> extras;
+
+  /// Organiser's payment QR. `null` means this race cannot be paid that way, so
+  /// the method must not be offered: showing it would promise a payment the
+  /// server will refuse. Temporary — see `docs/pago-qr-manual.md` in the API.
+  final String? paymentQrUrl;
+  final String? paymentQrInstructions;
+
+  bool get acceptsQrPayment => paymentQrUrl != null && paymentQrUrl!.isNotEmpty;
 
   String get location => '$city, $country';
   int get slotsLeft => slotsTotal - slotsTaken;

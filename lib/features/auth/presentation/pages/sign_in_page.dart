@@ -76,10 +76,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
+        // Un solo campo: el usuario no tiene por que recordar con cual se dio
+        // de alta. Quien decide si es email o CI es el servidor, por el `@`.
         AppTextField(
-          label: 'Username or Email',
+          label: 'ID number or email',
           controller: _identifier,
-          hint: 'pandu@paceup.app',
+          hint: '1234567 LP',
           errorText: _identifierError,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,

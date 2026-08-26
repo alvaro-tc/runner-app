@@ -19,7 +19,8 @@ String? appGuard(Ref ref, GoRouterState state) {
   if (location.startsWith('/dev')) return null;
 
   final onboardingSeen = ref.read(settingsProvider).onboardingSeen;
-  final signedIn = ref.read(authProvider);
+  final auth = ref.read(authProvider);
+  final signedIn = auth.signedIn;
 
   if (!signedIn && !onboardingSeen) {
     return location == Routes.onboarding ? null : Routes.onboarding;
@@ -30,6 +31,16 @@ String? appGuard(Ref ref, GoRouterState state) {
 
   final isAuthRoute = _authRoutes.contains(location);
   if (!signedIn) return isAuthRoute ? null : Routes.welcome;
+
+  // Entro con una contrasena que no eligio el —usuario CI, contrasena CI, alta
+  // desde la web— y esa clave la sabe cualquiera que le haya visto el carnet.
+  // Es una puerta y no un aviso: hasta que la cambie, la unica pantalla que
+  // existe es esta.
+  if (auth.mustChangePassword) {
+    return location == Routes.changePassword ? null : Routes.changePassword;
+  }
+  if (location == Routes.changePassword) return Routes.home;
+
   if (isAuthRoute) return Routes.home;
   return null;
 }

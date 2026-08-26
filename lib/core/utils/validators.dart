@@ -11,9 +11,26 @@ abstract final class Validators {
     return null;
   }
 
-  /// Sign-in accepts either a username or an email, so only emptiness is fatal.
+  /// Sign-in accepts either a CI or an email, so only emptiness is fatal.
   static String? identifier(String value) =>
-      value.trim().isEmpty ? 'Enter your username or email.' : null;
+      value.trim().isEmpty ? 'Enter your ID number or email.' : null;
+
+  /// Bolivian CI: digits, optionally followed by the issuing-department code.
+  ///
+  /// Mirrors the server's rule instead of guessing a laxer one — a client check
+  /// that lets through what the server rejects is worse than no check, because
+  /// the user finds out one screen later.
+  static final _ci = RegExp(r'^[0-9]{4,12}[A-Z]{0,3}$');
+
+  static String? ci(String value) {
+    final limpio = value.toUpperCase().replaceAll(RegExp(r'[\s.\-_]'), '');
+
+    if (limpio.isEmpty) return 'Enter your ID number.';
+    if (!_ci.hasMatch(limpio)) {
+      return 'Write it as it appears on your ID, e.g. 1234567 LP.';
+    }
+    return null;
+  }
 
   static String? password(String value) {
     if (value.isEmpty) return 'Enter your password.';

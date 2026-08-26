@@ -49,5 +49,16 @@ abstract interface class RaceRepository {
   /// Sondeo del cobro pendiente (QR y transferencia).
   Future<Result<PaymentInfo>> pollPayment(String paymentId);
 
+  /// Sube el comprobante de un cobro por QR. **Temporal.**
+  ///
+  /// Devuelve el cobro releido, no solo el comprobante: la pantalla tiene que
+  /// pintar el estado nuevo entero, y con dos llamadas hay un instante en que
+  /// se ve el comprobante subido y el cobro como si no lo estuviera.
+  Future<Result<PaymentInfo>> uploadProof({
+    required String paymentId,
+    required String filePath,
+    String? reference,
+  });
+
   Future<Result<void>> cancel(String registrationId);
 }

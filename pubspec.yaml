@@ -31,6 +31,9 @@ dependencies:
   intl: ^0.20.3
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
+  # Comprobante de pago: la unica forma de coger una captura de la galeria o
+  # hacer una foto. Temporal, igual que el cobro por QR manual que la usa.
+  image_picker: ^1.2.0
   fl_chart: ^1.2.0
   wakelock_plus: ^1.7.0
   dio: ^5.11.0

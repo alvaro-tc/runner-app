@@ -231,21 +231,42 @@ RegistrationQuote quoteFrom(Map<String, dynamic> j) {
 PaymentInfo paymentFrom(Map<String, dynamic> j) {
   final detalles = j['methodDetails'] as Map<String, dynamic>? ?? const {};
   final qr = detalles['qr'] as Map<String, dynamic>?;
+  // El QR del organizador viaja en su propio campo, no en el del QR simulado:
+  // son dos cosas distintas y mezclarlas haria que la pantalla pintara un QR
+  // que se paga solo cuando en realidad espera a una persona.
+  final qrManual = detalles['manualQr'] as Map<String, dynamic>?;
   final banco = detalles['bank'] as Map<String, dynamic>?;
 
   return PaymentInfo(
     id: j['id'] as String,
     method: switch (j['method']) {
       'qr' => RacePaymentMethod.qr,
+      'qr_manual' => RacePaymentMethod.qrManual,
       'bank_transfer' => RacePaymentMethod.bankTransfer,
       _ => RacePaymentMethod.card,
     },
     state: RacePaymentState.fromApi(j['status'] as String?),
     amount: _dinero(j['amountCents'], j['currency'] as String? ?? 'BOB'),
     failureReason: j['failureReason'] as String?,
-    qrImageUrl: qr?['imageUrl'] as String?,
+    qrImageUrl:
+        (qrManual?['imageUrl'] ?? qr?['imageUrl']) as String?,
+    qrInstructions: qrManual?['instructions'] as String?,
+    qrReference: qrManual?['reference'] as String?,
     bankReference: banco?['reference'] as String?,
     last4: detalles['last4'] as String?,
+    proof: proofFrom(j['proof'] as Map<String, dynamic>?),
+  );
+}
+
+PaymentProof? proofFrom(Map<String, dynamic>? j) {
+  if (j == null) return null;
+
+  return PaymentProof(
+    id: j['id'] as String,
+    state: ProofState.fromApi(j['status'] as String?),
+    imageUrl: j['imageUrl'] as String? ?? '',
+    reference: j['reference'] as String?,
+    note: j['note'] as String?,
   );
 }
 

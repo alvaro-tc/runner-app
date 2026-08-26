@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
 import 'package:paceup/app/router/guards.dart';
 import 'package:paceup/core/services/settings_provider.dart';
+import 'package:paceup/features/auth/presentation/pages/change_password_page.dart';
 import 'package:paceup/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:paceup/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:paceup/features/auth/presentation/pages/sign_up_page.dart';
@@ -68,6 +69,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.forgotPassword,
         builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: Routes.changePassword,
+        builder: (context, state) => const ChangePasswordPage(),
       ),
       if (kDebugMode)
         GoRoute(

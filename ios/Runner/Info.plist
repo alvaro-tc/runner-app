@@ -18,6 +18,10 @@
 	<string>PaceUp reads your position only while a run is recording, so it can draw your route and work out your pace.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>PaceUp keeps recording your route while your phone is in your pocket or the screen is off, so a run does not stop when you leave the app.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PaceUp opens your gallery only so you can pick the receipt of your race payment. Nothing else is read.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PaceUp uses the camera only so you can photograph the receipt of your race payment.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

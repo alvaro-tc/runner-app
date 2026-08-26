@@ -3,11 +3,15 @@
 Las tres cuentas las crea `npm run db:seed` en `running-api`. La contraseña es
 la misma para todas.
 
-| Correo | Contraseña | Rol | Qué tiene |
-|---|---|---|---|
-| `runner@test.com` | `Test1234!` | `runner` | **La cuenta con datos.** Cuatro meses de entrenamientos con GPS, un plan de 21K a mitad de camino, cuatro inscripciones y tres pares de zapatillas |
-| `runner2@test.com` | `Test1234!` | `runner` | **Vacía a propósito.** Es con la que se comprueba que los datos de uno no se ven desde la sesión de otro |
-| `admin@test.com` | `Test1234!` | `admin` | Panel de administración en `/admin` |
+| Correo | CI | Contraseña | Rol | Qué tiene |
+|---|---|---|---|---|
+| `runner@test.com` | `6789012LP` | `Test1234!` | `runner` | **La cuenta con datos.** Cuatro meses de entrenamientos con GPS, un plan de 21K a mitad de camino, cuatro inscripciones y tres pares de zapatillas |
+| `runner2@test.com` | `5544332CB` | `Test1234!` | `runner` | **Vacía a propósito.** Es con la que se comprueba que los datos de uno no se ven desde la sesión de otro |
+| `admin@test.com` | `1000001LP` | `Test1234!` | `admin` | Panel de administración en `/admin` |
+
+El campo de la pantalla de login acepta **cualquiera de los dos**: con `@` se
+trata como correo, sin `@` como CI. Es el mismo campo, así que se puede probar
+`6789012LP` / `Test1234!` sin cambiar nada.
 
 Qué hay exactamente en `runner@test.com`:
 
@@ -20,6 +24,29 @@ Qué hay exactamente en `runner@test.com`:
 - Tres zapatillas, una cerca del umbral de desgaste.
 - Cargo por servicio global **activo** (10 %, mínimo Bs 5), para poder probar
   activarlo y desactivarlo.
+
+## Probar el cobro por QR con verificación manual
+
+El seed carga un QR de cobro escaneable en **todas** las maratones, así que el
+método "Bank QR" aparece en el paso 3 sin tocar nada. El recorrido completo:
+
+1. Con `runner@test.com`, inscríbete en una maratón y elige **Bank QR**.
+   El cobro queda pendiente y la app pinta el QR y la glosa (`PU-XXXXXX`).
+2. Toca **Upload receipt** y elige cualquier imagen de la galería. El estado
+   pasa a *Receipt under review*: **la inscripción sigue sin confirmar**, que es
+   justo lo que hay que comprobar.
+3. Entra en `/admin` con `admin@test.com`, pestaña **Comprobantes QR**, y
+   aprueba. Ahí se emite el dorsal y se toma el cupo.
+4. Rechaza en vez de aprobar para ver el otro camino: el cobro **sigue abierto**
+   y la app deja subir otra imagen, con el motivo del rechazo a la vista.
+
+Para el alta desde la web (cuenta creada con usuario CI y contraseña CI), llama
+a `POST /public/registrations` con una CI que no exista y entra en la app con
+esa CI en los dos campos: la app te manda directo a cambiar la contraseña y no
+te deja salir de ahí hasta que lo hagas.
+
+El flujo entero, y cómo se desmonta cuando entre una pasarela real, está en
+`running-api/docs/pago-qr-manual.md`.
 
 ## Apuntar la app a un backend
 

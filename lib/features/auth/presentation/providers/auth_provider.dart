@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/error/failure.dart';
 import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
+import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habia sesion al arrancar. Se resuelve en `bootstrap()` leyendo el refresh
 /// token del almacen seguro —una lectura asincrona que no puede hacerse dentro
@@ -12,10 +14,27 @@ import 'package:paceup/core/sync/sync_providers.dart';
 /// veria Welcome un instante antes del primer frame de Home.
 final initialSessionProvider = Provider<bool>((ref) => false);
 
+/// Lo que el router necesita saber de la sesion.
+///
+/// Son **dos** cosas y no una: hay sesion, y esa sesion todavia arrastra una
+/// contrasena que el usuario no eligio (alta desde la web: usuario CI,
+/// contrasena CI). La segunda es una puerta, no un aviso — con ella abierta lo
+/// unico que se puede hacer en la app es cerrarla.
+@immutable
+class AuthState {
+  const AuthState({this.signedIn = false, this.mustChangePassword = false});
+
+  final bool signedIn;
+  final bool mustChangePassword;
+
+  /// Puede moverse por la app con normalidad.
+  bool get ready => signedIn && !mustChangePassword;
+}
+
 /// Whether a session exists. The router redirect watches this.
-class AuthNotifier extends Notifier<bool> {
+class AuthNotifier extends Notifier<AuthState> {
   @override
-  bool build() {
+  AuthState build() {
     // El refresh puede morir en cualquier peticion, no solo al pulsar salir.
     final caducada = ref.watch(sessionControllerProvider).expired;
     void alCaducar() {
@@ -24,40 +43,90 @@ class AuthNotifier extends Notifier<bool> {
 
     caducada.addListener(alCaducar);
     ref.onDispose(() => caducada.removeListener(alCaducar));
-    return ref.watch(initialSessionProvider);
+
+    final habiaSesion = ref.watch(initialSessionProvider);
+
+    // `mustChangePassword` no vive en el dispositivo: pudo cambiar desde el
+    // ultimo login —un admin reseteando la clave, un alta hecha en la web
+    // despues— asi que se relee. Hasta que responda se asume que no bloquea:
+    // arrancar bloqueado y desbloquear despues haria parpadear la pantalla de
+    // cambio a todo el mundo en cada arranque.
+    if (habiaSesion) unawaited(_refrescarUsuario());
+
+    return AuthState(signedIn: habiaSesion);
   }
 
-  Future<Failure?> signIn(String email, String password) async {
+  Future<Failure?> signIn(String identifier, String password) async {
     final result = await ref
         .read(authRepositoryProvider)
-        .signIn(email: email, password: password);
+        .signIn(identifier: identifier, password: password);
     return _aplicar(result.fold((user) => user, (f) => f));
   }
 
-  Future<Failure?> signUp(String name, String email, String password) async {
+  Future<Failure?> signUp({
+    required String name,
+    required String password,
+    String? email,
+    String? ci,
+  }) async {
     final result = await ref
         .read(authRepositoryProvider)
-        .signUp(fullName: name, email: email, password: password);
+        .signUp(fullName: name, password: password, email: email, ci: ci);
+    return _aplicar(result.fold((user) => user, (f) => f));
+  }
+
+  /// Cambia la contrasena y, si sale bien, levanta la puerta.
+  Future<Failure?> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final result = await ref
+        .read(authRepositoryProvider)
+        .changePassword(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        );
     return _aplicar(result.fold((user) => user, (f) => f));
   }
 
   Failure? _aplicar(Object resultado) {
     if (resultado is Failure) return resultado;
-    state = true;
+
+    final user = resultado as AuthUser;
+    state = AuthState(
+      signedIn: true,
+      mustChangePassword: user.mustChangePassword,
+    );
     return null;
+  }
+
+  Future<void> _refrescarUsuario() async {
+    final result = await ref.read(authRepositoryProvider).currentUser();
+    // Un fallo de red al arrancar no puede echar a nadie ni encerrarlo en la
+    // pantalla de cambio: se deja el estado como estaba y se reintentara en el
+    // siguiente login.
+    result.fold(
+      (AuthUser user) => state = AuthState(
+        signedIn: true,
+        mustChangePassword: user.mustChangePassword,
+      ),
+      (Failure _) {},
+    );
   }
 
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
-    state = false;
+    state = const AuthState();
   }
 
   /// La sesion murio sola (refresh rechazado). Los tokens ya los borro
   /// [SessionController]; falta la cache, que es de ese usuario y de nadie mas.
   Future<void> _cerrarLocal() async {
-    state = false;
+    state = const AuthState();
     await ref.read(appDatabaseProvider).wipe();
   }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, bool>(AuthNotifier.new);
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);
