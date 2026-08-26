@@ -8,6 +8,7 @@ import 'package:paceup/features/home/presentation/providers/home_provider.dart';
 import 'package:paceup/features/home/presentation/widgets/today_session_card.dart';
 import 'package:paceup/features/home/presentation/widgets/weekly_plan_strip.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
 import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
@@ -34,7 +35,7 @@ class HomePage extends ConsumerWidget {
               children: [
                 SizedBox(height: context.screenSize.height * 0.2),
                 ErrorStateView(
-                  message: error.toString(),
+                  message: error.localized(context.l10n),
                   onRetry: () => ref.invalidate(homeProvider),
                 ),
               ],
@@ -58,8 +59,8 @@ class _HomeBody extends ConsumerWidget {
     final planTitle = ref
         .watch(profileProvider)
         .maybeWhen(
-          data: (p) => "${p.firstName}'s Training Plan",
-          orElse: () => 'Your Training Plan',
+          data: (p) => context.l10n.homePlanTitleOf(p.firstName),
+          orElse: () => context.l10n.homePlanTitleGeneric,
         );
     final marathon = data.nextMarathon;
     // Fall back to a freshly computed value so the pill never flashes zeroes
@@ -88,7 +89,7 @@ class _HomeBody extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Upcoming Marathon In',
+                  context.l10n.homeUpcomingMarathon,
                   style: context.text.headingLg,
                 ),
               ),
@@ -124,10 +125,8 @@ class _HomeBody extends ConsumerWidget {
             onToggleCompleted: (value) => ref
                 .read(homeProvider.notifier)
                 .toggleSession(session.id, completed: value),
-            onReschedule: () => context.showSnack(
-              'Rescheduling arrives with the plan editor. '
-              'Start the run whenever suits you today.',
-            ),
+            onReschedule: () =>
+                context.showSnack(context.l10n.homeRescheduleComingSoon),
             onStart: () =>
                 context.push('${Routes.trainSetup}?session=${session.id}'),
           ),
@@ -162,7 +161,7 @@ class _WeekPicker extends StatelessWidget {
           PopupMenuItem(
             value: i,
             child: Text(
-              'Training Week $i',
+              context.l10n.homeTrainingWeek(i),
               style: context.text.bodyMd.copyWith(
                 color: i == selected ? c.primary : c.textPrimary,
               ),
@@ -182,7 +181,7 @@ class _WeekPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Training Week $selected',
+              context.l10n.homeTrainingWeek(selected),
               style: context.text.labelSm.copyWith(color: c.primary),
             ),
             const SizedBox(width: AppSpacing.xs),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
@@ -12,20 +13,24 @@ class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  static const _items = <({String label, IconData icon, IconData active})>[
-    (label: 'Home', icon: Icons.home_outlined, active: Icons.home_rounded),
+  /// Los iconos son fijos; la etiqueta se resuelve por `build` para que el
+  /// cambio de idioma llegue tambien a la barra.
+  static List<({String label, IconData icon, IconData active})> _items(
+    AppLocalizations t,
+  ) => [
+    (label: t.navHome, icon: Icons.home_outlined, active: Icons.home_rounded),
     (
-      label: 'Train',
+      label: t.navTrain,
       icon: Icons.directions_run_outlined,
       active: Icons.directions_run_rounded,
     ),
     (
-      label: 'Races',
+      label: t.navRaces,
       icon: Icons.emoji_events_outlined,
       active: Icons.emoji_events_rounded,
     ),
     (
-      label: 'Profile',
+      label: t.navProfile,
       icon: Icons.person_outline_rounded,
       active: Icons.person_rounded,
     ),
@@ -34,6 +39,7 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final items = _items(context.l10n);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface,
@@ -46,10 +52,10 @@ class AppBottomNavBar extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
-              for (var i = 0; i < _items.length; i++)
+              for (var i = 0; i < items.length; i++)
                 Expanded(
                   child: _NavItem(
-                    item: _items[i],
+                    item: items[i],
                     selected: i == currentIndex,
                     onTap: () => onTap(i),
                   ),

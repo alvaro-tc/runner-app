@@ -82,9 +82,9 @@ class ErrorStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EmptyState(
     icon: Icons.cloud_off_rounded,
-    title: 'That did not load',
+    title: context.l10n.stateErrorTitle,
     message: message,
-    actionLabel: 'Try again',
+    actionLabel: context.l10n.commonRetry,
     onAction: onRetry,
   );
 }
@@ -107,7 +107,7 @@ class SocialAuthButton extends StatelessWidget {
     final c = context.colors;
     return Semantics(
       button: true,
-      label: 'Continue with $provider',
+      label: context.l10n.stateSocialContinueWith(provider),
       child: Material(
         color: c.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),

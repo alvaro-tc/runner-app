@@ -108,8 +108,12 @@ class _InfoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
               child: Text(
-                'Predicted finish time '
-                '${Fmt.durationRange(marathon.predictedFinishMin!, marathon.predictedFinishMax!)}',
+                context.l10n.marathonPredictedFinish(
+                  Fmt.durationRange(
+                    marathon.predictedFinishMin!,
+                    marathon.predictedFinishMax!,
+                  ),
+                ),
                 style: context.text.bodySm.copyWith(color: c.primary),
               ),
             ),

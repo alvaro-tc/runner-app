@@ -3,6 +3,7 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/event_image.dart';
@@ -16,6 +17,7 @@ class RaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final result = entry.result;
 
     return Padding(
@@ -72,7 +74,7 @@ class RaceCard extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     AppBadge(
-                      label: 'BIB ${entry.bibNumber}',
+                      label: t.commonBib(entry.bibNumber),
                       tone: AppTone.neutral,
                     ),
                   ],
@@ -87,12 +89,16 @@ class RaceCard extends StatelessWidget {
                         // El monto solo esta en el detalle: la lista no trae
                         // los cobros. Sin el se dice "Paid" a secas, en vez de
                         // un "Paid 0,00" que seria mentira.
-                        PaymentStatus.paid => entry.amountPaid.amount == 0
-                            ? 'Paid'
-                            : 'Paid ${Fmt.money(entry.amountPaid.amount, entry.amountPaid.currency)}',
-                        PaymentStatus.pending => 'Payment pending',
-                        PaymentStatus.failed => 'Payment failed',
-                        PaymentStatus.refunded => 'Refunded',
+                        PaymentStatus.paid =>
+                          entry.amountPaid.amount == 0
+                              ? t.paymentStatusPaid
+                              : t.racesPaidAmount(
+                                  Fmt.money(
+                                    entry.amountPaid.amount,
+                                    entry.amountPaid.currency,
+                                  ),
+                                ),
+                        _ => entry.paymentStatus.label(t),
                       },
                       tone: switch (entry.paymentStatus) {
                         PaymentStatus.paid => AppTone.success,
@@ -105,6 +111,7 @@ class RaceCard extends StatelessWidget {
                       AppBadge(
                         label: Fmt.relativeShort(
                           entry.marathon.date.difference(DateTime.now()),
+                          t,
                         ),
                         icon: Icons.schedule_rounded,
                       ),
@@ -130,7 +137,7 @@ class RaceCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Finish time',
+                              t.commonFinishTime,
                               style: context.text.labelSm.copyWith(
                                 color: c.textSecondary,
                               ),
@@ -141,7 +148,7 @@ class RaceCard extends StatelessWidget {
                       Expanded(
                         child: _MiniStat(
                           value: Fmt.paceWithUnit(result.avgPacePerKm),
-                          label: 'Avg pace',
+                          label: t.racesAvgPace,
                         ),
                       ),
                       if (result.overallRank != null &&
@@ -149,7 +156,7 @@ class RaceCard extends StatelessWidget {
                         Expanded(
                           child: _MiniStat(
                             value: '#${result.overallRank}',
-                            label: 'of ${result.totalParticipants}',
+                            label: t.racesOfTotal(result.totalParticipants!),
                           ),
                         ),
                     ],
@@ -157,7 +164,7 @@ class RaceCard extends StatelessWidget {
                 ] else ...[
                   const SizedBox(height: AppSpacing.md),
                   AppButton(
-                    label: 'View details',
+                    label: t.racesViewDetails,
                     variant: AppButtonVariant.outline,
                     size: AppButtonSize.sm,
                     onPressed: onTap,

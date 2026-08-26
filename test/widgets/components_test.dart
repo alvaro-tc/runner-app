@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:paceup/core/theme/app_theme.dart';
 import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
 import 'package:paceup/features/races/presentation/widgets/race_card.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_progress_ring.dart';
 import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
 
-Widget wrap(Widget child, {bool dark = false}) => MaterialApp(
-  theme: dark ? AppTheme.dark : AppTheme.light,
-  home: Scaffold(body: Center(child: child)),
-);
+/// Locale fijo: estas pruebas comprueban la estructura del widget, no la
+/// traduccion. Con el idioma sin fijar, el texto —y el formato de la moneda—
+/// dependerian del locale de la maquina que ejecute la suite.
+Widget wrap(Widget child, {bool dark = false}) {
+  Intl.defaultLocale = 'en';
+  return MaterialApp(
+    theme: dark ? AppTheme.dark : AppTheme.light,
+    locale: const Locale('en'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: Scaffold(body: Center(child: child)),
+  );
+}
 
 void main() {
   group('AppButton', () {

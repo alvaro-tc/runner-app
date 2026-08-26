@@ -2,25 +2,11 @@ import 'package:meta/meta.dart';
 import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 
-enum PaymentStatus {
-  paid('Paid'),
-  pending('Payment pending'),
-  failed('Payment failed'),
-  refunded('Refunded');
+/// Sin etiqueta: el nombre visible sale del ARB, via `PaymentStatusL10n`.
+enum PaymentStatus { paid, pending, failed, refunded }
 
-  const PaymentStatus(this.label);
-  final String label;
-}
-
-enum RaceEntryStatus {
-  upcoming('Upcoming'),
-  completed('Completed'),
-  dnf('Did not finish'),
-  cancelled('Cancelled');
-
-  const RaceEntryStatus(this.label);
-  final String label;
-}
+/// Sin etiqueta: el nombre visible sale del ARB, via `RaceEntryStatusL10n`.
+enum RaceEntryStatus { upcoming, completed, dnf, cancelled }
 
 @immutable
 class RaceResult {

@@ -26,7 +26,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _submit() async {
-    setState(() => _error = Validators.email(_email.text));
+    final t = context.l10n;
+    setState(() => _error = Validators.email(t, _email.text));
     if (_error != null) return;
 
     setState(() => _loading = true);
@@ -41,24 +42,21 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     return AuthScaffold(
       children: [
-        Text('Reset your\npassword.', style: context.text.displayMd),
+        Text(t.authForgotTitle, style: context.text.displayMd),
         const SizedBox(height: AppSpacing.md),
         Text(
-          _sent
-              ? 'Check ${_email.text.trim()}. The link works for one hour; '
-                    'request another if it expires.'
-              : 'Give us the email on your account and we will send a link to '
-                    'set a new password.',
+          _sent ? t.authForgotSent(_email.text.trim()) : t.authForgotIntro,
           style: context.text.bodyMd.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xxl),
         if (!_sent) ...[
           AppTextField(
-            label: 'Email',
+            label: t.authEmailLabel,
             controller: _email,
-            hint: 'pandu@paceup.app',
+            hint: t.authEmailHint,
             errorText: _error,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
@@ -69,13 +67,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: 'Send reset link',
+            label: t.authSendResetLink,
             isLoading: _loading,
             onPressed: _submit,
           ),
         ] else
           AppButton(
-            label: 'Send it again',
+            label: t.authSendAgain,
             variant: AppButtonVariant.secondary,
             onPressed: () => setState(() => _sent = false),
           ),

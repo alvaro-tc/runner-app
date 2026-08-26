@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/app/dependencies.dart';
+import 'package:paceup/core/error/failure.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
 
 /// Mis carreras. Solo lo confirmado: los borradores viven en el flujo de
@@ -14,13 +15,13 @@ class RacesNotifier extends AsyncNotifier<List<RaceEntry>> {
     await future;
   }
 
-  Future<String?> cancel(String entryId) async {
+  Future<Failure?> cancel(String entryId) async {
     final result = await ref.read(raceRepositoryProvider).cancel(entryId);
 
     return result.fold((_) {
       ref.invalidateSelf();
       return null;
-    }, (failure) => failure.message);
+    }, (failure) => failure);
   }
 }
 
@@ -50,13 +51,12 @@ final racesSummaryProvider = FutureProvider<RaceTotals>((ref) async {
 /// El detalle **se pide aparte**: la lista no trae recorrido, parciales ni
 /// pagos, y buscarla en la lista dejaria la pantalla de una carrera corrida
 /// sin mapa ni splits.
-final raceDetailProvider = FutureProvider.family<RaceEntry, String>(
-  (ref, registrationId) async {
-    // Depende de la lista para que cancelar o inscribirse lo refresque tambien.
-    ref.watch(racesProvider);
-    return (await ref
-            .watch(raceRepositoryProvider)
-            .fetchById(registrationId))
-        .unwrap();
-  },
-);
+final raceDetailProvider = FutureProvider.family<RaceEntry, String>((
+  ref,
+  registrationId,
+) async {
+  // Depende de la lista para que cancelar o inscribirse lo refresque tambien.
+  ref.watch(racesProvider);
+  return (await ref.watch(raceRepositoryProvider).fetchById(registrationId))
+      .unwrap();
+});

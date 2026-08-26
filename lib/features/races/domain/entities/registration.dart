@@ -40,14 +40,15 @@ enum RegistrationState {
 }
 
 /// Metodos de cobro que atiende el proveedor simulado.
+/// Solo el codigo de la API: el nombre visible sale del ARB, via
+/// `RacePaymentMethodL10n`.
 enum RacePaymentMethod {
-  card('card', 'Card'),
-  qr('qr', 'QR'),
-  bankTransfer('bank_transfer', 'Bank transfer');
+  card('card'),
+  qr('qr'),
+  bankTransfer('bank_transfer');
 
-  const RacePaymentMethod(this.api, this.label);
+  const RacePaymentMethod(this.api);
   final String api;
-  final String label;
 
   /// Solo la tarjeta resuelve en el acto; el resto queda pendiente y hay que
   /// sondear el cobro.

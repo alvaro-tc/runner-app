@@ -9,6 +9,7 @@ import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
 import 'package:paceup/features/profile/domain/entities/user_profile.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
@@ -27,7 +28,7 @@ class ProfilePage extends ConsumerWidget {
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => SafeArea(
           child: ErrorStateView(
-            message: error.toString(),
+            message: error.localized(context.l10n),
             onRetry: () => ref.invalidate(profileProvider),
           ),
         ),
@@ -46,23 +47,21 @@ class _Body extends ConsumerWidget {
   static const _avatarSize = AppSizes.avatarProfile;
 
   Future<void> _logOut(BuildContext context, WidgetRef ref) async {
+    final t = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text(
-          'Your runs stay on this device. You will need to sign in again to '
-          'pick up where you left off.',
-        ),
+        title: Text(t.profileLogOutTitle),
+        content: Text(t.profileLogOutBody),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Stay signed in'),
+            child: Text(t.profileStaySignedIn),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             child: Text(
-              'Log out',
+              t.profileLogOut,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -76,6 +75,7 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final unit = ref.watch(distanceUnitProvider);
     final miles = unit.isMiles;
 
@@ -137,7 +137,7 @@ class _Body extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: _avatarSize / 2 + AppSpacing.sm),
-          AppBadge(label: 'BIB ${profile.bibNumber}'),
+          AppBadge(label: t.commonBib(profile.bibNumber)),
           const SizedBox(height: AppSpacing.sm),
           Text(profile.fullName, style: context.text.headingLg),
           Text(
@@ -146,7 +146,7 @@ class _Body extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.base),
           AppButton(
-            label: 'Edit Profile',
+            label: t.profileEditProfile,
             size: AppButtonSize.md,
             isFullWidth: false,
             onPressed: () => context.push(Routes.profileEdit),
@@ -159,51 +159,58 @@ class _Body extends ConsumerWidget {
               children: [
                 _HighlightCard(profile: profile, miles: miles),
                 const SizedBox(height: AppSpacing.xl),
-                Text('Your week', style: context.text.headingMd),
+                Text(t.profileYourWeek, style: context.text.headingMd),
                 _Card(
                   children: [
                     _ShoesRow(shoes: profile.primaryShoes, miles: miles),
                     const AppDivider(),
                     StatRow(
                       icon: Icons.healing_outlined,
-                      title: 'Injury Flags',
+                      title: t.profileInjuryFlags,
                       value: profile.injuryFlags,
                       tone: c.success,
                     ),
                     const AppDivider(),
                     StatRow(
                       icon: Icons.bedtime_outlined,
-                      title: 'Sleep',
-                      subtitle: 'Avg in last 7 days',
+                      title: t.profileSleep,
+                      subtitle: t.profileSleepSubtitle,
                       value: Fmt.durationShort(profile.sleep.averageLast7Days),
                     ),
                     const AppDivider(),
                     StatRow(
                       icon: Icons.water_drop_outlined,
-                      title: 'Hydration Habit',
-                      value: profile.hydration.label,
+                      title: t.profileHydration,
+                      value: profile.hydration.label(t),
                       tone: c.accentBlue,
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text('Settings', style: context.text.headingMd),
+                Text(t.commonSettings, style: context.text.headingMd),
                 _Card(
                   children: [
                     StatRow(
                       icon: Icons.palette_outlined,
-                      title: 'Appearance',
+                      title: t.profileAppearance,
                       value: switch (ref.watch(themeModeProvider)) {
-                        ThemeMode.light => 'Light',
-                        ThemeMode.dark => 'Dark',
-                        ThemeMode.system => 'System',
+                        ThemeMode.light => t.themeLight,
+                        ThemeMode.dark => t.themeDark,
+                        ThemeMode.system => t.themeSystem,
                       },
                       onTap: () => context.push(Routes.profileAppearance),
                     ),
                     const AppDivider(),
                     StatRow(
+                      icon: Icons.translate_rounded,
+                      title: t.languageTitle,
+                      value: ref.watch(languageProvider).label(t),
+                      onTap: () => context.push(Routes.profileLanguage),
+                    ),
+                    const AppDivider(),
+                    StatRow(
                       icon: Icons.straighten_rounded,
-                      title: 'Units',
+                      title: t.profileUnits,
                       value: unit.label,
                       onTap: () => ref
                           .read(settingsProvider.notifier)
@@ -212,13 +219,13 @@ class _Body extends ConsumerWidget {
                     const AppDivider(),
                     StatRow(
                       icon: Icons.settings_outlined,
-                      title: 'Notifications, privacy and help',
+                      title: t.profileNotificationsPrivacyHelp,
                       onTap: () => context.push(Routes.profileSettings),
                     ),
                     const AppDivider(),
                     StatRow(
                       icon: Icons.logout_rounded,
-                      title: 'Log out',
+                      title: t.profileLogOut,
                       tone: c.error,
                       onTap: () => _logOut(context, ref),
                     ),
@@ -247,9 +254,7 @@ class _HighlightCard extends StatelessWidget {
       color: c.primaryContainer,
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: InkWell(
-        onTap: () => context.showSnack(
-          'Extended statistics land with the next training report.',
-        ),
+        onTap: () => context.showSnack(context.l10n.profileStatsComingSoon),
         borderRadius: BorderRadius.circular(AppRadius.xl),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -260,7 +265,7 @@ class _HighlightCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Running Highlight',
+                      context.l10n.profileRunningHighlight,
                       style: context.text.titleMd.copyWith(color: c.primary),
                     ),
                   ),
@@ -278,7 +283,7 @@ class _HighlightCard extends StatelessWidget {
                           profile.highlights.weeklyMileageKm,
                           miles: miles,
                         ),
-                        label: 'Weekly Mileage',
+                        label: context.l10n.profileWeeklyMileage,
                       ),
                     ),
                     VerticalDivider(color: c.primary.withValues(alpha: 0.25)),
@@ -289,7 +294,7 @@ class _HighlightCard extends StatelessWidget {
                           profile.highlights.longestRunKm,
                           miles: miles,
                         ),
-                        label: 'Longest Run',
+                        label: context.l10n.profileLongestRun,
                       ),
                     ),
                   ],
@@ -358,7 +363,7 @@ class _ShoesRow extends StatelessWidget {
       children: [
         StatRow(
           icon: Icons.directions_walk_rounded,
-          title: 'Primary Shoes',
+          title: context.l10n.profilePrimaryShoes,
           subtitle: shoes.model,
           value: Fmt.distance(shoes.distanceKm, miles: miles, decimals: 0),
           tone: shoes.needsReplacing ? c.warning : c.primary,

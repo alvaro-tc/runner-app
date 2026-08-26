@@ -16,7 +16,8 @@ los repositorios falsos por una API real.
 3. **La presentación nunca toca `data`.** Los widgets leen providers; los
    providers dependen de interfaces del dominio.
 4. **Cero valores mágicos en la UI.** Todo color, espacio, radio y estilo sale
-   del design system a través de `context.colors` y `context.text`.
+   del design system a través de `context.colors` y `context.text`. Lo mismo
+   con el texto: sale del ARB a través de `context.l10n` (§9).
 5. **Sólo front-end.** Toda la data proviene de repositorios en memoria con
    `Future.delayed` para simular latencia.
 
@@ -55,6 +56,7 @@ lib/
 │   ├── formatters/formatters.dart
 │   ├── constants/fake_data_seed.dart
 │   └── services/                 # prefs, settings, location
+├── l10n/                         # ARB, clases generadas y etiquetas de enums
 ├── shared/widgets/               # atoms · molecules · organisms
 └── features/<feature>/
     ├── domain/{entities,repositories}
@@ -160,8 +162,91 @@ tab.
 6. **Rutas**: constante en `app_routes.dart` y `GoRoute` en `app_router.dart`.
 7. **Widgets**: si se usan en dos o más features van a `shared/widgets/`; si no,
    a `features/<nombre>/presentation/widgets/`.
+8. **Textos**: ni un literal en el widget. Todo pasa por el ARB (§9).
 
-## 9. Sustituir los fakes por una API real
+## 9. Internacionalización
+
+La app se publica en español; el inglés se mantiene como segundo idioma.
+
+### Dónde vive cada cosa
+
+```
+l10n.yaml                    # configuración de `flutter gen-l10n`
+lib/l10n/
+├── arb/app_en.arb           # plantilla (la que define las claves)
+├── arb/app_es.arb           # traducción
+├── gen/                     # generado — se versiona, ver más abajo
+└── l10n_labels.dart         # etiquetas de los enums del dominio
+```
+
+### La regla
+
+**Cero literales en la capa de presentación.** Los textos salen de
+`context.l10n`, que es `AppLocalizations.of(context)`:
+
+```dart
+Text(context.l10n.homeUpcomingMarathon)
+AppButton(label: t.authLogin)                 // final t = context.l10n;
+context.showSnack(t.authSocialComingSoon('Google'))
+```
+
+Lo verifica `./tool/i18n_guard.sh` (`make i18n-guard`), que recorre
+`features/*/presentation`, `shared/widgets` y `app/app.dart` y falla si
+encuentra un literal que parezca copy. Ignora interpolaciones puras
+(`'${Fmt.clock(x)} · '`), identificadores, rutas, marcas y códigos de unidad.
+Por ahora se corre a mano; CI/CD lo engancha en PU-004.
+
+### El dominio no guarda texto
+
+Ningún enum ni entidad lleva un `label` en inglés. Guardan **identificadores
+estables** y la traducción se resuelve al pintar, con las extensiones de
+`lib/l10n/l10n_labels.dart`:
+
+```dart
+enum SessionType { easy, tempo, ... }         // domain, sin texto
+type.label(t)                                 // presentation
+```
+
+El motivo es que un dato grabado con el texto dentro se queda en el idioma en
+que se grabó. Por eso `TrainingRun.title` persiste una clave (`RunTitleKey`) y
+no una frase, y `HistorySection` guarda *qué* cabecera es y no su título ya
+formateado. Lo mismo con los errores: los notifiers devuelven `Failure`, no
+`failure.message`, y la UI llama a `.localized(t)`.
+
+Lo que viene del servidor (`ApiFailure.message`, nombres de maratón, notas del
+usuario) se pinta tal cual: es texto de quien lo escribió, o del backend.
+
+**Hueco conocido:** el backend devuelve sus mensajes de error siempre en
+español y no negocia `Accept-Language`, así que con la app en inglés esos
+mensajes salen en español. Los que tienen código propio (`NetworkFailure`,
+`CacheFailure`, …) sí se traducen aquí. Cerrarlo es trabajo de servidor:
+negociar el idioma en `runner-api` y devolver el mensaje en el de la petición.
+Queda fuera de PU-203 porque el público objetivo es hispanohablante y el idioma
+con el que se publica ya coincide.
+
+### Fechas, números y moneda
+
+`core/formatters/formatters.dart` usa `intl` sin locale explícito, así que lee
+`Intl.defaultLocale`. Ese valor lo fija `PaceUpApp` en su `builder`, dentro del
+subárbol que ya resolvió el locale, de modo que fechas y moneda siguen al
+selector igual que el resto. `bootstrap()` llama a `initializeDateFormatting()`
+porque los símbolos de fecha de `es` no vienen cargados de serie.
+
+### Añadir o cambiar un texto
+
+1. Añadir la clave a `app_en.arb` **y** a `app_es.arb`. Con
+   `use-escaping: true`, un apóstrofo se escribe `''`.
+2. `make l10n` y commitear lo que cambie en `lib/l10n/gen/`.
+
+Lo generado se versiona a propósito: ni `flutter test` ni el analizador lo
+regeneran, así que un clon limpio no compilaría sin ello. `make test` y
+`make analyze` lanzan `gen-l10n` antes, por si los ARB se movieron.
+
+El selector de idioma vive en Ajustes → Idioma (`profile/language`). Cambia
+`AppSettings.language`, que persiste junto al tema y mueve el `locale` de
+`MaterialApp`: el cambio es en caliente, sin reiniciar.
+
+## 10. Sustituir los fakes por una API real
 
 Todo pasa por `app/dependencies.dart`. Por cada repositorio:
 
@@ -359,7 +444,7 @@ Pendiente de backend: **no hay forma de desmarcar una sesion** —la API solo
 tiene `complete`—, asi que desmarcar el check devuelve un error en vez de
 fingir que se guardo.
 
-## 10. Datos de prueba
+## 11. Datos de prueba
 
 `core/constants/fake_data_seed.dart` genera todo el dataset anclado a
 `DateTime.now()`, para que las cuentas atrás y la agrupación por semana sean
@@ -380,14 +465,20 @@ entrenamientos, que sigue siendo local hasta la primera sincronización.
 reparte marcas de tiempo según el ritmo objetivo con una deriva de ±4 %. De ahí
 salen distancia (Haversine), desnivel y splits por kilómetro.
 
-## 11. Pruebas
+## 12. Pruebas
 
 | Tipo | Qué cubre |
 |---|---|
 | Unitarias | formatters, Haversine, generación de splits, totales de Races, mapeo de carreras e inscripción (`race_repository_test`), flujo de alta y claves de idempotencia (`registration_flow_test`), costura sesión ↔ tracking (`run_session_test`) |
 | Widget | `AppButton`, `AppProgressRing`, `CountdownPill`, `RaceCard` |
-| Golden | Home, Races y Profile en claro y oscuro |
+| Golden | Home, Races y Profile en claro y oscuro, en español |
+| i18n | paridad de claves y placeholders entre los dos ARB, y el cambio de idioma en caliente (`test/l10n/i18n_test.dart`) |
 | Integración | onboarding → welcome → sign in → home, con guards |
+
+Las pruebas de widget fijan el locale a inglés en su `wrap`: comprueban la
+estructura del widget, no la traducción, y sin fijarlo el texto y el formato de
+la moneda dependerían de la máquina. Los goldens hacen lo contrario y fijan
+español, que es el idioma con el que se publica.
 
 Los goldens se regeneran con `flutter test --update-goldens`. Cargan Poppins y
 MaterialIcons explícitamente; sin eso el texto y los iconos saldrían como cajas.
@@ -412,7 +503,7 @@ Las pantallas que mantienen temporizadores vivos (la cuenta atrás de Home) no
 se pueden `pumpAndSettle`: se avanzan con `pump(Duration)` y se descargan con el
 helper `drainHome` de `test/helpers.dart`.
 
-## 12. Decisiones tomadas y desviaciones respecto al brief
+## 13. Decisiones tomadas y desviaciones respecto al brief
 
 | Decisión | Motivo |
 |---|---|
@@ -423,9 +514,11 @@ helper `drainHome` de `test/helpers.dart`.
 | **`flutter_lints` estricto en vez de `very_good_analysis`** | Cubre las reglas exigidas (`prefer_const_constructors`, `always_use_package_imports`, `require_trailing_commas`) más `strict-casts/inference/raw-types`, sin ruido añadido. |
 | **Ilustraciones y fotos generadas por `CustomPainter`** | No hay assets de diseño disponibles. `BlobIllustration` y `EventImage` dibujan marcadores de posición con la paleta de marca; `EventImage` usa `cached_network_image` en cuanto `heroImageUrl` no esté vacío, así que enchufar imágenes reales no requiere tocar las pantallas. |
 | **Anillos del plan semanal de tamaño adaptativo** | Siete anillos de 56pt no caben en 390pt. Se reducen hasta 40pt y, por debajo de eso, la tira pasa a scroll horizontal. Prioriza legibilidad sobre el tamaño fijo del diseño. |
-| **Sin golden de la sesión en vivo** | Ver §11. |
+| **Sin golden de la sesión en vivo** | Ver §12. |
+| **Goldens fijados a español** | El idioma con el que se publica, y de estas capturas salen las fichas de tienda (PU-201/PU-202). Sin fijarlo, la referencia dependería del locale de la máquina que corra la suite. |
+| **`showcase_page.dart` fuera del guard de i18n** | Es el catálogo de componentes de `/dev/showcase`, detrás del guard de rutas de debug: no sale en ninguna build de tienda. Traducir los rótulos de un catálogo sólo añade ruido al ARB. |
 
-## 13. Accesibilidad
+## 14. Accesibilidad
 
 - Contraste AA verificado en ambos temas.
 - `Semantics` en todos los iconos-botón (`semanticsLabel` es obligatorio en

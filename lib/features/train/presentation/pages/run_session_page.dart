@@ -1,16 +1,17 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
+import 'package:paceup/core/services/location_service.dart';
 import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/train/presentation/providers/history_provider.dart';
 import 'package:paceup/features/train/presentation/providers/run_session_provider.dart';
 import 'package:paceup/features/train/presentation/widgets/hold_to_finish_button.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/molecules/progress_widgets.dart';
@@ -44,23 +45,21 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     final state = ref.read(runSessionProvider);
     if (!state.isActive) return true;
 
+    final t = context.l10n;
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discard this run?'),
-        content: const Text(
-          'You have been running for a while. Leaving now throws away the '
-          'route and the time you have logged.',
-        ),
+        title: Text(t.runDiscardTitle),
+        content: Text(t.runDiscardBody),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Keep running'),
+            child: Text(t.runKeepRunning),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             child: Text(
-              'Discard',
+              t.commonDiscard,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -80,7 +79,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     final error = await ref.read(historyProvider.notifier).save(run);
     if (!mounted) return;
     if (error != null) {
-      context.showSnack(error);
+      context.showSnack(error.localized(context.l10n));
       return;
     }
     context.pushReplacement(Routes.trainSummaryOf(run.id));
@@ -121,7 +120,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                       }
                     },
                   ),
-                  if (state.error != null) _ErrorBanner(message: state.error!),
+                  if (state.error != null) _ErrorBanner(outcome: state.error!),
                   if (state.goal.laps != null) _LapCard(state: state),
                   const Spacer(),
                   Align(
@@ -134,7 +133,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                       child: AppIconButton(
                         icon: Icons.my_location_rounded,
                         style: AppIconButtonStyle.ink,
-                        semanticsLabel: 'Re-centre the map',
+                        semanticsLabel: context.l10n.runRecentre,
                         onPressed: () => _mapKey.currentState?.recenter(),
                       ),
                     ),
@@ -160,29 +159,27 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Leave the run',
+            semanticsLabel: t.runLeaveSemantics,
             onPressed: onBack,
           ),
           Expanded(
             child: Text(
-              'Running Session',
+              t.runSessionTitle,
               textAlign: TextAlign.center,
               style: context.text.titleMd,
             ),
           ),
           AppIconButton(
             icon: Icons.more_horiz_rounded,
-            semanticsLabel: 'More options',
-            onPressed: () => context.showSnack(
-              'Run settings arrive next. Pause and finish work from the sheet '
-              'below.',
-            ),
+            semanticsLabel: t.commonMoreOptions,
+            onPressed: () => context.showSnack(t.runSettingsComingSoon),
           ),
         ],
       ),
@@ -191,9 +188,9 @@ class _TopBar extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.message});
+  const _ErrorBanner({required this.outcome});
 
-  final String message;
+  final LocationPermissionOutcome outcome;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +208,7 @@ class _ErrorBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              message,
+              outcome.message(context.l10n),
               style: context.text.bodySm.copyWith(color: c.error),
             ),
           ),
@@ -229,6 +226,7 @@ class _LapCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final laps = state.goal.laps!;
     final done = state.completedLaps.clamp(0, laps);
     final withinLap = state.distanceKm - done;
@@ -246,12 +244,14 @@ class _LapCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Lap ${done + 1}/$laps',
+            t.runLapProgress(done + 1, laps),
             style: context.text.bodySm.copyWith(color: c.textSecondary),
           ),
           Text(
-            'Next: ${((1 - withinLap) * 1000).round()}m @ '
-            '${Fmt.paceWithUnit(state.goal.lapPace ?? state.avgPace)} pace',
+            t.runNextLap(
+              ((1 - withinLap) * 1000).round(),
+              Fmt.paceWithUnit(state.goal.lapPace ?? state.avgPace),
+            ),
             style: context.text.headingMd,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -274,6 +274,7 @@ class _StatsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final state = ref.watch(runSessionProvider);
     final miles = ref.watch(useMilesProvider);
 
@@ -319,14 +320,14 @@ class _StatsSheet extends ConsumerWidget {
                 Expanded(
                   child: _SmallStat(
                     value: Fmt.paceWithUnit(state.avgPace, miles: miles),
-                    label: 'Average Pace',
+                    label: t.commonAveragePace,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: _SmallStat(
                     value: Fmt.clock(state.elapsed),
-                    label: 'Elapsed Time',
+                    label: t.runElapsedTime,
                   ),
                 ),
               ],
@@ -337,14 +338,14 @@ class _StatsSheet extends ConsumerWidget {
                 Expanded(
                   child: _SmallStat(
                     value: Fmt.paceWithUnit(state.currentPace, miles: miles),
-                    label: 'Current Pace',
+                    label: t.runCurrentPace,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: _SmallStat(
                     value: Fmt.paceWithUnit(state.lastKmPace, miles: miles),
-                    label: 'Last km',
+                    label: t.runLastKm,
                   ),
                 ),
               ],
@@ -355,21 +356,21 @@ class _StatsSheet extends ConsumerWidget {
                 Expanded(
                   child: _SmallStat(
                     value: Fmt.elevation(state.elevationGainM),
-                    label: 'Elevation',
+                    label: t.runElevation,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: _SmallStat(
                     value: '${state.calories}',
-                    label: 'Calories',
+                    label: t.commonCalories,
                   ),
                 ),
               ],
             ),
             if (state.splits.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.lg),
-              Text('Splits', style: context.text.titleMd),
+              Text(t.commonSplits, style: context.text.titleMd),
               const SizedBox(height: AppSpacing.sm),
               for (final split in state.splits)
                 Padding(
@@ -379,7 +380,7 @@ class _StatsSheet extends ConsumerWidget {
                       SizedBox(
                         width: 40,
                         child: Text(
-                          'km ${split.km}',
+                          t.runSplitKm(split.km),
                           style: context.text.bodySm.copyWith(
                             color: c.textSecondary,
                           ),
@@ -449,7 +450,7 @@ class _BigDistanceCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Total Distance',
+                  context.l10n.runTotalDistance,
                   style: context.text.labelSm.copyWith(color: c.textSecondary),
                 ),
               ],
@@ -510,12 +511,13 @@ class _Controls extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final notifier = ref.read(runSessionProvider.notifier);
 
     if (state.status == RunStatus.paused) {
       return Column(
         children: [
-          AppButton(label: 'Resume', onPressed: notifier.resume),
+          AppButton(label: t.runResume, onPressed: notifier.resume),
           const SizedBox(height: AppSpacing.sm),
           HoldToFinishButton(onFinish: onFinish),
         ],
@@ -526,7 +528,7 @@ class _Controls extends ConsumerWidget {
       children: [
         Expanded(
           child: AppButton(
-            label: 'Pause',
+            label: t.runPause,
             variant: AppButtonVariant.outline,
             onPressed: state.status == RunStatus.running
                 ? notifier.pause
@@ -538,10 +540,8 @@ class _Controls extends ConsumerWidget {
           icon: Icons.music_note_rounded,
           style: AppIconButtonStyle.brand,
           size: AppSizes.controlHeight,
-          semanticsLabel: 'Music controls',
-          onPressed: () => context.showSnack(
-            'Music controls hook into your player in a later release.',
-          ),
+          semanticsLabel: t.runMusicSemantics,
+          onPressed: () => context.showSnack(t.runMusicComingSoon),
         ),
       ],
     );
@@ -569,7 +569,7 @@ class _Countdown extends StatelessWidget {
             builder: (context, scale, child) =>
                 Transform.scale(scale: scale, child: child),
             child: Text(
-              value > 0 ? '$value' : 'GO',
+              value > 0 ? '$value' : context.l10n.runCountdownGo,
               style: context.text.displayLg.copyWith(
                 fontSize: 96,
                 color: c.primary,

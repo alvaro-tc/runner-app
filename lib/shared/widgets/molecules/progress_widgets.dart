@@ -33,8 +33,12 @@ class DayProgressItem extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: isRest
-          ? '$weekday, rest day'
-          : '$weekday, ${label ?? ''} ${(progress * 100).round()} percent done',
+          ? context.l10n.daySemanticsRest(weekday)
+          : context.l10n.daySemanticsProgress(
+              weekday,
+              label ?? '',
+              (progress * 100).round(),
+            ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -93,7 +97,7 @@ class SegmentedProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return Semantics(
-      label: 'Lap ${completed + 1} of $total',
+      label: context.l10n.runLapSemantics(completed + 1, total),
       child: SizedBox(
         height: height + AppSpacing.sm,
         child: Row(

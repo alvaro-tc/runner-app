@@ -3,6 +3,7 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/home/domain/entities/training_plan.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 
@@ -23,6 +24,7 @@ class TodaySessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
@@ -48,7 +50,7 @@ class TodaySessionCard extends StatelessWidget {
               ),
               AppCheckbox(
                 value: session.isCompleted,
-                semanticsLabel: 'Mark ${session.title} as done',
+                semanticsLabel: t.homeMarkSessionDone(session.title(t)),
                 onChanged: onToggleCompleted,
               ),
             ],
@@ -57,7 +59,7 @@ class TodaySessionCard extends StatelessWidget {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(text: session.title, style: context.text.headingMd),
+                TextSpan(text: session.title(t), style: context.text.headingMd),
                 if (!session.type.isRest)
                   TextSpan(
                     text:
@@ -89,7 +91,7 @@ class TodaySessionCard extends StatelessWidget {
               Expanded(
                 flex: 10,
                 child: AppButton(
-                  label: 'Reschedule',
+                  label: t.homeReschedule,
                   variant: AppButtonVariant.outline,
                   size: AppButtonSize.md,
                   onPressed: onReschedule,
@@ -99,7 +101,7 @@ class TodaySessionCard extends StatelessWidget {
               Expanded(
                 flex: 13,
                 child: AppButton(
-                  label: 'Start Run',
+                  label: t.homeStartRun,
                   size: AppButtonSize.md,
                   onPressed: session.type.isRest ? null : onStart,
                 ),

@@ -1,28 +1,33 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/app/dependencies.dart';
+import 'package:paceup/core/error/failure.dart';
+import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/features/home/domain/entities/training_plan.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 
 class HistoryNotifier extends AsyncNotifier<List<TrainingRun>> {
   @override
   Future<List<TrainingRun>> build() async =>
       (await ref.watch(trainingRepositoryProvider).fetchHistory()).unwrap();
 
-  Future<String?> save(TrainingRun run) async {
+  /// Devuelve el fallo, no su mensaje: el texto se resuelve en la UI con el
+  /// idioma activo.
+  Future<Failure?> save(TrainingRun run) async {
     final result = await ref.read(trainingRepositoryProvider).save(run);
     return result.fold((_) {
       ref.invalidateSelf();
       return null;
-    }, (failure) => failure.message);
+    }, (failure) => failure);
   }
 
-  Future<String?> delete(String id) async {
+  Future<Failure?> delete(String id) async {
     final result = await ref.read(trainingRepositoryProvider).delete(id);
     return result.fold((_) {
       ref.invalidateSelf();
       return null;
-    }, (failure) => failure.message);
+    }, (failure) => failure);
   }
 }
 
@@ -41,13 +46,11 @@ final runProvider = Provider.family<TrainingRun?, String>((ref, id) {
 
 // ------------------------------------------------------------------ filters
 
+/// Sin etiqueta: el nombre visible sale del ARB, via `DateRangeFilterL10n`.
 enum DateRangeFilter {
-  all('All time'),
-  last30('Last 30 days'),
-  last90('Last 3 months');
-
-  const DateRangeFilter(this.label);
-  final String label;
+  all,
+  last30,
+  last90;
 
   bool matches(DateTime date) => switch (this) {
     DateRangeFilter.all => true,
@@ -107,11 +110,47 @@ final filteredHistoryProvider = Provider<List<TrainingRun>>((ref) {
   ];
 });
 
-/// Section headers for the history list: "This week", "Last week", then month.
+/// Cabeceras de la lista de historial: "esta semana", "semana pasada" y luego
+/// el mes.
+///
+/// La seccion guarda **como** se titula, no el titulo: el mes se formatea con
+/// el locale activo, asi que el texto se resuelve al pintar.
+sealed class HistorySectionLabel {
+  const HistorySectionLabel();
+
+  String call(AppLocalizations t) => switch (this) {
+    ThisWeekLabel() => t.trainThisWeek,
+    LastWeekLabel() => t.trainLastWeek,
+    MonthLabel(:final month) => Fmt.monthYear(month),
+  };
+}
+
+class ThisWeekLabel extends HistorySectionLabel {
+  const ThisWeekLabel();
+}
+
+class LastWeekLabel extends HistorySectionLabel {
+  const LastWeekLabel();
+}
+
+class MonthLabel extends HistorySectionLabel {
+  const MonthLabel(this.month);
+  final DateTime month;
+
+  @override
+  bool operator ==(Object other) =>
+      other is MonthLabel &&
+      other.month.year == month.year &&
+      other.month.month == month.month;
+
+  @override
+  int get hashCode => Object.hash(month.year, month.month);
+}
+
 @immutable
 class HistorySection {
   const HistorySection({required this.label, required this.runs});
-  final String label;
+  final HistorySectionLabel label;
   final List<TrainingRun> runs;
 }
 
@@ -125,14 +164,14 @@ final historySectionsProvider = Provider<List<HistorySection>>((ref) {
   ).subtract(Duration(days: now.weekday - 1));
   final lastWeekStart = thisWeekStart.subtract(const Duration(days: 7));
 
-  final buckets = <String, List<TrainingRun>>{};
-  final order = <String>[];
+  final buckets = <HistorySectionLabel, List<TrainingRun>>{};
+  final order = <HistorySectionLabel>[];
   for (final run in runs) {
     final label = run.startedAt.isAfter(thisWeekStart)
-        ? 'This week'
+        ? const ThisWeekLabel()
         : run.startedAt.isAfter(lastWeekStart)
-        ? 'Last week'
-        : _monthLabel(run.startedAt);
+        ? const LastWeekLabel()
+        : MonthLabel(DateTime(run.startedAt.year, run.startedAt.month));
     if (!buckets.containsKey(label)) {
       buckets[label] = [];
       order.add(label);
@@ -144,21 +183,6 @@ final historySectionsProvider = Provider<List<HistorySection>>((ref) {
       HistorySection(label: label, runs: buckets[label]!),
   ];
 });
-
-String _monthLabel(DateTime date) => switch (date.month) {
-  1 => 'January ${date.year}',
-  2 => 'February ${date.year}',
-  3 => 'March ${date.year}',
-  4 => 'April ${date.year}',
-  5 => 'May ${date.year}',
-  6 => 'June ${date.year}',
-  7 => 'July ${date.year}',
-  8 => 'August ${date.year}',
-  9 => 'September ${date.year}',
-  10 => 'October ${date.year}',
-  11 => 'November ${date.year}',
-  _ => 'December ${date.year}',
-};
 
 /// Totals for the current week, shown at the top of the Train tab.
 @immutable

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:paceup/core/theme/app_typography.dart';
 import 'package:paceup/core/theme/theme_extensions.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 
 extension ContextX on BuildContext {
+  /// Textos traducidos. `AppLocalizations.of` no devuelve null porque el
+  /// delegate esta siempre montado desde `PaceUpApp`.
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
   AppPalette get colors => Theme.of(this).extension<AppPalette>()!;
   AppTextStyles get text => Theme.of(this).extension<AppTextStyles>()!;
 

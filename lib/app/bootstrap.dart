@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/preferences_provider.dart';
@@ -25,6 +26,10 @@ Future<void> bootstrap(Widget Function() builder) async {
       systemNavigationBarColor: Colors.transparent,
     ),
   );
+
+  // Los simbolos de fecha de `es` (meses, dias) no vienen cargados: sin esto,
+  // `DateFormat('MMMM y')` en espanol lanza en el primer render.
+  await initializeDateFormatting();
 
   await Hive.initFlutter();
   final prefs = await SharedPreferences.getInstance();

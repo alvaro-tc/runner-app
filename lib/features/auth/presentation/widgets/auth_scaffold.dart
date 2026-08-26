@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:paceup/app/router/app_routes.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
@@ -37,10 +38,10 @@ class AuthScaffold extends StatelessWidget {
                     child: AppIconButton(
                       icon: Icons.arrow_back_rounded,
                       style: AppIconButtonStyle.plain,
-                      semanticsLabel: 'Go back',
+                      semanticsLabel: context.l10n.commonBack,
                       onPressed: () => context.canPop()
                           ? context.pop()
-                          : context.go('/welcome'),
+                          : context.go(Routes.welcome),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -57,9 +58,10 @@ class AuthScaffold extends StatelessWidget {
 
 /// Two hairlines with the word `or` between them.
 class AuthDivider extends StatelessWidget {
-  const AuthDivider({this.label = 'or', super.key});
+  const AuthDivider({this.label, super.key});
 
-  final String label;
+  /// Por defecto, el `o` traducido del idioma activo.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +72,7 @@ class AuthDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
           child: Text(
-            label,
+            label ?? context.l10n.commonOr,
             style: context.text.bodyMd.copyWith(color: c.textSecondary),
           ),
         ),

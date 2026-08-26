@@ -1,14 +1,7 @@
 import 'package:meta/meta.dart';
 
-enum Gender {
-  female('Female'),
-  male('Male'),
-  other('Other'),
-  undisclosed('Prefer not to say');
-
-  const Gender(this.label);
-  final String label;
-}
+/// Sin etiqueta: el nombre visible sale del ARB, via `GenderL10n`.
+enum Gender { female, male, other, undisclosed }
 
 @immutable
 class ShoeInfo {
@@ -60,8 +53,6 @@ class HydrationStats {
   const HydrationStats({required this.daysHitTarget, this.window = 7});
   final int daysHitTarget;
   final int window;
-
-  String get label => '$daysHitTarget/$window days hit target';
 }
 
 @immutable

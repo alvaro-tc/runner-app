@@ -12,6 +12,8 @@ import 'package:paceup/features/profile/domain/entities/user_profile.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
 import 'package:paceup/features/races/domain/entities/registration.dart';
 import 'package:paceup/features/races/presentation/providers/registration_provider.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -111,9 +113,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       0 => await _flow.submitPersonalData(_datosPersonales(profile)),
       1 => await _flow.submitCategoryAndExtras(
         categoryId: _categoryId,
-        extras: [
-          for (final id in _selectedExtras) ExtraSelection(extraId: id),
-        ],
+        extras: [for (final id in _selectedExtras) ExtraSelection(extraId: id)],
       ),
       _ => false,
     };
@@ -125,7 +125,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       RegistrationPersonalData(
         fullName: profile?.fullName.trim().isNotEmpty ?? false
             ? profile!.fullName
-            : 'Corredor',
+            : context.l10n.registerDefaultRunnerName,
         docId: _docId.text.trim(),
         phone: _phone.text.trim(),
         emergencyContactName: _emergencyName.text.trim(),
@@ -168,7 +168,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     return CardDetails(
       number: _cardNumber.text,
       holder: _cardHolder.text.trim().isEmpty
-          ? 'CORREDOR PACEUP'
+          ? context.l10n.registerDefaultCardHolder
           : _cardHolder.text.trim(),
       expMonth: mes,
       // Dos digitos son este siglo: `30` es 2030, no el ano 30.
@@ -188,16 +188,16 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: context.l10n.commonBack,
             onPressed: () => _step == 0 ? context.pop() : _goTo(_step - 1),
           ),
         ),
-        title: const Text('Registration'),
+        title: Text(context.l10n.registerTitle),
       ),
       body: marathon.when(
         loading: () => const Center(child: Skeleton(width: 200, height: 20)),
         error: (error, _) => ErrorStateView(
-          message: error.toString(),
+          message: error.localized(context.l10n),
           onRetry: () => ref.invalidate(marathonProvider(widget.marathonId)),
         ),
         data: (data) => _body(data, profile),
@@ -232,28 +232,34 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   Widget _detailsStep(UserProfile? profile) {
     final c = context.colors;
+    final t = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
       children: [
-        Text('Your details', style: context.text.headingMd),
+        Text(t.registerYourDetails, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Taken from your profile. Change them in Profile if anything is out '
-          'of date.',
+          t.registerFromProfile,
           style: context.text.bodySm.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _ReadOnlyField(label: 'Full name', value: profile?.fullName ?? '—'),
         _ReadOnlyField(
-          label: 'Date of birth',
+          label: t.registerFullName,
+          value: profile?.fullName ?? '—',
+        ),
+        _ReadOnlyField(
+          label: t.registerDateOfBirth,
           value: profile == null ? '—' : Fmt.fullDate(profile.birthDate),
         ),
-        _ReadOnlyField(label: 'Gender', value: profile?.gender.label ?? '—'),
+        _ReadOnlyField(
+          label: t.registerGender,
+          value: profile?.gender.label(t) ?? '—',
+        ),
         const SizedBox(height: AppSpacing.sm),
         AppTextField(
-          label: 'ID number',
+          label: t.registerIdNumber,
           controller: _docId,
-          hint: 'Goes on your bib record',
+          hint: t.registerIdNumberHint,
           textInputAction: TextInputAction.next,
           // El boton de continuar depende de este campo: sin repintar, se
           // quedaria gris con el documento ya escrito.
@@ -261,7 +267,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Phone',
+          label: t.registerPhone,
           controller: _phone,
           hint: '+591 70000000',
           keyboardType: TextInputType.phone,
@@ -269,20 +275,20 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Emergency contact name',
+          label: t.registerEmergencyName,
           controller: _emergencyName,
-          hint: 'Who should we call?',
+          hint: t.registerEmergencyNameHint,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Emergency contact phone',
+          label: t.registerEmergencyPhone,
           controller: _emergencyPhone,
           hint: '+591 70000001',
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Shirt size', style: context.text.labelSm),
+        Text(t.registerShirtSize, style: context.text.labelSm),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
@@ -303,15 +309,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   Widget _categoryStep(Marathon marathon) {
     final c = context.colors;
+    final t = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
       children: [
-        Text('Category & extras', style: context.text.headingMd),
+        Text(t.registerCategoryAndExtras, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.lg),
         if (marathon.categories.isEmpty)
           Text(
-            'This event runs a single distance: '
-            '${Fmt.distance(marathon.distanceKm)}.',
+            t.registerSingleDistance(Fmt.distance(marathon.distanceKm)),
             style: context.text.bodyMd.copyWith(color: c.textSecondary),
           )
         else
@@ -320,7 +326,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
               title: category.label,
               subtitle: Fmt.distance(category.distanceKm),
               trailing: category.surcharge.amount == 0
-                  ? 'Included'
+                  ? t.registerIncluded
                   : Fmt.money(
                       category.surcharge.amount,
                       category.surcharge.currency,
@@ -329,11 +335,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
               onTap: () => setState(() => _categoryId = category.id),
             ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Optional extras', style: context.text.titleMd),
+        Text(t.registerOptionalExtras, style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),
         if (marathon.extras.isEmpty)
           Text(
-            'No add-ons for this event.',
+            t.registerNoExtras,
             style: context.text.bodyMd.copyWith(color: c.textSecondary),
           )
         else
@@ -358,12 +364,13 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   Widget _reviewStep(Marathon marathon, RegistrationFlowState flow) {
     final c = context.colors;
+    final t = context.l10n;
     final quote = flow.quote;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
       children: [
-        Text('Review & pay', style: context.text.headingMd),
+        Text(t.registerReviewAndPay, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.lg),
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
@@ -384,7 +391,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                     for (final linea in quote.lines)
                       SessionSummaryRow(
                         label: linea.quantity > 1
-                            ? '${linea.label} × ${linea.quantity}'
+                            ? t.registerLineWithQuantity(
+                                linea.label,
+                                linea.quantity,
+                              )
                             : linea.label,
                         value: Fmt.money(
                           linea.amount.amount,
@@ -395,7 +405,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                     // "Bs 0,00" promete un cargo que hoy no se cobra.
                     if (quote.serviceFee != null)
                       SessionSummaryRow(
-                        label: quote.serviceFeeLabel ?? 'Service fee',
+                        label: quote.serviceFeeLabel ?? t.registerServiceFee,
                         value: Fmt.money(
                           quote.serviceFee!.amount,
                           quote.serviceFee!.currency,
@@ -403,7 +413,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                       ),
                     const AppDivider(),
                     SessionSummaryRow(
-                      label: 'Total',
+                      label: t.commonTotal,
                       value: Fmt.money(
                         quote.total.amount,
                         quote.total.currency,
@@ -414,16 +424,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                 ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Payment method', style: context.text.titleMd),
+        Text(t.registerPaymentMethod, style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),
         for (final method in RacePaymentMethod.values)
           _SelectableTile(
-            title: method.label,
+            title: method.label(t),
             subtitle: switch (method) {
-              RacePaymentMethod.card => 'Charged the moment your place is taken',
-              RacePaymentMethod.qr => 'Scan and pay; we wait for the bank',
-              RacePaymentMethod.bankTransfer =>
-                'Transfer and wait for the organiser to confirm',
+              RacePaymentMethod.card => t.registerCardSubtitle,
+              RacePaymentMethod.qr => t.registerQrSubtitle,
+              RacePaymentMethod.bankTransfer => t.registerBankTransferSubtitle,
             },
             selected: _method == method,
             onTap: () => setState(() => _method = method),
@@ -446,12 +455,12 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           children: [
             AppCheckbox(
               value: _acceptedTerms,
-              semanticsLabel: 'Accept event terms',
+              semanticsLabel: t.registerAcceptTermsSemantics,
               onChanged: (v) => setState(() => _acceptedTerms = v),
             ),
             Expanded(
               child: Text(
-                'I accept the event rules and the refund policy.',
+                t.registerAcceptTerms,
                 style: context.text.bodySm.copyWith(color: c.textSecondary),
               ),
             ),
@@ -460,12 +469,12 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         if (flow.error != null) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
-            _mensajeDeError(flow),
+            _mensajeDeError(flow, t),
             style: context.text.bodySm.copyWith(color: c.error),
           ),
           const SizedBox(height: AppSpacing.sm),
           AppButton(
-            label: 'Try another card',
+            label: t.registerTryAnotherCard,
             variant: AppButtonVariant.outline,
             onPressed: _flow.retryPayment,
           ),
@@ -476,15 +485,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   /// El texto del servidor ya es humano; lo que se traduce aqui es el motivo
   /// del rechazo, que llega como codigo estable.
-  String _mensajeDeError(RegistrationFlowState flow) {
+  String _mensajeDeError(RegistrationFlowState flow, AppLocalizations t) {
     final motivo = flow.payment?.failureReason;
 
     return switch (motivo) {
-      'card_declined' => 'The bank turned this card down. Try another one.',
-      'expired_card' => 'That card is expired.',
-      'invalid_card' => 'Those card details do not look right.',
-      'qr_expired' => 'The QR expired before it was paid. Generate a new one.',
-      _ => flow.error?.message ?? 'Payment could not be completed.',
+      'card_declined' => t.paymentCardDeclined,
+      'expired_card' => t.paymentExpiredCard,
+      'invalid_card' => t.paymentInvalidCard,
+      'qr_expired' => t.paymentQrExpired,
+      _ => flow.error?.localized(t) ?? t.paymentFailedGeneric,
     };
   }
 
@@ -494,6 +503,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     RegistrationFlowState flow,
   ) {
     final c = context.colors;
+    final t = context.l10n;
     final isLast = _step == 2;
     final total = flow.quote?.total;
     final puedeAvanzar = switch (_step) {
@@ -522,7 +532,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Total',
+                  t.commonTotal,
                   style: context.text.labelSm.copyWith(color: c.textSecondary),
                 ),
                 Text(
@@ -541,7 +551,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             const SizedBox(width: AppSpacing.base),
             Expanded(
               child: AppButton(
-                label: isLast ? 'Pay and register' : 'Continue',
+                label: isLast ? t.registerPayAndRegister : t.commonContinue,
                 isLoading: flow.busy,
                 onPressed: !puedeAvanzar
                     ? null
@@ -575,10 +585,11 @@ class _CardForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Column(
       children: [
         AppTextField(
-          label: 'Card number',
+          label: t.registerCardNumber,
           controller: number,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
@@ -589,9 +600,9 @@ class _CardForm extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Cardholder',
+          label: t.registerCardholder,
           controller: holder,
-          hint: 'As printed on the card',
+          hint: t.registerCardholderHint,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -599,9 +610,9 @@ class _CardForm extends StatelessWidget {
           children: [
             Expanded(
               child: AppTextField(
-                label: 'Expiry',
+                label: t.registerExpiry,
                 controller: expiry,
-                hint: 'MM/YY',
+                hint: t.registerExpiryHint,
                 keyboardType: TextInputType.datetime,
                 textInputAction: TextInputAction.next,
               ),
@@ -609,7 +620,7 @@ class _CardForm extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: AppTextField(
-                label: 'CVV',
+                label: t.registerCvv,
                 controller: cvv,
                 isPassword: true,
                 keyboardType: TextInputType.number,
@@ -655,7 +666,7 @@ class _PendingPayment extends StatelessWidget {
             ),
           if (payment.bankReference != null)
             Text(
-              'Reference: ${payment.bankReference}',
+              context.l10n.registerReference(payment.bankReference!),
               style: context.text.titleMd,
             ),
           const SizedBox(height: AppSpacing.sm),
@@ -669,7 +680,7 @@ class _PendingPayment extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Waiting for the payment to clear…',
+                context.l10n.registerWaitingForPayment,
                 style: context.text.bodySm.copyWith(color: c.textSecondary),
               ),
             ],
@@ -685,11 +696,15 @@ class _Stepper extends StatelessWidget {
 
   final int step;
 
-  static const _labels = ['Details', 'Category', 'Pay'];
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
+    final labels = [
+      t.registerStepDetails,
+      t.registerStepCategory,
+      t.registerStepPay,
+    ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenH,
@@ -699,7 +714,7 @@ class _Stepper extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (var i = 0; i < _labels.length; i++) ...[
+          for (var i = 0; i < labels.length; i++) ...[
             if (i > 0) const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
@@ -715,7 +730,7 @@ class _Stepper extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs + 2),
                   Text(
-                    _labels[i],
+                    labels[i],
                     style: context.text.labelSm.copyWith(
                       color: i <= step ? c.primary : c.textSecondary,
                     ),
@@ -882,26 +897,29 @@ class _SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              "You're in",
+              context.l10n.registerSuccessTitle,
               style: context.text.headingLg,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Your place at $marathonName is confirmed.',
+              context.l10n.registerSuccessBody(marathonName),
               textAlign: TextAlign.center,
               style: context.text.bodyMd.copyWith(color: c.textSecondary),
             ),
             const SizedBox(height: AppSpacing.base),
             AppBadge(
-              label: 'BIB $bibNumber',
+              label: context.l10n.commonBib(bibNumber),
               icon: Icons.confirmation_num_outlined,
             ),
             const SizedBox(height: AppSpacing.xl),
-            AppButton(label: 'View my race', onPressed: onViewRace),
+            AppButton(
+              label: context.l10n.registerViewMyRace,
+              onPressed: onViewRace,
+            ),
             const SizedBox(height: AppSpacing.sm),
             AppButton(
-              label: 'Back to home',
+              label: context.l10n.registerBackToHome,
               variant: AppButtonVariant.ghost,
               onPressed: onHome,
             ),

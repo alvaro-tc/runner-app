@@ -138,7 +138,7 @@ Sustituye el snackbar de `home_page.dart:128` («Rescheduling arrives with the p
 - Selector de fecha limitado a la semana del plan; no deja mover a un día pasado.
 - Aviso si el día destino ya tiene sesión, con opción de intercambiar.
 - **Desmarcar** una sesión completada — hoy la API solo deja marcar, limitación
-  anotada en `ARCHITECTURE.md` §358; el endpoint llega en PU-102.
+  anotada en `ARCHITECTURE.md` §10; el endpoint llega en PU-102.
 - La tira semanal se actualiza sin recargar la pantalla.
 
 #### PU-101 · Sesión expirada y estados de red — 3 pts

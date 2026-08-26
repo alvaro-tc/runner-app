@@ -8,6 +8,7 @@ import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -29,7 +30,7 @@ class MarathonDetailPage extends ConsumerWidget {
         loading: () => const Center(child: Skeleton(width: 200, height: 20)),
         error: (error, _) => SafeArea(
           child: ErrorStateView(
-            message: error.toString(),
+            message: error.localized(context.l10n),
             onRetry: () => ref.invalidate(marathonProvider(marathonId)),
           ),
         ),
@@ -66,7 +67,7 @@ class _Content extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: AppIconButton(
               icon: Icons.arrow_back_rounded,
-              semanticsLabel: 'Go back',
+              semanticsLabel: context.l10n.commonBack,
               onPressed: () => context.pop(),
             ),
           ),
@@ -87,9 +88,7 @@ class _Content extends StatelessWidget {
               children: [
                 Hero(
                   tag: 'marathon-${marathon.id}',
-                  child: EventImage(
-                    imageUrl: marathon.heroImageUrl,
-                  ),
+                  child: EventImage(imageUrl: marathon.heroImageUrl),
                 ),
                 DecoratedBox(
                   decoration: BoxDecoration(gradient: c.heroOverlay),
@@ -124,7 +123,7 @@ class _Content extends StatelessWidget {
                     icon: Icons.place_outlined,
                   ),
                   AppBadge(
-                    label: marathon.status.label,
+                    label: marathon.status.label(context.l10n),
                     tone: switch (marathon.status) {
                       RegistrationStatus.open => AppTone.success,
                       RegistrationStatus.closingSoon => AppTone.warning,
@@ -136,14 +135,14 @@ class _Content extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               _Section(
-                title: 'About',
+                title: context.l10n.marathonAbout,
                 child: Text(
                   marathon.about,
                   style: context.text.bodyMd.copyWith(color: c.textSecondary),
                 ),
               ),
               _Section(
-                title: 'Route',
+                title: context.l10n.marathonRoute,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                   child: SizedBox(
@@ -154,7 +153,7 @@ class _Content extends StatelessWidget {
               ),
               if (marathon.schedule.isNotEmpty)
                 _Section(
-                  title: 'Schedule',
+                  title: context.l10n.marathonSchedule,
                   child: Column(
                     children: [
                       for (final item in marathon.schedule)
@@ -166,7 +165,7 @@ class _Content extends StatelessWidget {
                   ),
                 ),
               _Section(
-                title: "What's included",
+                title: context.l10n.marathonWhatsIncluded,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -192,7 +191,7 @@ class _Content extends StatelessWidget {
                 ),
               ),
               _Section(
-                title: 'Entry fee',
+                title: context.l10n.marathonEntryFee,
                 child: Row(
                   children: [
                     Text(
@@ -205,8 +204,10 @@ class _Content extends StatelessWidget {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(
-                        '${marathon.slotsLeft} of ${marathon.slotsTotal} '
-                        'places left',
+                        context.l10n.marathonPlacesLeft(
+                          marathon.slotsLeft,
+                          marathon.slotsTotal,
+                        ),
                         style: context.text.bodySm.copyWith(
                           color: c.textSecondary,
                         ),
@@ -326,7 +327,7 @@ class _BottomBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Entry fee',
+                  context.l10n.marathonEntryFee,
                   style: context.text.labelSm.copyWith(color: c.textSecondary),
                 ),
                 Text(
@@ -341,7 +342,9 @@ class _BottomBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.base),
             Expanded(
               child: AppButton(
-                label: canRegister ? 'Register now' : marathon.status.label,
+                label: canRegister
+                    ? context.l10n.marathonRegisterNow
+                    : marathon.status.label(context.l10n),
                 onPressed: canRegister
                     ? () => context.push(Routes.marathonRegisterOf(marathon.id))
                     : null,

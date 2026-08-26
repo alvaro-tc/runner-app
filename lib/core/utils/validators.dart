@@ -1,39 +1,55 @@
+import 'package:paceup/l10n/gen/app_localizations.dart';
+
 /// Client-side form checks. Messages are written to be actionable, not just
 /// "invalid".
+///
+/// Reciben `AppLocalizations` en vez de devolver texto fijo: el mensaje sale
+/// del ARB del idioma activo, y los campos concretos (nombre, ciudad, peso,
+/// altura) tienen clave propia porque en espanol el articulo y el genero no se
+/// pueden interpolar de forma generica.
 abstract final class Validators {
   static final _email = RegExp(r'^[\w.!#$%&*+/=?^`{|}~-]+@[\w-]+(\.[\w-]+)+$');
 
-  static String? email(String value) {
-    if (value.trim().isEmpty) return 'Enter the email you signed up with.';
-    if (!_email.hasMatch(value.trim())) {
-      return 'That does not look like an email address.';
-    }
+  static String? email(AppLocalizations t, String value) {
+    if (value.trim().isEmpty) return t.validationEmailEmpty;
+    if (!_email.hasMatch(value.trim())) return t.validationEmailInvalid;
     return null;
   }
 
   /// Sign-in accepts either a username or an email, so only emptiness is fatal.
-  static String? identifier(String value) =>
-      value.trim().isEmpty ? 'Enter your username or email.' : null;
+  static String? identifier(AppLocalizations t, String value) =>
+      value.trim().isEmpty ? t.validationIdentifierEmpty : null;
 
-  static String? password(String value) {
-    if (value.isEmpty) return 'Enter your password.';
-    if (value.length < 8) return 'Use at least 8 characters.';
+  static String? password(AppLocalizations t, String value) {
+    if (value.isEmpty) return t.validationPasswordEmpty;
+    if (value.length < 8) return t.validationPasswordTooShort;
     return null;
   }
 
-  static String? confirmPassword(String value, String original) {
-    if (value.isEmpty) return 'Repeat your password.';
-    if (value != original) return 'The two passwords do not match.';
+  static String? confirmPassword(
+    AppLocalizations t,
+    String value,
+    String original,
+  ) {
+    if (value.isEmpty) return t.validationConfirmEmpty;
+    if (value != original) return t.validationConfirmMismatch;
     return null;
   }
 
-  static String? required(String value, String field) =>
-      value.trim().isEmpty ? 'Enter your $field.' : null;
+  /// Campo obligatorio cualquiera: el mensaje ya viene redactado por quien
+  /// llama, que es el unico que sabe de que campo se trata.
+  static String? required(String value, String message) =>
+      value.trim().isEmpty ? message : null;
 
-  static String? positiveNumber(String value, String field) {
+  /// [notANumber] y [notPositive] igual: dos redacciones por campo.
+  static String? positiveNumber(
+    String value, {
+    required String notANumber,
+    required String notPositive,
+  }) {
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return 'Enter $field as a number.';
-    if (parsed <= 0) return '$field has to be greater than zero.';
+    if (parsed == null) return notANumber;
+    if (parsed <= 0) return notPositive;
     return null;
   }
 }

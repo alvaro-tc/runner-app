@@ -8,6 +8,7 @@ import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 import 'package:paceup/features/train/presentation/providers/history_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
@@ -42,6 +43,7 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
   }
 
   Future<void> _save(TrainingRun run) async {
+    final t = context.l10n;
     setState(() => _saving = true);
     final error = await ref
         .read(historyProvider.notifier)
@@ -49,34 +51,32 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (error != null) {
-      context.showSnack(error);
+      context.showSnack(error.localized(t));
       return;
     }
     context
       ..go(Routes.train)
-      ..showSnack('Run saved');
+      ..showSnack(t.summarySaved);
   }
 
   Future<void> _delete(TrainingRun run) async {
+    final t = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(widget.readOnly ? 'Delete this run?' : 'Discard this run?'),
+        title: Text(widget.readOnly ? t.summaryDeleteTitle : t.runDiscardTitle),
         content: Text(
-          widget.readOnly
-              ? 'The route, the splits and the time all go with it. '
-                    'This cannot be undone.'
-              : 'Nothing about this run will be kept.',
+          widget.readOnly ? t.summaryDeleteBody : t.summaryDiscardBody,
         ),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Keep it'),
+            child: Text(t.summaryKeepIt),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             child: Text(
-              widget.readOnly ? 'Delete' : 'Discard',
+              widget.readOnly ? t.commonDelete : t.commonDiscard,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -88,7 +88,7 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
     final error = await ref.read(historyProvider.notifier).delete(run.id);
     if (!mounted) return;
     if (error != null) {
-      context.showSnack(error);
+      context.showSnack(error.localized(t));
       return;
     }
     context.go(Routes.train);
@@ -96,6 +96,7 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     final history = ref.watch(historyProvider);
     final run = ref.watch(runProvider(widget.runId));
 
@@ -111,18 +112,18 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go(Routes.train),
           ),
         ),
-        title: Text(widget.readOnly ? 'Run detail' : 'Run summary'),
+        title: Text(widget.readOnly ? t.summaryDetailTitle : t.summaryTitle),
       ),
       body: history.isLoading && run == null
           ? const Center(child: Skeleton(width: 180, height: 20))
           : run == null
           ? ErrorStateView(
-              message: 'That run is not in your history any more.',
+              message: t.summaryNotInHistory,
               onRetry: () => context.go(Routes.train),
             )
           : _body(run),
@@ -131,6 +132,7 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
 
   Widget _body(TrainingRun run) {
     final c = context.colors;
+    final t = context.l10n;
     final miles = ref.watch(useMilesProvider);
 
     return ListView(
@@ -142,7 +144,7 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
         AppSpacing.xxl,
       ),
       children: [
-        Text(run.title, style: context.text.headingLg),
+        Text(run.localizedTitle(t), style: context.text.headingLg),
         Text(
           '${Fmt.weekdayDayMonth(run.startedAt)} · '
           '${Fmt.timeOfDay(run.startedAt)}',
@@ -168,49 +170,49 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
             MetricTile(
               icon: Icons.straighten_rounded,
               value: Fmt.distance(run.distanceKm, miles: miles),
-              label: 'Distance',
+              label: t.commonDistance,
               compact: true,
             ),
             MetricTile(
               icon: Icons.schedule_rounded,
               value: Fmt.clock(run.elapsed),
-              label: 'Time',
+              label: t.commonTime,
               compact: true,
             ),
             MetricTile(
               icon: Icons.speed_rounded,
               value: Fmt.paceWithUnit(run.avgPacePerKm, miles: miles),
-              label: 'Average pace',
+              label: t.commonAveragePace,
               compact: true,
             ),
             MetricTile(
               icon: Icons.rocket_launch_outlined,
               value: Fmt.speed(run.avgSpeedKmh, miles: miles),
-              label: 'Average speed',
+              label: t.commonAverageSpeed,
               compact: true,
             ),
             MetricTile(
               icon: Icons.terrain_rounded,
               value: Fmt.elevation(run.elevationGainM),
-              label: 'Elevation gain',
+              label: t.commonElevationGain,
               compact: true,
             ),
             MetricTile(
               icon: Icons.local_fire_department_outlined,
               value: '${run.calories ?? 0}',
-              label: 'Calories',
+              label: t.commonCalories,
               compact: true,
               tone: c.warning,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Splits', style: context.text.headingMd),
+        Text(t.commonSplits, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.md),
         SplitsChart(splits: run.splits, miles: miles),
         if (!widget.readOnly) ...[
           const SizedBox(height: AppSpacing.xl),
-          Text('How did it feel?', style: context.text.headingMd),
+          Text(t.summaryHowDidItFeel, style: context.text.headingMd),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -229,37 +231,37 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
           ),
           const SizedBox(height: AppSpacing.lg),
           AppTextField(
-            label: 'Notes',
+            label: t.summaryNotesLabel,
             controller: _notes,
-            hint: 'Legs, weather, anything worth remembering',
+            hint: t.summaryNotesHint,
             maxLines: 3,
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: 'Save run',
+            label: t.summarySaveRun,
             isLoading: _saving,
             onPressed: () => _save(run),
           ),
           const SizedBox(height: AppSpacing.sm),
           AppButton(
-            label: 'Discard',
+            label: t.commonDiscard,
             variant: AppButtonVariant.ghost,
             onPressed: () => _delete(run),
           ),
         ] else ...[
           if (run.feeling != null || (run.notes?.isNotEmpty ?? false)) ...[
             const SizedBox(height: AppSpacing.xl),
-            Text('Your notes', style: context.text.headingMd),
+            Text(t.summaryYourNotes, style: context.text.headingMd),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              '${run.feeling == null ? '' : '${run.feeling!.emoji} ${run.feeling!.label}. '}'
+              '${run.feeling == null ? '' : '${run.feeling!.emoji} ${run.feeling!.label(t)}. '}'
               '${run.notes ?? ''}',
               style: context.text.bodyMd.copyWith(color: c.textSecondary),
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: 'Delete this run',
+            label: t.summaryDeleteRun,
             variant: AppButtonVariant.danger,
             onPressed: () => _delete(run),
           ),
@@ -283,10 +285,11 @@ class _FeelingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     return Semantics(
       button: true,
       selected: selected,
-      label: feeling.label,
+      label: feeling.label(t),
       child: Material(
         color: selected ? c.primaryContainer : c.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -304,7 +307,7 @@ class _FeelingButton extends StatelessWidget {
                 Text(feeling.emoji, style: const TextStyle(fontSize: 24)),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  feeling.label,
+                  feeling.label(t),
                   style: context.text.labelSm.copyWith(
                     color: selected ? c.primary : c.textSecondary,
                   ),

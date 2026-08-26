@@ -9,6 +9,7 @@ import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
 import 'package:paceup/features/races/presentation/providers/races_provider.dart';
 import 'package:paceup/features/races/presentation/widgets/race_card.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
 
@@ -39,7 +40,7 @@ class _RacesPageState extends ConsumerState<RacesPage> {
               children: [
                 SizedBox(height: context.screenSize.height * 0.2),
                 ErrorStateView(
-                  message: error.toString(),
+                  message: error.localized(context.l10n),
                   onRetry: () => ref.invalidate(racesProvider),
                 ),
               ],
@@ -52,6 +53,7 @@ class _RacesPageState extends ConsumerState<RacesPage> {
   }
 
   Widget _body(List<RaceEntry> all) {
+    final t = context.l10n;
     final shown = [
       for (final entry in all)
         if (_showCompleted ? entry.hasResult : !entry.hasResult) entry,
@@ -68,7 +70,7 @@ class _RacesPageState extends ConsumerState<RacesPage> {
         AppSpacing.xxl,
       ),
       children: [
-        Text('My Races', style: context.text.headingLg),
+        Text(t.racesTitle, style: context.text.headingLg),
         const SizedBox(height: AppSpacing.lg),
         const _TotalsCard(),
         const SizedBox(height: AppSpacing.lg),
@@ -82,11 +84,13 @@ class _RacesPageState extends ConsumerState<RacesPage> {
             padding: const EdgeInsets.only(top: AppSpacing.xl),
             child: EmptyState(
               icon: Icons.emoji_events_outlined,
-              title: _showCompleted ? 'No finishes yet' : 'No races yet',
+              title: _showCompleted
+                  ? t.racesNoFinishesTitle
+                  : t.racesNoRacesTitle,
               message: _showCompleted
-                  ? 'Cross a start line and your result lands here.'
-                  : 'Find one and pin your first bib.',
-              actionLabel: 'Browse events',
+                  ? t.racesNoFinishesMessage
+                  : t.racesNoRacesMessage,
+              actionLabel: t.racesBrowseEvents,
               onAction: () => context.go(Routes.home),
             ),
           )
@@ -107,6 +111,7 @@ class _TotalsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final totals = ref.watch(raceTotalsProvider);
     final miles = ref.watch(useMilesProvider);
     if (totals == null) {
@@ -132,13 +137,13 @@ class _TotalsCard extends ConsumerWidget {
               Expanded(
                 child: _Total(
                   value: '${totals.racesJoined}',
-                  label: 'Races joined',
+                  label: t.racesJoined,
                 ),
               ),
               Expanded(
                 child: _Total(
                   value: Fmt.distance(totals.distanceRacedKm, miles: miles),
-                  label: 'Distance raced',
+                  label: t.racesDistanceRaced,
                 ),
               ),
               Expanded(
@@ -147,7 +152,7 @@ class _TotalsCard extends ConsumerWidget {
                     totals.totalSpent.amount,
                     totals.totalSpent.currency,
                   ),
-                  label: 'Total spent',
+                  label: t.racesTotalSpent,
                 ),
               ),
             ],
@@ -155,8 +160,8 @@ class _TotalsCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             totals.bestMarathon == null
-                ? 'No marathon finish recorded yet.'
-                : 'Best marathon: ${Fmt.durationShort(totals.bestMarathon!)}',
+                ? t.racesNoMarathonYet
+                : t.racesBestMarathon(Fmt.durationShort(totals.bestMarathon!)),
             style: context.text.bodySm.copyWith(
               color: c.onPrimary.withValues(alpha: 0.85),
             ),
@@ -212,6 +217,7 @@ class _Segmented extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final labels = [context.l10n.racesUpcoming, context.l10n.racesCompleted];
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
@@ -220,7 +226,7 @@ class _Segmented extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (final (index, label) in ['Upcoming', 'Completed'].indexed)
+          for (final (index, label) in labels.indexed)
             Expanded(
               child: GestureDetector(
                 onTap: () => onChanged(index == 1),

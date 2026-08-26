@@ -40,7 +40,7 @@ class _HoldToFinishButtonState extends State<HoldToFinishButton>
     final c = context.colors;
     return Semantics(
       button: true,
-      label: 'Hold to finish the run',
+      label: context.l10n.runHoldToFinishSemantics,
       child: GestureDetector(
         onTapDown: (_) => _ctrl.forward(),
         onTapUp: (_) => _ctrl.reverse(),
@@ -82,7 +82,9 @@ class _HoldToFinishButtonState extends State<HoldToFinishButton>
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      _ctrl.value > 0 ? 'Keep holding…' : 'Hold to finish',
+                      _ctrl.value > 0
+                          ? context.l10n.runKeepHolding
+                          : context.l10n.runHoldToFinish,
                       style: context.text.button.copyWith(color: c.onPrimary),
                     ),
                   ],

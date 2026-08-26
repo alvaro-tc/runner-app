@@ -6,6 +6,7 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/onboarding/presentation/widgets/onboarding_illustration.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -19,31 +20,31 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final _controller = PageController();
   int _index = 0;
 
-  static const _slides = <({String title, String body, OnboardingArt art})>[
+  static const _slideCount = 3;
+
+  /// El copy se resuelve en cada `build` para que el cambio de idioma repinte
+  /// los slides sin reiniciar.
+  List<({String title, String body, OnboardingArt art})> _slides(
+    AppLocalizations t,
+  ) => [
     (
-      title: 'Train with a plan that adapts',
-      body:
-          'Tell PaceUp the race you are chasing. It lays out the weeks, moves '
-          'sessions when life gets in the way, and keeps the goal in sight.',
+      title: t.onboardingPlanTitle,
+      body: t.onboardingPlanBody,
       art: OnboardingArt.plan,
     ),
     (
-      title: 'Track every run in real time',
-      body:
-          'GPS draws your route as you go. Pace, splits and elapsed time stay '
-          'on screen, so you always know whether to push or hold back.',
+      title: t.onboardingTrackTitle,
+      body: t.onboardingTrackBody,
       art: OnboardingArt.track,
     ),
     (
-      title: 'Race, and keep every medal',
-      body:
-          'Enter events from inside the app, then keep your bib, your finish '
-          'time and your splits together in one place.',
+      title: t.onboardingRaceTitle,
+      body: t.onboardingRaceBody,
       art: OnboardingArt.race,
     ),
   ];
 
-  bool get _isLast => _index == _slides.length - 1;
+  bool get _isLast => _index == _slideCount - 1;
 
   @override
   void dispose() {
@@ -70,6 +71,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final slides = _slides(context.l10n);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -81,7 +83,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 child: TextButton(
                   onPressed: _finish,
                   child: Text(
-                    'Skip',
+                    context.l10n.onboardingSkip,
                     style: context.text.button.copyWith(color: c.textSecondary),
                   ),
                 ),
@@ -90,10 +92,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _slides.length,
+                itemCount: slides.length,
                 onPageChanged: (i) => setState(() => _index = i),
                 itemBuilder: (context, i) {
-                  final slide = _slides[i];
+                  final slide = slides[i];
                   return Column(
                     children: [
                       Expanded(
@@ -142,7 +144,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                for (var i = 0; i < _slides.length; i++)
+                for (var i = 0; i < slides.length; i++)
                   AnimatedContainer(
                     duration: AppDurations.base,
                     curve: AppDurations.curve,
@@ -169,7 +171,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 duration: AppDurations.base,
                 curve: AppDurations.curve,
                 child: AppButton(
-                  label: _isLast ? 'Get started' : 'Next',
+                  label: _isLast
+                      ? context.l10n.onboardingGetStarted
+                      : context.l10n.commonNext,
                   onPressed: _next,
                 ),
               ),

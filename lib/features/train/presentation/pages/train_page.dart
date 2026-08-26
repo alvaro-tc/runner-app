@@ -11,6 +11,7 @@ import 'package:paceup/features/home/domain/entities/training_plan.dart';
 import 'package:paceup/features/home/presentation/providers/home_provider.dart';
 import 'package:paceup/features/train/presentation/providers/history_provider.dart';
 import 'package:paceup/features/train/presentation/widgets/training_history_tile.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
@@ -61,6 +62,7 @@ class TrainPage extends ConsumerWidget {
   }
 
   List<Widget> _historySlivers(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final sections = ref.watch(historySectionsProvider);
     if (sections.isEmpty) {
       return [
@@ -69,13 +71,13 @@ class TrainPage extends ConsumerWidget {
             padding: const EdgeInsets.only(top: AppSpacing.xxl),
             child: EmptyState(
               icon: Icons.directions_run_rounded,
-              title: 'No runs yet',
+              title: t.trainNoRunsTitle,
               message: ref.watch(historyFilterProvider).isEmpty
-                  ? 'Your first one starts here. Pick a goal and head out.'
-                  : 'Nothing matches those filters. Widen them to see more.',
+                  ? t.trainNoRunsMessage
+                  : t.trainNoMatchesMessage,
               actionLabel: ref.watch(historyFilterProvider).isEmpty
-                  ? 'Start training'
-                  : 'Clear filters',
+                  ? t.trainStartTraining
+                  : t.trainClearFilters,
               onAction: ref.watch(historyFilterProvider).isEmpty
                   ? () => context.push(Routes.trainSetup)
                   : ref.read(historyFilterProvider.notifier).clear,
@@ -87,7 +89,7 @@ class TrainPage extends ConsumerWidget {
 
     return [
       for (final section in sections) ...[
-        SliverStickyHeader(label: section.label),
+        SliverStickyHeader(label: section.label(t)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
           sliver: SliverList.builder(
@@ -158,6 +160,7 @@ class _QuickStart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final session = ref.watch(homeProvider).value?.focusSession;
 
     return Padding(
@@ -178,15 +181,17 @@ class _QuickStart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Ready to run?',
+              t.trainReadyToRun,
               style: context.text.headingLg.copyWith(color: c.onPrimary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               session == null || session.type.isRest
-                  ? 'Nothing scheduled today. A free run still counts.'
-                  : "Today's plan: ${session.title} · "
-                        '${Fmt.durationShort(session.targetDuration)}',
+                  ? t.trainNothingScheduled
+                  : t.trainTodaysPlan(
+                      session.title(t),
+                      Fmt.durationShort(session.targetDuration),
+                    ),
               style: context.text.bodyMd.copyWith(
                 color: c.onPrimary.withValues(alpha: 0.85),
               ),
@@ -196,7 +201,7 @@ class _QuickStart extends ConsumerWidget {
               children: [
                 Expanded(
                   child: AppButton(
-                    label: 'Start training',
+                    label: t.trainStartTraining,
                     variant: AppButtonVariant.secondary,
                     size: AppButtonSize.md,
                     onPressed: () => context.push(
@@ -209,7 +214,7 @@ class _QuickStart extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: AppButton(
-                    label: 'Free run',
+                    label: t.trainFreeRun,
                     variant: AppButtonVariant.ghost,
                     size: AppButtonSize.md,
                     onPressed: () => context.push(Routes.trainSession),
@@ -230,6 +235,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final summary = ref.watch(weeklySummaryProvider);
     final miles = ref.watch(useMilesProvider);
     final maxY = summary.dailyDistanceKm.fold<double>(
@@ -242,7 +248,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(title: 'This week'),
+          SectionHeader(title: t.trainThisWeek),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -250,7 +256,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                 child: MetricTile(
                   icon: Icons.straighten_rounded,
                   value: Fmt.distance(summary.distanceKm, miles: miles),
-                  label: 'Distance',
+                  label: t.commonDistance,
                   compact: true,
                 ),
               ),
@@ -259,7 +265,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                 child: MetricTile(
                   icon: Icons.schedule_rounded,
                   value: Fmt.durationShort(summary.duration),
-                  label: 'Time',
+                  label: t.commonTime,
                   compact: true,
                 ),
               ),
@@ -272,7 +278,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                 child: MetricTile(
                   icon: Icons.speed_rounded,
                   value: Fmt.paceWithUnit(summary.avgPace, miles: miles),
-                  label: 'Average pace',
+                  label: t.commonAveragePace,
                   compact: true,
                 ),
               ),
@@ -281,7 +287,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                 child: MetricTile(
                   icon: Icons.check_circle_outline_rounded,
                   value: '${summary.sessions}',
-                  label: 'Sessions',
+                  label: t.trainSessions,
                   compact: true,
                 ),
               ),
@@ -309,9 +315,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                       getTitlesWidget: (value, meta) => Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.xs),
                         child: Text(
-                          const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][value
-                              .toInt()
-                              .clamp(0, 6)],
+                          Fmt.weekdayInitials()[value.toInt().clamp(0, 6)],
                           style: context.text.labelSm.copyWith(
                             color: c.textSecondary,
                           ),
@@ -341,7 +345,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          const SectionHeader(title: 'History'),
+          SectionHeader(title: t.trainHistory),
         ],
       ),
     );
@@ -353,6 +357,7 @@ class _Filters extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final filter = ref.watch(historyFilterProvider);
     final notifier = ref.read(historyFilterProvider.notifier);
 
@@ -366,7 +371,7 @@ class _Filters extends ConsumerWidget {
           children: [
             for (final range in DateRangeFilter.values) ...[
               AppChip(
-                label: range.label,
+                label: range.label(t),
                 selected: filter.range == range,
                 onTap: () => notifier.setRange(range),
               ),
@@ -381,7 +386,7 @@ class _Filters extends ConsumerWidget {
             for (final type in SessionType.values)
               if (type != SessionType.rest) ...[
                 AppChip(
-                  label: type.label,
+                  label: type.label(t),
                   icon: iconForSessionType(type),
                   selected: filter.types.contains(type),
                   onTap: () => notifier.toggleType(type),

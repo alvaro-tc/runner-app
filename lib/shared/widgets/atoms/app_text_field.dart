@@ -137,6 +137,7 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   Widget? _buildSuffix(Color color) {
+    final t = context.l10n;
     if (widget.isPassword) {
       return IconButton(
         onPressed: () => setState(() => _obscure = !_obscure),
@@ -145,7 +146,7 @@ class _AppTextFieldState extends State<AppTextField> {
           size: 20,
           color: color,
         ),
-        tooltip: _obscure ? 'Show password' : 'Hide password',
+        tooltip: _obscure ? t.fieldShowPassword : t.fieldHidePassword,
       );
     }
     if (widget.suffixIcon != null) {
