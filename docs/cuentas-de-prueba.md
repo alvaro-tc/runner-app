@@ -1,13 +1,16 @@
 # Cuentas de prueba y entornos
 
-Las tres cuentas las crea `npm run db:seed` en `running-api`. La contraseña es
-la misma para todas.
+Las cuentas las crea `npm run db:seed` en `running-api`. La contraseña es la
+misma para todas.
 
 | Correo | CI | Contraseña | Rol | Qué tiene |
 |---|---|---|---|---|
 | `runner@test.com` | `6789012LP` | `Test1234!` | `runner` | **La cuenta con datos.** Cuatro meses de entrenamientos con GPS, un plan de 21K a mitad de camino, cuatro inscripciones y tres pares de zapatillas |
 | `runner2@test.com` | `5544332CB` | `Test1234!` | `runner` | **Vacía a propósito.** Es con la que se comprueba que los datos de uno no se ven desde la sesión de otro |
 | `admin@test.com` | `1000001LP` | `Test1234!` | `admin` | Panel de administración en `/admin` |
+| `runner3@test.com` | `7788990SC` | `Test1234!` | `runner` | Vacía, en Santa Cruz |
+| `runner4@test.com` | `3322110CB` | `Test1234!` | `runner` | Vacía, en Cochabamba |
+| `runner5@test.com` | `9988776SU` | `Test1234!` | `runner` | Vacía, en Sucre |
 
 El campo de la pantalla de login acepta **cualquiera de los dos**: con `@` se
 trata como correo, sin `@` como CI. Es el mismo campo, así que se puede probar

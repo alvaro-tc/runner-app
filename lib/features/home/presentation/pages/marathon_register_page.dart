@@ -18,6 +18,7 @@ import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
+import 'package:paceup/shared/widgets/molecules/phone_field.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
 import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
@@ -307,11 +308,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(
+        PhoneField(
           label: 'Phone',
           controller: _phone,
-          hint: '+591 70000000',
-          keyboardType: TextInputType.phone,
+          hint: '70000000',
           textInputAction: TextInputAction.next,
           // Igual que el documento: el botón de continuar depende de él.
           onChanged: (_) => setState(() {}),
@@ -885,6 +885,9 @@ class _ManualQrPayment extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
+          // Lo que subió, no solo que subió algo: sin la imagen a la vista no
+          // hay forma de comprobar que se mandó la captura correcta.
+          if (proof != null) _UploadedProof(imageUrl: proof.imageUrl),
           if (proof?.state == ProofState.inReview)
             _ProofStatus(
               icon: Icons.hourglass_top_rounded,
@@ -929,6 +932,44 @@ class _ManualQrPayment extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Miniatura del comprobante ya subido, con toque para verlo entero.
+///
+/// Es la respuesta a "¿y qué mandé?": sin esto el corredor solo tiene la
+/// palabra del estado, y una captura equivocada se descubre recién cuando el
+/// organizador la rechaza.
+class _UploadedProof extends StatelessWidget {
+  const _UploadedProof({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: GestureDetector(
+        onTap: () => showDialog<void>(
+          context: context,
+          builder: (context) => Dialog(
+            child: InteractiveViewer(
+              child: Image.network(imageUrl, errorBuilder: (_, _, _) => const SizedBox.shrink()),
+            ),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Image.network(
+            imageUrl,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+        ),
       ),
     );
   }
