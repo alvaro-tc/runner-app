@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
+import 'package:paceup/features/home/domain/entities/marathon.dart';
 import 'package:paceup/features/home/presentation/providers/home_provider.dart';
+import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
 import 'package:paceup/features/home/presentation/widgets/today_session_card.dart';
 import 'package:paceup/features/home/presentation/widgets/weekly_plan_strip.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
@@ -62,13 +64,15 @@ class _HomeBody extends ConsumerWidget {
           data: (p) => context.l10n.homePlanTitleOf(p.firstName),
           orElse: () => context.l10n.homePlanTitleGeneric,
         );
-    final marathon = data.nextMarathon;
-    // Fall back to a freshly computed value so the pill never flashes zeroes
-    // while the ticker's first event is in flight.
-    final remaining = marathon == null
-        ? Duration.zero
-        : ref.watch(countdownProvider(marathon.date)).value ??
-              marathon.date.difference(ref.watch(nowProvider)());
+    // La del usuario abre el carrusel —es la que tiene una cuenta atras que le
+    // importa—; detras van las del catalogo, sin repetirla.
+    final destacada = data.nextMarathon;
+    final catalogo = ref.watch(upcomingMarathonsProvider).value ?? const [];
+    final marathons = <Marathon>[
+      ?destacada,
+      for (final m in catalogo)
+        if (m.id != destacada?.id) m,
+    ];
     final session = data.focusSession;
     final plan = data.plan;
 
@@ -84,6 +88,7 @@ class _HomeBody extends ConsumerWidget {
       ),
       children: [
         // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
+<<<<<<< HEAD
         if (marathon != null) ...[
           Row(
             children: [
@@ -102,6 +107,10 @@ class _HomeBody extends ConsumerWidget {
             marathon: marathon,
             onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
           ),
+=======
+        if (marathons.isNotEmpty) ...[
+          _UpcomingMarathons(marathons: marathons),
+>>>>>>> main
           const SizedBox(height: AppSpacing.xl),
         ],
         SectionHeader(
@@ -135,6 +144,105 @@ class _HomeBody extends ConsumerWidget {
     );
   }
 }
+
+/// El carrusel de proximas carreras. La cuenta atras es la de la tarjeta que se
+/// esta mirando, no la de la primera: si no, marca los dias de una carrera que
+/// no esta en pantalla.
+class _UpcomingMarathons extends ConsumerStatefulWidget {
+  const _UpcomingMarathons({required this.marathons});
+
+  final List<Marathon> marathons;
+
+  @override
+  ConsumerState<_UpcomingMarathons> createState() => _UpcomingMarathonsState();
+}
+
+class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
+  final _controller = PageController();
+  int _index = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    // La lista puede encoger entre refrescos y dejar el indice fuera.
+    final marathons = widget.marathons;
+    final index = _index.clamp(0, marathons.length - 1);
+    final actual = marathons[index];
+    // Se recalcula tambien aqui para que la pastilla no parpadee en cero
+    // mientras llega el primer tic del reloj.
+    final remaining =
+        ref.watch(countdownProvider(actual.date)).value ??
+        actual.date.difference(ref.watch(nowProvider)());
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                marathons.length == 1
+                    ? 'Upcoming Marathon In'
+                    : 'Upcoming Marathons',
+                style: context.text.headingLg,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            CountdownPill(remaining: remaining),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        LayoutBuilder(
+          builder: (context, box) => SizedBox(
+            // El alto de la tarjeta: el afiche (16/11) mas el saliente de la
+            // ficha, que es lo que `MarathonHeroCard` reserva por debajo.
+            height: box.maxWidth * 11 / 16 + _heroOverhang,
+            child: PageView.builder(
+              controller: _controller,
+              itemCount: marathons.length,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (context, i) => MarathonHeroCard(
+                marathon: marathons[i],
+                onTap: () =>
+                    context.push(Routes.marathonDetailOf(marathons[i].id)),
+              ),
+            ),
+          ),
+        ),
+        if (marathons.length > 1) ...[
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < marathons.length; i++)
+                AnimatedContainer(
+                  duration: AppDurations.fast,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs / 2,
+                  ),
+                  height: 6,
+                  width: i == index ? 18 : 6,
+                  decoration: BoxDecoration(
+                    color: i == index ? c.primary : c.border,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Lo que `MarathonHeroCard` deja libre por debajo del afiche para la ficha.
+const _heroOverhang = 44.0;
 
 class _WeekPicker extends StatelessWidget {
   const _WeekPicker({

@@ -57,7 +57,7 @@ void main() {
       }),
     );
 
-    final result = await repo.signIn(email: 'a@b.c', password: 'runfast123');
+    final result = await repo.signIn(identifier: 'a@b.c', password: 'runfast123');
 
     expect(result.unwrap().name, 'Pandu');
     expect(storage.access, 'a1');
@@ -81,7 +81,7 @@ void main() {
         },
       });
     });
-    await repo.signIn(email: 'a@b.c', password: 'runfast123');
+    await repo.signIn(identifier: 'a@b.c', password: 'runfast123');
     await db.writeDoc('home.summary', {'x': 1});
 
     final result = await repo.signOut();

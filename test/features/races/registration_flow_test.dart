@@ -41,11 +41,16 @@ class _FakeRaceRepository implements RaceRepository {
     bibNumber: state.isConfirmed ? 'MLP-0042' : null,
   );
 
-  static PaymentInfo _pago(RacePaymentState state) => PaymentInfo(
+  static PaymentInfo _pago(
+    RacePaymentState state, {
+    RacePaymentMethod method = RacePaymentMethod.qr,
+    PaymentProof? proof,
+  }) => PaymentInfo(
     id: 'pay1',
-    method: RacePaymentMethod.qr,
+    method: method,
     state: state,
     amount: const Money(510, 'BOB'),
+    proof: proof,
   );
 
   @override
@@ -83,6 +88,19 @@ class _FakeRaceRepository implements RaceRepository {
   @override
   Future<Result<PaymentInfo>> pollPayment(String paymentId) async {
     sondeos++;
+    return Result.success(siguientePago ?? _pago(RacePaymentState.pending));
+  }
+
+  /// Comprobantes subidos, para comprobar que subir uno NO confirma nada.
+  final List<String> comprobantes = [];
+
+  @override
+  Future<Result<PaymentInfo>> uploadProof({
+    required String paymentId,
+    required String filePath,
+    String? reference,
+  }) async {
+    comprobantes.add(filePath);
     return Result.success(siguientePago ?? _pago(RacePaymentState.pending));
   }
 
@@ -128,6 +146,9 @@ void main() {
   const datos = RegistrationPersonalData(
     fullName: 'Alvaro Quispe',
     docId: '1234567 LP',
+    phone: '+591 70000000',
+    knowsCam: true,
+    acceptsDonorCall: false,
   );
 
   test('sin abrir una maraton, el paso 1 no hace nada', () async {
@@ -198,6 +219,87 @@ void main() {
     // La clave vieja identifica el intento ya resuelto; reusarla devolveria
     // aquel resultado para siempre.
     expect(repo.claves.toSet(), hasLength(2));
+  });
+
+  test('el QR manual NO se sondea: al otro lado hay una persona', () async {
+    repo.checkoutResult = CheckoutOutcome(
+      payment: _FakeRaceRepository._pago(
+        RacePaymentState.pending,
+        method: RacePaymentMethod.qrManual,
+      ),
+      registration: _FakeRaceRepository._registro(
+        RegistrationState.pendingPayment,
+      ),
+    );
+
+    flow().openFor('m1');
+    await flow().submitPersonalData(datos);
+
+    expect(await flow().pay(method: RacePaymentMethod.qrManual), isFalse);
+    expect(estado().isAwaitingPayment, isTrue);
+
+    // Sondear cada dos segundos a un organizador que va a mirar la imagen
+    // cuando pueda solo gasta bateria.
+    await Future<void>.delayed(const Duration(seconds: 3));
+    expect(repo.sondeos, 0);
+  });
+
+  test('subir el comprobante NO confirma la inscripcion', () async {
+    repo.checkoutResult = CheckoutOutcome(
+      payment: _FakeRaceRepository._pago(
+        RacePaymentState.pending,
+        method: RacePaymentMethod.qrManual,
+      ),
+      registration: _FakeRaceRepository._registro(
+        RegistrationState.pendingPayment,
+      ),
+    );
+
+    flow().openFor('m1');
+    await flow().submitPersonalData(datos);
+    await flow().pay(method: RacePaymentMethod.qrManual);
+
+    repo.siguientePago = _FakeRaceRepository._pago(
+      RacePaymentState.pending,
+      method: RacePaymentMethod.qrManual,
+      proof: const PaymentProof(
+        id: 'proof1',
+        state: ProofState.inReview,
+        imageUrl: 'https://api.test/uploads/p.webp',
+      ),
+    );
+
+    expect(
+      await flow().uploadProof(filePath: '/tmp/captura.jpg', reference: '123'),
+      isTrue,
+    );
+
+    expect(repo.comprobantes, ['/tmp/captura.jpg']);
+    // Mandar la captura no es haber pagado: el cobro sigue abierto y la
+    // inscripcion sin confirmar hasta que un organizador lo mire.
+    expect(estado().isConfirmed, isFalse);
+    expect(estado().payment!.isAwaitingReview, isTrue);
+    expect(estado().payment!.needsAnotherProof, isFalse);
+  });
+
+  test('un comprobante rechazado deja subir otro', () {
+    const pago = PaymentInfo(
+      id: 'pay1',
+      method: RacePaymentMethod.qrManual,
+      state: RacePaymentState.pending,
+      amount: Money(510, 'BOB'),
+      proof: PaymentProof(
+        id: 'proof1',
+        state: ProofState.rejected,
+        imageUrl: 'https://api.test/uploads/p.webp',
+        note: 'La captura es de otra transferencia',
+      ),
+    );
+
+    // Rechazar no cierra el cobro: obligar a rehacer la inscripcion entera por
+    // una foto equivocada seria soltarle el cupo al corredor.
+    expect(pago.needsAnotherProof, isTrue);
+    expect(pago.isAwaitingReview, isFalse);
   });
 
   test('con QR la inscripcion queda esperando y se sondea el cobro', () async {

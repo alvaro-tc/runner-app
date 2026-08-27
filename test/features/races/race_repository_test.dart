@@ -219,6 +219,9 @@ void main() {
         data: const RegistrationPersonalData(
           fullName: 'Alvaro Quispe',
           docId: '1234567 LP',
+          phone: '+591 70000000',
+          knowsCam: true,
+          acceptsDonorCall: false,
         ),
       )).unwrap();
 
@@ -236,7 +239,13 @@ void main() {
 
       final registro = (await repo.startRegistration(
         marathonId: 'm1',
-        data: const RegistrationPersonalData(fullName: 'A', docId: 'B'),
+        data: const RegistrationPersonalData(
+          fullName: 'A',
+          docId: 'B',
+          phone: '+591 70000000',
+          knowsCam: false,
+          acceptsDonorCall: false,
+        ),
       )).unwrap();
 
       // `null` y no `Money.zero`: un "Bs 0,00" promete un cargo que no se cobra.

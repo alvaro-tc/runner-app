@@ -8,9 +8,11 @@ part of 'auth_models.dart';
 
 _AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => _AuthUser(
   id: json['id'] as String,
-  email: json['email'] as String,
   name: json['name'] as String,
   role: json['role'] as String,
+  email: json['email'] as String?,
+  ci: json['ci'] as String?,
+  mustChangePassword: json['mustChangePassword'] as bool? ?? false,
   onboardingSeenAt: json['onboardingSeenAt'] == null
       ? null
       : DateTime.parse(json['onboardingSeenAt'] as String),
@@ -18,9 +20,11 @@ _AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => _AuthUser(
 
 Map<String, dynamic> _$AuthUserToJson(_AuthUser instance) => <String, dynamic>{
   'id': instance.id,
-  'email': instance.email,
   'name': instance.name,
   'role': instance.role,
+  'email': instance.email,
+  'ci': instance.ci,
+  'mustChangePassword': instance.mustChangePassword,
   'onboardingSeenAt': instance.onboardingSeenAt?.toIso8601String(),
 };
 

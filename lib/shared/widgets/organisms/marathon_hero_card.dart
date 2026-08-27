@@ -3,6 +3,7 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/home/domain/entities/marathon.dart';
+import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/event_image.dart';
 
 /// Event artwork with a white card overhanging its bottom edge — the hero
@@ -94,6 +95,48 @@ class _InfoCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.text.titleMd,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // El afiche solo dice el nombre: donde es, cuanto se corre y cuanto
+          // cuesta son las tres preguntas que decide mirar la tarjeta.
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              AppBadge(
+                // La ciudad sola: el pais alarga la pastilla hasta partir la
+                // fila y la ficha ya tapa bastante afiche.
+                label: marathon.city,
+                icon: Icons.place_outlined,
+                tone: AppTone.neutral,
+              ),
+              AppBadge(
+                label: Fmt.distanceShort(marathon.distanceKm),
+                icon: Icons.straighten_rounded,
+                tone: AppTone.neutral,
+              ),
+              if (marathon.entryFee.amount > 0)
+                AppBadge(
+                  label: Fmt.money(
+                    marathon.entryFee.amount,
+                    marathon.entryFee.currency,
+                  ),
+                  icon: Icons.sell_outlined,
+                  tone: AppTone.neutral,
+                ),
+              AppBadge(
+                label: marathon.slotsTotal > 0 && marathon.status.acceptsEntries
+                    ? '${marathon.slotsLeft} slots left'
+                    : marathon.status.label,
+                icon: Icons.confirmation_number_outlined,
+                tone: switch (marathon.status) {
+                  RegistrationStatus.open => AppTone.success,
+                  RegistrationStatus.closingSoon => AppTone.warning,
+                  RegistrationStatus.full ||
+                  RegistrationStatus.closed => AppTone.neutral,
+                },
+              ),
+            ],
           ),
           if (marathon.predictedFinishMin != null &&
               marathon.predictedFinishMax != null) ...[

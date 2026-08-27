@@ -8,9 +8,20 @@ part 'auth_models.g.dart';
 abstract class AuthUser with _$AuthUser {
   const factory AuthUser({
     required String id,
-    required String email,
     required String name,
     required String role,
+
+    /// `null` cuando la cuenta se dio de alta solo con CI. El correo es
+    /// opcional a proposito: hay corredores que no tienen o no lo quieren dar.
+    String? email,
+
+    /// Cedula normalizada. Es la otra credencial de acceso.
+    String? ci,
+
+    /// `true` cuando la contrasena la puso otro: alta desde la web, donde el
+    /// usuario y la contrasena son la CI. Hasta que la cambie, la app no le
+    /// deja pasar de la pantalla de cambio.
+    @Default(false) bool mustChangePassword,
 
     /// `null` = todavia no vio los slides. Vive en el backend ademas de en
     /// local, asi que sobrevive a una reinstalacion.

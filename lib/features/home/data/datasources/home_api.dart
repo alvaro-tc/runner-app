@@ -32,10 +32,13 @@ class HomeApi {
     await dio.patch<dynamic>('/training-plans/sessions/$id/complete');
   });
 
-  Future<List<Map<String, dynamic>>> marathons({int limit = 20}) =>
+  /// Las que todavia no largaron, de la mas cercana a la mas lejana. Es lo que
+  /// pide el carrusel de Home: el catalogo entero viene paginado y con las
+  /// pasadas dentro.
+  Future<List<Map<String, dynamic>>> upcomingMarathons({int limit = 8}) =>
       apiCall(() async {
         final res = await dio.get<dynamic>(
-          '/marathons',
+          '/marathons/upcoming',
           queryParameters: {'limit': limit},
         );
         return (res.data as List).cast<Map<String, dynamic>>();

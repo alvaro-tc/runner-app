@@ -91,6 +91,22 @@ class RemoteRaceRepository implements RaceRepository {
       guard(() async => paymentFrom(await _api.payment(paymentId)));
 
   @override
+  Future<Result<PaymentInfo>> uploadProof({
+    required String paymentId,
+    required String filePath,
+    String? reference,
+  }) => guard(() async {
+    await _api.uploadProof(
+      paymentId: paymentId,
+      filePath: filePath,
+      reference: reference,
+    );
+    // Se relee el cobro en vez de coser el comprobante sobre el que habia: el
+    // servidor es quien decide si con esto el cobro cambio de estado.
+    return paymentFrom(await _api.payment(paymentId));
+  });
+
+  @override
   Future<Result<void>> cancel(String registrationId) =>
       guard(() => _api.cancel(registrationId));
 }

@@ -20,6 +20,7 @@ class SignUpPage extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
   final _name = TextEditingController();
+  final _ci = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
@@ -31,6 +32,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   @override
   void dispose() {
     _name.dispose();
+    _ci.dispose();
     _email.dispose();
     _password.dispose();
     _confirm.dispose();
@@ -41,12 +43,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final t = context.l10n;
     setState(() {
       _errors
+<<<<<<< HEAD
         ..['name'] = Validators.required(
           _name.text,
           t.validationFullNameRequired,
         )
         ..['email'] = Validators.email(t, _email.text)
         ..['password'] = Validators.password(t, _password.text)
+=======
+        ..['name'] = Validators.required(_name.text, 'full name')
+        ..['ci'] = Validators.ci(_ci.text)
+        // El correo es opcional: solo se valida si escribio algo. Exigirlo
+        // dejaria fuera a quien no tiene, que es justo a quien hay que dejar
+        // inscribirse.
+        ..['email'] = _email.text.trim().isEmpty
+            ? null
+            : Validators.email(_email.text)
+        ..['password'] = Validators.password(_password.text)
+>>>>>>> main
         ..['confirm'] = Validators.confirmPassword(
           t,
           _confirm.text,
@@ -62,7 +76,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     setState(() => _loading = true);
     final failure = await ref
         .read(authProvider.notifier)
-        .signUp(_name.text.trim(), _email.text.trim(), _password.text);
+        .signUp(
+          name: _name.text.trim(),
+          password: _password.text,
+          email: _email.text.trim().isEmpty ? null : _email.text.trim(),
+          ci: _ci.text.trim(),
+        );
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -100,8 +119,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           onChanged: (_) => _clear('name'),
         ),
         const SizedBox(height: AppSpacing.lg),
+        // La CI es la credencial que vale en las dos puntas: con ella entras a
+        // la app y con ella la web reconoce un pago tuyo hecho fuera de aqui.
         AppTextField(
+<<<<<<< HEAD
           label: t.authEmailLabel,
+=======
+          label: 'ID number (CI)',
+          controller: _ci,
+          hint: '1234567 LP',
+          errorText: _errors['ci'],
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.username],
+          onChanged: (_) => _clear('ci'),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          label: 'Email (optional)',
+>>>>>>> main
           controller: _email,
           hint: t.authEmailHint,
           errorText: _errors['email'],
@@ -109,6 +144,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.email],
           onChanged: (_) => _clear('email'),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Without it we cannot email you a password reset link, so keep your '
+          'ID number to hand.',
+          style: context.text.bodySm.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(

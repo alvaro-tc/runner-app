@@ -112,6 +112,28 @@ class RacesApi {
     return res.data as Map<String, dynamic>;
   });
 
+  /// Sube el comprobante de un cobro por QR. **Temporal**: ver
+  /// `docs/pago-qr-manual.md` en la API.
+  ///
+  /// El cobro **no** se da por bueno con esto: queda esperando a que un
+  /// organizador lo mire. Devuelve el comprobante ya con su estado.
+  Future<Map<String, dynamic>> uploadProof({
+    required String paymentId,
+    required String filePath,
+    String? reference,
+  }) => apiCall(() async {
+    final form = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath),
+      if (reference != null && reference.isNotEmpty) 'reference': reference,
+    });
+
+    final res = await _dio.post<dynamic>(
+      '/payments/$paymentId/proof',
+      data: form,
+    );
+    return res.data as Map<String, dynamic>;
+  });
+
   Future<void> cancel(String registrationId) =>
       apiCall(() => _dio.delete<dynamic>('/registrations/$registrationId'));
 

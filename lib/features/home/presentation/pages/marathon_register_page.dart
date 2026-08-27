@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:paceup/app/router/app_routes.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
@@ -19,6 +20,7 @@ import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
+import 'package:paceup/shared/widgets/molecules/phone_field.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
 import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
@@ -54,8 +56,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   final _page = PageController();
   final _docId = TextEditingController();
   final _phone = TextEditingController();
+  final _email = TextEditingController();
   final _emergencyName = TextEditingController();
   final _emergencyPhone = TextEditingController();
+  final _proofReference = TextEditingController();
   final _cardNumber = TextEditingController(text: _tarjetaDeEjemplo);
   final _cardHolder = TextEditingController();
   final _cardExpiry = TextEditingController(text: '12/30');
@@ -68,13 +72,21 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   RacePaymentMethod _method = RacePaymentMethod.card;
   bool _acceptedTerms = false;
 
+  // Las dos preguntas del CAM. Empiezan sin responder y no en `false`: "no
+  // contesto" y "dijo que no" no son lo mismo, y menos en un consentimiento
+  // para llamarle por telefono.
+  bool? _knowsCam;
+  bool? _acceptsDonorCall;
+
   @override
   void dispose() {
     _page.dispose();
     _docId.dispose();
     _phone.dispose();
+    _email.dispose();
     _emergencyName.dispose();
     _emergencyPhone.dispose();
+    _proofReference.dispose();
     _cardNumber.dispose();
     _cardHolder.dispose();
     _cardExpiry.dispose();
@@ -128,6 +140,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             : context.l10n.registerDefaultRunnerName,
         docId: _docId.text.trim(),
         phone: _phone.text.trim(),
+        // El footer no deja llegar aqui sin las dos respuestas; el `?? false`
+        // es solo para que el tipo cierre.
+        knowsCam: _knowsCam ?? false,
+        acceptsDonorCall: _acceptsDonorCall ?? false,
+        email: _email.text.trim().isEmpty ? null : _email.text.trim(),
         emergencyContactName: _emergencyName.text.trim(),
         emergencyContactPhone: _emergencyPhone.text.trim(),
         shirtSize: _shirtSize,
@@ -156,6 +173,37 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           ..pop()
           ..go(Routes.home),
       ),
+    );
+  }
+
+  /// Coge una imagen y la sube como comprobante. **Temporal**: ver
+  /// `docs/pago-qr-manual.md` en la API.
+  ///
+  /// Subirla no confirma nada — el cobro sigue pendiente hasta que un
+  /// organizador la mire— y el mensaje lo dice tal cual: prometer aquí una
+  /// inscripción confirmada es exactamente el malentendido que hay que evitar.
+  Future<void> _subirComprobante(ImageSource source) async {
+    final imagen = await ImagePicker().pickImage(
+      source: source,
+      // Se manda ya reducida: el servidor la vuelve a reescalar, pero subir
+      // 12 MP por datos móviles desde la calle es lo que hace que el usuario
+      // abandone en esta pantalla.
+      maxWidth: 1600,
+      imageQuality: 85,
+    );
+    if (imagen == null || !mounted) return;
+
+    final ok = await _flow.uploadProof(
+      filePath: imagen.path,
+      reference: _proofReference.text.trim(),
+    );
+    if (!mounted) return;
+
+    context.showSnack(
+      ok
+          ? 'Receipt sent. The organiser will check it and confirm your place.'
+          : ref.read(registrationFlowProvider).error?.message ??
+                'We could not upload that receipt.',
     );
   }
 
@@ -266,16 +314,49 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
+<<<<<<< HEAD
         AppTextField(
           label: t.registerPhone,
+=======
+        PhoneField(
+          label: 'Phone',
+>>>>>>> main
           controller: _phone,
-          hint: '+591 70000000',
-          keyboardType: TextInputType.phone,
+          hint: '70000000',
           textInputAction: TextInputAction.next,
+          // Igual que el documento: el botón de continuar depende de él.
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
+<<<<<<< HEAD
           label: t.registerEmergencyName,
+=======
+          label: 'Email (optional)',
+          controller: _email,
+          hint: 'Where we send your confirmation',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Text('About the CAM', style: context.text.titleMd),
+        const SizedBox(height: AppSpacing.sm),
+        _YesNo(
+          question: 'Do you know the work the CAM does?',
+          value: _knowsCam,
+          onChanged: (v) => setState(() => _knowsCam = v),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _YesNo(
+          question:
+              'May we call you about becoming a CAM donor?',
+          value: _acceptsDonorCall,
+          onChanged: (v) => setState(() => _acceptsDonorCall = v),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        AppTextField(
+          label: 'Emergency contact name',
+>>>>>>> main
           controller: _emergencyName,
           hint: t.registerEmergencyNameHint,
           textInputAction: TextInputAction.next,
@@ -426,7 +507,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         const SizedBox(height: AppSpacing.lg),
         Text(t.registerPaymentMethod, style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),
+        // El QR del organizador sólo se ofrece si esta carrera tiene uno
+        // cargado: enseñarlo si no, sería prometer un pago que el servidor va a
+        // rechazar en el último paso.
         for (final method in RacePaymentMethod.values)
+<<<<<<< HEAD
           _SelectableTile(
             title: method.label(t),
             subtitle: switch (method) {
@@ -437,6 +522,23 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             selected: _method == method,
             onTap: () => setState(() => _method = method),
           ),
+=======
+          if (method != RacePaymentMethod.qrManual || marathon.acceptsQrPayment)
+            _SelectableTile(
+              title: method.label,
+              subtitle: switch (method) {
+                RacePaymentMethod.card =>
+                  'Charged the moment your place is taken',
+                RacePaymentMethod.qr => 'Scan and pay; we wait for the bank',
+                RacePaymentMethod.bankTransfer =>
+                  'Transfer and wait for the organiser to confirm',
+                RacePaymentMethod.qrManual =>
+                  'Pay with your banking app, then upload the receipt',
+              },
+              selected: _method == method,
+              onTap: () => setState(() => _method = method),
+            ),
+>>>>>>> main
         if (_method == RacePaymentMethod.card) ...[
           const SizedBox(height: AppSpacing.md),
           _CardForm(
@@ -448,7 +550,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ],
         if (flow.isAwaitingPayment) ...[
           const SizedBox(height: AppSpacing.md),
-          _PendingPayment(payment: flow.payment!),
+          if (flow.payment!.method.needsProof)
+            _ManualQrPayment(
+              payment: flow.payment!,
+              reference: _proofReference,
+              busy: flow.busy,
+              onUpload: _subirComprobante,
+            )
+          else
+            _PendingPayment(payment: flow.payment!),
         ],
         const SizedBox(height: AppSpacing.md),
         Row(
@@ -507,7 +617,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final isLast = _step == 2;
     final total = flow.quote?.total;
     final puedeAvanzar = switch (_step) {
-      0 => _docId.text.trim().isNotEmpty,
+      0 =>
+        _docId.text.trim().isNotEmpty &&
+            _phone.text.trim().isNotEmpty &&
+            _knowsCam != null &&
+            _acceptsDonorCall != null,
       1 => marathon.categories.isEmpty || _categoryId != null,
       _ => _acceptedTerms && !flow.isAwaitingPayment,
     };
@@ -687,6 +801,250 @@ class _PendingPayment extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Pregunta de sí/no sin respuesta por defecto.
+///
+/// Sin valor inicial a propósito: una de las dos es un consentimiento para
+/// llamar por teléfono, y un "no" premarcado o un "sí" premarcado son las dos
+/// formas de responder por el usuario.
+class _YesNo extends StatelessWidget {
+  const _YesNo({
+    required this.question,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String question;
+  final bool? value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(question, style: context.text.bodyMd),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            AppChip(
+              label: 'Yes',
+              selected: value == true,
+              onTap: () => onChanged(true),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            AppChip(
+              label: 'No',
+              selected: value == false,
+              onTap: () => onChanged(false),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Cobro por QR del organizador, verificado a mano. **Temporal**: ver
+/// `docs/pago-qr-manual.md` en la API.
+///
+/// Aquí sí hay botón, al revés que en [_PendingPayment]: al otro lado no hay un
+/// banco que responda solo, hay una persona esperando una imagen. Sin ese botón
+/// la pantalla se quedaría girando para siempre.
+class _ManualQrPayment extends StatelessWidget {
+  const _ManualQrPayment({
+    required this.payment,
+    required this.reference,
+    required this.busy,
+    required this.onUpload,
+  });
+
+  final PaymentInfo payment;
+  final TextEditingController reference;
+  final bool busy;
+  final Future<void> Function(ImageSource) onUpload;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final proof = payment.proof;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: c.warningBg,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (payment.qrImageUrl != null)
+            Center(
+              child: ColoredBox(
+                // Un QR sobre fondo de color no siempre lo lee el escáner: el
+                // contraste es parte del código, no decoración.
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  child: Image.network(
+                    payment.qrImageUrl!,
+                    height: 200,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+          if (payment.qrInstructions != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              payment.qrInstructions!,
+              style: context.text.bodySm.copyWith(color: c.textSecondary),
+            ),
+          ],
+          if (payment.qrReference != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text('Payment note', style: context.text.labelSm),
+            const SizedBox(height: AppSpacing.xs),
+            SelectableText(
+              payment.qrReference!,
+              style: context.text.headingMd,
+            ),
+            Text(
+              'Write it in the transfer detail. It is how the organiser links '
+              'your payment to this entry.',
+              style: context.text.bodySm.copyWith(color: c.textSecondary),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          // Lo que subió, no solo que subió algo: sin la imagen a la vista no
+          // hay forma de comprobar que se mandó la captura correcta.
+          if (proof != null) _UploadedProof(imageUrl: proof.imageUrl),
+          if (proof?.state == ProofState.inReview)
+            _ProofStatus(
+              icon: Icons.hourglass_top_rounded,
+              title: 'Receipt under review',
+              detail:
+                  'Your place is not booked yet. The organiser confirms it '
+                  'once they see the money in the account.',
+              tone: c.textSecondary,
+            )
+          else ...[
+            if (proof?.state == ProofState.rejected)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _ProofStatus(
+                  icon: Icons.error_outline_rounded,
+                  title: 'Receipt rejected',
+                  // El motivo lo escribió el organizador: se pinta tal cual,
+                  // porque es lo único que le dice al corredor qué corregir.
+                  detail: proof?.note ?? 'Upload a clearer one.',
+                  tone: c.error,
+                ),
+              ),
+            AppTextField(
+              label: 'Transaction number (optional)',
+              controller: reference,
+              hint: 'From your banking app',
+              textInputAction: TextInputAction.done,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppButton(
+              label: 'Upload receipt',
+              icon: Icons.photo_library_outlined,
+              isLoading: busy,
+              onPressed: () => onUpload(ImageSource.gallery),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(
+              label: 'Take a photo',
+              variant: AppButtonVariant.outline,
+              icon: Icons.photo_camera_outlined,
+              onPressed: busy ? null : () => onUpload(ImageSource.camera),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Miniatura del comprobante ya subido, con toque para verlo entero.
+///
+/// Es la respuesta a "¿y qué mandé?": sin esto el corredor solo tiene la
+/// palabra del estado, y una captura equivocada se descubre recién cuando el
+/// organizador la rechaza.
+class _UploadedProof extends StatelessWidget {
+  const _UploadedProof({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: GestureDetector(
+        onTap: () => showDialog<void>(
+          context: context,
+          builder: (context) => Dialog(
+            child: InteractiveViewer(
+              child: Image.network(imageUrl, errorBuilder: (_, _, _) => const SizedBox.shrink()),
+            ),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Image.network(
+            imageUrl,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProofStatus extends StatelessWidget {
+  const _ProofStatus({
+    required this.icon,
+    required this.title,
+    required this.detail,
+    required this.tone,
+  });
+
+  final IconData icon;
+  final String title;
+  final String detail;
+  final Color tone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: tone),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: context.text.titleMd.copyWith(color: tone)),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                detail,
+                style: context.text.bodySm.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -78,10 +78,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
+        // Un solo campo: el usuario no tiene por que recordar con cual se dio
+        // de alta. Quien decide si es email o CI es el servidor, por el `@`.
         AppTextField(
+<<<<<<< HEAD
           label: t.authIdentifierLabel,
           controller: _identifier,
           hint: t.authEmailHint,
+=======
+          label: 'ID number or email',
+          controller: _identifier,
+          hint: '1234567 LP',
+>>>>>>> main
           errorText: _identifierError,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,

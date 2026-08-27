@@ -39,6 +39,7 @@ enum RegistrationState {
   bool get isConfirmed => this == confirmed;
 }
 
+<<<<<<< HEAD
 /// Metodos de cobro que atiende el proveedor simulado.
 /// Solo el codigo de la API: el nombre visible sale del ARB, via
 /// `RacePaymentMethodL10n`.
@@ -46,6 +47,18 @@ enum RacePaymentMethod {
   card('card'),
   qr('qr'),
   bankTransfer('bank_transfer');
+=======
+/// Metodos de cobro.
+///
+/// [qrManual] es **temporal** y no lo atiende ningun proveedor: se muestra el QR
+/// bancario del organizador, el corredor sube una captura del pago y una
+/// persona lo verifica. Ver `docs/pago-qr-manual.md` en la API.
+enum RacePaymentMethod {
+  card('card', 'Card'),
+  qr('qr', 'QR'),
+  bankTransfer('bank_transfer', 'Bank transfer'),
+  qrManual('qr_manual', 'Bank QR');
+>>>>>>> main
 
   const RacePaymentMethod(this.api);
   final String api;
@@ -53,6 +66,46 @@ enum RacePaymentMethod {
   /// Solo la tarjeta resuelve en el acto; el resto queda pendiente y hay que
   /// sondear el cobro.
   bool get settlesImmediately => this == card;
+
+  /// Espera a que una persona mire un comprobante, no a un banco. Sondear no
+  /// sirve de nada aqui: nadie lo va a resolver en los proximos segundos.
+  bool get needsProof => this == qrManual;
+}
+
+/// Estado del comprobante que subio el corredor. **Temporal.**
+enum ProofState {
+  /// Subido y esperando al organizador. El cobro sigue pendiente: haber
+  /// mandado la captura no es haber pagado.
+  inReview,
+  approved,
+  rejected;
+
+  static ProofState fromApi(String? value) => switch (value) {
+    'approved' => approved,
+    'rejected' => rejected,
+    _ => inReview,
+  };
+}
+
+/// El comprobante subido para un cobro por QR. **Temporal.**
+@immutable
+class PaymentProof {
+  const PaymentProof({
+    required this.id,
+    required this.state,
+    required this.imageUrl,
+    this.reference,
+    this.note,
+  });
+
+  final String id;
+  final ProofState state;
+  final String imageUrl;
+  final String? reference;
+
+  /// Motivo del rechazo, escrito por el organizador. Es lo que le dice al
+  /// corredor que corregir, asi que se pinta tal cual.
+  final String? note;
 }
 
 enum RacePaymentState {
@@ -75,7 +128,10 @@ class RegistrationPersonalData {
   const RegistrationPersonalData({
     required this.fullName,
     required this.docId,
-    this.phone,
+    required this.phone,
+    required this.knowsCam,
+    required this.acceptsDonorCall,
+    this.email,
     this.emergencyContactName,
     this.emergencyContactPhone,
     this.bloodType,
@@ -83,8 +139,23 @@ class RegistrationPersonalData {
   });
 
   final String fullName;
+
+  /// Cedula de identidad. Es lo que cruza esta inscripcion con un pago hecho
+  /// desde la web, asi que no es un dato de relleno.
   final String docId;
-  final String? phone;
+
+  /// Celular. Obligatorio: es por donde avisan un cambio de ultima hora.
+  final String phone;
+
+  /// ¿Conoce el trabajo del CAM?
+  final bool knowsCam;
+
+  /// ¿Acepta que le llamen para ser donante del CAM? Es un consentimiento: se
+  /// manda tal cual lo respondio, y `false` significa que dijo que no — no que
+  /// no contesto.
+  final bool acceptsDonorCall;
+
+  final String? email;
   final String? emergencyContactName;
   final String? emergencyContactPhone;
   final String? bloodType;
@@ -93,7 +164,10 @@ class RegistrationPersonalData {
   Map<String, Object?> toApi() => {
     'fullName': fullName,
     'docId': docId,
-    if (phone != null && phone!.isNotEmpty) 'phone': phone,
+    'phone': phone,
+    'knowsCam': knowsCam,
+    'acceptsDonorCall': acceptsDonorCall,
+    if (email != null && email!.isNotEmpty) 'email': email,
     if (emergencyContactName != null && emergencyContactName!.isNotEmpty)
       'emergencyContactName': emergencyContactName,
     if (emergencyContactPhone != null && emergencyContactPhone!.isNotEmpty)
@@ -213,8 +287,11 @@ class PaymentInfo {
     required this.amount,
     this.failureReason,
     this.qrImageUrl,
+    this.qrInstructions,
+    this.qrReference,
     this.bankReference,
     this.last4,
+    this.proof,
   });
 
   final String id;
@@ -227,10 +304,30 @@ class PaymentInfo {
   final String? failureReason;
 
   final String? qrImageUrl;
+
+  /// Instrucciones del organizador junto al QR, y la glosa que hay que poner en
+  /// la transferencia. **Temporal**, solo en `qr_manual`.
+  final String? qrInstructions;
+  final String? qrReference;
+
   final String? bankReference;
   final String? last4;
 
+  /// El ultimo comprobante subido, si el metodo lo lleva. **Temporal.**
+  final PaymentProof? proof;
+
   bool get isSettled => state != RacePaymentState.pending;
+
+  /// Esta esperando a que un organizador mire el comprobante. Es distinto de
+  /// "no ha subido nada": en ese caso lo que toca es pedirselo, no esperar.
+  bool get isAwaitingReview =>
+      !isSettled && proof?.state == ProofState.inReview;
+
+  /// Le rechazaron la captura y el cobro sigue abierto: puede subir otra.
+  bool get needsAnotherProof =>
+      !isSettled &&
+      method.needsProof &&
+      (proof == null || proof!.state == ProofState.rejected);
 }
 
 /// Lo que devuelve el checkout: el cobro y como quedo la inscripcion.

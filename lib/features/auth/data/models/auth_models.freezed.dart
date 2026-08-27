@@ -15,7 +15,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthUser {
 
- String get id; String get email; String get name; String get role;/// `null` = todavia no vio los slides. Vive en el backend ademas de en
+ String get id; String get name; String get role;/// `null` cuando la cuenta se dio de alta solo con CI. El correo es
+/// opcional a proposito: hay corredores que no tienen o no lo quieren dar.
+ String? get email;/// Cedula normalizada. Es la otra credencial de acceso.
+ String? get ci;/// `true` cuando la contrasena la puso otro: alta desde la web, donde el
+/// usuario y la contrasena son la CI. Hasta que la cambie, la app no le
+/// deja pasar de la pantalla de cambio.
+ bool get mustChangePassword;/// `null` = todavia no vio los slides. Vive en el backend ademas de en
 /// local, asi que sobrevive a una reinstalacion.
  DateTime? get onboardingSeenAt;
 /// Create a copy of AuthUser
@@ -30,16 +36,16 @@ $AuthUserCopyWith<AuthUser> get copyWith => _$AuthUserCopyWithImpl<AuthUser>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,role,onboardingSeenAt);
+int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,onboardingSeenAt);
 
 @override
 String toString() {
-  return 'AuthUser(id: $id, email: $email, name: $name, role: $role, onboardingSeenAt: $onboardingSeenAt)';
+  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, onboardingSeenAt: $onboardingSeenAt)';
 }
 
 
@@ -50,7 +56,7 @@ abstract mixin class $AuthUserCopyWith<$Res>  {
   factory $AuthUserCopyWith(AuthUser value, $Res Function(AuthUser) _then) = _$AuthUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String name, String role, DateTime? onboardingSeenAt
+ String id, String name, String role, String? email, String? ci, bool mustChangePassword, DateTime? onboardingSeenAt
 });
 
 
@@ -67,13 +73,15 @@ class _$AuthUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? name = null,Object? role = null,Object? onboardingSeenAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? onboardingSeenAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,ci: freezed == ci ? _self.ci : ci // ignore: cast_nullable_to_non_nullable
+as String?,mustChangePassword: null == mustChangePassword ? _self.mustChangePassword : mustChangePassword // ignore: cast_nullable_to_non_nullable
+as bool,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }
@@ -159,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String role,  DateTime? onboardingSeenAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  DateTime? onboardingSeenAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthUser() when $default != null:
-return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.onboardingSeenAt);case _:
   return orElse();
 
 }
@@ -180,10 +188,10 @@ return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenA
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String role,  DateTime? onboardingSeenAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  DateTime? onboardingSeenAt)  $default,) {final _that = this;
 switch (_that) {
 case _AuthUser():
-return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.onboardingSeenAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +208,10 @@ return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenA
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String name,  String role,  DateTime? onboardingSeenAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  DateTime? onboardingSeenAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthUser() when $default != null:
-return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.onboardingSeenAt);case _:
   return null;
 
 }
@@ -215,13 +223,21 @@ return $default(_that.id,_that.email,_that.name,_that.role,_that.onboardingSeenA
 @JsonSerializable()
 
 class _AuthUser implements AuthUser {
-  const _AuthUser({required this.id, required this.email, required this.name, required this.role, this.onboardingSeenAt});
+  const _AuthUser({required this.id, required this.name, required this.role, this.email, this.ci, this.mustChangePassword = false, this.onboardingSeenAt});
   factory _AuthUser.fromJson(Map<String, dynamic> json) => _$AuthUserFromJson(json);
 
 @override final  String id;
-@override final  String email;
 @override final  String name;
 @override final  String role;
+/// `null` cuando la cuenta se dio de alta solo con CI. El correo es
+/// opcional a proposito: hay corredores que no tienen o no lo quieren dar.
+@override final  String? email;
+/// Cedula normalizada. Es la otra credencial de acceso.
+@override final  String? ci;
+/// `true` cuando la contrasena la puso otro: alta desde la web, donde el
+/// usuario y la contrasena son la CI. Hasta que la cambie, la app no le
+/// deja pasar de la pantalla de cambio.
+@override@JsonKey() final  bool mustChangePassword;
 /// `null` = todavia no vio los slides. Vive en el backend ademas de en
 /// local, asi que sobrevive a una reinstalacion.
 @override final  DateTime? onboardingSeenAt;
@@ -239,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,role,onboardingSeenAt);
+int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,onboardingSeenAt);
 
 @override
 String toString() {
-  return 'AuthUser(id: $id, email: $email, name: $name, role: $role, onboardingSeenAt: $onboardingSeenAt)';
+  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, onboardingSeenAt: $onboardingSeenAt)';
 }
 
 
@@ -259,7 +275,7 @@ abstract mixin class _$AuthUserCopyWith<$Res> implements $AuthUserCopyWith<$Res>
   factory _$AuthUserCopyWith(_AuthUser value, $Res Function(_AuthUser) _then) = __$AuthUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String name, String role, DateTime? onboardingSeenAt
+ String id, String name, String role, String? email, String? ci, bool mustChangePassword, DateTime? onboardingSeenAt
 });
 
 
@@ -276,13 +292,15 @@ class __$AuthUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? name = null,Object? role = null,Object? onboardingSeenAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? onboardingSeenAt = freezed,}) {
   return _then(_AuthUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,ci: freezed == ci ? _self.ci : ci // ignore: cast_nullable_to_non_nullable
+as String?,mustChangePassword: null == mustChangePassword ? _self.mustChangePassword : mustChangePassword // ignore: cast_nullable_to_non_nullable
+as bool,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

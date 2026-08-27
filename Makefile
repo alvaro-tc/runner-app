@@ -1,6 +1,6 @@
 ﻿.PHONY: run run-web run-local apk goldens fmt analyze test l10n i18n-guard
 
-# Contra el backend de produccion (runner-app.tumype.com).
+# Contra el backend de produccion (cam-run.tumype.com).
 run:
 	flutter run --dart-define-from-file=.env
 

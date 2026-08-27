@@ -22,6 +22,7 @@ class AppTextField extends StatefulWidget {
     this.maxLines = 1,
     this.inputFormatters,
     this.autofillHints,
+    this.prefix,
     super.key,
   });
 
@@ -40,6 +41,10 @@ class AppTextField extends StatefulWidget {
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
   final List<String>? autofillHints;
+
+  /// Widget tappable delante del texto, p.ej. el selector de código de país
+  /// del teléfono. `null` deja el campo como siempre.
+  final Widget? prefix;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -121,6 +126,8 @@ class _AppTextFieldState extends State<AppTextField> {
                 horizontal: AppSpacing.base,
                 vertical: AppSpacing.base + 1,
               ),
+              prefixIcon: widget.prefix,
+              prefixIconConstraints: const BoxConstraints(),
               suffixIcon: _buildSuffix(c.textSecondary),
             ),
           ),
