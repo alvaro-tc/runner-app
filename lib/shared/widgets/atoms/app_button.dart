@@ -1,6 +1,6 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
 
 enum AppButtonVariant { primary, secondary, outline, ghost, danger }
 

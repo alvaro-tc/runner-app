@@ -1,5 +1,5 @@
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
 
 /// Lectura offline-first: emite lo que hay en local **de inmediato** y despues
 /// lo que traiga la red, ya guardado en cache.

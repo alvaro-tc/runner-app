@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:camrun/core/utils/route_generator.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:paceup/core/utils/route_generator.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 /// Sin mensaje: la explicacion sale del ARB, via
 /// `LocationPermissionOutcomeL10n`.
@@ -46,9 +46,13 @@ class GeolocatorLocationService implements LocationService {
         intervalDuration: const Duration(seconds: 1),
         // Sin servicio en primer plano, Android mata el stream a los pocos
         // minutos de salir de pantalla y el entrenamiento se corta solo.
+        // ponytail: en espanol fijo. `LocationSettings` se construye sin
+        // `BuildContext`, asi que no hay `AppLocalizations` a mano; si algun
+        // dia importa el ingles, pasarle el `AppLocalizations` desde quien
+        // arranca el tracking.
         foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationTitle: 'PaceUp is recording your run',
-          notificationText: 'Tap to go back to your session.',
+          notificationTitle: 'CamRun está grabando tu salida',
+          notificationText: 'Toca para volver a tu sesión.',
           enableWakeLock: true,
         ),
       );

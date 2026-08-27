@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:meta/meta.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
 
 @immutable
 class GeoPoint {

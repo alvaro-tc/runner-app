@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// App name shown in the OS task switcher. Brand, not translated.
   ///
   /// In en, this message translates to:
-  /// **'PaceUp'**
+  /// **'CamRun'**
   String get appTitle;
 
   /// No description provided for @commonRetry.
@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// Welcome screen headline. The line break is intentional.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to\nPaceUp'**
+  /// **'Welcome to\nCamRun'**
   String get authWelcomeTitle;
 
   /// No description provided for @authWelcomeBody.
@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// No description provided for @authEmailHint.
   ///
   /// In en, this message translates to:
-  /// **'pandu@paceup.app'**
+  /// **'pandu@camrun.app'**
   String get authEmailHint;
 
   /// No description provided for @authPasswordLabel.
@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Tell PaceUp the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.'**
+  /// **'Tell CamRun the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.'**
   String get onboardingPlanBody;
 
   /// No description provided for @onboardingTrackTitle.
@@ -887,13 +887,13 @@ abstract class AppLocalizations {
   /// No description provided for @locationDeniedForever.
   ///
   /// In en, this message translates to:
-  /// **'Location is blocked for PaceUp. Turn it on in system settings, then come back.'**
+  /// **'Location is blocked for CamRun. Turn it on in system settings, then come back.'**
   String get locationDeniedForever;
 
   /// No description provided for @locationBackgroundDenied.
   ///
   /// In en, this message translates to:
-  /// **'Background location is off. Recording keeps working while PaceUp is on screen, but may stop if you switch apps.'**
+  /// **'Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.'**
   String get locationBackgroundDenied;
 
   /// No description provided for @locationServiceDisabled.
@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupFreeRunSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'No target. Just go and let PaceUp record it.'**
+  /// **'No target. Just go and let CamRun record it.'**
   String get setupFreeRunSubtitle;
 
   /// No description provided for @setupPlanSession.
@@ -1061,13 +1061,13 @@ abstract class AppLocalizations {
   /// No description provided for @setupLocationGrantedBody.
   ///
   /// In en, this message translates to:
-  /// **'PaceUp can draw your route while you run.'**
+  /// **'CamRun can draw your route while you run.'**
   String get setupLocationGrantedBody;
 
   /// No description provided for @setupLocationRationale.
   ///
   /// In en, this message translates to:
-  /// **'PaceUp reads your position only while a run is recording, and stores the route on this device.'**
+  /// **'CamRun reads your position only while a run is recording, and stores the route on this device.'**
   String get setupLocationRationale;
 
   /// No description provided for @setupAllowLocation.
@@ -2003,7 +2003,7 @@ abstract class AppLocalizations {
   /// No description provided for @registerDefaultCardHolder.
   ///
   /// In en, this message translates to:
-  /// **'PACEUP RUNNER'**
+  /// **'CAMRUN RUNNER'**
   String get registerDefaultCardHolder;
 
   /// No description provided for @paymentCardDeclined.
@@ -2351,7 +2351,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsContactComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'Write to support@paceup.app and we will answer within a day.'**
+  /// **'Write to support@camrun.app and we will answer within a day.'**
   String get settingsContactComingSoon;
 
   /// No description provided for @settingsVersion.
@@ -2545,6 +2545,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Predicted finish time {range}'**
   String marathonPredictedFinish(String range);
+
+  /// No description provided for @commonYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get commonYes;
+
+  /// No description provided for @commonNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get commonNo;
+
+  /// No description provided for @authIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number (CI)'**
+  String get authIdLabel;
+
+  /// No description provided for @authIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1234567 LP'**
+  String get authIdHint;
+
+  /// No description provided for @authEmailOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get authEmailOptionalLabel;
+
+  /// No description provided for @authEmailOptionalHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Without it we cannot email you a password reset link, so keep your ID number to hand.'**
+  String get authEmailOptionalHelp;
+
+  /// No description provided for @validationIdEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your ID number.'**
+  String get validationIdEmpty;
+
+  /// No description provided for @validationIdInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it as it appears on your ID, e.g. 1234567 LP.'**
+  String get validationIdInvalid;
+
+  /// No description provided for @validationCurrentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password.'**
+  String get validationCurrentPasswordRequired;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your\npassword.'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was created with your ID number as both the username and the password. Anyone who has seen your ID knows it, so pick a new one before you go on.'**
+  String get changePasswordBody;
+
+  /// No description provided for @changePasswordCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get changePasswordCurrentLabel;
+
+  /// No description provided for @changePasswordCurrentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ID number, if nobody changed it'**
+  String get changePasswordCurrentHint;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordNewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters, with a letter and a number'**
+  String get changePasswordNewHint;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it once more'**
+  String get changePasswordConfirmHint;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and continue'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @homeUpcomingMarathons.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Marathons'**
+  String get homeUpcomingMarathons;
+
+  /// No description provided for @racesUpcomingMarathons.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming marathons'**
+  String get racesUpcomingMarathons;
+
+  /// No description provided for @registerEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where we send your confirmation'**
+  String get registerEmailHint;
+
+  /// No description provided for @registerCamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the CAM'**
+  String get registerCamTitle;
+
+  /// No description provided for @registerCamKnowsQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you know the work the CAM does?'**
+  String get registerCamKnowsQuestion;
+
+  /// No description provided for @registerCamDonorQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'May we call you about becoming a CAM donor?'**
+  String get registerCamDonorQuestion;
+
+  /// No description provided for @paymentMethodQrManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank QR'**
+  String get paymentMethodQrManual;
+
+  /// No description provided for @registerQrManualSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with your banking app, then upload the receipt'**
+  String get registerQrManualSubtitle;
+
+  /// No description provided for @registerProofSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt sent. The organiser will check it and confirm your place.'**
+  String get registerProofSent;
+
+  /// No description provided for @registerProofUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not upload that receipt.'**
+  String get registerProofUploadFailed;
+
+  /// No description provided for @registerPaymentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment note'**
+  String get registerPaymentNote;
+
+  /// No description provided for @registerPaymentNoteHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it in the transfer detail. It is how the organiser links your payment to this entry.'**
+  String get registerPaymentNoteHelp;
+
+  /// No description provided for @registerProofInReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt under review'**
+  String get registerProofInReviewTitle;
+
+  /// No description provided for @registerProofInReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your place is not booked yet. The organiser confirms it once they see the money in the account.'**
+  String get registerProofInReviewBody;
+
+  /// No description provided for @registerProofRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt rejected'**
+  String get registerProofRejectedTitle;
+
+  /// No description provided for @registerProofRejectedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a clearer one.'**
+  String get registerProofRejectedFallback;
+
+  /// No description provided for @registerProofReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction number (optional)'**
+  String get registerProofReferenceLabel;
+
+  /// No description provided for @registerProofReferenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'From your banking app'**
+  String get registerProofReferenceHint;
+
+  /// No description provided for @registerProofUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload receipt'**
+  String get registerProofUpload;
+
+  /// No description provided for @registerProofTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get registerProofTakePhoto;
+
+  /// No description provided for @phoneSelectCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a country'**
+  String get phoneSelectCountry;
+
+  /// No description provided for @countryBO.
+  ///
+  /// In en, this message translates to:
+  /// **'Bolivia'**
+  String get countryBO;
+
+  /// No description provided for @countryAR.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentina'**
+  String get countryAR;
+
+  /// No description provided for @countryBR.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazil'**
+  String get countryBR;
+
+  /// No description provided for @countryCL.
+  ///
+  /// In en, this message translates to:
+  /// **'Chile'**
+  String get countryCL;
+
+  /// No description provided for @countryCO.
+  ///
+  /// In en, this message translates to:
+  /// **'Colombia'**
+  String get countryCO;
+
+  /// No description provided for @countryEC.
+  ///
+  /// In en, this message translates to:
+  /// **'Ecuador'**
+  String get countryEC;
+
+  /// No description provided for @countryES.
+  ///
+  /// In en, this message translates to:
+  /// **'Spain'**
+  String get countryES;
+
+  /// No description provided for @countryUS.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get countryUS;
+
+  /// No description provided for @countryMX.
+  ///
+  /// In en, this message translates to:
+  /// **'Mexico'**
+  String get countryMX;
+
+  /// No description provided for @countryPY.
+  ///
+  /// In en, this message translates to:
+  /// **'Paraguay'**
+  String get countryPY;
+
+  /// No description provided for @countryPE.
+  ///
+  /// In en, this message translates to:
+  /// **'Peru'**
+  String get countryPE;
+
+  /// No description provided for @countryUY.
+  ///
+  /// In en, this message translates to:
+  /// **'Uruguay'**
+  String get countryUY;
+
+  /// No description provided for @countryVE.
+  ///
+  /// In en, this message translates to:
+  /// **'Venezuela'**
+  String get countryVE;
+
+  /// No description provided for @marathonSlotsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} slots left'**
+  String marathonSlotsLeft(int left);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,5 @@
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 
 abstract interface class AuthRepository {
   /// Devuelve el usuario porque trae `onboardingSeenAt` —quien ya vio los

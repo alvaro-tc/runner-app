@@ -1,5 +1,5 @@
+import 'package:camrun/core/utils/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:paceup/core/utils/uuid.dart';
 
 /// Tokens y `deviceId`. Interfaz aparte del almacen real para poder inyectar
 /// uno en memoria en los tests, donde no hay Keychain ni Keystore.

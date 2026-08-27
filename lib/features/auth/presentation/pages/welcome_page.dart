@@ -1,10 +1,10 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/blob_illustration.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/blob_illustration.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});

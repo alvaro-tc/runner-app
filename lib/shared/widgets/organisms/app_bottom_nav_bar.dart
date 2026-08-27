@@ -1,7 +1,7 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({

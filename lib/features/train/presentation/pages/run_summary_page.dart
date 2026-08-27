@@ -1,22 +1,22 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/presentation/providers/history_provider.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
+import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
+import 'package:camrun/shared/widgets/organisms/splits_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/features/train/presentation/providers/history_provider.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
-import 'package:paceup/shared/widgets/organisms/route_map_view.dart';
-import 'package:paceup/shared/widgets/organisms/splits_chart.dart';
 
 /// Post-run summary. The same layout serves the read-only history detail —
 /// [readOnly] just hides the feeling picker, the notes field and Save/Discard.

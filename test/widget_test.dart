@@ -1,9 +1,9 @@
+import 'package:camrun/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:camrun/features/auth/presentation/pages/welcome_page.dart';
+import 'package:camrun/features/home/presentation/pages/home_page.dart';
+import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/features/auth/presentation/pages/sign_in_page.dart';
-import 'package:paceup/features/auth/presentation/pages/welcome_page.dart';
-import 'package:paceup/features/home/presentation/pages/home_page.dart';
-import 'package:paceup/features/onboarding/presentation/pages/onboarding_page.dart';
 
 import 'helpers.dart';
 
@@ -12,18 +12,18 @@ void main() {
     await pumpApp(tester);
     await tester.pump();
     expect(find.byType(OnboardingPage), findsOneWidget);
-    expect(find.text('Train with a plan that adapts'), findsOneWidget);
+    expect(find.text('Entrena con un plan que se adapta'), findsOneWidget);
   });
 
   testWidgets('skipping onboarding goes to the welcome screen', (tester) async {
     await pumpApp(tester);
     await tester.pump();
 
-    await tester.tap(find.text('Skip'));
+    await tester.tap(find.text('Saltar'));
     await tester.pumpAndSettle();
 
     expect(find.byType(WelcomePage), findsOneWidget);
-    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
     expect(find.byType(HomePage), findsNothing);
   });
 
@@ -31,13 +31,13 @@ void main() {
     await pumpApp(tester);
     await tester.pump();
 
-    expect(find.text('Next'), findsOneWidget);
+    expect(find.text('Siguiente'), findsOneWidget);
     await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
     await tester.pumpAndSettle();
     await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
     await tester.pumpAndSettle();
 
-    expect(find.text('Get started'), findsOneWidget);
+    expect(find.text('Empezar'), findsOneWidget);
   });
 
   testWidgets('a signed-in user goes straight to home', (tester) async {
@@ -54,16 +54,16 @@ void main() {
   testWidgets('signing in reaches home', (tester) async {
     await pumpApp(tester);
     await tester.pump();
-    await tester.tap(find.text('Skip'));
+    await tester.tap(find.text('Saltar'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Login'));
+    await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
     expect(find.byType(SignInPage), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).first, 'pandu@paceup.app');
+    await tester.enterText(find.byType(TextField).first, 'pandu@camrun.app');
     await tester.enterText(find.byType(TextField).last, 'runfast123');
-    await tapSubmit(tester, 'Login');
+    await tapSubmit(tester, 'Iniciar sesión');
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(seconds: 1));
@@ -77,17 +77,17 @@ void main() {
   ) async {
     await pumpApp(tester);
     await tester.pump();
-    await tester.tap(find.text('Skip'));
+    await tester.tap(find.text('Saltar'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Login'));
+    await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField).first, 'pandu');
     await tester.enterText(find.byType(TextField).last, 'short');
-    await tapSubmit(tester, 'Login');
+    await tapSubmit(tester, 'Iniciar sesión');
     await tester.pump();
 
-    expect(find.text('Use at least 8 characters.'), findsOneWidget);
+    expect(find.text('Usa al menos 8 caracteres.'), findsOneWidget);
     expect(find.byType(HomePage), findsNothing);
   });
 }

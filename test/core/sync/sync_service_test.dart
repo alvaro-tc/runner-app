@@ -1,13 +1,13 @@
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/interceptors.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/sync/offline_first.dart';
+import 'package:camrun/core/sync/sync_service.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/interceptors.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/sync/offline_first.dart';
-import 'package:paceup/core/sync/sync_service.dart';
 
 import '../fake_http.dart';
 

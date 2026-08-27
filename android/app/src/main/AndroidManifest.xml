@@ -12,7 +12,7 @@
     <!-- Map tiles and, later, the real API. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="PaceUp"
+        android:label="CamRun"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:paceup/core/utils/route_generator.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/profile/domain/entities/user_profile.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:camrun/core/utils/route_generator.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 
 /// In-memory dataset backing every `Fake*Repository`. Everything is anchored to
 /// [now] so countdowns and "this week" grouping stay correct whenever the app
@@ -35,7 +35,7 @@ abstract final class FakeDataSeed {
   static final UserProfile profile = UserProfile(
     id: 'user-1',
     fullName: 'Pandu Wirawan',
-    email: 'pandu@paceup.app',
+    email: 'pandu@camrun.app',
     city: 'Jakarta',
     country: 'Indonesia',
     avatarUrl: '',

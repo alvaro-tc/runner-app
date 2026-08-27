@@ -1,7 +1,7 @@
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/features/profile/domain/entities/user_profile.dart';
 
 class ProfileNotifier extends AsyncNotifier<UserProfile> {
   @override

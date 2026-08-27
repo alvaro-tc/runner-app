@@ -1,19 +1,19 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/train/presentation/providers/run_session_provider.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/home/presentation/providers/home_provider.dart';
-import 'package:paceup/features/train/presentation/providers/run_session_provider.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 /// Picks what the next run is for, and explains why location is needed before
 /// the system prompt appears.

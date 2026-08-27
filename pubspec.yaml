@@ -1,5 +1,5 @@
-name: paceup
-description: "PaceUp - training plans, live run tracking and race history."
+name: camrun
+description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -30,7 +30,7 @@ dependencies:
   latlong2: ^0.10.1
   geolocator: ^14.0.3
   # UI utilities
-  intl: ^0.20.3
+  intl: ^0.20.2
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
   # Comprobante de pago: la unica forma de coger una captura de la galeria o

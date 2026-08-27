@@ -1,6 +1,6 @@
+import 'package:camrun/core/theme/app_colors.dart';
+import 'package:camrun/core/theme/app_shadows.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/theme/app_colors.dart';
-import 'package:paceup/core/theme/app_shadows.dart';
 
 /// Every semantic colour role the app uses, including the ones Material 3 does
 /// not model (success/warning pairs, ring track, map overlay, brand gradients).

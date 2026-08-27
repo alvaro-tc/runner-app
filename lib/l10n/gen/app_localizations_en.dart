@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'PaceUp';
+  String get appTitle => 'CamRun';
 
   @override
   String get commonRetry => 'Try again';
@@ -51,7 +51,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get authWelcomeTitle => 'Welcome to\nPaceUp';
+  String get authWelcomeTitle => 'Welcome to\nCamRun';
 
   @override
   String get authWelcomeBody =>
@@ -76,7 +76,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authIdentifierLabel => 'Username or Email';
 
   @override
-  String get authEmailHint => 'pandu@paceup.app';
+  String get authEmailHint => 'pandu@camrun.app';
 
   @override
   String get authPasswordLabel => 'Password';
@@ -216,7 +216,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPlanBody =>
-      'Tell PaceUp the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.';
+      'Tell CamRun the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.';
 
   @override
   String get onboardingTrackTitle => 'Track every run in real time';
@@ -432,11 +432,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationDeniedForever =>
-      'Location is blocked for PaceUp. Turn it on in system settings, then come back.';
+      'Location is blocked for CamRun. Turn it on in system settings, then come back.';
 
   @override
   String get locationBackgroundDenied =>
-      'Background location is off. Recording keeps working while PaceUp is on screen, but may stop if you switch apps.';
+      'Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.';
 
   @override
   String get locationServiceDisabled =>
@@ -503,7 +503,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupFreeRunSubtitle =>
-      'No target. Just go and let PaceUp record it.';
+      'No target. Just go and let CamRun record it.';
 
   @override
   String get setupPlanSession => 'Plan session';
@@ -528,11 +528,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupLocationGrantedBody =>
-      'PaceUp can draw your route while you run.';
+      'CamRun can draw your route while you run.';
 
   @override
   String get setupLocationRationale =>
-      'PaceUp reads your position only while a run is recording, and stores the route on this device.';
+      'CamRun reads your position only while a run is recording, and stores the route on this device.';
 
   @override
   String get setupAllowLocation => 'Allow location';
@@ -1047,7 +1047,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerDefaultRunnerName => 'Runner';
 
   @override
-  String get registerDefaultCardHolder => 'PACEUP RUNNER';
+  String get registerDefaultCardHolder => 'CAMRUN RUNNER';
 
   @override
   String get paymentCardDeclined =>
@@ -1235,7 +1235,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Write to support@paceup.app and we will answer within a day.';
+      'Write to support@camrun.app and we will answer within a day.';
 
   @override
   String get settingsVersion => 'Version';
@@ -1351,5 +1351,177 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String marathonPredictedFinish(String range) {
     return 'Predicted finish time $range';
+  }
+
+  @override
+  String get commonYes => 'Yes';
+
+  @override
+  String get commonNo => 'No';
+
+  @override
+  String get authIdLabel => 'ID number (CI)';
+
+  @override
+  String get authIdHint => '1234567 LP';
+
+  @override
+  String get authEmailOptionalLabel => 'Email (optional)';
+
+  @override
+  String get authEmailOptionalHelp =>
+      'Without it we cannot email you a password reset link, so keep your ID number to hand.';
+
+  @override
+  String get validationIdEmpty => 'Enter your ID number.';
+
+  @override
+  String get validationIdInvalid =>
+      'Write it as it appears on your ID, e.g. 1234567 LP.';
+
+  @override
+  String get validationCurrentPasswordRequired =>
+      'Enter your current password.';
+
+  @override
+  String get changePasswordTitle => 'Choose your\npassword.';
+
+  @override
+  String get changePasswordBody =>
+      'Your account was created with your ID number as both the username and the password. Anyone who has seen your ID knows it, so pick a new one before you go on.';
+
+  @override
+  String get changePasswordCurrentLabel => 'Current password';
+
+  @override
+  String get changePasswordCurrentHint =>
+      'Your ID number, if nobody changed it';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordNewHint =>
+      'At least 8 characters, with a letter and a number';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get changePasswordConfirmHint => 'Type it once more';
+
+  @override
+  String get changePasswordSubmit => 'Save and continue';
+
+  @override
+  String get homeUpcomingMarathons => 'Upcoming Marathons';
+
+  @override
+  String get racesUpcomingMarathons => 'Upcoming marathons';
+
+  @override
+  String get registerEmailHint => 'Where we send your confirmation';
+
+  @override
+  String get registerCamTitle => 'About the CAM';
+
+  @override
+  String get registerCamKnowsQuestion => 'Do you know the work the CAM does?';
+
+  @override
+  String get registerCamDonorQuestion =>
+      'May we call you about becoming a CAM donor?';
+
+  @override
+  String get paymentMethodQrManual => 'Bank QR';
+
+  @override
+  String get registerQrManualSubtitle =>
+      'Pay with your banking app, then upload the receipt';
+
+  @override
+  String get registerProofSent =>
+      'Receipt sent. The organiser will check it and confirm your place.';
+
+  @override
+  String get registerProofUploadFailed => 'We could not upload that receipt.';
+
+  @override
+  String get registerPaymentNote => 'Payment note';
+
+  @override
+  String get registerPaymentNoteHelp =>
+      'Write it in the transfer detail. It is how the organiser links your payment to this entry.';
+
+  @override
+  String get registerProofInReviewTitle => 'Receipt under review';
+
+  @override
+  String get registerProofInReviewBody =>
+      'Your place is not booked yet. The organiser confirms it once they see the money in the account.';
+
+  @override
+  String get registerProofRejectedTitle => 'Receipt rejected';
+
+  @override
+  String get registerProofRejectedFallback => 'Upload a clearer one.';
+
+  @override
+  String get registerProofReferenceLabel => 'Transaction number (optional)';
+
+  @override
+  String get registerProofReferenceHint => 'From your banking app';
+
+  @override
+  String get registerProofUpload => 'Upload receipt';
+
+  @override
+  String get registerProofTakePhoto => 'Take a photo';
+
+  @override
+  String get phoneSelectCountry => 'Select a country';
+
+  @override
+  String get countryBO => 'Bolivia';
+
+  @override
+  String get countryAR => 'Argentina';
+
+  @override
+  String get countryBR => 'Brazil';
+
+  @override
+  String get countryCL => 'Chile';
+
+  @override
+  String get countryCO => 'Colombia';
+
+  @override
+  String get countryEC => 'Ecuador';
+
+  @override
+  String get countryES => 'Spain';
+
+  @override
+  String get countryUS => 'United States';
+
+  @override
+  String get countryMX => 'Mexico';
+
+  @override
+  String get countryPY => 'Paraguay';
+
+  @override
+  String get countryPE => 'Peru';
+
+  @override
+  String get countryUY => 'Uruguay';
+
+  @override
+  String get countryVE => 'Venezuela';
+
+  @override
+  String marathonSlotsLeft(int left) {
+    return '$left slots left';
   }
 }

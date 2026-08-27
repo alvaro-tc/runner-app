@@ -1,8 +1,8 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
 
 const _authRoutes = {
   Routes.welcome,

@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/sync/sync_service.dart';
+import 'package:camrun/core/utils/uuid.dart';
+import 'package:camrun/features/tracking/data/models/tracking_models.dart';
+import 'package:camrun/features/tracking/data/tracking_api.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/sync/sync_service.dart';
-import 'package:paceup/core/utils/uuid.dart';
-import 'package:paceup/features/tracking/data/models/tracking_models.dart';
-import 'package:paceup/features/tracking/data/tracking_api.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 /// Graba un entrenamiento: GPS dentro, puntos en la base local y lotes al
 /// servidor.

@@ -1,11 +1,11 @@
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 
 class HistoryNotifier extends AsyncNotifier<List<TrainingRun>> {
   @override

@@ -1,13 +1,13 @@
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/auth/data/datasources/auth_api.dart';
+import 'package:camrun/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/auth/data/datasources/auth_api.dart';
-import 'package:paceup/features/auth/data/repositories/remote_auth_repository.dart';
 
 import '../../core/fake_http.dart';
 import '../../helpers.dart';

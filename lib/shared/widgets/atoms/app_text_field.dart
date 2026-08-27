@@ -1,7 +1,7 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
 
 /// Labelled input: the label sits above the field (never as a floating hint),
 /// matching the sign-in reference.

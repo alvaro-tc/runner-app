@@ -1,4 +1,4 @@
-import 'package:paceup/l10n/gen/app_localizations.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 
 /// Client-side form checks. Messages are written to be actionable, not just
 /// "invalid".
@@ -16,14 +16,9 @@ abstract final class Validators {
     return null;
   }
 
-<<<<<<< HEAD
-  /// Sign-in accepts either a username or an email, so only emptiness is fatal.
+  /// Sign-in accepts either a CI or an email, so only emptiness is fatal.
   static String? identifier(AppLocalizations t, String value) =>
       value.trim().isEmpty ? t.validationIdentifierEmpty : null;
-=======
-  /// Sign-in accepts either a CI or an email, so only emptiness is fatal.
-  static String? identifier(String value) =>
-      value.trim().isEmpty ? 'Enter your ID number or email.' : null;
 
   /// Bolivian CI: digits, optionally followed by the issuing-department code.
   ///
@@ -32,16 +27,13 @@ abstract final class Validators {
   /// the user finds out one screen later.
   static final _ci = RegExp(r'^[0-9]{4,12}[A-Z]{0,3}$');
 
-  static String? ci(String value) {
+  static String? ci(AppLocalizations t, String value) {
     final limpio = value.toUpperCase().replaceAll(RegExp(r'[\s.\-_]'), '');
 
-    if (limpio.isEmpty) return 'Enter your ID number.';
-    if (!_ci.hasMatch(limpio)) {
-      return 'Write it as it appears on your ID, e.g. 1234567 LP.';
-    }
+    if (limpio.isEmpty) return t.validationIdEmpty;
+    if (!_ci.hasMatch(limpio)) return t.validationIdInvalid;
     return null;
   }
->>>>>>> main
 
   static String? password(AppLocalizations t, String value) {
     if (value.isEmpty) return t.validationPasswordEmpty;

@@ -1,6 +1,6 @@
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:meta/meta.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 /// Sin etiqueta: el nombre visible sale del ARB, via `PaymentStatusL10n`.
 enum PaymentStatus { paid, pending, failed, refunded }

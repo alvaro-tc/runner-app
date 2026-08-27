@@ -1,11 +1,11 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 
 /// Selector de idioma (PU-203).
 ///

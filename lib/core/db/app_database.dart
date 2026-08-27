@@ -96,7 +96,7 @@ class AppDatabase extends _$AppDatabase {
     : super(
         executor ??
             driftDatabase(
-              name: 'paceup',
+              name: 'camrun',
               // En web el wasm y el worker viven en `web/`; sin esto
               // `driftDatabase` lanza al construirse y no llega ni el primer
               // frame.

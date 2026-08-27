@@ -1,6 +1,6 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
 
 /// Shimmer placeholder. Loading states use these instead of a centred spinner
 /// so the page keeps its shape while data arrives.

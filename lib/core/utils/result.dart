@@ -1,4 +1,4 @@
-import 'package:paceup/core/error/failure.dart';
+import 'package:camrun/core/error/failure.dart';
 
 /// Repository return type. Dart 3 sealed classes give exhaustive `switch`
 /// without a code generator.

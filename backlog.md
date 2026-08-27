@@ -1,6 +1,6 @@
-# PaceUp — Product Backlog
+# CamRun — Product Backlog
 
-Plan de trabajo para llevar PaceUp de **prototipo front-end funcional** a
+Plan de trabajo para llevar CamRun de **prototipo front-end funcional** a
 **producto en producción con backend, pagos reales y panel de administración**.
 
 Organizado en 4 sprints de 2 semanas. El Sprint 1 cierra con una demo

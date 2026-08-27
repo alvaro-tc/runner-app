@@ -1,7 +1,7 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_progress_ring.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_progress_ring.dart';
 
 /// One column of the weekly plan strip: weekday label above a ring (or a rest
 /// dot), with today rendered heavier.

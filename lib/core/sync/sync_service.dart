@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
 
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
 
 /// Cuantas cosas se movieron en un drenado. Lo devuelve [SyncService.drain]
 /// para que los tests —y manana un indicador en la UI— sepan que paso.

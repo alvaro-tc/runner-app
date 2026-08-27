@@ -1,6 +1,6 @@
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/utils/uuid.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/utils/uuid.dart';
 
 /// Habla con `/races/*`, `/registrations/*` y `/payments/*`.
 ///

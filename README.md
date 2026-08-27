@@ -1,4 +1,4 @@
-# PaceUp
+# CamRun
 
 App móvil de running en Flutter: plan de entrenamiento, seguimiento de carreras
 en vivo con GPS, historial persistente e inscripción a maratones.

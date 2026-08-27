@@ -1,7 +1,7 @@
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/sync/sync_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/sync/sync_service.dart';
 
 /// La base local. `driftDatabase` abre perezosamente, asi que no hace falta
 /// resolverla en `bootstrap()` antes del primer frame.

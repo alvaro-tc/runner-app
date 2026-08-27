@@ -1,8 +1,8 @@
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/shared/widgets/molecules/progress_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/shared/widgets/molecules/progress_widgets.dart';
 
 /// Seven day columns. Falls back to a horizontal scroll on narrow screens or
 /// at large text scales rather than squeezing the rings.

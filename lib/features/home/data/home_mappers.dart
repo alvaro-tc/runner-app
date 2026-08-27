@@ -1,6 +1,6 @@
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/domain/repositories/home_repositories.dart';
 
 /// JSON de la API -> entidades del dominio.
 ///

@@ -1,24 +1,24 @@
+import 'package:camrun/app/app.dart';
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/constants/fake_data_seed.dart';
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/services/preferences_provider.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/domain/repositories/training_repository.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/app/app.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/constants/fake_data_seed.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/services/preferences_provider.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
-import 'package:paceup/features/home/presentation/providers/home_provider.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/features/train/domain/repositories/training_repository.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/fake_http.dart';
@@ -124,7 +124,7 @@ Future<ProviderContainer> pumpApp(
   addTearDown(container.dispose);
 
   await tester.pumpWidget(
-    UncontrolledProviderScope(container: container, child: const PaceUpApp()),
+    UncontrolledProviderScope(container: container, child: const CamRunApp()),
   );
   return container;
 }

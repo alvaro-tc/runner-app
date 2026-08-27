@@ -1,4 +1,4 @@
-#set document(title: "PaceUp — Guía de inicio en local", author: "Equipo PaceUp")
+#set document(title: "CamRun — Guía de inicio en local", author: "Equipo CamRun")
 #set page(paper: "a4", margin: 2cm, numbering: "1")
 #set text(font: ("Segoe UI", "Arial"), size: 10pt, lang: "es")
 #set par(justify: true, leading: 0.68em)
@@ -33,7 +33,7 @@
 )
 
 #align(center)[
-  #text(size: 22pt, weight: "bold")[PaceUp]
+  #text(size: 22pt, weight: "bold")[CamRun]
   #v(-0.5em)
   #text(size: 13pt)[Guía de instalación y arranque en local]
   #v(0.3em)
@@ -52,7 +52,7 @@
 
 = Qué es y contra qué corre
 
-PaceUp es la app móvil de running en Flutter: plan de entrenamiento, seguimiento
+CamRun es la app móvil de running en Flutter: plan de entrenamiento, seguimiento
 de carreras en vivo con GPS, historial persistente e inscripción a maratones.
 
 Hay *dos formas* de levantarla, y esta guía cubre las dos por separado:
@@ -472,13 +472,13 @@ Abre una consola de Postgres como superusuario:
 y dentro, en los tres casos:
 
 ```sql
-CREATE ROLE paceup LOGIN PASSWORD 'paceup';
-CREATE DATABASE paceup        OWNER paceup;  -- desarrollo
-CREATE DATABASE paceup_shadow OWNER paceup;  -- solo prisma migrate dev
-CREATE DATABASE paceup_test   OWNER paceup;  -- tests e2e
+CREATE ROLE camrun LOGIN PASSWORD 'camrun';
+CREATE DATABASE camrun        OWNER camrun;  -- desarrollo
+CREATE DATABASE camrun_shadow OWNER camrun;  -- solo prisma migrate dev
+CREATE DATABASE camrun_test   OWNER camrun;  -- tests e2e
 ```
 
-Sal con `\q`. `paceup_shadow` la usa `prisma migrate dev` para detectar drift:
+Sal con `\q`. `camrun_shadow` la usa `prisma migrate dev` para detectar drift:
 se puede borrar y recrear sin perder nada.
 
 == Paso 3 — Clonar y configurar la API
@@ -503,7 +503,7 @@ Y edita `.env`. Lo mínimo que hay que tocar:
 
 #tabla(
   columns: (auto, 1fr),
-  [`DATABASE_URL`], [`postgresql://paceup:paceup@localhost:5432/paceup?schema=public`],
+  [`DATABASE_URL`], [`postgresql://camrun:camrun@localhost:5432/camrun?schema=public`],
   [`REDIS_URL`], [`redis://localhost:6379`],
   [`JWT_SECRET`], [*Sin default a propósito.* Genera el tuyo (abajo)],
   [`CORS_ORIGINS`], [`*` en desarrollo, o `http://localhost:5000` para ser estricto],

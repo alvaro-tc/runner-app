@@ -1,11 +1,11 @@
 import 'dart:convert';
 
+import 'package:camrun/core/constants/fake_data_seed.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/domain/repositories/training_repository.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:paceup/core/constants/fake_data_seed.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/features/train/domain/repositories/training_repository.dart';
 
 /// Run history lives in a Hive box keyed by run id, with each run stored as a
 /// JSON string. It is seeded once on first launch so the app has a history to

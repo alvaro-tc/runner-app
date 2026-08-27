@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habia sesion al arrancar. Se resuelve en `bootstrap()` leyendo el refresh
 /// token del almacen seguro —una lectura asincrona que no puede hacerse dentro

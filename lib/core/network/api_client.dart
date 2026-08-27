@@ -1,9 +1,9 @@
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/api_config.dart';
+import 'package:camrun/core/network/interceptors.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/api_config.dart';
-import 'package:paceup/core/network/interceptors.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
 
 BaseOptions _options(String baseUrl) => BaseOptions(
   baseUrl: baseUrl,

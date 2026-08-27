@@ -1,7 +1,7 @@
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habla con `/auth/*`. No decide nada: guardar tokens y navegar es del
 /// repositorio (Fase 22).

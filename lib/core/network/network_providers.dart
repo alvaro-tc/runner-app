@@ -1,11 +1,11 @@
+import 'package:camrun/core/config/app_config_api.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/features/auth/data/datasources/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/core/config/app_config_api.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/features/auth/data/datasources/auth_api.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>(
   (ref) => SecureTokenStorage(),

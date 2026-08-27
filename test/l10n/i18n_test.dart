@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:camrun/app/router/app_router.dart';
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/app/router/app_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers.dart';
@@ -148,6 +148,24 @@ void main() {
       expect(find.text('Idioma'), findsOneWidget);
       expect(find.text('Language'), findsNothing);
       expect(container.read(languageProvider), AppLanguage.spanish);
+
+      await drainHome(tester);
+    });
+
+    testWidgets('sin idioma guardado la app arranca en espanol', (
+      tester,
+    ) async {
+      // Aunque el telefono este en ingles: el publico objetivo es
+      // hispanohablante, asi que el idioma por defecto no sigue al sistema.
+      tester.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+      addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
+      final container = await pumpApp(tester, signedIn: true);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(container.read(languageProvider), AppLanguage.spanish);
+      expect(find.text('Inicio'), findsOneWidget);
+      expect(find.text('Home'), findsNothing);
 
       await drainHome(tester);
     });

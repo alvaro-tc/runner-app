@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 
 /// Builds coherent synthetic GPS traces for the fake data layer: smooth closed
 /// loops rather than random noise, so the map and the split chart both look

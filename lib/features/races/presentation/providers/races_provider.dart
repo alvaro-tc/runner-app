@@ -1,7 +1,7 @@
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
 
 /// Mis carreras. Solo lo confirmado: los borradores viven en el flujo de
 /// inscripcion, no aqui.

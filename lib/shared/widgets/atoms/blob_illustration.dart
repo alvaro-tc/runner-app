@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:camrun/core/extensions/context_x.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
 
 /// Organic brand-coloured blob with a glyph on top. Stands in for the hand-drawn
 /// artwork on the onboarding and welcome screens; drop a real asset into

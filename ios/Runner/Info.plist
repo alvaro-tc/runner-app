@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Paceup</string>
+	<string>CamRun</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,19 +15,19 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>PaceUp reads your position only while a run is recording, so it can draw your route and work out your pace.</string>
+	<string>CamRun lee tu posición solo mientras grabas una salida, para dibujar tu ruta y calcular tu ritmo.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>PaceUp keeps recording your route while your phone is in your pocket or the screen is off, so a run does not stop when you leave the app.</string>
+	<string>CamRun sigue grabando tu ruta con el teléfono en el bolsillo o la pantalla apagada, para que la salida no se corte al salir de la app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>PaceUp opens your gallery only so you can pick the receipt of your race payment. Nothing else is read.</string>
+	<string>CamRun abre tu galería solo para que elijas el comprobante del pago de tu carrera. No lee nada más.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>PaceUp uses the camera only so you can photograph the receipt of your race payment.</string>
+	<string>CamRun usa la cámara solo para que fotografíes el comprobante del pago de tu carrera.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>paceup</string>
+	<string>camrun</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

@@ -1,4 +1,4 @@
-package com.paceup.paceup
+package com.camrun.camrun
 
 import io.flutter.embedding.android.FlutterActivity
 

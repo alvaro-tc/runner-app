@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/utils/route_generator.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/tracking/tracking_providers.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/utils/route_generator.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/tracking/tracking_providers.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 enum RunStatus { idle, countdown, running, paused, finished }
 

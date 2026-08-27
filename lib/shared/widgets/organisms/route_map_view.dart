@@ -1,12 +1,12 @@
 import 'dart:math' as math;
 
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 // latlong2 exports its own generic `Path<T>`, which shadows dart:ui's.
 import 'package:latlong2/latlong.dart' hide Path;
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 /// Every map in the app goes through this widget. Swapping flutter_map for
 /// google_maps_flutter is a change inside this file only.
@@ -115,7 +115,7 @@ class RouteMapViewState extends State<RouteMapView> {
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.paceup.app',
+            userAgentPackageName: 'com.camrun.app',
             tileBuilder: c.isDark ? _darkenTile : null,
           ),
           // La guia primero: va por debajo del recorrido real.

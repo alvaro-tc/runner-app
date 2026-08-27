@@ -1,9 +1,9 @@
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/features/tracking/data/tracking_api.dart';
+import 'package:camrun/features/tracking/data/tracking_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/features/tracking/data/tracking_api.dart';
-import 'package:paceup/features/tracking/data/tracking_service.dart';
 
 final trackingApiProvider = Provider<TrackingApi>(
   (ref) => TrackingApi(ref.watch(dioProvider), ref.watch(tokenStorageProvider)),

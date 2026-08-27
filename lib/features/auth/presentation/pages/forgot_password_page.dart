@@ -1,10 +1,10 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/utils/validators.dart';
+import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/core/utils/validators.dart';
-import 'package:paceup/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});

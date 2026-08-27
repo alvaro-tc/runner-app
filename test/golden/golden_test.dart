@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:camrun/app/router/app_router.dart';
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/services/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/app/router/app_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/services/settings_provider.dart';
 
 import '../helpers.dart';
 

@@ -1,6 +1,6 @@
+import 'package:camrun/core/services/preferences_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/core/services/preferences_provider.dart';
 
 enum DistanceUnit {
   km('km'),
@@ -69,9 +69,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
         (m) => m.name == prefs.getString(_kTheme),
         orElse: () => ThemeMode.system,
       ),
+      // El publico objetivo es hispanohablante: sin eleccion guardada la app
+      // arranca en espanol, no en el idioma del telefono.
       language: AppLanguage.values.firstWhere(
         (l) => l.name == prefs.getString(_kLanguage),
-        orElse: () => AppLanguage.system,
+        orElse: () => AppLanguage.spanish,
       ),
       unit: DistanceUnit.values.firstWhere(
         (u) => u.name == prefs.getString(_kUnit),

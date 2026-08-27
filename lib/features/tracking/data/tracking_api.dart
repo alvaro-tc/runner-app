@@ -1,7 +1,7 @@
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/features/tracking/data/models/tracking_models.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/features/tracking/data/models/tracking_models.dart';
 
 /// Habla con `/workouts/sessions/*` y con la ingesta de posiciones.
 class TrackingApi {

@@ -1,11 +1,11 @@
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/error_mapper.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/storage/token_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/error_mapper.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/core/storage/token_storage.dart';
 
 import '../fake_http.dart';
 

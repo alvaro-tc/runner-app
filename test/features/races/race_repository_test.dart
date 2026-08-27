@@ -1,15 +1,15 @@
 import 'dart:convert';
 
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/features/races/data/datasources/races_api.dart';
+import 'package:camrun/features/races/data/repositories/remote_race_repository.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/features/races/data/datasources/races_api.dart';
-import 'package:paceup/features/races/data/repositories/remote_race_repository.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
 
 import '../../core/fake_http.dart';
 import '../../helpers.dart';
@@ -352,7 +352,7 @@ void main() {
             'amountCents': 51_000,
             'currency': 'BOB',
             'methodDetails': {
-              'qr': {'imageUrl': 'http://x/qr.png', 'payload': 'PACEUP-QR|...'},
+              'qr': {'imageUrl': 'http://x/qr.png', 'payload': 'CAMRUN-QR|...'},
             },
             'failureReason': null,
             'expiresAt': '2026-07-01T12:15:00Z',

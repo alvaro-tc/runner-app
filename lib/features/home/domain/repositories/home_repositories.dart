@@ -1,7 +1,7 @@
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:meta/meta.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
 
 /// Lo que `GET /home/summary` resuelve de una vez. Cinco cosas de cuatro
 /// modulos: con un endpoint por cosa, arrancar la app son cinco peticiones en

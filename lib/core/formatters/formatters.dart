@@ -1,5 +1,5 @@
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 
 /// Distance, pace, duration and money rendering. Kept pure so it is unit
 /// testable without a widget tree.

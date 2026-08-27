@@ -1,15 +1,15 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/utils/validators.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
+import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/core/utils/validators.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
-import 'package:paceup/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
@@ -81,15 +81,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         // Un solo campo: el usuario no tiene por que recordar con cual se dio
         // de alta. Quien decide si es email o CI es el servidor, por el `@`.
         AppTextField(
-<<<<<<< HEAD
           label: t.authIdentifierLabel,
           controller: _identifier,
-          hint: t.authEmailHint,
-=======
-          label: 'ID number or email',
-          controller: _identifier,
-          hint: '1234567 LP',
->>>>>>> main
+          hint: t.authIdHint,
           errorText: _identifierError,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
@@ -150,8 +144,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ],
         ),
         const SizedBox(height: AppSpacing.xxl),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               t.authNoAccount,

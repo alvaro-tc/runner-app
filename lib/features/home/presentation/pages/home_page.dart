@@ -1,21 +1,21 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/home/presentation/widgets/today_session_card.dart';
+import 'package:camrun/features/home/presentation/widgets/weekly_plan_strip.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
+import 'package:camrun/shared/widgets/organisms/marathon_hero_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/presentation/providers/home_provider.dart';
-import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
-import 'package:paceup/features/home/presentation/widgets/today_session_card.dart';
-import 'package:paceup/features/home/presentation/widgets/weekly_plan_strip.dart';
-import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
-import 'package:paceup/shared/widgets/organisms/marathon_hero_card.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -88,29 +88,8 @@ class _HomeBody extends ConsumerWidget {
       ),
       children: [
         // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
-<<<<<<< HEAD
-        if (marathon != null) ...[
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.homeUpcomingMarathon,
-                  style: context.text.headingLg,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              CountdownPill(remaining: remaining),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          MarathonHeroCard(
-            marathon: marathon,
-            onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
-          ),
-=======
         if (marathons.isNotEmpty) ...[
           _UpcomingMarathons(marathons: marathons),
->>>>>>> main
           const SizedBox(height: AppSpacing.xl),
         ],
         SectionHeader(
@@ -188,8 +167,8 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
             Expanded(
               child: Text(
                 marathons.length == 1
-                    ? 'Upcoming Marathon In'
-                    : 'Upcoming Marathons',
+                    ? context.l10n.homeUpcomingMarathon
+                    : context.l10n.homeUpcomingMarathons,
                 style: context.text.headingLg,
               ),
             ),
