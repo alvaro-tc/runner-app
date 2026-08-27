@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/app/dependencies.dart';
 import 'package:paceup/features/home/domain/entities/marathon.dart';
 
-final marathonListProvider = FutureProvider<List<Marathon>>(
+/// El catalogo de proximas carreras: el carrusel de Home y el fondo de la
+/// pestana "Upcoming" de Carreras.
+final upcomingMarathonsProvider = FutureProvider<List<Marathon>>(
   (ref) async =>
-      (await ref.watch(marathonRepositoryProvider).fetchAll()).unwrap(),
+      (await ref.watch(marathonRepositoryProvider).fetchUpcoming()).unwrap(),
 );
 
 final marathonProvider = FutureProvider.family<Marathon, String>(

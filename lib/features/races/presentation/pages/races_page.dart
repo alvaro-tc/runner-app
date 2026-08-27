@@ -6,11 +6,16 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
+import 'package:paceup/features/home/domain/entities/marathon.dart';
+import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
 import 'package:paceup/features/races/presentation/providers/races_provider.dart';
 import 'package:paceup/features/races/presentation/widgets/race_card.dart';
+import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
+import 'package:paceup/shared/widgets/atoms/event_image.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
+import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 class RacesPage extends ConsumerStatefulWidget {
   const RacesPage({super.key});
@@ -52,10 +57,18 @@ class _RacesPageState extends ConsumerState<RacesPage> {
   }
 
   Widget _body(List<RaceEntry> all) {
+    // El corte lo pone la fecha de largada, igual que en la API. Con el
+    // resultado como criterio, una carrera de ayer sin tiempos cargados seguia
+    // saliendo en "Upcoming" y una futura no salia en ninguna de las dos.
     final shown = [
       for (final entry in all)
-        if (_showCompleted ? entry.hasResult : !entry.hasResult) entry,
+        if (entry.isUpcoming != _showCompleted) entry,
     ];
+    // Solo cuelga de "Upcoming": en "Completed" un catalogo de carreras
+    // futuras no responde a nada.
+    final catalogo = _showCompleted
+        ? const <Marathon>[]
+        : ref.watch(upcomingMarathonsProvider).value ?? const <Marathon>[];
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -77,7 +90,9 @@ class _RacesPageState extends ConsumerState<RacesPage> {
           onChanged: (v) => setState(() => _showCompleted = v),
         ),
         const SizedBox(height: AppSpacing.lg),
-        if (shown.isEmpty)
+        // Con el catalogo debajo, el cartel de vacio sobra: ya hay algo que
+        // mirar y donde tocar.
+        if (shown.isEmpty && catalogo.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xl),
             child: EmptyState(
@@ -90,13 +105,118 @@ class _RacesPageState extends ConsumerState<RacesPage> {
               onAction: () => context.go(Routes.home),
             ),
           )
-        else
+        else if (shown.isNotEmpty)
           for (final entry in shown)
             RaceCard(
               entry: entry,
               onTap: () => context.push(Routes.raceDetailOf(entry.id)),
             ),
+        // Sin dorsal todavia, la pestaña no puede quedarse en un cartel: las
+        // proximas del catalogo son la respuesta a "no veo ninguna carrera".
+        if (catalogo.isNotEmpty) _OpenForRegistration(marathons: catalogo),
       ],
+    );
+  }
+}
+
+/// Las proximas del catalogo, al pie de "Upcoming". No son carreras del
+/// usuario: son a las que todavia se puede apuntar, y por eso llevan su propio
+/// encabezado en vez de mezclarse con las tarjetas de dorsal.
+class _OpenForRegistration extends StatelessWidget {
+  const _OpenForRegistration({required this.marathons});
+
+  final List<Marathon> marathons;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.lg),
+        const SectionHeader(title: 'Upcoming marathons'),
+        const SizedBox(height: AppSpacing.md),
+        for (final marathon in marathons)
+          _MarathonRow(
+            marathon: marathon,
+            onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
+          ),
+      ],
+    );
+  }
+}
+
+class _MarathonRow extends StatelessWidget {
+  const _MarathonRow({required this.marathon, required this.onTap});
+
+  final Marathon marathon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Material(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(color: c.border),
+            ),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  child: SizedBox(
+                    width: 52,
+                    height: 52,
+                    child: EventImage(imageUrl: marathon.heroImageUrl),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        marathon.name,
+                        style: context.text.titleMd,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${Fmt.dayMonth(marathon.date)} · ${marathon.city} · '
+                        '${Fmt.distanceShort(marathon.distanceKm)}',
+                        style: context.text.bodySm.copyWith(
+                          color: c.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // "Registration open" es el caso normal y no dice nada que la
+                // fila no diga ya; lo que urge —cierra, se lleno— si.
+                if (marathon.status != RegistrationStatus.open) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  AppBadge(
+                    label: marathon.status.label,
+                    tone: marathon.status == RegistrationStatus.closingSoon
+                        ? AppTone.warning
+                        : AppTone.neutral,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

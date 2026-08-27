@@ -36,7 +36,7 @@ de Flutter, no hace falta ningún paquete.
 
 | Comando | Archivo | URL base |
 |---|---|---|
-| `make run` / `make run-web` | `.env` | `https://runner-app.tumype.com/api/v1` |
+| `make run` / `make run-web` | `.env` | `https://cam-run.tumype.com/api/v1` |
 | `make run-local` | `.env.local` | `http://10.0.2.2:3000/api/v1` |
 
 Lo que hay en esos archivos se **incrusta en el binario**: ahí no va nunca un
@@ -59,7 +59,7 @@ vez: un puerto aleatorio no se puede meter en una lista blanca. En el backend,
 `/etc/running-api/.env.production`:
 
 ```
-CORS_ORIGINS=https://runner-app.tumype.com,http://localhost:5000
+CORS_ORIGINS=https://cam-run.tumype.com,http://localhost:5000
 ```
 
 ```bash
@@ -71,7 +71,7 @@ carga: el servidor responde `200` y el navegador tira la respuesta. Se
 comprueba con
 
 ```bash
-curl -sI -H "Origin: http://localhost:5000"   https://runner-app.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
+curl -sI -H "Origin: http://localhost:5000"   https://cam-run.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
 ```
 
 En web no todo se comporta igual: el GPS del navegador se para al cambiar de

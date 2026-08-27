@@ -58,7 +58,7 @@ compilación. Los dos entornos ya están en la raíz del repo.
 
 | Entorno | Archivo | Comando |
 |---|---|---|
-| Producción | `.env` (`https://runner-app.tumype.com/api/v1`) | `make run` |
+| Producción | `.env` (`https://cam-run.tumype.com/api/v1`) | `make run` |
 | Local | `.env.local` (`http://10.0.2.2:3000/api/v1`) | `make run-local` |
 
 o, sin `make`:
@@ -96,7 +96,7 @@ cada vez: uno aleatorio no se puede meter en una lista blanca. Hay que añadirlo
 en el VPS, en `/etc/running-api/.env.production`:
 
 ```
-CORS_ORIGINS=https://runner-app.tumype.com,http://localhost:5000
+CORS_ORIGINS=https://cam-run.tumype.com,http://localhost:5000
 ```
 
 ```bash
@@ -108,7 +108,7 @@ carga —el backend responde `200`, pero el navegador tira la respuesta—. Se
 comprueba así, que hoy **no** devuelve la cabecera:
 
 ```bash
-curl -sI -H "Origin: http://localhost:5000"   https://runner-app.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
+curl -sI -H "Origin: http://localhost:5000"   https://cam-run.tumype.com/api/v1/config/app | grep -i access-control-allow-origin
 ```
 
 Qué no funciona igual en web, para que no sorprenda:
@@ -124,7 +124,7 @@ permisos, segundo plano— se prueba en un teléfono.
 
 ## Estado de producción (20-08-2026, 22:16)
 
-`https://runner-app.tumype.com/api/v1` **funciona**. Lo que falla es que la
+`https://cam-run.tumype.com/api/v1` **funciona**. Lo que falla es que la
 base está vacía: falta sembrarla.
 
 | Petición | Respuesta |

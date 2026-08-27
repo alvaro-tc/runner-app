@@ -26,12 +26,12 @@ class RemoteMarathonRepository implements MarathonRepository {
   final AppDatabase db;
 
   @override
-  Future<Result<List<Marathon>>> fetchAll() => guard(
+  Future<Result<List<Marathon>>> fetchUpcoming({int limit = 8}) => guard(
     () => _fresco(
       db: db,
-      key: 'marathons.list',
+      key: 'marathons.upcoming',
       // La cache guarda documentos, no listas: la lista viaja dentro de uno.
-      fetch: () async => {'items': await api.marathons()},
+      fetch: () async => {'items': await api.upcomingMarathons(limit: limit)},
       parse: (j) => [
         for (final m in (j['items'] as List).cast<Map<String, dynamic>>())
           marathonFrom(m),

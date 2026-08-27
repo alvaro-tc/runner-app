@@ -11,6 +11,10 @@ import 'core/fake_http.dart';
 /// en La Paz y fallaria en Berlin.
 Future<ResponseBody> fakeBackend(RequestOptions req) async {
   final path = req.path;
+  // Antes que el detalle: `/marathons/upcoming` es una lista, no una maraton.
+  if (path.startsWith('/marathons/upcoming')) {
+    return envelope([_maraton, _otraMaraton]);
+  }
   if (path.startsWith('/marathons/')) return envelope(marathonDetail);
   if (path.startsWith('/registrations/') && path.endsWith('/payments')) {
     return envelope([_pago]);
@@ -105,6 +109,27 @@ const marathonDetail = {
       'available': true,
     },
   ],
+};
+
+/// La segunda del carrusel de Home. Basta con que sea otra: lo que se prueba
+/// es que el carrusel pagina, no sus datos.
+const _otraMaraton = {
+  'id': 'm2',
+  'slug': 'carrera-10k-cochabamba',
+  'name': 'Carrera 10K Cochabamba',
+  'startsAt': '2026-09-26T08:00:00',
+  'timezone': 'America/La_Paz',
+  'city': 'Cochabamba',
+  'country': 'BO',
+  'distanceMeters': 10000,
+  'priceCents': 9000,
+  'currency': 'BOB',
+  'coverUrl': null,
+  'registrationStatus': 'closing_soon',
+  'capacity': 800,
+  'slotsTaken': 760,
+  'slotsAvailable': 40,
+  'registrationClosesAt': null,
 };
 
 /// Lo que la lista de carreras necesita de la maraton: la API la manda

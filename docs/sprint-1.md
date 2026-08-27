@@ -8,7 +8,7 @@ verdad contra el servidor.
 
 > Este documento continúa el `backlog.md`. Los sprints 1 y 2 de aquel plan
 > (backend, identidad, catálogo, tracking real, sincronización offline) **ya
-> están entregados**: la app corre contra `https://runner-app.tumype.com/api/v1`
+> están entregados**: la app corre contra `https://cam-run.tumype.com/api/v1`
 > con `RemoteAuthRepository`, `RemoteHomeRepository`, `RemoteRaceRepository`,
 > `TrackingService` y `SyncService` con outbox y backoff exponencial. Lo que
 > queda planificado aquí es lo que falta para tener producto completo.
