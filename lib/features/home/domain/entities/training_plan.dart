@@ -1,16 +1,14 @@
 import 'package:meta/meta.dart';
 
+/// Sin etiqueta: el nombre visible sale del ARB, via `SessionTypeL10n`.
 enum SessionType {
-  easy('Run Easy'),
-  tempo('Tempo'),
-  intervals('Intervals'),
-  recovery('Recovery'),
-  long('Long Run'),
-  rest('Rest'),
-  race('Race Day');
-
-  const SessionType(this.label);
-  final String label;
+  easy,
+  tempo,
+  intervals,
+  recovery,
+  long,
+  rest,
+  race;
 
   bool get isRest => this == rest;
 }
@@ -51,10 +49,6 @@ class PlannedSession {
   final double completionRatio;
   final bool isCompleted;
 
-  /// `5km Run Easy`
-  String get title =>
-      type.isRest ? 'Rest day' : '${targetDistanceKm.round()}km ${type.label}';
-
   PlannedSession copyWith({double? completionRatio, bool? isCompleted}) =>
       PlannedSession(
         id: id,
@@ -81,8 +75,6 @@ class TrainingWeek {
   final int index;
   final DateTime startDate;
   final List<PlannedSession> sessions;
-
-  String get label => 'Training Week $index';
 
   double get plannedDistanceKm =>
       sessions.fold(0, (sum, s) => sum + s.targetDistanceKm);

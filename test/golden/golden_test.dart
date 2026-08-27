@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paceup/app/router/app_router.dart';
 import 'package:paceup/app/router/app_routes.dart';
+import 'package:paceup/core/services/settings_provider.dart';
 
 import '../helpers.dart';
 
@@ -61,8 +62,13 @@ void main() {
   }
 }
 
+/// El idioma va fijado a proposito: sin el, la referencia dependeria del
+/// locale de la maquina que corra la suite. Se fija a espanol porque es el
+/// idioma con el que se publica, y de estas capturas salen las fichas de
+/// tienda (PU-201/PU-202).
 Map<String, Object> _signedIn(ThemeMode mode) => {
   'settings.themeMode': mode.name,
+  'settings.language': AppLanguage.spanish.name,
 };
 
 /// iPhone 14 logical size.

@@ -8,6 +8,7 @@ import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/core/utils/validators.dart';
 import 'package:paceup/features/profile/domain/entities/user_profile.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -65,22 +66,21 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
 
   Future<bool> _confirmLeave() async {
     if (!_dirty) return true;
+    final t = context.l10n;
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text(
-          'You have edits that are not saved yet. Leaving now loses them.',
-        ),
+        title: Text(t.editDiscardTitle),
+        content: Text(t.editDiscardBody),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Keep editing'),
+            child: Text(t.editKeepEditing),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             child: Text(
-              'Discard',
+              t.commonDiscard,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -91,13 +91,25 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   }
 
   Future<void> _save(UserProfile original) async {
+    final t = context.l10n;
     setState(() {
       _errors
-        ..['name'] = Validators.required(_name.text, 'full name')
-        ..['email'] = Validators.email(_email.text)
-        ..['city'] = Validators.required(_city.text, 'city')
-        ..['weight'] = Validators.positiveNumber(_weight.text, 'Weight')
-        ..['height'] = Validators.positiveNumber(_height.text, 'Height');
+        ..['name'] = Validators.required(
+          _name.text,
+          t.validationFullNameRequired,
+        )
+        ..['email'] = Validators.email(t, _email.text)
+        ..['city'] = Validators.required(_city.text, t.validationCityRequired)
+        ..['weight'] = Validators.positiveNumber(
+          _weight.text,
+          notANumber: t.validationWeightNotANumber,
+          notPositive: t.validationWeightNotPositive,
+        )
+        ..['height'] = Validators.positiveNumber(
+          _height.text,
+          notANumber: t.validationHeightNotANumber,
+          notPositive: t.validationHeightNotPositive,
+        );
     });
     if (_errors.values.any((e) => e != null)) return;
 
@@ -122,12 +134,12 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       _dirty = error != null;
     });
     if (error != null) {
-      context.showSnack(error);
+      context.showSnack(error.localized(t));
       return;
     }
     context
       ..pop()
-      ..showSnack('Profile updated');
+      ..showSnack(t.editProfileUpdated);
   }
 
   Future<void> _pickBirthDate() async {
@@ -136,7 +148,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       initialDate: _birthDate ?? DateTime(1995),
       firstDate: DateTime(1930),
       lastDate: DateTime.now(),
-      helpText: 'Date of birth',
+      helpText: context.l10n.registerDateOfBirth,
     );
     if (picked == null) return;
     setState(() {
@@ -148,6 +160,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final profile = ref.watch(profileProvider);
 
     return PopScope(
@@ -162,17 +175,17 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: AppIconButton(
               icon: Icons.arrow_back_rounded,
-              semanticsLabel: 'Go back',
+              semanticsLabel: t.commonBack,
               onPressed: () async {
                 if (await _confirmLeave() && context.mounted) context.pop();
               },
             ),
           ),
-          title: const Text('Edit profile'),
+          title: Text(t.editProfileTitle),
         ),
         body: profile.when(
           loading: () => const Center(child: Skeleton(width: 180, height: 20)),
-          error: (error, _) => Center(child: Text(error.toString())),
+          error: (error, _) => Center(child: Text(error.localized(t))),
           data: (data) {
             if (!_loaded) _hydrate(data);
             return ListView(
@@ -183,17 +196,16 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     children: [
                       AppAvatar(initials: data.initials, size: 92),
                       TextButton(
-                        onPressed: () => context.showSnack(
-                          'Photo upload arrives with the media service.',
-                        ),
-                        child: const Text('Change photo'),
+                        onPressed: () =>
+                            context.showSnack(t.editPhotoComingSoon),
+                        child: Text(t.editChangePhoto),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppTextField(
-                  label: 'Full name',
+                  label: t.registerFullName,
                   controller: _name,
                   errorText: _errors['name'],
                   textInputAction: TextInputAction.next,
@@ -201,7 +213,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppTextField(
-                  label: 'Email',
+                  label: t.authEmailLabel,
                   controller: _email,
                   errorText: _errors['email'],
                   keyboardType: TextInputType.emailAddress,
@@ -213,7 +225,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   children: [
                     Expanded(
                       child: AppTextField(
-                        label: 'City',
+                        label: t.editCity,
                         controller: _city,
                         errorText: _errors['city'],
                         onChanged: (_) => _touch(),
@@ -222,7 +234,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: AppTextField(
-                        label: 'Country',
+                        label: t.editCountry,
                         controller: _country,
                         onChanged: (_) => _touch(),
                       ),
@@ -230,7 +242,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('Date of birth', style: context.text.labelSm),
+                Text(t.registerDateOfBirth, style: context.text.labelSm),
                 const SizedBox(height: AppSpacing.sm),
                 InkWell(
                   onTap: _pickBirthDate,
@@ -249,7 +261,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                         Expanded(
                           child: Text(
                             _birthDate == null
-                                ? 'Pick a date'
+                                ? t.editPickADate
                                 : Fmt.fullDate(_birthDate!),
                             style: context.text.bodyMd,
                           ),
@@ -264,7 +276,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('Gender', style: context.text.labelSm),
+                Text(t.registerGender, style: context.text.labelSm),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
                   spacing: AppSpacing.sm,
@@ -272,7 +284,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   children: [
                     for (final gender in Gender.values)
                       AppChip(
-                        label: gender.label,
+                        label: gender.label(t),
                         selected: _gender == gender,
                         onTap: () => setState(() {
                           _gender = gender;
@@ -286,7 +298,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   children: [
                     Expanded(
                       child: AppTextField(
-                        label: 'Weight (kg)',
+                        label: t.editWeightKg,
                         controller: _weight,
                         errorText: _errors['weight'],
                         keyboardType: const TextInputType.numberWithOptions(
@@ -298,7 +310,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: AppTextField(
-                        label: 'Height (cm)',
+                        label: t.editHeightCm,
                         controller: _height,
                         errorText: _errors['height'],
                         keyboardType: TextInputType.number,
@@ -308,14 +320,16 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('Units', style: context.text.labelSm),
+                Text(t.profileUnits, style: context.text.labelSm),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
                   spacing: AppSpacing.sm,
                   children: [
                     for (final unit in DistanceUnit.values)
                       AppChip(
-                        label: unit == DistanceUnit.km ? 'Kilometres' : 'Miles',
+                        label: unit == DistanceUnit.km
+                            ? t.settingsKilometres
+                            : t.settingsMiles,
                         selected: ref.watch(distanceUnitProvider) == unit,
                         onTap: () =>
                             ref.read(settingsProvider.notifier).setUnit(unit),
@@ -324,7 +338,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppButton(
-                  label: 'Save changes',
+                  label: t.editSaveChanges,
                   isLoading: _saving,
                   onPressed: _dirty ? () => _save(data) : null,
                 ),

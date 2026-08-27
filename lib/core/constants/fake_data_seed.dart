@@ -298,17 +298,37 @@ abstract final class FakeDataSeed {
     const centerLat = -6.2088;
     const centerLng = 106.8456;
     const shapes = <({double km, SessionType type, String title, int paceSec})>[
-      (km: 5.2, type: SessionType.easy, title: 'Morning Run', paceSec: 380),
-      (km: 8.1, type: SessionType.tempo, title: 'Tempo Run', paceSec: 322),
-      (km: 6.4, type: SessionType.easy, title: 'Evening Run', paceSec: 372),
-      (km: 14.3, type: SessionType.long, title: 'Long Run', paceSec: 398),
+      (
+        km: 5.2,
+        type: SessionType.easy,
+        title: RunTitleKey.morning,
+        paceSec: 380,
+      ),
+      (
+        km: 8.1,
+        type: SessionType.tempo,
+        title: RunTitleKey.tempo,
+        paceSec: 322,
+      ),
+      (
+        km: 6.4,
+        type: SessionType.easy,
+        title: RunTitleKey.evening,
+        paceSec: 372,
+      ),
+      (km: 14.3, type: SessionType.long, title: RunTitleKey.long, paceSec: 398),
       (
         km: 4.0,
         type: SessionType.intervals,
-        title: 'Track Session',
+        title: RunTitleKey.trackSession,
         paceSec: 305,
       ),
-      (km: 10.6, type: SessionType.easy, title: 'Lunch Run', paceSec: 366),
+      (
+        km: 10.6,
+        type: SessionType.easy,
+        title: RunTitleKey.lunch,
+        paceSec: 366,
+      ),
     ];
 
     final runs = <TrainingRun>[];

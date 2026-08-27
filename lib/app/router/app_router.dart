@@ -16,6 +16,7 @@ import 'package:paceup/features/home/presentation/pages/marathon_detail_page.dar
 import 'package:paceup/features/home/presentation/pages/marathon_register_page.dart';
 import 'package:paceup/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:paceup/features/profile/presentation/pages/appearance_page.dart';
+import 'package:paceup/features/profile/presentation/pages/language_page.dart';
 import 'package:paceup/features/profile/presentation/pages/profile_edit_page.dart';
 import 'package:paceup/features/profile/presentation/pages/profile_page.dart';
 import 'package:paceup/features/profile/presentation/pages/profile_settings_page.dart';
@@ -181,6 +182,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'appearance',
                     builder: (context, state) => const AppearancePage(),
+                  ),
+                  GoRoute(
+                    path: 'language',
+                    builder: (context, state) => const LanguagePage(),
                   ),
                 ],
               ),

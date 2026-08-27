@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 
 /// Distance, pace, duration and money rendering. Kept pure so it is unit
 /// testable without a widget tree.
@@ -80,12 +81,14 @@ abstract final class Fmt {
     );
   }
 
-  /// `in 34d` / `in 6h` / `today` — used by race cards.
-  static String relativeShort(Duration d) {
-    if (d.isNegative) return 'today';
-    if (d.inDays > 0) return 'in ${d.inDays}d';
-    if (d.inHours > 0) return 'in ${d.inHours}h';
-    return 'in ${d.inMinutes}m';
+  /// `en 34 d` / `en 6 h` / `hoy` — lo pintan las tarjetas de carrera.
+  ///
+  /// El texto sale del ARB: aqui solo se decide **que** unidad toca.
+  static String relativeShort(Duration d, AppLocalizations t) {
+    if (d.isNegative) return t.relativeToday;
+    if (d.inDays > 0) return t.relativeInDays(d.inDays);
+    if (d.inHours > 0) return t.relativeInHours(d.inHours);
+    return t.relativeInMinutes(d.inMinutes);
   }
 
   // ------------------------------------------------------------------- date
@@ -96,6 +99,16 @@ abstract final class Fmt {
   static String fullDate(DateTime d) => DateFormat('d MMMM y').format(d);
   static String monthYear(DateTime d) => DateFormat('MMMM y').format(d);
   static String weekdayShort(DateTime d) => DateFormat('EEE').format(d);
+
+  /// Iniciales de lunes a domingo en el idioma activo (`L M X J V S D` en
+  /// espanol, `M T W T F S S` en ingles). Las pinta el grafico semanal.
+  static List<String> weekdayInitials() {
+    final symbols = DateFormat.E().dateSymbols.NARROWWEEKDAYS;
+    // `NARROWWEEKDAYS` empieza en domingo; la app cuenta semanas de lunes a
+    // domingo, asi que se rota.
+    return [...symbols.skip(1), symbols.first];
+  }
+
   static String timeOfDay(DateTime d) => DateFormat('HH:mm').format(d);
 
   // ------------------------------------------------------------------ misc

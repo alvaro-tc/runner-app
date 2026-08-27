@@ -9,6 +9,7 @@ import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/home/domain/entities/training_plan.dart';
 import 'package:paceup/features/home/presentation/providers/home_provider.dart';
 import 'package:paceup/features/train/presentation/providers/run_session_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -58,6 +59,7 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
   }
 
   RunGoal _buildGoal() {
+    final t = context.l10n;
     final planned = _plannedSession;
     return switch (_type) {
       RunGoalType.planSession when planned != null => RunGoal(
@@ -67,17 +69,17 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
         sessionId: planned.id,
         laps: planned.type == SessionType.intervals ? 10 : null,
         lapPace: planned.targetPace.min,
-        title: planned.title,
+        title: planned.title(t),
       ),
       RunGoalType.distance => RunGoal(
         type: RunGoalType.distance,
         distanceKm: _distanceKm,
-        title: '${Fmt.distance(_distanceKm)} goal',
+        title: t.goalDistanceTitle(Fmt.distance(_distanceKm)),
       ),
       RunGoalType.time => RunGoal(
         type: RunGoalType.time,
         duration: _duration,
-        title: '${Fmt.durationShort(_duration)} goal',
+        title: t.goalTimeTitle(Fmt.durationShort(_duration)),
       ),
       _ => RunGoal.free,
     };
@@ -101,6 +103,7 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final planned = _plannedSession;
     final granted = _permission?.isGranted ?? false;
 
@@ -110,38 +113,38 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () => context.pop(),
           ),
         ),
-        title: const Text('Set up your run'),
+        title: Text(t.setupTitle),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.screenH),
         children: [
-          const SectionHeader(title: 'What are you running?'),
+          SectionHeader(title: t.setupWhatAreYouRunning),
           const SizedBox(height: AppSpacing.md),
           _GoalTile(
             icon: Icons.bolt_rounded,
-            title: 'Free run',
-            subtitle: 'No target. Just go and let PaceUp record it.',
+            title: t.trainFreeRun,
+            subtitle: t.setupFreeRunSubtitle,
             selected: _type == RunGoalType.free,
             onTap: () => setState(() => _type = RunGoalType.free),
           ),
           if (planned != null)
             _GoalTile(
               icon: Icons.event_available_rounded,
-              title: 'Plan session',
+              title: t.setupPlanSession,
               subtitle:
-                  '${planned.title} · '
+                  '${planned.title(t)} · '
                   '${Fmt.paceRange(planned.targetPace.min, planned.targetPace.max)}',
               selected: _type == RunGoalType.planSession,
               onTap: () => setState(() => _type = RunGoalType.planSession),
             ),
           _GoalTile(
             icon: Icons.straighten_rounded,
-            title: 'Distance goal',
-            subtitle: 'Run until you hit a set distance.',
+            title: t.setupDistanceGoal,
+            subtitle: t.setupDistanceGoalSubtitle,
             selected: _type == RunGoalType.distance,
             onTap: () => setState(() => _type = RunGoalType.distance),
           ),
@@ -158,8 +161,8 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
             ),
           _GoalTile(
             icon: Icons.timer_outlined,
-            title: 'Time goal',
-            subtitle: 'Run for a set amount of time.',
+            title: t.setupTimeGoal,
+            subtitle: t.setupTimeGoalSubtitle,
             selected: _type == RunGoalType.time,
             onTap: () => setState(() => _type = RunGoalType.time),
           ),
@@ -195,7 +198,7 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      granted ? 'Location ready' : 'Location access',
+                      granted ? t.setupLocationReady : t.setupLocationAccess,
                       style: context.text.titleMd,
                     ),
                   ],
@@ -203,17 +206,16 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   _permission != null && !granted
-                      ? _permission!.message
+                      ? _permission!.message(t)
                       : granted
-                      ? 'PaceUp can draw your route while you run.'
-                      : 'PaceUp reads your position only while a run is '
-                            'recording, and stores the route on this device.',
+                      ? t.setupLocationGrantedBody
+                      : t.setupLocationRationale,
                   style: context.text.bodySm.copyWith(color: c.textSecondary),
                 ),
                 if (!granted) ...[
                   const SizedBox(height: AppSpacing.md),
                   AppButton(
-                    label: 'Allow location',
+                    label: t.setupAllowLocation,
                     variant: AppButtonVariant.secondary,
                     size: AppButtonSize.sm,
                     isFullWidth: false,
@@ -225,7 +227,7 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          AppButton(label: 'Start run', onPressed: _start),
+          AppButton(label: t.setupStartRun, onPressed: _start),
         ],
       ),
     );

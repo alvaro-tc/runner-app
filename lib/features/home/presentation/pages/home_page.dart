@@ -10,6 +10,7 @@ import 'package:paceup/features/home/presentation/providers/marathon_providers.d
 import 'package:paceup/features/home/presentation/widgets/today_session_card.dart';
 import 'package:paceup/features/home/presentation/widgets/weekly_plan_strip.dart';
 import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/skeleton.dart';
 import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
 import 'package:paceup/shared/widgets/molecules/states.dart';
@@ -36,7 +37,7 @@ class HomePage extends ConsumerWidget {
               children: [
                 SizedBox(height: context.screenSize.height * 0.2),
                 ErrorStateView(
-                  message: error.toString(),
+                  message: error.localized(context.l10n),
                   onRetry: () => ref.invalidate(homeProvider),
                 ),
               ],
@@ -60,8 +61,8 @@ class _HomeBody extends ConsumerWidget {
     final planTitle = ref
         .watch(profileProvider)
         .maybeWhen(
-          data: (p) => "${p.firstName}'s Training Plan",
-          orElse: () => 'Your Training Plan',
+          data: (p) => context.l10n.homePlanTitleOf(p.firstName),
+          orElse: () => context.l10n.homePlanTitleGeneric,
         );
     // La del usuario abre el carrusel —es la que tiene una cuenta atras que le
     // importa—; detras van las del catalogo, sin repetirla.
@@ -87,8 +88,29 @@ class _HomeBody extends ConsumerWidget {
       ),
       children: [
         // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
+<<<<<<< HEAD
+        if (marathon != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n.homeUpcomingMarathon,
+                  style: context.text.headingLg,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              CountdownPill(remaining: remaining),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          MarathonHeroCard(
+            marathon: marathon,
+            onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
+          ),
+=======
         if (marathons.isNotEmpty) ...[
           _UpcomingMarathons(marathons: marathons),
+>>>>>>> main
           const SizedBox(height: AppSpacing.xl),
         ],
         SectionHeader(
@@ -112,10 +134,8 @@ class _HomeBody extends ConsumerWidget {
             onToggleCompleted: (value) => ref
                 .read(homeProvider.notifier)
                 .toggleSession(session.id, completed: value),
-            onReschedule: () => context.showSnack(
-              'Rescheduling arrives with the plan editor. '
-              'Start the run whenever suits you today.',
-            ),
+            onReschedule: () =>
+                context.showSnack(context.l10n.homeRescheduleComingSoon),
             onStart: () =>
                 context.push('${Routes.trainSetup}?session=${session.id}'),
           ),
@@ -249,7 +269,7 @@ class _WeekPicker extends StatelessWidget {
           PopupMenuItem(
             value: i,
             child: Text(
-              'Training Week $i',
+              context.l10n.homeTrainingWeek(i),
               style: context.text.bodyMd.copyWith(
                 color: i == selected ? c.primary : c.textPrimary,
               ),
@@ -269,7 +289,7 @@ class _WeekPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Training Week $selected',
+              context.l10n.homeTrainingWeek(selected),
               style: context.text.labelSm.copyWith(color: c.primary),
             ),
             const SizedBox(width: AppSpacing.xs),

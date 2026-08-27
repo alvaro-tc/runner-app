@@ -40,8 +40,17 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   }
 
   Future<void> _submit() async {
+    final t = context.l10n;
     setState(() {
       _errors
+<<<<<<< HEAD
+        ..['name'] = Validators.required(
+          _name.text,
+          t.validationFullNameRequired,
+        )
+        ..['email'] = Validators.email(t, _email.text)
+        ..['password'] = Validators.password(t, _password.text)
+=======
         ..['name'] = Validators.required(_name.text, 'full name')
         ..['ci'] = Validators.ci(_ci.text)
         // El correo es opcional: solo se valida si escribio algo. Exigirlo
@@ -51,14 +60,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             ? null
             : Validators.email(_email.text)
         ..['password'] = Validators.password(_password.text)
+>>>>>>> main
         ..['confirm'] = Validators.confirmPassword(
+          t,
           _confirm.text,
           _password.text,
         );
     });
     if (_errors.values.any((e) => e != null)) return;
     if (!_acceptedTerms) {
-      context.showSnack('Accept the terms to create your account.');
+      context.showSnack(t.authAcceptTermsRequired);
       return;
     }
 
@@ -88,19 +99,20 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     return AuthScaffold(
       children: [
-        Text('Create your\naccount.', style: context.text.displayMd),
+        Text(t.authSignUpTitle, style: context.text.displayMd),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Two minutes now, and every run you take from here is counted.',
+          t.authSignUpSubtitle,
           style: context.text.bodyMd.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xxl),
         AppTextField(
-          label: 'Full name',
+          label: t.authFullNameLabel,
           controller: _name,
-          hint: 'Pandu Wirawan',
+          hint: t.authFullNameHint,
           errorText: _errors['name'],
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.name],
@@ -110,6 +122,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         // La CI es la credencial que vale en las dos puntas: con ella entras a
         // la app y con ella la web reconoce un pago tuyo hecho fuera de aqui.
         AppTextField(
+<<<<<<< HEAD
+          label: t.authEmailLabel,
+=======
           label: 'ID number (CI)',
           controller: _ci,
           hint: '1234567 LP',
@@ -121,8 +136,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
           label: 'Email (optional)',
+>>>>>>> main
           controller: _email,
-          hint: 'pandu@paceup.app',
+          hint: t.authEmailHint,
           errorText: _errors['email'],
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
@@ -137,9 +153,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Password',
+          label: t.authPasswordLabel,
           controller: _password,
-          hint: 'At least 8 characters',
+          hint: t.authPasswordHint,
           errorText: _errors['password'],
           isPassword: true,
           textInputAction: TextInputAction.next,
@@ -148,9 +164,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Confirm password',
+          label: t.authConfirmPasswordLabel,
           controller: _confirm,
-          hint: 'Type it once more',
+          hint: t.authConfirmPasswordHint,
           errorText: _errors['confirm'],
           isPassword: true,
           textInputAction: TextInputAction.done,
@@ -162,12 +178,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           children: [
             AppCheckbox(
               value: _acceptedTerms,
-              semanticsLabel: 'Accept terms and privacy policy',
+              semanticsLabel: t.authAcceptTermsSemantics,
               onChanged: (v) => setState(() => _acceptedTerms = v),
             ),
             Expanded(
               child: Text(
-                'I accept the terms of service and the privacy policy.',
+                t.authAcceptTerms,
                 style: context.text.bodySm.copyWith(color: c.textSecondary),
               ),
             ),
@@ -175,7 +191,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppButton(
-          label: 'Create account',
+          label: t.authCreateAccount,
           isLoading: _loading,
           onPressed: _submit,
         ),
@@ -184,12 +200,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Already have an account?',
+              t.authHaveAccount,
               style: context.text.bodyMd.copyWith(color: c.textSecondary),
             ),
             TextButton(
               onPressed: () => context.pushReplacement(Routes.signIn),
-              child: const Text('Login'),
+              child: Text(t.authLogin),
             ),
           ],
         ),

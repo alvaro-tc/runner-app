@@ -11,6 +11,7 @@ import 'package:paceup/features/races/domain/entities/race_entry.dart';
 import 'package:paceup/features/races/presentation/providers/races_provider.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 import 'package:paceup/features/train/presentation/providers/run_session_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -34,6 +35,7 @@ class RaceStartPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final carrera = ref.watch(raceDetailProvider(registrationId));
 
     return Scaffold(
@@ -42,20 +44,18 @@ class RaceStartPage extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () => context.canPop()
                 ? context.pop()
                 : context.go(Routes.raceDetailOf(registrationId)),
           ),
         ),
-        title: const Text('Race day'),
+        title: Text(t.raceDayTitle),
       ),
       body: carrera.when(
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => ErrorStateView(
-          message: error is Failure
-              ? error.message
-              : 'We could not load that race.',
+          message: error is Failure ? error.localized(t) : t.raceDayNotLoaded,
           onRetry: () => ref.invalidate(raceDetailProvider(registrationId)),
         ),
         data: (entry) => _Body(entry: entry),
@@ -92,6 +92,7 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     // El recorrido oficial vive en el catalogo, no en la inscripcion: es de la
     // carrera, no de quien corre.
     final maraton = ref.watch(marathonProvider(entry.marathon.id));
@@ -137,7 +138,7 @@ class _Body extends ConsumerWidget {
           runSpacing: AppSpacing.sm,
           children: [
             AppBadge(
-              label: 'BIB ${entry.bibNumber}',
+              label: t.commonBib(entry.bibNumber),
               icon: Icons.confirmation_num_outlined,
             ),
             AppBadge(
@@ -155,24 +156,24 @@ class _Body extends ConsumerWidget {
             borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: c.border),
           ),
-          child: const Column(
+          child: Column(
             children: [
               StatRow(
                 icon: Icons.route_outlined,
-                title: 'The official course is on the map',
-                subtitle: 'Your live track is drawn on top of it as you run',
+                title: t.raceDayCourseTitle,
+                subtitle: t.raceDayCourseSubtitle,
               ),
-              AppDivider(),
+              const AppDivider(),
               StatRow(
                 icon: Icons.sensors_rounded,
-                title: 'Your position is sent while you run',
-                subtitle: 'In batches, so the battery lasts the whole race',
+                title: t.raceDayPositionTitle,
+                subtitle: t.raceDayPositionSubtitle,
               ),
-              AppDivider(),
+              const AppDivider(),
               StatRow(
                 icon: Icons.wifi_off_rounded,
-                title: 'Losing signal is fine',
-                subtitle: 'Points are stored on the phone and uploaded later',
+                title: t.raceDaySignalTitle,
+                subtitle: t.raceDaySignalSubtitle,
               ),
             ],
           ),
@@ -180,16 +181,13 @@ class _Body extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         if (entry.canStart)
           AppButton(
-            label: 'Start the race',
+            label: t.raceDayStart,
             icon: Icons.play_arrow_rounded,
             onPressed: () => _start(context, ref, recorrido),
           )
         else
           Text(
-            entry.hasResult
-                ? 'You already finished this race.'
-                : 'This race is not ready to start. Check that your entry is '
-                      'paid and confirmed.',
+            entry.hasResult ? t.raceDayAlreadyFinished : t.raceDayNotReady,
             style: context.text.bodySm.copyWith(color: c.textSecondary),
           ),
       ],

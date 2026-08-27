@@ -94,15 +94,31 @@ class KmSplit {
   };
 }
 
+/// El emoji es el mismo en todos los idiomas; la etiqueta sale del ARB, via
+/// `RunFeelingL10n`.
 enum RunFeeling {
-  rough('Rough', '😖'),
-  okay('Okay', '😐'),
-  good('Good', '🙂'),
-  strong('Strong', '🔥');
+  rough('\u{1F616}'),
+  okay('\u{1F610}'),
+  good('\u{1F642}'),
+  strong('\u{1F525}');
 
-  const RunFeeling(this.label, this.emoji);
-  final String label;
+  const RunFeeling(this.emoji);
   final String emoji;
+}
+
+/// Titulos que genera la propia app para una salida.
+///
+/// Se guardan como identificador, no como texto: una salida grabada en ingles
+/// tiene que leerse en espanol al cambiar el idioma. Lo que venga del servidor
+/// llega ya como texto libre y se pinta tal cual.
+abstract final class RunTitleKey {
+  static const morning = 'run.morning';
+  static const lunch = 'run.lunch';
+  static const afternoon = 'run.afternoon';
+  static const evening = 'run.evening';
+  static const tempo = 'run.tempo';
+  static const long = 'run.long';
+  static const trackSession = 'run.track_session';
 }
 
 @immutable
@@ -120,7 +136,7 @@ class TrainingRun {
     required this.route,
     required this.splits,
     required this.type,
-    this.title = 'Morning Run',
+    this.title = RunTitleKey.morning,
     this.avgHeartRate,
     this.calories,
     this.feeling,
@@ -146,7 +162,7 @@ class TrainingRun {
         KmSplit.fromJson(Map<String, dynamic>.from(s as Map)),
     ],
     type: SessionType.values.byName(json['type'] as String),
-    title: json['title'] as String? ?? 'Morning Run',
+    title: json['title'] as String? ?? RunTitleKey.morning,
     avgHeartRate: json['hr'] as int?,
     calories: json['calories'] as int?,
     feeling: json['feeling'] == null

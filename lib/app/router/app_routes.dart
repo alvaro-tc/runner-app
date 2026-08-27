@@ -27,6 +27,7 @@ abstract final class Routes {
   static const profileEdit = '/profile/edit';
   static const profileSettings = '/profile/settings';
   static const profileAppearance = '/profile/appearance';
+  static const profileLanguage = '/profile/language';
 
   static const showcase = '/dev/showcase';
 

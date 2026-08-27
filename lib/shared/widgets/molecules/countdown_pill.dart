@@ -26,9 +26,11 @@ class CountdownPill extends StatelessWidget {
     ];
 
     return Semantics(
-      label:
-          'Starts in ${parts.days} days ${parts.hours} hours '
-          '${parts.minutes} minutes',
+      label: context.l10n.countdownSemantics(
+        parts.days,
+        parts.hours,
+        parts.minutes,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.base,

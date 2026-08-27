@@ -18,7 +18,7 @@ class SplitsChart extends StatelessWidget {
     final c = context.colors;
     if (splits.isEmpty) {
       return Text(
-        'This run was shorter than a kilometre, so there are no splits yet.',
+        context.l10n.splitsTooShort,
         style: context.text.bodySm.copyWith(color: c.textSecondary),
       );
     }
@@ -76,7 +76,7 @@ class SplitsChart extends StatelessWidget {
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipColor: (_) => c.inkPill,
                   getTooltipItem: (group, _, rod, _) => BarTooltipItem(
-                    'km ${group.x + 1}\n'
+                    '${context.l10n.runSplitKm(group.x + 1)}\n'
                     '${Fmt.paceWithUnit(splits[group.x].pace, miles: miles)}',
                     context.text.bodySm.copyWith(color: c.onInkPill),
                   ),
@@ -106,11 +106,14 @@ class SplitsChart extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            _Legend(color: c.success, label: 'Fastest km'),
+            _Legend(color: c.success, label: context.l10n.splitsFastestKm),
             const SizedBox(width: AppSpacing.base),
-            _Legend(color: c.primary, label: 'Under average'),
+            _Legend(color: c.primary, label: context.l10n.splitsUnderAverage),
             const SizedBox(width: AppSpacing.base),
-            _Legend(color: c.primaryLight, label: 'Over average'),
+            _Legend(
+              color: c.primaryLight,
+              label: context.l10n.splitsOverAverage,
+            ),
           ],
         ),
       ],

@@ -6,23 +6,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:paceup/core/utils/route_generator.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
 
+/// Sin mensaje: la explicacion sale del ARB, via
+/// `LocationPermissionOutcomeL10n`.
 enum LocationPermissionOutcome {
   granted,
-  denied('Location permission was declined. Grant it to record your route.'),
-  deniedForever(
-    'Location is blocked for PaceUp. Turn it on in system settings, then come '
-    'back.',
-  ),
-  backgroundDenied(
-    'Background location is off. Recording keeps working while PaceUp is on '
-    'screen, but may stop if you switch apps.',
-  ),
-  serviceDisabled(
-    'Location services are off on this device. Switch them on to start a run.',
-  );
-
-  const LocationPermissionOutcome([this.message = '']);
-  final String message;
+  denied,
+  deniedForever,
+  backgroundDenied,
+  serviceDisabled;
 
   bool get isGranted => this == LocationPermissionOutcome.granted;
 }

@@ -22,7 +22,7 @@ class RunGoal {
     this.officialRoute = const [],
     this.laps,
     this.lapPace,
-    this.title = 'Free run',
+    this.title = '',
   });
 
   static const free = RunGoal(type: RunGoalType.free);
@@ -106,7 +106,10 @@ class RunSessionState {
   final int countdownValue;
   final Duration currentPace;
   final Duration lastKmPace;
-  final String? error;
+
+  /// El motivo por el que el GPS no arranco, como enum: el texto sale del ARB
+  /// al pintarlo. Ver `LocationPermissionOutcomeL10n`.
+  final LocationPermissionOutcome? error;
 
   bool get isActive =>
       status == RunStatus.running || status == RunStatus.paused;
@@ -150,7 +153,7 @@ class RunSessionState {
     int? countdownValue,
     Duration? currentPace,
     Duration? lastKmPace,
-    String? error,
+    LocationPermissionOutcome? error,
     bool clearError = false,
   }) => RunSessionState(
     status: status ?? this.status,
@@ -206,7 +209,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
 
     final outcome = await ref.read(locationServiceProvider).ensurePermission();
     if (!outcome.isGranted) {
-      state = state.copyWith(goal: goal, error: outcome.message);
+      state = state.copyWith(goal: goal, error: outcome);
       return;
     }
 
@@ -242,7 +245,9 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     // local. Correr sin cobertura tiene que funcionar igual.
     await tracking.start(
       type: goal.isRace ? 'race' : 'free_run',
-      planSessionId: goal.type == RunGoalType.planSession ? goal.sessionId : null,
+      planSessionId: goal.type == RunGoalType.planSession
+          ? goal.sessionId
+          : null,
       registrationId: goal.registrationId,
     );
   }
@@ -322,7 +327,9 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   /// el historial local si no hubo red.
   Future<TrainingRun> finish({int? feeling, String? notes}) async {
     _teardown();
-    await ref.read(trackingServiceProvider).stop(feeling: feeling, notes: notes);
+    await ref
+        .read(trackingServiceProvider)
+        .stop(feeling: feeling, notes: notes);
 
     final started = _startedAt ?? DateTime.now();
     final elapsed = state.elapsed;
@@ -361,11 +368,13 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     await ref.read(trackingServiceProvider).discard();
   }
 
+  /// Devuelve la **clave**, no el texto: quien la pinta la traduce al idioma
+  /// activo en ese momento. Ver `RunTitleL10n`.
   static String _titleFor(DateTime at) {
-    if (at.hour < 11) return 'Morning Run';
-    if (at.hour < 15) return 'Lunch Run';
-    if (at.hour < 19) return 'Afternoon Run';
-    return 'Evening Run';
+    if (at.hour < 11) return RunTitleKey.morning;
+    if (at.hour < 15) return RunTitleKey.lunch;
+    if (at.hour < 19) return RunTitleKey.afternoon;
+    return RunTitleKey.evening;
   }
 }
 

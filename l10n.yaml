@@ -1,0 +1,20 @@
+# Generacion de las clases de localizacion (PU-203).
+#
+# `flutter gen-l10n` (o cualquier `flutter run`/`build`, que lo dispara solo por
+# el `generate: true` del pubspec) lee los ARB de aqui y escribe las clases en
+# lib/l10n/gen/. Eso SI se versiona: `flutter test` y el analizador no lo
+# regeneran, asi que un clon limpio no compilaria sin ello. Despues de tocar un
+# ARB hay que correr `make l10n` y commitear lo que cambie.
+arb-dir: lib/l10n/arb
+output-dir: lib/l10n/gen
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+preferred-supported-locales:
+  - es
+  - en
+# El ingles es la plantilla, pero el publico objetivo es hispanohablante: si
+# alguna clave se queda sin traducir cae al ingles en vez de romper el build.
+untranslated-messages-file: lib/l10n/untranslated.json
+nullable-getter: false
+use-escaping: true

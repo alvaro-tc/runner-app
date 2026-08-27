@@ -9,6 +9,7 @@ import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/races/domain/entities/race_entry.dart';
 import 'package:paceup/features/races/presentation/providers/races_provider.dart';
+import 'package:paceup/l10n/l10n_labels.dart';
 import 'package:paceup/shared/widgets/atoms/app_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
@@ -27,6 +28,7 @@ class RaceDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final entry = ref.watch(raceDetailProvider(entryId));
 
     return Scaffold(
@@ -35,19 +37,17 @@ class RaceDetailPage extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go(Routes.races),
           ),
         ),
-        title: const Text('My race'),
+        title: Text(t.raceDetailTitle),
       ),
       body: entry.when(
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => ErrorStateView(
-          message: error is Failure
-              ? error.message
-              : 'We could not find that registration.',
+          message: error is Failure ? error.localized(t) : t.raceDetailNotFound,
           onRetry: () => ref.invalidate(raceDetailProvider(entryId)),
         ),
         data: (data) => _Body(entry: data),
@@ -62,24 +62,23 @@ class _Body extends ConsumerWidget {
   final RaceEntry entry;
 
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
+    final t = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel this registration?'),
+        title: Text(t.raceCancelTitle),
         content: Text(
-          'Your place at ${entry.marathon.name} is released and the entry fee '
-          'is refunded to ${entry.paymentMethod}. Re-entry depends on '
-          'availability.',
+          t.raceCancelBody(entry.marathon.name, entry.paymentMethod),
         ),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Keep my place'),
+            child: Text(t.raceKeepMyPlace),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             child: Text(
-              'Cancel entry',
+              t.raceCancelEntry,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -90,12 +89,13 @@ class _Body extends ConsumerWidget {
 
     final error = await ref.read(racesProvider.notifier).cancel(entry.id);
     if (!context.mounted) return;
-    context.showSnack(error ?? 'Registration cancelled. Refund on its way.');
+    context.showSnack(error?.localized(t) ?? t.raceCancelled);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final miles = ref.watch(useMilesProvider);
     final result = entry.result;
 
@@ -115,9 +115,7 @@ class _Body extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                EventImage(
-                  imageUrl: entry.marathon.heroImageUrl,
-                ),
+                EventImage(imageUrl: entry.marathon.heroImageUrl),
                 DecoratedBox(
                   decoration: BoxDecoration(gradient: c.heroOverlay),
                 ),
@@ -137,10 +135,10 @@ class _Body extends ConsumerWidget {
           runSpacing: AppSpacing.sm,
           children: [
             AppBadge(
-              label: 'BIB ${entry.bibNumber}',
+              label: t.commonBib(entry.bibNumber),
               icon: Icons.confirmation_num_outlined,
             ),
-            AppBadge(label: entry.status.label, tone: AppTone.neutral),
+            AppBadge(label: entry.status.label(t), tone: AppTone.neutral),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -149,7 +147,7 @@ class _Body extends ConsumerWidget {
         else
           ..._upcomingBlocks(context, ref),
         const SizedBox(height: AppSpacing.xl),
-        Text('Registration', style: context.text.headingMd),
+        Text(t.raceRegistration, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.sm),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
@@ -161,20 +159,23 @@ class _Body extends ConsumerWidget {
           child: Column(
             children: [
               SessionSummaryRow(
-                label: 'Registered on',
+                label: t.raceRegisteredOn,
                 value: Fmt.fullDate(entry.registeredAt),
               ),
               SessionSummaryRow(
-                label: 'Amount paid',
+                label: t.raceAmountPaid,
                 value: Fmt.money(
                   entry.amountPaid.amount,
                   entry.amountPaid.currency,
                 ),
               ),
-              SessionSummaryRow(label: 'Method', value: entry.paymentMethod),
               SessionSummaryRow(
-                label: 'Status',
-                value: entry.paymentStatus.label,
+                label: t.raceMethod,
+                value: entry.paymentMethod,
+              ),
+              SessionSummaryRow(
+                label: t.raceStatus,
+                value: entry.paymentStatus.label(t),
                 valueColor: switch (entry.paymentStatus) {
                   PaymentStatus.paid => c.success,
                   PaymentStatus.pending => c.warning,
@@ -187,34 +188,31 @@ class _Body extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         AppButton(
-          label: 'Download receipt',
+          label: t.raceDownloadReceipt,
           variant: AppButtonVariant.outline,
           icon: Icons.receipt_long_outlined,
-          onPressed: () => context.showSnack(
-            'Receipts download once the billing service is connected.',
-          ),
+          onPressed: () => context.showSnack(t.raceReceiptComingSoon),
         ),
         if (result != null) ...[
           const SizedBox(height: AppSpacing.sm),
           AppButton(
-            label: 'Share result',
+            label: t.raceShareResult,
             variant: AppButtonVariant.secondary,
             icon: Icons.ios_share_rounded,
-            onPressed: () =>
-                context.showSnack('A shareable finisher card is on the way.'),
+            onPressed: () => context.showSnack(t.raceShareComingSoon),
           ),
         ] else if (entry.isUpcoming) ...[
           if (entry.canStart) ...[
             const SizedBox(height: AppSpacing.sm),
             AppButton(
-              label: 'Go to the start line',
+              label: t.raceGoToStartLine,
               icon: Icons.play_arrow_rounded,
               onPressed: () => context.push(Routes.raceStartOf(entry.id)),
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
           AppButton(
-            label: 'Cancel registration',
+            label: t.raceCancelRegistration,
             variant: AppButtonVariant.ghost,
             onPressed: () => _cancel(context, ref),
           ),
@@ -229,6 +227,7 @@ class _Body extends ConsumerWidget {
     bool miles,
   ) {
     final c = context.colors;
+    final t = context.l10n;
     return [
       ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -253,44 +252,44 @@ class _Body extends ConsumerWidget {
           MetricTile(
             icon: Icons.flag_rounded,
             value: Fmt.clock(result.finishTime),
-            label: 'Finish time',
+            label: t.commonFinishTime,
             compact: true,
           ),
           MetricTile(
             icon: Icons.sensors_rounded,
             value: Fmt.clock(result.chipTime),
-            label: 'Chip time',
+            label: t.raceChipTime,
             compact: true,
           ),
           MetricTile(
             icon: Icons.speed_rounded,
             value: Fmt.paceWithUnit(result.avgPacePerKm, miles: miles),
-            label: 'Average pace',
+            label: t.commonAveragePace,
             compact: true,
           ),
           MetricTile(
             icon: Icons.rocket_launch_outlined,
             value: Fmt.speed(result.avgSpeedKmh, miles: miles),
-            label: 'Average speed',
+            label: t.commonAverageSpeed,
             compact: true,
           ),
           MetricTile(
             icon: Icons.straighten_rounded,
             value: Fmt.distance(result.distanceKm, miles: miles),
-            label: 'Distance',
+            label: t.commonDistance,
             compact: true,
           ),
           MetricTile(
             icon: Icons.terrain_rounded,
             value: Fmt.elevation(result.elevationGainM),
-            label: 'Elevation gain',
+            label: t.commonElevationGain,
             compact: true,
           ),
           if (result.bestKm != null)
             MetricTile(
               icon: Icons.bolt_rounded,
               value: Fmt.paceWithUnit(result.bestKm!, miles: miles),
-              label: 'Best km',
+              label: t.raceBestKm,
               compact: true,
               tone: c.success,
             ),
@@ -298,20 +297,20 @@ class _Body extends ConsumerWidget {
             MetricTile(
               icon: Icons.leaderboard_outlined,
               value: Fmt.rank(result.overallRank!, result.totalParticipants!),
-              label: 'Overall rank',
+              label: t.raceOverallRank,
               compact: true,
             ),
           if (result.ageGroupRank != null)
             MetricTile(
               icon: Icons.groups_outlined,
               value: '#${result.ageGroupRank}',
-              label: 'Age group rank',
+              label: t.raceAgeGroupRank,
               compact: true,
             ),
         ],
       ),
       const SizedBox(height: AppSpacing.xl),
-      Text('Splits', style: context.text.headingMd),
+      Text(t.commonSplits, style: context.text.headingMd),
       const SizedBox(height: AppSpacing.md),
       SplitsChart(splits: result.splits, miles: miles),
     ];
@@ -319,11 +318,12 @@ class _Body extends ConsumerWidget {
 
   List<Widget> _upcomingBlocks(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final t = context.l10n;
     final remaining = entry.marathon.date.difference(DateTime.now());
     return [
       Row(
         children: [
-          Expanded(child: Text('Starts in', style: context.text.headingMd)),
+          Expanded(child: Text(t.raceStartsIn, style: context.text.headingMd)),
           CountdownPill(remaining: remaining),
         ],
       ),
@@ -335,24 +335,24 @@ class _Body extends ConsumerWidget {
           borderRadius: BorderRadius.circular(AppRadius.xl),
           border: Border.all(color: c.border),
         ),
-        child: const Column(
+        child: Column(
           children: [
             StatRow(
               icon: Icons.inventory_2_outlined,
-              title: 'Kit collection',
-              subtitle: 'Expo opens two days before, 10:00–20:00',
+              title: t.raceKitCollection,
+              subtitle: t.raceKitCollectionSubtitle,
             ),
-            AppDivider(),
+            const AppDivider(),
             StatRow(
               icon: Icons.flag_outlined,
-              title: 'Start time',
-              subtitle: 'Corrals close 20 minutes before your wave',
+              title: t.raceStartTime,
+              subtitle: t.raceStartTimeSubtitle,
             ),
-            AppDivider(),
+            const AppDivider(),
             StatRow(
               icon: Icons.backpack_outlined,
-              title: 'Bag drop',
-              subtitle: 'At the start village, opens 90 minutes prior',
+              title: t.raceBagDrop,
+              subtitle: t.raceBagDropSubtitle,
             ),
           ],
         ),

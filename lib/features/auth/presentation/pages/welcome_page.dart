@@ -41,7 +41,7 @@ class WelcomePage extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSpacing.xxl),
                           Text(
-                            'Welcome to\nPaceUp',
+                            context.l10n.authWelcomeTitle,
                             textAlign: TextAlign.center,
                             style: context.text.displayMd.copyWith(
                               letterSpacing: 0.3,
@@ -51,9 +51,7 @@ class WelcomePage extends StatelessWidget {
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 320),
                             child: Text(
-                              'Your training plan, your runs and your races — '
-                              'all in one place. Start where you are and build '
-                              'from there.',
+                              context.l10n.authWelcomeBody,
                               textAlign: TextAlign.center,
                               style: context.text.bodyMd.copyWith(
                                 color: c.textSecondary,
@@ -62,12 +60,12 @@ class WelcomePage extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSpacing.xxxl),
                           AppButton(
-                            label: 'Login',
+                            label: context.l10n.authLogin,
                             onPressed: () => context.push(Routes.signIn),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           AppButton(
-                            label: 'Register',
+                            label: context.l10n.authRegister,
                             variant: AppButtonVariant.secondary,
                             onPressed: () => context.push(Routes.signUp),
                           ),

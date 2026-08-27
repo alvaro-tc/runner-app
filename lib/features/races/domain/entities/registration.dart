@@ -39,6 +39,15 @@ enum RegistrationState {
   bool get isConfirmed => this == confirmed;
 }
 
+<<<<<<< HEAD
+/// Metodos de cobro que atiende el proveedor simulado.
+/// Solo el codigo de la API: el nombre visible sale del ARB, via
+/// `RacePaymentMethodL10n`.
+enum RacePaymentMethod {
+  card('card'),
+  qr('qr'),
+  bankTransfer('bank_transfer');
+=======
 /// Metodos de cobro.
 ///
 /// [qrManual] es **temporal** y no lo atiende ningun proveedor: se muestra el QR
@@ -49,10 +58,10 @@ enum RacePaymentMethod {
   qr('qr', 'QR'),
   bankTransfer('bank_transfer', 'Bank transfer'),
   qrManual('qr_manual', 'Bank QR');
+>>>>>>> main
 
-  const RacePaymentMethod(this.api, this.label);
+  const RacePaymentMethod(this.api);
   final String api;
-  final String label;
 
   /// Solo la tarjeta resuelve en el acto; el resto queda pendiente y hay que
   /// sondear el cobro.

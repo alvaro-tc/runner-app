@@ -1,4 +1,4 @@
-﻿.PHONY: run run-web run-local apk goldens fmt analyze test
+﻿.PHONY: run run-web run-local apk goldens fmt analyze test l10n i18n-guard
 
 # Contra el backend de produccion (cam-run.tumype.com).
 run:
@@ -19,14 +19,24 @@ run-local:
 apk:
 	flutter build apk --release --dart-define-from-file=.env
 
+# Regenera las clases de traduccion desde los ARB (PU-203). Lo que salga en
+# lib/l10n/gen/ va al commit.
+l10n:
+	flutter gen-l10n
+
+# Falla si queda algun literal sin traducir en la capa de presentacion. Por
+# ahora se corre a mano; lo engancha CI/CD en PU-004.
+i18n-guard:
+	./tool/i18n_guard.sh
+
 goldens:
 	flutter test --update-goldens
 
 fmt:
 	dart format .
 
-analyze:
+analyze: l10n
 	flutter analyze
 
-test:
+test: l10n
 	flutter test

@@ -19,14 +19,12 @@ class Money {
   int get hashCode => Object.hash(amount, currency);
 }
 
+/// Sin etiqueta: el nombre visible sale del ARB, via `RegistrationStatusL10n`.
 enum RegistrationStatus {
-  open('Registration open'),
-  closingSoon('Closing soon'),
-  full('Sold out'),
-  closed('Registration closed');
-
-  const RegistrationStatus(this.label);
-  final String label;
+  open,
+  closingSoon,
+  full,
+  closed;
 
   bool get acceptsEntries => this == open || this == closingSoon;
 }

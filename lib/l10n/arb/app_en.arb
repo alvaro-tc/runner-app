@@ -1,0 +1,685 @@
+{
+  "@@locale": "en",
+  "appTitle": "PaceUp",
+  "@appTitle": {
+    "description": "App name shown in the OS task switcher. Brand, not translated."
+  },
+  "commonRetry": "Try again",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonDone": "Done",
+  "commonBack": "Go back",
+  "commonClose": "Close",
+  "commonNext": "Next",
+  "commonOr": "or",
+  "commonComingSoon": "Coming soon.",
+  "navHome": "Home",
+  "navTrain": "Train",
+  "navRaces": "Races",
+  "navProfile": "Profile",
+  "authWelcomeTitle": "Welcome to\nPaceUp",
+  "@authWelcomeTitle": {
+    "description": "Welcome screen headline. The line break is intentional."
+  },
+  "authWelcomeBody": "Your training plan, your runs and your races — all in one place. Start where you are and build from there.",
+  "authLogin": "Login",
+  "authRegister": "Register",
+  "authSignInTitle": "Let''s Sign you in.",
+  "authSignInWelcomeBack": "Welcome back",
+  "authSignInMissed": "You''ve been missed!",
+  "authIdentifierLabel": "Username or Email",
+  "authEmailHint": "pandu@paceup.app",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "At least 8 characters",
+  "authForgotPassword": "Forgot password?",
+  "authNoAccount": "Don''t have an account?",
+  "authSocialComingSoon": "{provider} sign-in is coming soon. Use your email for now.",
+  "@authSocialComingSoon": {
+    "description": "Snackbar shown when tapping a social sign-in button.",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "authSignUpTitle": "Create your\naccount.",
+  "authSignUpSubtitle": "Two minutes now, and every run you take from here is counted.",
+  "authFullNameLabel": "Full name",
+  "authFullNameHint": "Pandu Wirawan",
+  "authEmailLabel": "Email",
+  "authConfirmPasswordLabel": "Confirm password",
+  "authConfirmPasswordHint": "Type it once more",
+  "authAcceptTermsSemantics": "Accept terms and privacy policy",
+  "authAcceptTerms": "I accept the terms of service and the privacy policy.",
+  "authAcceptTermsRequired": "Accept the terms to create your account.",
+  "authCreateAccount": "Create account",
+  "authHaveAccount": "Already have an account?",
+  "authForgotTitle": "Reset your\npassword.",
+  "authForgotIntro": "Give us the email on your account and we will send a link to set a new password.",
+  "authForgotSent": "Check {email}. The link works for one hour; request another if it expires.",
+  "@authForgotSent": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "pandu@paceup.app"
+      }
+    }
+  },
+  "authSendResetLink": "Send reset link",
+  "authSendAgain": "Send it again",
+  "validationEmailEmpty": "Enter the email you signed up with.",
+  "validationEmailInvalid": "That does not look like an email address.",
+  "validationIdentifierEmpty": "Enter your username or email.",
+  "validationPasswordEmpty": "Enter your password.",
+  "validationPasswordTooShort": "Use at least 8 characters.",
+  "validationConfirmEmpty": "Repeat your password.",
+  "validationConfirmMismatch": "The two passwords do not match.",
+  "validationFullNameRequired": "Enter your full name.",
+  "validationDistanceNotANumber": "Enter the distance as a number.",
+  "validationDistanceNotPositive": "The distance has to be greater than zero.",
+  "failureNetwork": "We could not reach the server. Check your connection and try again.",
+  "failureCache": "Stored data could not be read. Pull to refresh.",
+  "failureNotFound": "We could not find what you asked for.",
+  "failurePermission": "Location permission is off. Enable it to record your route.",
+  "failureUnexpected": "Something broke on our side. Try again in a moment.",
+  "failureSessionExpired": "Your session expired. Sign in again.",
+  "onboardingSkip": "Skip",
+  "onboardingGetStarted": "Get started",
+  "onboardingPlanTitle": "Train with a plan that adapts",
+  "onboardingPlanBody": "Tell PaceUp the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.",
+  "onboardingTrackTitle": "Track every run in real time",
+  "onboardingTrackBody": "GPS draws your route as you go. Pace, splits and elapsed time stay on screen, so you always know whether to push or hold back.",
+  "onboardingRaceTitle": "Race, and keep every medal",
+  "onboardingRaceBody": "Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.",
+  "homeUpcomingMarathon": "Upcoming Marathon In",
+  "homePlanTitleOf": "{name}''s Training Plan",
+  "@homePlanTitleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Pandu"
+      }
+    }
+  },
+  "homePlanTitleGeneric": "Your Training Plan",
+  "homeTrainingWeek": "Training Week {week}",
+  "@homeTrainingWeek": {
+    "placeholders": {
+      "week": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "homeRescheduleComingSoon": "Rescheduling arrives with the plan editor. Start the run whenever suits you today.",
+  "commonTotal": "Total",
+  "commonContinue": "Continue",
+  "commonDiscard": "Discard",
+  "commonDelete": "Delete",
+  "commonSettings": "Settings",
+  "commonSplits": "Splits",
+  "commonDistance": "Distance",
+  "commonTime": "Time",
+  "commonAveragePace": "Average pace",
+  "commonAverageSpeed": "Average speed",
+  "commonElevationGain": "Elevation gain",
+  "commonCalories": "Calories",
+  "commonFinishTime": "Finish time",
+  "commonBib": "BIB {number}",
+  "@commonBib": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "commonMoreOptions": "More options",
+  "stateErrorTitle": "That did not load",
+  "stateSocialContinueWith": "Continue with {provider}",
+  "@stateSocialContinueWith": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTypeEasy": "Run Easy",
+  "sessionTypeTempo": "Tempo",
+  "sessionTypeIntervals": "Intervals",
+  "sessionTypeRecovery": "Recovery",
+  "sessionTypeLong": "Long Run",
+  "sessionTypeRest": "Rest",
+  "sessionTypeRace": "Race Day",
+  "sessionRestDay": "Rest day",
+  "sessionTitle": "{km}km {type}",
+  "@sessionTitle": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "runTitleMorning": "Morning Run",
+  "runTitleLunch": "Lunch Run",
+  "runTitleAfternoon": "Afternoon Run",
+  "runTitleEvening": "Evening Run",
+  "runTitleTempo": "Tempo Run",
+  "runTitleLong": "Long Run",
+  "runTitleTrackSession": "Track Session",
+  "feelingRough": "Rough",
+  "feelingOkay": "Okay",
+  "feelingGood": "Good",
+  "feelingStrong": "Strong",
+  "genderFemale": "Female",
+  "genderMale": "Male",
+  "genderOther": "Other",
+  "genderUndisclosed": "Prefer not to say",
+  "paymentStatusPaid": "Paid",
+  "paymentStatusPending": "Payment pending",
+  "paymentStatusFailed": "Payment failed",
+  "paymentStatusRefunded": "Refunded",
+  "raceEntryStatusUpcoming": "Upcoming",
+  "raceEntryStatusCompleted": "Completed",
+  "raceEntryStatusDnf": "Did not finish",
+  "raceEntryStatusCancelled": "Cancelled",
+  "registrationStatusOpen": "Registration open",
+  "registrationStatusClosingSoon": "Closing soon",
+  "registrationStatusFull": "Sold out",
+  "registrationStatusClosed": "Registration closed",
+  "paymentMethodCard": "Card",
+  "paymentMethodQr": "QR",
+  "paymentMethodBankTransfer": "Bank transfer",
+  "locationDenied": "Location permission was declined. Grant it to record your route.",
+  "locationDeniedForever": "Location is blocked for PaceUp. Turn it on in system settings, then come back.",
+  "locationBackgroundDenied": "Background location is off. Recording keeps working while PaceUp is on screen, but may stop if you switch apps.",
+  "locationServiceDisabled": "Location services are off on this device. Switch them on to start a run.",
+  "trainNoRunsTitle": "No runs yet",
+  "trainNoRunsMessage": "Your first one starts here. Pick a goal and head out.",
+  "trainNoMatchesMessage": "Nothing matches those filters. Widen them to see more.",
+  "trainStartTraining": "Start training",
+  "trainClearFilters": "Clear filters",
+  "trainReadyToRun": "Ready to run?",
+  "trainNothingScheduled": "Nothing scheduled today. A free run still counts.",
+  "trainTodaysPlan": "Today''s plan: {title} · {duration}",
+  "@trainTodaysPlan": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "trainFreeRun": "Free run",
+  "trainThisWeek": "This week",
+  "trainLastWeek": "Last week",
+  "trainHistory": "History",
+  "trainSessions": "Sessions",
+  "filterAllTime": "All time",
+  "filterLast30": "Last 30 days",
+  "filterLast90": "Last 3 months",
+  "setupTitle": "Set up your run",
+  "setupWhatAreYouRunning": "What are you running?",
+  "setupFreeRunSubtitle": "No target. Just go and let PaceUp record it.",
+  "setupPlanSession": "Plan session",
+  "setupDistanceGoal": "Distance goal",
+  "setupDistanceGoalSubtitle": "Run until you hit a set distance.",
+  "setupTimeGoal": "Time goal",
+  "setupTimeGoalSubtitle": "Run for a set amount of time.",
+  "setupLocationReady": "Location ready",
+  "setupLocationAccess": "Location access",
+  "setupLocationGrantedBody": "PaceUp can draw your route while you run.",
+  "setupLocationRationale": "PaceUp reads your position only while a run is recording, and stores the route on this device.",
+  "setupAllowLocation": "Allow location",
+  "setupStartRun": "Start run",
+  "goalDistanceTitle": "{distance} goal",
+  "@goalDistanceTitle": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "goalTimeTitle": "{duration} goal",
+  "@goalTimeTitle": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "runDiscardTitle": "Discard this run?",
+  "runDiscardBody": "You have been running for a while. Leaving now throws away the route and the time you have logged.",
+  "runKeepRunning": "Keep running",
+  "runLeaveSemantics": "Leave the run",
+  "runRecentre": "Re-centre the map",
+  "runSessionTitle": "Running Session",
+  "runSettingsComingSoon": "Run settings arrive next. Pause and finish work from the sheet below.",
+  "runLapProgress": "Lap {done}/{total}",
+  "@runLapProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "runNextLap": "Next: {metres}m @ {pace} pace",
+  "@runNextLap": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "runLapSemantics": "Lap {done} of {total}",
+  "@runLapSemantics": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "runElapsedTime": "Elapsed Time",
+  "runCurrentPace": "Current Pace",
+  "runLastKm": "Last km",
+  "runElevation": "Elevation",
+  "runTotalDistance": "Total Distance",
+  "runSplitKm": "km {km}",
+  "@runSplitKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "runResume": "Resume",
+  "runPause": "Pause",
+  "runMusicSemantics": "Music controls",
+  "runMusicComingSoon": "Music controls hook into your player in a later release.",
+  "runCountdownGo": "GO",
+  "runHoldToFinishSemantics": "Hold to finish the run",
+  "runKeepHolding": "Keep holding…",
+  "runHoldToFinish": "Hold to finish",
+  "summarySaved": "Run saved",
+  "summaryDeleteTitle": "Delete this run?",
+  "summaryDeleteBody": "The route, the splits and the time all go with it. This cannot be undone.",
+  "summaryDiscardBody": "Nothing about this run will be kept.",
+  "summaryKeepIt": "Keep it",
+  "summaryDetailTitle": "Run detail",
+  "summaryTitle": "Run summary",
+  "summaryNotInHistory": "That run is not in your history any more.",
+  "summaryHowDidItFeel": "How did it feel?",
+  "summaryNotesLabel": "Notes",
+  "summaryNotesHint": "Legs, weather, anything worth remembering",
+  "summarySaveRun": "Save run",
+  "summaryYourNotes": "Your notes",
+  "summaryDeleteRun": "Delete this run",
+  "splitsTooShort": "This run was shorter than a kilometre, so there are no splits yet.",
+  "splitsFastestKm": "Fastest km",
+  "splitsUnderAverage": "Under average",
+  "splitsOverAverage": "Over average",
+  "racesTitle": "My Races",
+  "racesUpcoming": "Upcoming",
+  "racesCompleted": "Completed",
+  "racesNoFinishesTitle": "No finishes yet",
+  "racesNoRacesTitle": "No races yet",
+  "racesNoFinishesMessage": "Cross a start line and your result lands here.",
+  "racesNoRacesMessage": "Find one and pin your first bib.",
+  "racesBrowseEvents": "Browse events",
+  "racesJoined": "Races joined",
+  "racesDistanceRaced": "Distance raced",
+  "racesTotalSpent": "Total spent",
+  "racesNoMarathonYet": "No marathon finish recorded yet.",
+  "racesBestMarathon": "Best marathon: {time}",
+  "@racesBestMarathon": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "racesPaidAmount": "Paid {amount}",
+  "@racesPaidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "racesAvgPace": "Avg pace",
+  "racesOfTotal": "of {total}",
+  "@racesOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "racesViewDetails": "View details",
+  "raceDetailTitle": "My race",
+  "raceDetailNotFound": "We could not find that registration.",
+  "raceCancelTitle": "Cancel this registration?",
+  "raceCancelBody": "Your place at {marathon} is released and the entry fee is refunded to {method}. Re-entry depends on availability.",
+  "@raceCancelBody": {
+    "placeholders": {
+      "marathon": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "raceKeepMyPlace": "Keep my place",
+  "raceCancelEntry": "Cancel entry",
+  "raceCancelled": "Registration cancelled. Refund on its way.",
+  "raceRegistration": "Registration",
+  "raceRegisteredOn": "Registered on",
+  "raceAmountPaid": "Amount paid",
+  "raceMethod": "Method",
+  "raceStatus": "Status",
+  "raceDownloadReceipt": "Download receipt",
+  "raceReceiptComingSoon": "Receipts download once the billing service is connected.",
+  "raceShareResult": "Share result",
+  "raceShareComingSoon": "A shareable finisher card is on the way.",
+  "raceGoToStartLine": "Go to the start line",
+  "raceCancelRegistration": "Cancel registration",
+  "raceChipTime": "Chip time",
+  "raceBestKm": "Best km",
+  "raceOverallRank": "Overall rank",
+  "raceAgeGroupRank": "Age group rank",
+  "raceStartsIn": "Starts in",
+  "raceKitCollection": "Kit collection",
+  "raceKitCollectionSubtitle": "Expo opens two days before, 10:00–20:00",
+  "raceStartTime": "Start time",
+  "raceStartTimeSubtitle": "Corrals close 20 minutes before your wave",
+  "raceBagDrop": "Bag drop",
+  "raceBagDropSubtitle": "At the start village, opens 90 minutes prior",
+  "raceDayTitle": "Race day",
+  "raceDayNotLoaded": "We could not load that race.",
+  "raceDayCourseTitle": "The official course is on the map",
+  "raceDayCourseSubtitle": "Your live track is drawn on top of it as you run",
+  "raceDayPositionTitle": "Your position is sent while you run",
+  "raceDayPositionSubtitle": "In batches, so the battery lasts the whole race",
+  "raceDaySignalTitle": "Losing signal is fine",
+  "raceDaySignalSubtitle": "Points are stored on the phone and uploaded later",
+  "raceDayStart": "Start the race",
+  "raceDayAlreadyFinished": "You already finished this race.",
+  "raceDayNotReady": "This race is not ready to start. Check that your entry is paid and confirmed.",
+  "marathonAbout": "About",
+  "marathonRoute": "Route",
+  "marathonSchedule": "Schedule",
+  "marathonWhatsIncluded": "What''s included",
+  "marathonEntryFee": "Entry fee",
+  "marathonPlacesLeft": "{left} of {total} places left",
+  "@marathonPlacesLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "marathonRegisterNow": "Register now",
+  "registerTitle": "Registration",
+  "registerStepDetails": "Details",
+  "registerStepCategory": "Category",
+  "registerStepPay": "Pay",
+  "registerYourDetails": "Your details",
+  "registerFromProfile": "Taken from your profile. Change them in Profile if anything is out of date.",
+  "registerFullName": "Full name",
+  "registerDateOfBirth": "Date of birth",
+  "registerGender": "Gender",
+  "registerIdNumber": "ID number",
+  "registerIdNumberHint": "Goes on your bib record",
+  "registerPhone": "Phone",
+  "registerEmergencyName": "Emergency contact name",
+  "registerEmergencyNameHint": "Who should we call?",
+  "registerEmergencyPhone": "Emergency contact phone",
+  "registerShirtSize": "Shirt size",
+  "registerCategoryAndExtras": "Category & extras",
+  "registerSingleDistance": "This event runs a single distance: {distance}.",
+  "@registerSingleDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "registerIncluded": "Included",
+  "registerOptionalExtras": "Optional extras",
+  "registerNoExtras": "No add-ons for this event.",
+  "registerReviewAndPay": "Review & pay",
+  "registerLineWithQuantity": "{label} × {quantity}",
+  "@registerLineWithQuantity": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "registerServiceFee": "Service fee",
+  "registerPaymentMethod": "Payment method",
+  "registerCardSubtitle": "Charged the moment your place is taken",
+  "registerQrSubtitle": "Scan and pay; we wait for the bank",
+  "registerBankTransferSubtitle": "Transfer and wait for the organiser to confirm",
+  "registerAcceptTermsSemantics": "Accept event terms",
+  "registerAcceptTerms": "I accept the event rules and the refund policy.",
+  "registerTryAnotherCard": "Try another card",
+  "registerPayAndRegister": "Pay and register",
+  "registerCardNumber": "Card number",
+  "registerCardholder": "Cardholder",
+  "registerCardholderHint": "As printed on the card",
+  "registerExpiry": "Expiry",
+  "registerExpiryHint": "MM/YY",
+  "registerCvv": "CVV",
+  "registerReference": "Reference: {reference}",
+  "@registerReference": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "registerWaitingForPayment": "Waiting for the payment to clear…",
+  "registerSuccessTitle": "You''re in",
+  "registerSuccessBody": "Your place at {marathon} is confirmed.",
+  "@registerSuccessBody": {
+    "placeholders": {
+      "marathon": {
+        "type": "String"
+      }
+    }
+  },
+  "registerViewMyRace": "View my race",
+  "registerBackToHome": "Back to home",
+  "registerDefaultRunnerName": "Runner",
+  "registerDefaultCardHolder": "PACEUP RUNNER",
+  "paymentCardDeclined": "The bank turned this card down. Try another one.",
+  "paymentExpiredCard": "That card is expired.",
+  "paymentInvalidCard": "Those card details do not look right.",
+  "paymentQrExpired": "The QR expired before it was paid. Generate a new one.",
+  "paymentFailedGeneric": "Payment could not be completed.",
+  "profileLogOutTitle": "Log out?",
+  "profileLogOutBody": "Your runs stay on this device. You will need to sign in again to pick up where you left off.",
+  "profileStaySignedIn": "Stay signed in",
+  "profileLogOut": "Log out",
+  "profileEditProfile": "Edit Profile",
+  "profileYourWeek": "Your week",
+  "profileInjuryFlags": "Injury Flags",
+  "profileSleep": "Sleep",
+  "profileSleepSubtitle": "Avg in last 7 days",
+  "profileHydration": "Hydration Habit",
+  "profileHydrationValue": "{days}/{window} days hit target",
+  "@profileHydrationValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "window": {
+        "type": "int"
+      }
+    }
+  },
+  "profileAppearance": "Appearance",
+  "profileUnits": "Units",
+  "profileNotificationsPrivacyHelp": "Notifications, privacy and help",
+  "profileStatsComingSoon": "Extended statistics land with the next training report.",
+  "profileRunningHighlight": "Running Highlight",
+  "profileWeeklyMileage": "Weekly Mileage",
+  "profileLongestRun": "Longest Run",
+  "profilePrimaryShoes": "Primary Shoes",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "themeLightDetail": "Bright surfaces, best in daylight.",
+  "themeDarkDetail": "Easier on the eyes for evening runs.",
+  "themeSystemDetail": "Follows whatever your phone is set to.",
+  "languageTitle": "Language",
+  "languageSpanish": "Español",
+  "languageEnglish": "English",
+  "languageSystem": "System",
+  "languageSpanishDetail": "The whole app in Spanish.",
+  "languageEnglishDetail": "The whole app in English.",
+  "languageSystemDetail": "Follows whatever your phone is set to.",
+  "settingsNotifications": "Notifications",
+  "settingsPlanReminders": "Plan reminders",
+  "settingsPlanRemindersSubtitle": "A nudge the morning of each session",
+  "settingsRaceUpdates": "Race updates",
+  "settingsRaceUpdatesSubtitle": "Kit collection, start times and results",
+  "settingsWeeklyReport": "Weekly report",
+  "settingsWeeklyReportSubtitle": "Your mileage summary every Monday",
+  "settingsPrivacy": "Privacy",
+  "settingsShareActivity": "Share activity",
+  "settingsShareActivitySubtitle": "Let other runners see your finished runs",
+  "settingsExportData": "Export my data",
+  "settingsExportComingSoon": "Data export runs from the account service, coming soon.",
+  "settingsPreferences": "Preferences",
+  "settingsDistanceUnit": "Distance unit",
+  "settingsKilometres": "Kilometres",
+  "settingsMiles": "Miles",
+  "settingsHelp": "Help",
+  "settingsHelpCentre": "Help centre",
+  "settingsHelpComingSoon": "The help centre opens in your browser once support is live.",
+  "settingsContactSupport": "Contact support",
+  "settingsContactComingSoon": "Write to support@paceup.app and we will answer within a day.",
+  "settingsVersion": "Version",
+  "editProfileTitle": "Edit profile",
+  "editDiscardTitle": "Discard changes?",
+  "editDiscardBody": "You have edits that are not saved yet. Leaving now loses them.",
+  "editKeepEditing": "Keep editing",
+  "editProfileUpdated": "Profile updated",
+  "editPhotoComingSoon": "Photo upload arrives with the media service.",
+  "editChangePhoto": "Change photo",
+  "editCity": "City",
+  "editCountry": "Country",
+  "editPickADate": "Pick a date",
+  "editWeightKg": "Weight (kg)",
+  "editHeightCm": "Height (cm)",
+  "editSaveChanges": "Save changes",
+  "validationCityRequired": "Enter your city.",
+  "validationWeightNotANumber": "Enter your weight as a number.",
+  "validationWeightNotPositive": "Your weight has to be greater than zero.",
+  "validationHeightNotANumber": "Enter your height as a number.",
+  "validationHeightNotPositive": "Your height has to be greater than zero.",
+  "relativeToday": "today",
+  "relativeInDays": "in {days}d",
+  "@relativeInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeInHours": "in {hours}h",
+  "@relativeInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeInMinutes": "in {minutes}m",
+  "@relativeInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeMarkSessionDone": "Mark {session} as done",
+  "@homeMarkSessionDone": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "homeReschedule": "Reschedule",
+  "homeStartRun": "Start Run",
+  "fieldShowPassword": "Show password",
+  "fieldHidePassword": "Hide password",
+  "countdownSemantics": "Starts in {days} days {hours} hours {minutes} minutes",
+  "@countdownSemantics": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "daySemanticsRest": "{weekday}, rest day",
+  "@daySemanticsRest": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "daySemanticsProgress": "{weekday}, {label} {percent} percent done",
+  "@daySemanticsProgress": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "marathonPredictedFinish": "Predicted finish time {range}",
+  "@marathonPredictedFinish": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  }
+}

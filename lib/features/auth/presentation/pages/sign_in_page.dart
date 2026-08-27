@@ -34,9 +34,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   Future<void> _submit() async {
+    final t = context.l10n;
     setState(() {
-      _identifierError = Validators.identifier(_identifier.text);
-      _passwordError = Validators.password(_password.text);
+      _identifierError = Validators.identifier(t, _identifier.text);
+      _passwordError = Validators.password(t, _password.text);
     });
     if (_identifierError != null || _passwordError != null) return;
 
@@ -57,19 +58,20 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     return AuthScaffold(
       children: [
-        Text("Let's Sign you in.", style: context.text.displayMd),
+        Text(t.authSignInTitle, style: context.text.displayMd),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Welcome back',
+          t.authSignInWelcomeBack,
           style: context.text.headingMd.copyWith(
             fontWeight: FontWeight.w400,
             color: c.textSecondary,
           ),
         ),
         Text(
-          "You've been missed!",
+          t.authSignInMissed,
           style: context.text.headingMd.copyWith(
             fontWeight: FontWeight.w400,
             color: c.textSecondary,
@@ -79,9 +81,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         // Un solo campo: el usuario no tiene por que recordar con cual se dio
         // de alta. Quien decide si es email o CI es el servidor, por el `@`.
         AppTextField(
+<<<<<<< HEAD
+          label: t.authIdentifierLabel,
+          controller: _identifier,
+          hint: t.authEmailHint,
+=======
           label: 'ID number or email',
           controller: _identifier,
           hint: '1234567 LP',
+>>>>>>> main
           errorText: _identifierError,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
@@ -94,9 +102,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Password',
+          label: t.authPasswordLabel,
           controller: _password,
-          hint: 'At least 8 characters',
+          hint: t.authPasswordHint,
           errorText: _passwordError,
           isPassword: true,
           textInputAction: TextInputAction.done,
@@ -110,7 +118,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: () => context.push(Routes.forgotPassword),
-            child: const Text('Forgot password?'),
+            child: Text(t.authForgotPassword),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -122,25 +130,22 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             SocialAuthButton(
               icon: Icons.g_mobiledata_rounded,
               provider: 'Google',
-              onPressed: () => context.showSnack(
-                'Google sign-in is coming soon. Use your email for now.',
-              ),
+              onPressed: () =>
+                  context.showSnack(t.authSocialComingSoon('Google')),
             ),
             const SizedBox(width: AppSpacing.base),
             SocialAuthButton(
               icon: Icons.work_outline_rounded,
               provider: 'LinkedIn',
-              onPressed: () => context.showSnack(
-                'LinkedIn sign-in is coming soon. Use your email for now.',
-              ),
+              onPressed: () =>
+                  context.showSnack(t.authSocialComingSoon('LinkedIn')),
             ),
             const SizedBox(width: AppSpacing.base),
             SocialAuthButton(
               icon: Icons.facebook_rounded,
               provider: 'Facebook',
-              onPressed: () => context.showSnack(
-                'Facebook sign-in is coming soon. Use your email for now.',
-              ),
+              onPressed: () =>
+                  context.showSnack(t.authSocialComingSoon('Facebook')),
             ),
           ],
         ),
@@ -149,17 +154,17 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Don't have an account?",
+              t.authNoAccount,
               style: context.text.bodyMd.copyWith(color: c.textSecondary),
             ),
             TextButton(
               onPressed: () => context.pushReplacement(Routes.signUp),
-              child: const Text('Register'),
+              child: Text(t.authRegister),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppButton(label: 'Login', isLoading: _loading, onPressed: _submit),
+        AppButton(label: t.authLogin, isLoading: _loading, onPressed: _submit),
       ],
     );
   }

@@ -25,6 +25,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final unit = ref.watch(distanceUnitProvider);
 
     return Scaffold(
@@ -33,72 +34,72 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () => context.pop(),
           ),
         ),
-        title: const Text('Settings'),
+        title: Text(t.commonSettings),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.screenH),
         children: [
-          Text('Notifications', style: context.text.headingMd),
+          Text(t.settingsNotifications, style: context.text.headingMd),
           _Group(
             children: [
               _SwitchRow(
                 icon: Icons.event_available_rounded,
-                title: 'Plan reminders',
-                subtitle: 'A nudge the morning of each session',
+                title: t.settingsPlanReminders,
+                subtitle: t.settingsPlanRemindersSubtitle,
                 value: _planReminders,
                 onChanged: (v) => setState(() => _planReminders = v),
               ),
               const AppDivider(),
               _SwitchRow(
                 icon: Icons.emoji_events_outlined,
-                title: 'Race updates',
-                subtitle: 'Kit collection, start times and results',
+                title: t.settingsRaceUpdates,
+                subtitle: t.settingsRaceUpdatesSubtitle,
                 value: _raceUpdates,
                 onChanged: (v) => setState(() => _raceUpdates = v),
               ),
               const AppDivider(),
               _SwitchRow(
                 icon: Icons.insights_rounded,
-                title: 'Weekly report',
-                subtitle: 'Your mileage summary every Monday',
+                title: t.settingsWeeklyReport,
+                subtitle: t.settingsWeeklyReportSubtitle,
                 value: _weeklyReport,
                 onChanged: (v) => setState(() => _weeklyReport = v),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Privacy', style: context.text.headingMd),
+          Text(t.settingsPrivacy, style: context.text.headingMd),
           _Group(
             children: [
               _SwitchRow(
                 icon: Icons.public_rounded,
-                title: 'Share activity',
-                subtitle: 'Let other runners see your finished runs',
+                title: t.settingsShareActivity,
+                subtitle: t.settingsShareActivitySubtitle,
                 value: _shareActivity,
                 onChanged: (v) => setState(() => _shareActivity = v),
               ),
               const AppDivider(),
               StatRow(
                 icon: Icons.download_rounded,
-                title: 'Export my data',
-                onTap: () => context.showSnack(
-                  'Data export runs from the account service, coming soon.',
-                ),
+                title: t.settingsExportData,
+                onTap: () => context.showSnack(t.settingsExportComingSoon),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Preferences', style: context.text.headingMd),
+          Text(t.settingsPreferences, style: context.text.headingMd),
           _Group(
             children: [
               StatRow(
                 icon: Icons.straighten_rounded,
-                title: 'Distance unit',
-                value: unit == DistanceUnit.km ? 'Kilometres' : 'Miles',
+                title: t.settingsDistanceUnit,
+                value: unit == DistanceUnit.km
+                    ? t.settingsKilometres
+                    : t.settingsMiles,
                 onTap: () => ref
                     .read(settingsProvider.notifier)
                     .setUnit(
@@ -110,29 +111,25 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Help', style: context.text.headingMd),
+          Text(t.settingsHelp, style: context.text.headingMd),
           _Group(
             children: [
               StatRow(
                 icon: Icons.help_outline_rounded,
-                title: 'Help centre',
-                onTap: () => context.showSnack(
-                  'The help centre opens in your browser once support is live.',
-                ),
+                title: t.settingsHelpCentre,
+                onTap: () => context.showSnack(t.settingsHelpComingSoon),
               ),
               const AppDivider(),
               StatRow(
                 icon: Icons.mail_outline_rounded,
-                title: 'Contact support',
+                title: t.settingsContactSupport,
                 value: 'support@paceup.app',
-                onTap: () => context.showSnack(
-                  'Write to support@paceup.app and we will answer within a day.',
-                ),
+                onTap: () => context.showSnack(t.settingsContactComingSoon),
               ),
               const AppDivider(),
               StatRow(
                 icon: Icons.info_outline_rounded,
-                title: 'Version',
+                title: t.settingsVersion,
                 value: '1.0.0',
                 tone: c.textSecondary,
               ),

@@ -12,24 +12,43 @@ enum DistanceUnit {
   bool get isMiles => this == DistanceUnit.mi;
 }
 
+/// Idiomas que la app ofrece en Ajustes.
+///
+/// `system` no fija locale: deja que Flutter resuelva el del dispositivo contra
+/// `supportedLocales`, y cae al espanol si el idioma del telefono no esta.
+enum AppLanguage {
+  system(null),
+  spanish(Locale('es')),
+  english(Locale('en'));
+
+  const AppLanguage(this.locale);
+
+  /// `null` cuando se sigue al sistema — es justo lo que espera `MaterialApp`.
+  final Locale? locale;
+}
+
 @immutable
 class AppSettings {
   const AppSettings({
     required this.themeMode,
+    required this.language,
     required this.unit,
     required this.onboardingSeen,
   });
 
   final ThemeMode themeMode;
+  final AppLanguage language;
   final DistanceUnit unit;
   final bool onboardingSeen;
 
   AppSettings copyWith({
     ThemeMode? themeMode,
+    AppLanguage? language,
     DistanceUnit? unit,
     bool? onboardingSeen,
   }) => AppSettings(
     themeMode: themeMode ?? this.themeMode,
+    language: language ?? this.language,
     unit: unit ?? this.unit,
     onboardingSeen: onboardingSeen ?? this.onboardingSeen,
   );
@@ -39,6 +58,7 @@ class AppSettings {
 /// every change so a restart restores exactly what the user picked.
 class SettingsNotifier extends Notifier<AppSettings> {
   static const _kTheme = 'settings.themeMode';
+  static const _kLanguage = 'settings.language';
   static const _kUnit = 'settings.distanceUnit';
 
   @override
@@ -48,6 +68,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
       themeMode: ThemeMode.values.firstWhere(
         (m) => m.name == prefs.getString(_kTheme),
         orElse: () => ThemeMode.system,
+      ),
+      language: AppLanguage.values.firstWhere(
+        (l) => l.name == prefs.getString(_kLanguage),
+        orElse: () => AppLanguage.system,
       ),
       unit: DistanceUnit.values.firstWhere(
         (u) => u.name == prefs.getString(_kUnit),
@@ -64,6 +88,15 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await ref.read(sharedPreferencesProvider).setString(_kTheme, mode.name);
   }
 
+  /// El cambio es en caliente: `state` se actualiza antes del `await`, asi que
+  /// `MaterialApp` se reconstruye con el locale nuevo sin esperar al disco.
+  Future<void> setLanguage(AppLanguage language) async {
+    state = state.copyWith(language: language);
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(_kLanguage, language.name);
+  }
+
   Future<void> setUnit(DistanceUnit unit) async {
     state = state.copyWith(unit: unit);
     await ref.read(sharedPreferencesProvider).setString(_kUnit, unit.name);
@@ -78,6 +111,15 @@ final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
 
 final themeModeProvider = Provider<ThemeMode>(
   (ref) => ref.watch(settingsProvider.select((s) => s.themeMode)),
+);
+
+final languageProvider = Provider<AppLanguage>(
+  (ref) => ref.watch(settingsProvider.select((s) => s.language)),
+);
+
+/// `null` = seguir al sistema.
+final localeProvider = Provider<Locale?>(
+  (ref) => ref.watch(languageProvider).locale,
 );
 
 final distanceUnitProvider = Provider<DistanceUnit>(

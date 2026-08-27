@@ -46,3 +46,8 @@ app.*.map.json
 
 # Diffs que el runner de goldens regenera en cada corrida
 test/golden/failures/
+
+# El informe de claves sin traducir es un artefacto de `flutter gen-l10n`; lo
+# generado en `lib/l10n/gen/` SI se versiona, porque `flutter test` y el
+# analizador no lo regeneran solos y un clon limpio no compilaria sin el.
+lib/l10n/untranslated.json

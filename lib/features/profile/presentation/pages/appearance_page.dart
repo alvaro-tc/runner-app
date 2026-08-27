@@ -5,31 +5,25 @@ import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/services/settings_provider.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/core/theme/app_theme.dart';
+import 'package:paceup/l10n/gen/app_localizations.dart';
 import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 
 class AppearancePage extends ConsumerWidget {
   const AppearancePage({super.key});
 
-  static const _options = <({ThemeMode mode, String label, String detail})>[
-    (
-      mode: ThemeMode.light,
-      label: 'Light',
-      detail: 'Bright surfaces, best in daylight.',
-    ),
-    (
-      mode: ThemeMode.dark,
-      label: 'Dark',
-      detail: 'Easier on the eyes for evening runs.',
-    ),
-    (
-      mode: ThemeMode.system,
-      label: 'System',
-      detail: 'Follows whatever your phone is set to.',
-    ),
+  /// El copy se resuelve por `build`: asi el cambio de idioma repinta tambien
+  /// esta pantalla.
+  static List<({ThemeMode mode, String label, String detail})> _options(
+    AppLocalizations t,
+  ) => [
+    (mode: ThemeMode.light, label: t.themeLight, detail: t.themeLightDetail),
+    (mode: ThemeMode.dark, label: t.themeDark, detail: t.themeDarkDetail),
+    (mode: ThemeMode.system, label: t.themeSystem, detail: t.themeSystemDetail),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.l10n;
     final current = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -38,16 +32,16 @@ class AppearancePage extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: AppIconButton(
             icon: Icons.arrow_back_rounded,
-            semanticsLabel: 'Go back',
+            semanticsLabel: t.commonBack,
             onPressed: () => context.pop(),
           ),
         ),
-        title: const Text('Appearance'),
+        title: Text(t.profileAppearance),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.screenH),
         children: [
-          for (final option in _options)
+          for (final option in _options(t))
             _ThemeOption(
               label: option.label,
               detail: option.detail,

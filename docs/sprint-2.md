@@ -101,7 +101,7 @@ Es el punto más frágil de cualquier app de running y por eso va el primer día
 > **En corto:** Arreglos internos pendientes que no ve el usuario pero que hacen que las pruebas automáticas sean fiables — hoy algunas dependen del día en que se ejecutan y fallan solas.
 
 - `FakeDataSeed` acepta una fecha base inyectable, para que los goldens de Home
-  dejen de depender del día natural (limitación anotada en `ARCHITECTURE.md` §401).
+  dejen de depender del día natural (limitación anotada en `ARCHITECTURE.md` §12).
 - Golden de la sesión en vivo con la capa de tiles simulada.
 - Tests de widget de la sesión en vivo: cuenta atrás, pausa, auto-pausa y finalización.
 
