@@ -20,7 +20,8 @@ android {
         applicationId = "com.camrun.camrun"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // traccar_client_sdk pide API 24.
+        minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

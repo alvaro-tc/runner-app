@@ -19,6 +19,7 @@ class RunGoal {
     this.duration,
     this.sessionId,
     this.registrationId,
+    this.marathonId,
     this.officialRoute = const [],
     this.laps,
     this.lapPace,
@@ -45,6 +46,28 @@ class RunGoal {
     officialRoute: officialRoute,
   );
 
+  /// La maraton oficial, la que arranca el organizador desde el panel.
+  ///
+  /// Es una carrera con [marathonId] puesto, y ese id es lo que **cierra la
+  /// pantalla**: mientras el evento este en marcha no hay atras, ni pausa, ni
+  /// descartar. Quien corre una maraton no puede tirar su tiempo oficial por
+  /// tocar un boton sin querer, y el final no lo decide el —lo decide el
+  /// organizador cuando corta la carrera—.
+  factory RunGoal.marathon({
+    required String marathonId,
+    required String registrationId,
+    required String title,
+    required double distanceKm,
+    List<GeoPoint> officialRoute = const [],
+  }) => RunGoal(
+    type: RunGoalType.race,
+    marathonId: marathonId,
+    registrationId: registrationId,
+    title: title,
+    distanceKm: distanceKm,
+    officialRoute: officialRoute,
+  );
+
   final RunGoalType type;
   final double? distanceKm;
   final Duration? duration;
@@ -52,6 +75,9 @@ class RunGoal {
 
   /// Solo en carrera. Es lo que se manda al arrancar la sesion remota.
   final String? registrationId;
+
+  /// Solo en maraton oficial. Ver [RunGoal.marathon].
+  final String? marathonId;
 
   /// El trazado oficial, para dibujarlo debajo del recorrido real y que el
   /// corredor vea si se salio.
@@ -63,6 +89,9 @@ class RunGoal {
   final String title;
 
   bool get isRace => type == RunGoalType.race;
+
+  /// Maraton oficial en marcha: la pantalla no se puede abandonar.
+  bool get isLiveMarathon => marathonId != null;
 }
 
 enum RunGoalType { free, planSession, distance, time, race }
@@ -249,6 +278,10 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
           ? goal.sessionId
           : null,
       registrationId: goal.registrationId,
+      // Traccar solo en la maraton oficial: es la unica salida donde el
+      // seguimiento en vivo importa y donde el telefono pasa horas fuera de
+      // pantalla. Ver [LiveUploader].
+      live: goal.isLiveMarathon,
     );
   }
 

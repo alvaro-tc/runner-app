@@ -68,15 +68,27 @@ class HistoryFilter {
   const HistoryFilter({
     this.types = const {},
     this.range = DateRangeFilter.all,
+    this.weekdays = const {},
   });
 
   final Set<SessionType> types;
   final DateRangeFilter range;
 
-  bool get isEmpty => types.isEmpty && range == DateRangeFilter.all;
+  /// Dias de la semana, `1` = lunes … `7` = domingo. Vacio = todos.
+  final Set<int> weekdays;
 
-  HistoryFilter copyWith({Set<SessionType>? types, DateRangeFilter? range}) =>
-      HistoryFilter(types: types ?? this.types, range: range ?? this.range);
+  bool get isEmpty =>
+      types.isEmpty && weekdays.isEmpty && range == DateRangeFilter.all;
+
+  HistoryFilter copyWith({
+    Set<SessionType>? types,
+    DateRangeFilter? range,
+    Set<int>? weekdays,
+  }) => HistoryFilter(
+    types: types ?? this.types,
+    range: range ?? this.range,
+    weekdays: weekdays ?? this.weekdays,
+  );
 }
 
 class HistoryFilterNotifier extends Notifier<HistoryFilter> {
@@ -87,6 +99,12 @@ class HistoryFilterNotifier extends Notifier<HistoryFilter> {
     final next = {...state.types};
     next.contains(type) ? next.remove(type) : next.add(type);
     state = state.copyWith(types: next);
+  }
+
+  void toggleWeekday(int weekday) {
+    final next = {...state.weekdays};
+    next.contains(weekday) ? next.remove(weekday) : next.add(weekday);
+    state = state.copyWith(weekdays: next);
   }
 
   void setRange(DateRangeFilter range) => state = state.copyWith(range: range);
@@ -105,6 +123,8 @@ final filteredHistoryProvider = Provider<List<TrainingRun>>((ref) {
   return [
     for (final run in runs)
       if ((filter.types.isEmpty || filter.types.contains(run.type)) &&
+          (filter.weekdays.isEmpty ||
+              filter.weekdays.contains(run.startedAt.weekday)) &&
           filter.range.matches(run.startedAt))
         run,
   ];

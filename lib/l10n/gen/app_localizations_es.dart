@@ -1537,4 +1537,284 @@ class AppLocalizationsEs extends AppLocalizations {
   String marathonSlotsLeft(int left) {
     return 'Quedan $left plazas';
   }
+
+  @override
+  String get authWelcomeCamTitle => 'CAM · Centro de Apoyo a la Mujer';
+
+  @override
+  String get authWelcomeCamBody =>
+      'CamRun es la app del Centro de Apoyo a la Mujer: una organización sin fines de lucro que acompaña a mujeres en situación de vulnerabilidad. Cada carrera que corres apoya esa labor.';
+
+  @override
+  String get homeNoSessionTitle => 'Sin sesión para este día';
+
+  @override
+  String get homeNoSessionMessage =>
+      'Elige otro día de la semana o sal a correr libre cuando quieras.';
+
+  @override
+  String get homeFreeRun => 'Salida libre';
+
+  @override
+  String get filterWeekdayAll => 'Todos los días';
+
+  @override
+  String get adminLiveTitle => 'En vivo';
+
+  @override
+  String get adminNavLive => 'En vivo';
+
+  @override
+  String get adminNavMarathons => 'Maratones';
+
+  @override
+  String get adminNavUsers => 'Usuarios';
+
+  @override
+  String get adminLoadFailed => 'No se pudo cargar. Reintenta.';
+
+  @override
+  String get adminNoMarathonsTitle => 'Todavía no hay maratones';
+
+  @override
+  String get adminNoMarathonsBody =>
+      'Crea la primera y aparecerá aquí lista para publicar.';
+
+  @override
+  String adminRunnersOnCourse(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count corredores en pista',
+      one: '1 corredor en pista',
+      zero: 'Sin corredores en pista',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminStart => 'Iniciar maratón';
+
+  @override
+  String get adminFinish => 'Finalizar';
+
+  @override
+  String get adminStartConfirmTitle => '¿Dar la largada?';
+
+  @override
+  String adminStartConfirmBody(String name) {
+    return 'A todos los inscritos en «$name» se les abrirá la pantalla de carrera y empezará a contar su tiempo. Esto no se deshace.';
+  }
+
+  @override
+  String get adminFinishConfirmTitle => '¿Cortar la carrera?';
+
+  @override
+  String adminFinishConfirmBody(String name) {
+    return 'Se cerrará la carrera de «$name» y cada corredor pasará a ver sus estadísticas. Esto no se deshace.';
+  }
+
+  @override
+  String get adminAlreadyFinished => 'Esta maratón ya terminó';
+
+  @override
+  String get adminMarathonsTitle => 'Maratones';
+
+  @override
+  String get adminNewMarathon => 'Nueva maratón';
+
+  @override
+  String get adminEditMarathon => 'Editar maratón';
+
+  @override
+  String get adminLive => 'En vivo';
+
+  @override
+  String get adminFinished => 'Terminada';
+
+  @override
+  String get adminPublished => 'Publicada';
+
+  @override
+  String get adminDraft => 'Borrador';
+
+  @override
+  String get adminRegistrationsOpen => 'Inscripciones abiertas';
+
+  @override
+  String get adminRegistrationsClosed => 'Inscripciones cerradas';
+
+  @override
+  String adminSlots(int taken, int total) {
+    return '$taken/$total cupos';
+  }
+
+  @override
+  String get adminName => 'Nombre';
+
+  @override
+  String get adminCity => 'Ciudad';
+
+  @override
+  String get adminDescription => 'Descripción';
+
+  @override
+  String get adminCapacity => 'Cupos';
+
+  @override
+  String get adminPrice => 'Precio (Bs)';
+
+  @override
+  String get adminStartsAt => 'Fecha y hora';
+
+  @override
+  String get adminNameRequired => 'Ponle un nombre a la maratón.';
+
+  @override
+  String get adminCityRequired => 'Indica la ciudad.';
+
+  @override
+  String get adminCapacityRequired => 'Los cupos tienen que ser al menos 1.';
+
+  @override
+  String get adminRouteTitle => 'Recorrido';
+
+  @override
+  String get adminRouteSubtitle => 'Toca el mapa para marcar el trazado';
+
+  @override
+  String get adminRouteMissing => 'Sin marcar';
+
+  @override
+  String get adminRouteHint =>
+      'Toca el mapa para poner el primer punto del recorrido.';
+
+  @override
+  String adminRoutePoints(int count, String distance) {
+    return '$count puntos · $distance';
+  }
+
+  @override
+  String get adminRouteUndo => 'Deshacer';
+
+  @override
+  String get adminRouteClear => 'Borrar todo';
+
+  @override
+  String get adminRouteOutAndBack => 'Ida y vuelta';
+
+  @override
+  String get adminRouteOutAndBackHint =>
+      'Marca solo la ida: la vuelta es el mismo trazado al revés y la distancia se duplica.';
+
+  @override
+  String get adminPublishedSwitch => 'Publicada en el catálogo';
+
+  @override
+  String get adminPublishedHint =>
+      'Retirarla no cancela ninguna inscripción vendida.';
+
+  @override
+  String get adminRegistrationsSwitch => 'Inscripciones habilitadas';
+
+  @override
+  String get adminRegistrationsHint =>
+      'Ciérralas cuando no quieras aceptar más gente.';
+
+  @override
+  String get adminPaymentQr => 'QR de cobro';
+
+  @override
+  String get adminQrLoaded => 'Cargado';
+
+  @override
+  String get adminQrMissing => 'Sin QR';
+
+  @override
+  String get adminQrSubtitle => 'Sin QR, la maratón no admite pago por QR';
+
+  @override
+  String get adminQrAfterSave => 'Guarda la maratón para poder subir el QR';
+
+  @override
+  String get adminQrInstructions => 'Texto junto al QR';
+
+  @override
+  String get adminQrUploaded => 'QR actualizado.';
+
+  @override
+  String get adminDelete => 'Eliminar';
+
+  @override
+  String get adminDeleteMarathonTitle => '¿Eliminar la maratón?';
+
+  @override
+  String get adminDeleteMarathonBody =>
+      'Solo se puede si todavía no tiene inscritos. Si los tiene, retírala del catálogo en vez de borrarla.';
+
+  @override
+  String get adminUsersTitle => 'Usuarios';
+
+  @override
+  String get adminNewUser => 'Nueva cuenta';
+
+  @override
+  String get adminEditUser => 'Editar cuenta';
+
+  @override
+  String get adminSearch => 'Buscar';
+
+  @override
+  String get adminSearchHint => 'Nombre, correo o CI';
+
+  @override
+  String get adminNoUsersTitle => 'Sin resultados';
+
+  @override
+  String get adminNoUsersBody => 'Prueba con otro nombre, correo o cédula.';
+
+  @override
+  String get adminRole => 'Rol';
+
+  @override
+  String get adminRoleAdmin => 'Admin';
+
+  @override
+  String get adminRoleOrganizer => 'Organizador';
+
+  @override
+  String get adminRoleRunner => 'Corredor';
+
+  @override
+  String get adminEmail => 'Correo';
+
+  @override
+  String get adminPassword => 'Contraseña';
+
+  @override
+  String get adminNewPassword => 'Nueva contraseña';
+
+  @override
+  String get adminPasswordKeepHint => 'Déjalo vacío para no cambiarla';
+
+  @override
+  String get adminPasswordTooShort =>
+      'La contraseña necesita al menos 8 caracteres.';
+
+  @override
+  String get adminMustChangePassword => 'Todavía usa su CI como contraseña';
+
+  @override
+  String get adminDeleteUserTitle => '¿Eliminar la cuenta?';
+
+  @override
+  String adminDeleteUserBody(String name) {
+    return 'Se borrará la cuenta de $name y todo lo suyo. Esto no se deshace.';
+  }
+
+  @override
+  String get runRemaining => 'Falta';
+
+  @override
+  String get runAlmostThere => '¡Ya casi!';
 }

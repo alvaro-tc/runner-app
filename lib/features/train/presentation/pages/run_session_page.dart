@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/network/live_socket.dart';
+import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/races/presentation/providers/live_marathon_provider.dart';
 import 'package:camrun/features/train/presentation/providers/history_provider.dart';
 import 'package:camrun/features/train/presentation/providers/run_session_provider.dart';
 import 'package:camrun/features/train/presentation/widgets/hold_to_finish_button.dart';
@@ -28,6 +31,7 @@ class RunSessionPage extends ConsumerStatefulWidget {
 
 class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   final _mapKey = GlobalKey<RouteMapViewState>();
+  StreamSubscription<MarathonLiveState>? _corte;
 
   @override
   void initState() {
@@ -38,6 +42,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
 
   @override
   void dispose() {
+    unawaited(_corte?.cancel());
     unawaited(WakelockPlus.disable());
     super.dispose();
   }
@@ -74,6 +79,20 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     return false;
   }
 
+  /// La maraton se corto desde el panel: se cierra la grabacion y se sale al
+  /// resumen, como cualquier carrera terminada.
+  ///
+  /// El aviso llega por el socket y no por el provider de carreras: aquel dice
+  /// exactamente "esta maraton termino" mientras que el otro puede quedarse en
+  /// `null` un instante por una recarga de la lista, y eso cortaria la carrera
+  /// de alguien que sigue corriendo.
+  void _escucharCorte(String marathonId) {
+    _corte ??= ref.read(liveSocketProvider).states.listen((estado) {
+      if (estado.marathonId != marathonId || estado.finishedAt == null) return;
+      if (ref.read(runSessionProvider).isActive) unawaited(_finish());
+    });
+  }
+
   Future<void> _finish() async {
     final run = await ref.read(runSessionProvider.notifier).finish();
     if (!mounted) return;
@@ -91,10 +110,21 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     final state = ref.watch(runSessionProvider);
     final c = context.colors;
 
+    // Maraton oficial: la pantalla es una puerta cerrada. Ni atras, ni pausa,
+    // ni descartar. El unico que la abre es el organizador, cortando la carrera.
+    final bloqueada = state.goal.isLiveMarathon;
+    if (bloqueada) {
+      _escucharCorte(state.goal.marathonId!);
+      // Mantiene vivo al que lleva las salas del socket mientras dure la
+      // carrera: sin nadie mirandolo, se cerraria la sala por la que llega el
+      // corte y la pantalla se quedaria bloqueada para siempre.
+      ref.watch(liveMarathonProvider);
+    }
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
+        if (didPop || bloqueada) return;
         if (await _confirmDiscard() && context.mounted) context.pop();
       },
       child: Scaffold(
@@ -115,12 +145,15 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
               child: Column(
                 children: [
                   _TopBar(
+                    locked: bloqueada,
+                    title: bloqueada ? state.goal.title : null,
                     onBack: () async {
                       if (await _confirmDiscard() && context.mounted) {
                         context.pop();
                       }
                     },
                   ),
+                  if (bloqueada) _Restante(state: state),
                   if (state.error != null) _ErrorBanner(outcome: state.error!),
                   if (state.goal.laps != null) _LapCard(state: state),
                   const Spacer(),
@@ -143,7 +176,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                 ],
               ),
             ),
-            _StatsSheet(onFinish: _finish),
+            _StatsSheet(onFinish: _finish, locked: bloqueada),
             if (state.status == RunStatus.countdown)
               _Countdown(value: state.countdownValue, background: c.background),
           ],
@@ -154,9 +187,15 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack});
+  const _TopBar({required this.onBack, this.locked = false, this.title});
 
   final Future<void> Function() onBack;
+
+  /// Sin botones. No estan escondidos por estetica: en maraton oficial no hay
+  /// nada que puedan hacer, y un boton que no hace nada se pulsa igual.
+  final bool locked;
+
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -165,23 +204,91 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
-          AppIconButton(
-            icon: Icons.arrow_back_rounded,
-            semanticsLabel: t.runLeaveSemantics,
-            onPressed: onBack,
-          ),
+          if (!locked)
+            AppIconButton(
+              icon: Icons.arrow_back_rounded,
+              semanticsLabel: t.runLeaveSemantics,
+              onPressed: onBack,
+            ),
           Expanded(
             child: Text(
-              t.runSessionTitle,
+              title ?? t.runSessionTitle,
               textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
               style: context.text.titleMd,
             ),
           ),
-          AppIconButton(
-            icon: Icons.more_horiz_rounded,
-            semanticsLabel: t.commonMoreOptions,
-            onPressed: () => context.showSnack(t.runSettingsComingSoon),
+          if (!locked)
+            AppIconButton(
+              icon: Icons.more_horiz_rounded,
+              semanticsLabel: t.commonMoreOptions,
+              onPressed: () => context.showSnack(t.runSettingsComingSoon),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lo recorrido y lo que falta, en grande y arriba.
+///
+/// Es lo unico que se mira corriendo una maraton, y por eso no vive dentro de
+/// la hoja de estadisticas: esa hay que arrastrarla, y a mitad de carrera no se
+/// arrastra nada.
+class _Restante extends StatelessWidget {
+  const _Restante({required this.state});
+
+  final RunSessionState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final total = state.goal.distanceKm;
+    final falta = total == null ? null : (total - state.distanceKm);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: c.border),
+        boxShadow: c.floatingShadow,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.commonDistance,
+                  style: context.text.bodySm.copyWith(color: c.textSecondary),
+                ),
+                Text(
+                  Fmt.distance(state.distanceKm),
+                  style: context.text.headingMd,
+                ),
+              ],
+            ),
           ),
+          if (falta != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  t.runRemaining,
+                  style: context.text.bodySm.copyWith(color: c.textSecondary),
+                ),
+                Text(
+                  // Pasarse de la distancia oficial es normal —el GPS suma y el
+                  // recorrido nunca es exacto—: entonces no falta nada.
+                  falta <= 0 ? t.runAlmostThere : Fmt.distance(falta),
+                  style: context.text.headingMd.copyWith(color: c.primary),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -268,9 +375,12 @@ class _LapCard extends StatelessWidget {
 }
 
 class _StatsSheet extends ConsumerWidget {
-  const _StatsSheet({required this.onFinish});
+  const _StatsSheet({required this.onFinish, this.locked = false});
 
   final VoidCallback onFinish;
+
+  /// Sin pausa ni "terminar": en maraton oficial el final lo da el organizador.
+  final bool locked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -403,8 +513,10 @@ class _StatsSheet extends ConsumerWidget {
                   ),
                 ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            _Controls(state: state, onFinish: onFinish),
+            if (!locked) ...[
+              const SizedBox(height: AppSpacing.lg),
+              _Controls(state: state, onFinish: onFinish),
+            ],
           ],
         ),
       ),

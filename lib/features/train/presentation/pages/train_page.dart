@@ -393,6 +393,32 @@ class _Filters extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],
+            Container(
+              width: 1,
+              height: 24,
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              color: context.colors.border,
+            ),
+            // Dia de la semana: sin filtro no habia forma de comparar, por
+            // ejemplo, todas las tiradas largas del domingo.
+            AppChip(
+              label: t.filterWeekdayAll,
+              selected: filter.weekdays.isEmpty,
+              onTap: () {
+                for (final d in {...filter.weekdays}) {
+                  notifier.toggleWeekday(d);
+                }
+              },
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            for (var day = 1; day <= 7; day++) ...[
+              AppChip(
+                label: Fmt.weekdayShortOf(day),
+                selected: filter.weekdays.contains(day),
+                onTap: () => notifier.toggleWeekday(day),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
           ],
         ),
       ),

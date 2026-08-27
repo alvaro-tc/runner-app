@@ -53,6 +53,8 @@ class Marathon {
     this.extras = const [],
     this.paymentQrUrl,
     this.paymentQrInstructions,
+    this.liveStartedAt,
+    this.liveFinishedAt,
   });
 
   final String id;
@@ -85,6 +87,15 @@ class Marathon {
   /// server will refuse. Temporary — see `docs/pago-qr-manual.md` in the API.
   final String? paymentQrUrl;
   final String? paymentQrInstructions;
+
+  /// Cuando el organizador dio la largada de verdad, no la hora programada.
+  /// `null` = todavia no arranco. Es lo que pone en marcha la pantalla de
+  /// carrera del inscrito.
+  final DateTime? liveStartedAt;
+  final DateTime? liveFinishedAt;
+
+  /// Se esta corriendo ahora mismo.
+  bool get isLive => liveStartedAt != null && liveFinishedAt == null;
 
   bool get acceptsQrPayment => paymentQrUrl != null && paymentQrUrl!.isNotEmpty;
 

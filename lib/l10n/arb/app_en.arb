@@ -741,5 +741,137 @@
         "type": "int"
       }
     }
-  }
+  },
+  "authWelcomeCamTitle": "CAM · Women''s Support Centre",
+  "authWelcomeCamBody": "CamRun is the app of the Centro de Apoyo a la Mujer, a non-profit supporting women in vulnerable situations. Every run you log backs that work.",
+  "homeNoSessionTitle": "No session for this day",
+  "homeNoSessionMessage": "Pick another day of the week, or head out for a free run whenever you like.",
+  "homeFreeRun": "Free run",
+  "filterWeekdayAll": "All days",
+  "adminLiveTitle": "Live",
+  "adminNavLive": "Live",
+  "adminNavMarathons": "Marathons",
+  "adminNavUsers": "Users",
+  "adminLoadFailed": "Could not load. Try again.",
+  "adminNoMarathonsTitle": "No marathons yet",
+  "adminNoMarathonsBody": "Create the first one and it will show up here, ready to publish.",
+  "adminRunnersOnCourse": "{count, plural, =0{No runners on course} =1{1 runner on course} other{{count} runners on course}}",
+  "@adminRunnersOnCourse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminStart": "Start marathon",
+  "adminFinish": "Finish",
+  "adminStartConfirmTitle": "Start the race?",
+  "adminStartConfirmBody": "Every entrant in “{name}” will get the race screen and their clock will start. This cannot be undone.",
+  "@adminStartConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminFinishConfirmTitle": "Stop the race?",
+  "adminFinishConfirmBody": "“{name}” will be closed and every runner will see their stats. This cannot be undone.",
+  "@adminFinishConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAlreadyFinished": "This marathon has already finished",
+  "adminMarathonsTitle": "Marathons",
+  "adminNewMarathon": "New marathon",
+  "adminEditMarathon": "Edit marathon",
+  "adminLive": "Live",
+  "adminFinished": "Finished",
+  "adminPublished": "Published",
+  "adminDraft": "Draft",
+  "adminRegistrationsOpen": "Registrations open",
+  "adminRegistrationsClosed": "Registrations closed",
+  "adminSlots": "{taken}/{total} slots",
+  "@adminSlots": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "adminName": "Name",
+  "adminCity": "City",
+  "adminDescription": "Description",
+  "adminCapacity": "Slots",
+  "adminPrice": "Price (Bs)",
+  "adminStartsAt": "Date and time",
+  "adminNameRequired": "Give the marathon a name.",
+  "adminCityRequired": "Enter the city.",
+  "adminCapacityRequired": "Slots must be at least 1.",
+  "adminRouteTitle": "Course",
+  "adminRouteSubtitle": "Tap the map to mark the course",
+  "adminRouteMissing": "Not set",
+  "adminRouteHint": "Tap the map to drop the first point of the course.",
+  "adminRoutePoints": "{count} points · {distance}",
+  "@adminRoutePoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRouteUndo": "Undo",
+  "adminRouteClear": "Clear all",
+  "adminRouteOutAndBack": "Out and back",
+  "adminRouteOutAndBackHint": "Mark only the outbound leg: the return is the same line reversed and the distance doubles.",
+  "adminPublishedSwitch": "Published in the catalogue",
+  "adminPublishedHint": "Pulling it does not cancel any entry already sold.",
+  "adminRegistrationsSwitch": "Registrations enabled",
+  "adminRegistrationsHint": "Close them when you stop taking entries.",
+  "adminPaymentQr": "Payment QR",
+  "adminQrLoaded": "Uploaded",
+  "adminQrMissing": "No QR",
+  "adminQrSubtitle": "Without a QR this marathon cannot take QR payments",
+  "adminQrAfterSave": "Save the marathon first to upload the QR",
+  "adminQrInstructions": "Text shown next to the QR",
+  "adminQrUploaded": "QR updated.",
+  "adminDelete": "Delete",
+  "adminDeleteMarathonTitle": "Delete this marathon?",
+  "adminDeleteMarathonBody": "Only possible while it has no entrants. If it does, pull it from the catalogue instead.",
+  "adminUsersTitle": "Users",
+  "adminNewUser": "New account",
+  "adminEditUser": "Edit account",
+  "adminSearch": "Search",
+  "adminSearchHint": "Name, email or ID",
+  "adminNoUsersTitle": "No results",
+  "adminNoUsersBody": "Try another name, email or ID number.",
+  "adminRole": "Role",
+  "adminRoleAdmin": "Admin",
+  "adminRoleOrganizer": "Organiser",
+  "adminRoleRunner": "Runner",
+  "adminEmail": "Email",
+  "adminPassword": "Password",
+  "adminNewPassword": "New password",
+  "adminPasswordKeepHint": "Leave empty to keep it",
+  "adminPasswordTooShort": "The password needs at least 8 characters.",
+  "adminMustChangePassword": "Still using their ID number as password",
+  "adminDeleteUserTitle": "Delete this account?",
+  "adminDeleteUserBody": "The account of {name} and everything in it will be deleted. This cannot be undone.",
+  "@adminDeleteUserBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "runRemaining": "To go",
+  "runAlmostThere": "Almost there!"
 }

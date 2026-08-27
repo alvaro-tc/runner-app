@@ -1,5 +1,6 @@
 import 'package:camrun/core/config/app_config_api.dart';
 import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/network/server_clock.dart';
 import 'package:camrun/core/network/session_controller.dart';
 import 'package:camrun/core/storage/token_storage.dart';
@@ -34,3 +35,11 @@ final authApiProvider = Provider<AuthApi>(
 final appConfigApiProvider = Provider<AppConfigApi>(
   (ref) => AppConfigApi(ref.watch(dioProvider)),
 );
+
+/// Un solo socket para toda la app: el mapa en vivo del panel y el aviso de
+/// largada del corredor viajan por la misma conexion.
+final liveSocketProvider = Provider<LiveSocket>((ref) {
+  final socket = LiveSocket(ref.watch(tokenStorageProvider));
+  ref.onDispose(socket.dispose);
+  return socket;
+});

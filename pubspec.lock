@@ -1218,6 +1218,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  socket_io_client:
+    dependency: "direct main"
+    description:
+      name: socket_io_client
+      sha256: f5990ff303d385e7b2150f0e57cca097a8d20c6a2ae0a22cb2d496661ea8ed9b
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.6"
+  socket_io_common:
+    dependency: transitive
+    description:
+      name: socket_io_common
+      sha256: "162fbaecbf4bf9a9372a62a341b3550b51dcef2f02f3e5830a297fd48203d45b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.1"
   source_gen:
     dependency: transitive
     description:
@@ -1410,6 +1426,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.17"
+  traccar_client_sdk:
+    dependency: "direct main"
+    description:
+      name: traccar_client_sdk
+      sha256: f3c4a14e669e205f640573d1e2ba9fb6cbd0d64079aef50a4a0321b43a7a2196
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
   typed_data:
     dependency: transitive
     description:

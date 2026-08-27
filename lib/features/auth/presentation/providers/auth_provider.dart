@@ -22,13 +22,25 @@ final initialSessionProvider = Provider<bool>((ref) => false);
 /// unico que se puede hacer en la app es cerrarla.
 @immutable
 class AuthState {
-  const AuthState({this.signedIn = false, this.mustChangePassword = false});
+  const AuthState({
+    this.signedIn = false,
+    this.mustChangePassword = false,
+    this.role = '',
+  });
 
   final bool signedIn;
   final bool mustChangePassword;
 
+  /// `admin`, `organizer` o `runner`. Vacio mientras no se sepa: con sesion
+  /// recuperada del arranque el rol tarda una peticion en llegar, y asumir
+  /// `admin` un instante abriria el panel a cualquiera que reinstale.
+  final String role;
+
   /// Puede moverse por la app con normalidad.
   bool get ready => signedIn && !mustChangePassword;
+
+  /// Le toca el panel y no la app de corredor.
+  bool get isAdmin => role == 'admin';
 }
 
 /// Whether a session exists. The router redirect watches this.
@@ -96,6 +108,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = AuthState(
       signedIn: true,
       mustChangePassword: user.mustChangePassword,
+      role: user.role,
     );
     return null;
   }
@@ -109,6 +122,7 @@ class AuthNotifier extends Notifier<AuthState> {
       (AuthUser user) => state = AuthState(
         signedIn: true,
         mustChangePassword: user.mustChangePassword,
+        role: user.role,
       ),
       (Failure _) {},
     );

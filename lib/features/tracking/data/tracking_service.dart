@@ -6,6 +6,7 @@ import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/core/sync/sync_service.dart';
 import 'package:camrun/core/utils/uuid.dart';
+import 'package:camrun/features/tracking/data/live_uploader.dart';
 import 'package:camrun/features/tracking/data/models/tracking_models.dart';
 import 'package:camrun/features/tracking/data/tracking_api.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
@@ -24,6 +25,7 @@ class TrackingService {
     this._api,
     this._location,
     this._sync, {
+    this.liveUploader,
     this.flushEvery = const Duration(seconds: 20),
   });
 
@@ -36,6 +38,9 @@ class TrackingService {
   final LocationService _location;
   final SyncService _sync;
 
+  /// Solo se usa en maraton oficial. Ver [LiveUploader].
+  final LiveUploader? liveUploader;
+
   final _puntos = StreamController<GeoPoint>.broadcast();
   final _grabado = <GeoPoint>[];
 
@@ -45,6 +50,10 @@ class TrackingService {
   String? _clientUuid;
   DateTime? _startedAt;
   bool _pausado = false;
+
+  /// Traccar se hizo cargo de subir: esta grabacion no encola ni un punto, o
+  /// entrarian dos veces.
+  bool _viaTraccar = false;
 
   /// Los puntos segun van llegando, ya filtrados. Es lo que pinta el mapa.
   Stream<GeoPoint> get stream => _puntos.stream;
@@ -64,6 +73,7 @@ class TrackingService {
     String? planSessionId,
     String? registrationId,
     String? clientUuid,
+    bool live = false,
   }) async {
     if (isRecording) return _sesion;
 
@@ -87,6 +97,12 @@ class TrackingService {
       );
     }
 
+    // Sin sesion remota no hay nada que Traccar pueda alimentar —el backend
+    // resuelve el dispositivo a su sesion activa y aqui no la hay—, asi que el
+    // entrenamiento se graba en local y sube entero al terminar.
+    _viaTraccar =
+        live && _sesion != null && (await liveUploader?.start() ?? false);
+
     _pausado = false;
     _gps = _location.track().listen(_onPoint);
     _reloj = Timer.periodic(flushEvery, (_) => unawaited(flush()));
@@ -100,6 +116,7 @@ class TrackingService {
     _pausado = true;
     await _gps?.cancel();
     _gps = null;
+    if (_viaTraccar) await liveUploader?.stop();
     await flush();
     await _avisar('pause');
   }
@@ -108,6 +125,7 @@ class TrackingService {
     if (!_pausado) return;
     _pausado = false;
     _gps = _location.track().listen(_onPoint);
+    if (_viaTraccar) await liveUploader?.start();
     await _avisar('resume');
   }
 
@@ -175,6 +193,8 @@ class TrackingService {
   // ─── Interno ─────────────────────────────────────────────────────────────
 
   void _apagarSensores() {
+    if (_viaTraccar) unawaited(liveUploader?.stop());
+    _viaTraccar = false;
     _reloj?.cancel();
     _reloj = null;
     unawaited(_gps?.cancel());
@@ -189,7 +209,9 @@ class TrackingService {
 
     // Primero la base, despues la red. Siempre en ese orden.
     final sesion = _sesion;
-    if (sesion == null) return;
+    // Con Traccar subiendo, el stream de aqui solo pinta el mapa y calcula el
+    // ritmo en pantalla: los puntos que van al servidor son los suyos.
+    if (sesion == null || _viaTraccar) return;
     await _db.queuePositions([
       PendingPositionsCompanion.insert(
         clientPointId: _pointId(p),

@@ -18,6 +18,8 @@
 	<string>CamRun lee tu posición solo mientras grabas una salida, para dibujar tu ruta y calcular tu ritmo.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>CamRun sigue grabando tu ruta con el teléfono en el bolsillo o la pantalla apagada, para que la salida no se corte al salir de la app.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>CamRun usa el sensor de movimiento durante la carrera para gastar menos batería cuando estás quieto.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>CamRun abre tu galería solo para que elijas el comprobante del pago de tu carrera. No lee nada más.</string>
 	<key>NSCameraUsageDescription</key>

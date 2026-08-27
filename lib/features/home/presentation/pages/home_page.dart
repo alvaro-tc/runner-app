@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
@@ -50,13 +52,31 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class _HomeBody extends ConsumerWidget {
+class _HomeBody extends ConsumerStatefulWidget {
   const _HomeBody({required this.data});
 
   final HomeData data;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends ConsumerState<_HomeBody> {
+  /// El dia que se esta mirando en la tira. `null` = el que decide el plan.
+  String? _selectedSessionId;
+
+  @override
+  void didUpdateWidget(_HomeBody old) {
+    super.didUpdateWidget(old);
+    // Al cambiar de semana el id seleccionado ya no existe: vuelve al foco.
+    if (old.data.selectedWeekIndex != widget.data.selectedWeekIndex) {
+      _selectedSessionId = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.data;
     final c = context.colors;
     final planTitle = ref
         .watch(profileProvider)
@@ -73,8 +93,12 @@ class _HomeBody extends ConsumerWidget {
       for (final m in catalogo)
         if (m.id != destacada?.id) m,
     ];
-    final session = data.focusSession;
     final plan = data.plan;
+    final session = _selectedSessionId == null
+        ? data.focusSession
+        : data.week.sessions
+              .where((s) => s.id == _selectedSessionId)
+              .firstOrNull;
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -105,9 +129,22 @@ class _HomeBody extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         // La tira existe con plan y sin el: lo corrido se pinta igual.
-        WeeklyPlanStrip(week: data.week),
+        WeeklyPlanStrip(
+          week: data.week,
+          selectedSessionId: session?.id,
+          onSessionTap: (s) => setState(() => _selectedSessionId = s.id),
+        ),
         const SizedBox(height: AppSpacing.xl),
-        if (session != null)
+        if (session == null)
+          // Sin sesion la pantalla se quedaba cortada a media altura.
+          EmptyState(
+            icon: Icons.self_improvement_rounded,
+            title: context.l10n.homeNoSessionTitle,
+            message: context.l10n.homeNoSessionMessage,
+            actionLabel: context.l10n.homeFreeRun,
+            onAction: () => context.push(Routes.trainSession),
+          )
+        else
           TodaySessionCard(
             session: session,
             onToggleCompleted: (value) => ref
@@ -137,11 +174,42 @@ class _UpcomingMarathons extends ConsumerStatefulWidget {
 }
 
 class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
-  final _controller = PageController();
+  // `viewportFraction` deja asomar la siguiente: se ve que hay mas carreras
+  // sin tener que descubrirlo deslizando.
+  final _controller = PageController(viewportFraction: 0.92);
   int _index = 0;
+  Timer? _autoplay;
+
+  @override
+  void initState() {
+    super.initState();
+    _restartAutoplay();
+  }
+
+  /// Pasa sola cada 5 s. Al tocar el carrusel se reinicia la cuenta, para que
+  /// no se mueva bajo el dedo de quien lo esta mirando.
+  void _restartAutoplay() {
+    _autoplay?.cancel();
+    if (widget.marathons.length < 2) return;
+    _autoplay = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_controller.hasClients) return;
+      _controller.animateToPage(
+        (_index + 1) % widget.marathons.length,
+        duration: AppDurations.slow,
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void didUpdateWidget(_UpcomingMarathons old) {
+    super.didUpdateWidget(old);
+    if (old.marathons.length != widget.marathons.length) _restartAutoplay();
+  }
 
   @override
   void dispose() {
+    _autoplay?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -182,14 +250,25 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
             // El alto de la tarjeta: el afiche (16/11) mas el saliente de la
             // ficha, que es lo que `MarathonHeroCard` reserva por debajo.
             height: box.maxWidth * 11 / 16 + _heroOverhang,
-            child: PageView.builder(
-              controller: _controller,
-              itemCount: marathons.length,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) => MarathonHeroCard(
-                marathon: marathons[i],
-                onTap: () =>
-                    context.push(Routes.marathonDetailOf(marathons[i].id)),
+            child: NotificationListener<ScrollStartNotification>(
+              onNotification: (n) {
+                if (n.dragDetails != null) _restartAutoplay();
+                return false;
+              },
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: marathons.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) => Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                  ),
+                  child: MarathonHeroCard(
+                    marathon: marathons[i],
+                    onTap: () =>
+                        context.push(Routes.marathonDetailOf(marathons[i].id)),
+                  ),
+                ),
               ),
             ),
           ),
@@ -200,16 +279,28 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var i = 0; i < marathons.length; i++)
-                AnimatedContainer(
-                  duration: AppDurations.fast,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs / 2,
-                  ),
-                  height: 6,
-                  width: i == index ? 18 : 6,
-                  decoration: BoxDecoration(
-                    color: i == index ? c.primary : c.border,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                GestureDetector(
+                  onTap: () {
+                    _restartAutoplay();
+                    _controller.animateToPage(
+                      i,
+                      duration: AppDurations.base,
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  // Un punto de 6pt no se acierta: el area de toque va aparte.
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    child: AnimatedContainer(
+                      duration: AppDurations.fast,
+                      height: 6,
+                      width: i == index ? 18 : 6,
+                      decoration: BoxDecoration(
+                        color: i == index ? c.primary : c.border,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                    ),
                   ),
                 ),
             ],

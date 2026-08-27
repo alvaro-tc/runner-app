@@ -2863,6 +2863,510 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{left} slots left'**
   String marathonSlotsLeft(int left);
+
+  /// No description provided for @authWelcomeCamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CAM · Women\'\'s Support Centre'**
+  String get authWelcomeCamTitle;
+
+  /// No description provided for @authWelcomeCamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'CamRun is the app of the Centro de Apoyo a la Mujer, a non-profit supporting women in vulnerable situations. Every run you log backs that work.'**
+  String get authWelcomeCamBody;
+
+  /// No description provided for @homeNoSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No session for this day'**
+  String get homeNoSessionTitle;
+
+  /// No description provided for @homeNoSessionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another day of the week, or head out for a free run whenever you like.'**
+  String get homeNoSessionMessage;
+
+  /// No description provided for @homeFreeRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Free run'**
+  String get homeFreeRun;
+
+  /// No description provided for @filterWeekdayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All days'**
+  String get filterWeekdayAll;
+
+  /// No description provided for @adminLiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get adminLiveTitle;
+
+  /// No description provided for @adminNavLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get adminNavLive;
+
+  /// No description provided for @adminNavMarathons.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathons'**
+  String get adminNavMarathons;
+
+  /// No description provided for @adminNavUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminNavUsers;
+
+  /// No description provided for @adminLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load. Try again.'**
+  String get adminLoadFailed;
+
+  /// No description provided for @adminNoMarathonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No marathons yet'**
+  String get adminNoMarathonsTitle;
+
+  /// No description provided for @adminNoMarathonsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the first one and it will show up here, ready to publish.'**
+  String get adminNoMarathonsBody;
+
+  /// No description provided for @adminRunnersOnCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No runners on course} =1{1 runner on course} other{{count} runners on course}}'**
+  String adminRunnersOnCourse(int count);
+
+  /// No description provided for @adminStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start marathon'**
+  String get adminStart;
+
+  /// No description provided for @adminFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get adminFinish;
+
+  /// No description provided for @adminStartConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the race?'**
+  String get adminStartConfirmTitle;
+
+  /// No description provided for @adminStartConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every entrant in “{name}” will get the race screen and their clock will start. This cannot be undone.'**
+  String adminStartConfirmBody(String name);
+
+  /// No description provided for @adminFinishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop the race?'**
+  String get adminFinishConfirmTitle;
+
+  /// No description provided for @adminFinishConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” will be closed and every runner will see their stats. This cannot be undone.'**
+  String adminFinishConfirmBody(String name);
+
+  /// No description provided for @adminAlreadyFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'This marathon has already finished'**
+  String get adminAlreadyFinished;
+
+  /// No description provided for @adminMarathonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathons'**
+  String get adminMarathonsTitle;
+
+  /// No description provided for @adminNewMarathon.
+  ///
+  /// In en, this message translates to:
+  /// **'New marathon'**
+  String get adminNewMarathon;
+
+  /// No description provided for @adminEditMarathon.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit marathon'**
+  String get adminEditMarathon;
+
+  /// No description provided for @adminLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get adminLive;
+
+  /// No description provided for @adminFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get adminFinished;
+
+  /// No description provided for @adminPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get adminPublished;
+
+  /// No description provided for @adminDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get adminDraft;
+
+  /// No description provided for @adminRegistrationsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations open'**
+  String get adminRegistrationsOpen;
+
+  /// No description provided for @adminRegistrationsClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations closed'**
+  String get adminRegistrationsClosed;
+
+  /// No description provided for @adminSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'{taken}/{total} slots'**
+  String adminSlots(int taken, int total);
+
+  /// No description provided for @adminName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminName;
+
+  /// No description provided for @adminCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get adminCity;
+
+  /// No description provided for @adminDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get adminDescription;
+
+  /// No description provided for @adminCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Slots'**
+  String get adminCapacity;
+
+  /// No description provided for @adminPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (Bs)'**
+  String get adminPrice;
+
+  /// No description provided for @adminStartsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time'**
+  String get adminStartsAt;
+
+  /// No description provided for @adminNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the marathon a name.'**
+  String get adminNameRequired;
+
+  /// No description provided for @adminCityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the city.'**
+  String get adminCityRequired;
+
+  /// No description provided for @adminCapacityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Slots must be at least 1.'**
+  String get adminCapacityRequired;
+
+  /// No description provided for @adminRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get adminRouteTitle;
+
+  /// No description provided for @adminRouteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to mark the course'**
+  String get adminRouteSubtitle;
+
+  /// No description provided for @adminRouteMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get adminRouteMissing;
+
+  /// No description provided for @adminRouteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to drop the first point of the course.'**
+  String get adminRouteHint;
+
+  /// No description provided for @adminRoutePoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} points · {distance}'**
+  String adminRoutePoints(int count, String distance);
+
+  /// No description provided for @adminRouteUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get adminRouteUndo;
+
+  /// No description provided for @adminRouteClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get adminRouteClear;
+
+  /// No description provided for @adminRouteOutAndBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Out and back'**
+  String get adminRouteOutAndBack;
+
+  /// No description provided for @adminRouteOutAndBackHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark only the outbound leg: the return is the same line reversed and the distance doubles.'**
+  String get adminRouteOutAndBackHint;
+
+  /// No description provided for @adminPublishedSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Published in the catalogue'**
+  String get adminPublishedSwitch;
+
+  /// No description provided for @adminPublishedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulling it does not cancel any entry already sold.'**
+  String get adminPublishedHint;
+
+  /// No description provided for @adminRegistrationsSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations enabled'**
+  String get adminRegistrationsSwitch;
+
+  /// No description provided for @adminRegistrationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Close them when you stop taking entries.'**
+  String get adminRegistrationsHint;
+
+  /// No description provided for @adminPaymentQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment QR'**
+  String get adminPaymentQr;
+
+  /// No description provided for @adminQrLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get adminQrLoaded;
+
+  /// No description provided for @adminQrMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR'**
+  String get adminQrMissing;
+
+  /// No description provided for @adminQrSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a QR this marathon cannot take QR payments'**
+  String get adminQrSubtitle;
+
+  /// No description provided for @adminQrAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the marathon first to upload the QR'**
+  String get adminQrAfterSave;
+
+  /// No description provided for @adminQrInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Text shown next to the QR'**
+  String get adminQrInstructions;
+
+  /// No description provided for @adminQrUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'QR updated.'**
+  String get adminQrUploaded;
+
+  /// No description provided for @adminDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get adminDelete;
+
+  /// No description provided for @adminDeleteMarathonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this marathon?'**
+  String get adminDeleteMarathonTitle;
+
+  /// No description provided for @adminDeleteMarathonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only possible while it has no entrants. If it does, pull it from the catalogue instead.'**
+  String get adminDeleteMarathonBody;
+
+  /// No description provided for @adminUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminUsersTitle;
+
+  /// No description provided for @adminNewUser.
+  ///
+  /// In en, this message translates to:
+  /// **'New account'**
+  String get adminNewUser;
+
+  /// No description provided for @adminEditUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit account'**
+  String get adminEditUser;
+
+  /// No description provided for @adminSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get adminSearch;
+
+  /// No description provided for @adminSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, email or ID'**
+  String get adminSearchHint;
+
+  /// No description provided for @adminNoUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get adminNoUsersTitle;
+
+  /// No description provided for @adminNoUsersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another name, email or ID number.'**
+  String get adminNoUsersBody;
+
+  /// No description provided for @adminRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminRole;
+
+  /// No description provided for @adminRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminRoleAdmin;
+
+  /// No description provided for @adminRoleOrganizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Organiser'**
+  String get adminRoleOrganizer;
+
+  /// No description provided for @adminRoleRunner.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner'**
+  String get adminRoleRunner;
+
+  /// No description provided for @adminEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get adminEmail;
+
+  /// No description provided for @adminPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get adminPassword;
+
+  /// No description provided for @adminNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get adminNewPassword;
+
+  /// No description provided for @adminPasswordKeepHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to keep it'**
+  String get adminPasswordKeepHint;
+
+  /// No description provided for @adminPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The password needs at least 8 characters.'**
+  String get adminPasswordTooShort;
+
+  /// No description provided for @adminMustChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Still using their ID number as password'**
+  String get adminMustChangePassword;
+
+  /// No description provided for @adminDeleteUserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this account?'**
+  String get adminDeleteUserTitle;
+
+  /// No description provided for @adminDeleteUserBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The account of {name} and everything in it will be deleted. This cannot be undone.'**
+  String adminDeleteUserBody(String name);
+
+  /// No description provided for @runRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'To go'**
+  String get runRemaining;
+
+  /// No description provided for @runAlmostThere.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there!'**
+  String get runAlmostThere;
 }
 
 class _AppLocalizationsDelegate

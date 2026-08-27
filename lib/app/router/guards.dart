@@ -42,5 +42,16 @@ String? appGuard(Ref ref, GoRouterState state) {
   if (location == Routes.changePassword) return Routes.home;
 
   if (isAuthRoute) return Routes.home;
-  return null;
+
+  // El panel y la app de corredor son dos aplicaciones que comparten binario.
+  // La separacion se hace aqui y no escondiendo botones: un admin que escriba
+  // /train no tiene por que ver un plan de entrenamiento que no existe, y un
+  // corredor que llegue a /admin por un enlace no puede quedarse ahi.
+  // Las subpantallas de perfil —ajustes, idioma, apariencia— son de los dos:
+  // viven fuera de los shells y no pertenecen a ninguno de los dos lados.
+  if (location.startsWith('${Routes.profile}/')) return null;
+
+  final enPanel = location.startsWith(Routes.admin);
+  if (auth.isAdmin) return enPanel ? null : Routes.admin;
+  return enPanel ? Routes.home : null;
 }

@@ -1524,4 +1524,286 @@ class AppLocalizationsEn extends AppLocalizations {
   String marathonSlotsLeft(int left) {
     return '$left slots left';
   }
+
+  @override
+  String get authWelcomeCamTitle => 'CAM · Women\'s Support Centre';
+
+  @override
+  String get authWelcomeCamBody =>
+      'CamRun is the app of the Centro de Apoyo a la Mujer, a non-profit supporting women in vulnerable situations. Every run you log backs that work.';
+
+  @override
+  String get homeNoSessionTitle => 'No session for this day';
+
+  @override
+  String get homeNoSessionMessage =>
+      'Pick another day of the week, or head out for a free run whenever you like.';
+
+  @override
+  String get homeFreeRun => 'Free run';
+
+  @override
+  String get filterWeekdayAll => 'All days';
+
+  @override
+  String get adminLiveTitle => 'Live';
+
+  @override
+  String get adminNavLive => 'Live';
+
+  @override
+  String get adminNavMarathons => 'Marathons';
+
+  @override
+  String get adminNavUsers => 'Users';
+
+  @override
+  String get adminLoadFailed => 'Could not load. Try again.';
+
+  @override
+  String get adminNoMarathonsTitle => 'No marathons yet';
+
+  @override
+  String get adminNoMarathonsBody =>
+      'Create the first one and it will show up here, ready to publish.';
+
+  @override
+  String adminRunnersOnCourse(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count runners on course',
+      one: '1 runner on course',
+      zero: 'No runners on course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminStart => 'Start marathon';
+
+  @override
+  String get adminFinish => 'Finish';
+
+  @override
+  String get adminStartConfirmTitle => 'Start the race?';
+
+  @override
+  String adminStartConfirmBody(String name) {
+    return 'Every entrant in “$name” will get the race screen and their clock will start. This cannot be undone.';
+  }
+
+  @override
+  String get adminFinishConfirmTitle => 'Stop the race?';
+
+  @override
+  String adminFinishConfirmBody(String name) {
+    return '“$name” will be closed and every runner will see their stats. This cannot be undone.';
+  }
+
+  @override
+  String get adminAlreadyFinished => 'This marathon has already finished';
+
+  @override
+  String get adminMarathonsTitle => 'Marathons';
+
+  @override
+  String get adminNewMarathon => 'New marathon';
+
+  @override
+  String get adminEditMarathon => 'Edit marathon';
+
+  @override
+  String get adminLive => 'Live';
+
+  @override
+  String get adminFinished => 'Finished';
+
+  @override
+  String get adminPublished => 'Published';
+
+  @override
+  String get adminDraft => 'Draft';
+
+  @override
+  String get adminRegistrationsOpen => 'Registrations open';
+
+  @override
+  String get adminRegistrationsClosed => 'Registrations closed';
+
+  @override
+  String adminSlots(int taken, int total) {
+    return '$taken/$total slots';
+  }
+
+  @override
+  String get adminName => 'Name';
+
+  @override
+  String get adminCity => 'City';
+
+  @override
+  String get adminDescription => 'Description';
+
+  @override
+  String get adminCapacity => 'Slots';
+
+  @override
+  String get adminPrice => 'Price (Bs)';
+
+  @override
+  String get adminStartsAt => 'Date and time';
+
+  @override
+  String get adminNameRequired => 'Give the marathon a name.';
+
+  @override
+  String get adminCityRequired => 'Enter the city.';
+
+  @override
+  String get adminCapacityRequired => 'Slots must be at least 1.';
+
+  @override
+  String get adminRouteTitle => 'Course';
+
+  @override
+  String get adminRouteSubtitle => 'Tap the map to mark the course';
+
+  @override
+  String get adminRouteMissing => 'Not set';
+
+  @override
+  String get adminRouteHint =>
+      'Tap the map to drop the first point of the course.';
+
+  @override
+  String adminRoutePoints(int count, String distance) {
+    return '$count points · $distance';
+  }
+
+  @override
+  String get adminRouteUndo => 'Undo';
+
+  @override
+  String get adminRouteClear => 'Clear all';
+
+  @override
+  String get adminRouteOutAndBack => 'Out and back';
+
+  @override
+  String get adminRouteOutAndBackHint =>
+      'Mark only the outbound leg: the return is the same line reversed and the distance doubles.';
+
+  @override
+  String get adminPublishedSwitch => 'Published in the catalogue';
+
+  @override
+  String get adminPublishedHint =>
+      'Pulling it does not cancel any entry already sold.';
+
+  @override
+  String get adminRegistrationsSwitch => 'Registrations enabled';
+
+  @override
+  String get adminRegistrationsHint =>
+      'Close them when you stop taking entries.';
+
+  @override
+  String get adminPaymentQr => 'Payment QR';
+
+  @override
+  String get adminQrLoaded => 'Uploaded';
+
+  @override
+  String get adminQrMissing => 'No QR';
+
+  @override
+  String get adminQrSubtitle =>
+      'Without a QR this marathon cannot take QR payments';
+
+  @override
+  String get adminQrAfterSave => 'Save the marathon first to upload the QR';
+
+  @override
+  String get adminQrInstructions => 'Text shown next to the QR';
+
+  @override
+  String get adminQrUploaded => 'QR updated.';
+
+  @override
+  String get adminDelete => 'Delete';
+
+  @override
+  String get adminDeleteMarathonTitle => 'Delete this marathon?';
+
+  @override
+  String get adminDeleteMarathonBody =>
+      'Only possible while it has no entrants. If it does, pull it from the catalogue instead.';
+
+  @override
+  String get adminUsersTitle => 'Users';
+
+  @override
+  String get adminNewUser => 'New account';
+
+  @override
+  String get adminEditUser => 'Edit account';
+
+  @override
+  String get adminSearch => 'Search';
+
+  @override
+  String get adminSearchHint => 'Name, email or ID';
+
+  @override
+  String get adminNoUsersTitle => 'No results';
+
+  @override
+  String get adminNoUsersBody => 'Try another name, email or ID number.';
+
+  @override
+  String get adminRole => 'Role';
+
+  @override
+  String get adminRoleAdmin => 'Admin';
+
+  @override
+  String get adminRoleOrganizer => 'Organiser';
+
+  @override
+  String get adminRoleRunner => 'Runner';
+
+  @override
+  String get adminEmail => 'Email';
+
+  @override
+  String get adminPassword => 'Password';
+
+  @override
+  String get adminNewPassword => 'New password';
+
+  @override
+  String get adminPasswordKeepHint => 'Leave empty to keep it';
+
+  @override
+  String get adminPasswordTooShort =>
+      'The password needs at least 8 characters.';
+
+  @override
+  String get adminMustChangePassword =>
+      'Still using their ID number as password';
+
+  @override
+  String get adminDeleteUserTitle => 'Delete this account?';
+
+  @override
+  String adminDeleteUserBody(String name) {
+    return 'The account of $name and everything in it will be deleted. This cannot be undone.';
+  }
+
+  @override
+  String get runRemaining => 'To go';
+
+  @override
+  String get runAlmostThere => 'Almost there!';
 }

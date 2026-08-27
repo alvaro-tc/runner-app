@@ -8,6 +8,22 @@ import 'package:flutter_map/flutter_map.dart';
 // latlong2 exports its own generic `Path<T>`, which shadows dart:ui's.
 import 'package:latlong2/latlong.dart' hide Path;
 
+/// Una chinche suelta sobre el mapa.
+@immutable
+class MapPin {
+  const MapPin({
+    required this.lat,
+    required this.lng,
+    required this.child,
+    this.size = 32,
+  });
+
+  final double lat;
+  final double lng;
+  final Widget child;
+  final double size;
+}
+
 /// Every map in the app goes through this widget. Swapping flutter_map for
 /// google_maps_flutter is a change inside this file only.
 class RouteMapView extends StatefulWidget {
@@ -19,6 +35,8 @@ class RouteMapView extends StatefulWidget {
     this.showStartFinish = true,
     this.markerEveryKm,
     this.userMarker,
+    this.pins = const [],
+    this.onTap,
     super.key,
   });
 
@@ -39,6 +57,16 @@ class RouteMapView extends StatefulWidget {
   /// Drops a numbered pin at each multiple of this distance.
   final int? markerEveryKm;
   final Widget? userMarker;
+
+  /// Chinches sueltas encima del mapa: los corredores del mapa en vivo, los
+  /// vertices del editor de recorrido. Van aparte de [route] porque no son un
+  /// trazado —no hay orden entre ellas— y pintarlas como polilinea uniria por
+  /// una raya a dos corredores que no tienen nada que ver.
+  final List<MapPin> pins;
+
+  /// Un toque sobre el mapa, con la coordenada. Solo el editor de recorrido lo
+  /// usa; sin el, el mapa no reacciona a los toques.
+  final void Function(double lat, double lng)? onTap;
 
   @override
   State<RouteMapView> createState() => RouteMapViewState();
@@ -111,6 +139,9 @@ class RouteMapViewState extends State<RouteMapView> {
             _ready = true;
             if (widget.follow == null) _fitRoute();
           },
+          onTap: widget.onTap == null
+              ? null
+              : (_, punto) => widget.onTap!(punto.latitude, punto.longitude),
         ),
         children: [
           TileLayer(
@@ -172,6 +203,17 @@ class RouteMapViewState extends State<RouteMapView> {
           next += every * 1000;
         }
       }
+    }
+
+    for (final pin in widget.pins) {
+      markers.add(
+        Marker(
+          point: LatLng(pin.lat, pin.lng),
+          width: pin.size,
+          height: pin.size,
+          child: pin.child,
+        ),
+      );
     }
 
     final f = widget.follow;
