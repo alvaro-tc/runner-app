@@ -873,5 +873,16 @@
     }
   },
   "runRemaining": "To go",
-  "runAlmostThere": "Almost there!"
+  "runAlmostThere": "Almost there!",
+  "settingsAccount": "Account",
+  "deleteAccountTitle": "Delete account",
+  "deleteAccountRowSubtitle": "Erase your account and everything in it, for good",
+  "deleteAccountBody": "Deleting your account removes it from CamRun and cannot be undone. There is no way to get it back afterwards.",
+  "deleteAccountWhatGoes": "You will lose your profile, your runs and their routes, your training plan and your race registrations. Payments already made stay in the accounting records of the race organiser, with no account attached to them.",
+  "deleteAccountPasswordLabel": "Password",
+  "deleteAccountPasswordHint": "Confirm it is you",
+  "deleteAccountSubmit": "Delete my account",
+  "deleteAccountConfirmTitle": "Delete it for good?",
+  "deleteAccountConfirmBody": "Your account and all your data will be erased. This cannot be undone.",
+  "deleteAccountConfirmAction": "Delete"
 }

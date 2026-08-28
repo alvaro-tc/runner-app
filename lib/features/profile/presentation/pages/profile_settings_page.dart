@@ -1,3 +1,4 @@
+import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
@@ -107,6 +108,19 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                           ? DistanceUnit.mi
                           : DistanceUnit.km,
                     ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(t.settingsAccount, style: context.text.headingMd),
+          _Group(
+            children: [
+              StatRow(
+                icon: Icons.delete_forever_outlined,
+                title: t.deleteAccountTitle,
+                subtitle: t.deleteAccountRowSubtitle,
+                tone: c.error,
+                onTap: () => context.push(Routes.profileDeleteAccount),
               ),
             ],
           ),

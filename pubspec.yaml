@@ -51,6 +51,13 @@ dependencies:
   # reintento ya resueltos. Solo se enciende durante la carrera.
   traccar_client_sdk: ^1.0.10
 
+# traccar_client_sdk aplica kotlin-android, asi que el proyecto va con
+# android.builtInKotlin=false. image_picker_android >=0.8.13+17 movio su
+# Messages.kt (ImagePickerApi) a src/main/kotlin y ya solo compila con
+# built-in Kotlin. +16 es la ultima 100% Java. Quitar cuando traccar migre.
+dependency_overrides:
+  image_picker_android: 0.8.13+16
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -61,6 +68,8 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.14.1
   drift_dev: ^2.34.0
+  # Genera los mipmap de Android y el appiconset de iOS desde un solo PNG.
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -81,3 +90,13 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
+
+# Ejecutar tras cambiar el logo:  dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icono-tienda-1024.png"
+  # El ícono adaptativo de Android recorta a círculo: el logo va sobre un fondo
+  # plano y con margen, si no se come los bordes.
+  adaptive_icon_background: "#4C1D95"
+  adaptive_icon_foreground: "assets/icons/adaptive-foreground-1024.png"

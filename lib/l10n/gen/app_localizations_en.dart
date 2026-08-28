@@ -1806,4 +1806,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runAlmostThere => 'Almost there!';
+
+  @override
+  String get settingsAccount => 'Account';
+
+  @override
+  String get deleteAccountTitle => 'Delete account';
+
+  @override
+  String get deleteAccountRowSubtitle =>
+      'Erase your account and everything in it, for good';
+
+  @override
+  String get deleteAccountBody =>
+      'Deleting your account removes it from CamRun and cannot be undone. There is no way to get it back afterwards.';
+
+  @override
+  String get deleteAccountWhatGoes =>
+      'You will lose your profile, your runs and their routes, your training plan and your race registrations. Payments already made stay in the accounting records of the race organiser, with no account attached to them.';
+
+  @override
+  String get deleteAccountPasswordLabel => 'Password';
+
+  @override
+  String get deleteAccountPasswordHint => 'Confirm it is you';
+
+  @override
+  String get deleteAccountSubmit => 'Delete my account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete it for good?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Your account and all your data will be erased. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmAction => 'Delete';
 }

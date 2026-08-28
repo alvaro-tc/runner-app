@@ -94,4 +94,14 @@ class RemoteAuthRepository implements AuthRepository {
     await session.clear();
     await db.wipe();
   });
+
+  /// El borrado local solo ocurre si el servidor confirmo el borrado remoto:
+  /// al reves —limpiar y que la peticion falle— dejaria la cuenta viva y al
+  /// usuario convencido de que ya no existe.
+  @override
+  Future<Result<void>> deleteAccount(String password) => guard(() async {
+    await api.deleteAccount(password);
+    await session.clear();
+    await db.wipe();
+  });
 }

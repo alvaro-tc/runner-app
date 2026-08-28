@@ -133,6 +133,19 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthState();
   }
 
+  /// Borrado de cuenta. Si el servidor lo confirma el repositorio ya dejo el
+  /// dispositivo limpio, asi que aqui solo queda caer la sesion y dejar que el
+  /// guard mande a Welcome.
+  Future<Failure?> deleteAccount(String password) async {
+    final result = await ref
+        .read(authRepositoryProvider)
+        .deleteAccount(password);
+    return result.fold((_) {
+      state = const AuthState();
+      return null;
+    }, (Failure f) => f);
+  }
+
   /// La sesion murio sola (refresh rechazado). Los tokens ya los borro
   /// [SessionController]; falta la cache, que es de ese usuario y de nadie mas.
   Future<void> _cerrarLocal() async {

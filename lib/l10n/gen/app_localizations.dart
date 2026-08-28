@@ -3367,6 +3367,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Almost there!'**
   String get runAlmostThere;
+
+  /// No description provided for @settingsAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase your account and everything in it, for good'**
+  String get deleteAccountRowSubtitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account removes it from CamRun and cannot be undone. There is no way to get it back afterwards.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountWhatGoes.
+  ///
+  /// In en, this message translates to:
+  /// **'You will lose your profile, your runs and their routes, your training plan and your race registrations. Payments already made stay in the accounting records of the race organiser, with no account attached to them.'**
+  String get deleteAccountWhatGoes;
+
+  /// No description provided for @deleteAccountPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get deleteAccountPasswordLabel;
+
+  /// No description provided for @deleteAccountPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it is you'**
+  String get deleteAccountPasswordHint;
+
+  /// No description provided for @deleteAccountSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccountSubmit;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete it for good?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account and all your data will be erased. This cannot be undone.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @deleteAccountConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountConfirmAction;
 }
 
 class _AppLocalizationsDelegate

@@ -544,5 +544,16 @@
   "adminDeleteUserTitle": "¿Eliminar la cuenta?",
   "adminDeleteUserBody": "Se borrará la cuenta de {name} y todo lo suyo. Esto no se deshace.",
   "runRemaining": "Falta",
-  "runAlmostThere": "¡Ya casi!"
+  "runAlmostThere": "¡Ya casi!",
+  "settingsAccount": "Cuenta",
+  "deleteAccountTitle": "Eliminar cuenta",
+  "deleteAccountRowSubtitle": "Borra tu cuenta y todo lo que contiene, para siempre",
+  "deleteAccountBody": "Al eliminar tu cuenta desaparece de CamRun y no se puede deshacer. Después no hay forma de recuperarla.",
+  "deleteAccountWhatGoes": "Perderás tu perfil, tus salidas y sus rutas, tu plan de entrenamiento y tus inscripciones a carreras. Los pagos ya realizados se conservan en los registros contables del organizador, sin tu cuenta asociada.",
+  "deleteAccountPasswordLabel": "Contraseña",
+  "deleteAccountPasswordHint": "Confirma que eres tú",
+  "deleteAccountSubmit": "Eliminar mi cuenta",
+  "deleteAccountConfirmTitle": "¿Eliminarla para siempre?",
+  "deleteAccountConfirmBody": "Tu cuenta y todos tus datos se borrarán. Esto no se puede deshacer.",
+  "deleteAccountConfirmAction": "Eliminar"
 }

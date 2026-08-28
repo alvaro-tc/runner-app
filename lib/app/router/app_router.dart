@@ -6,6 +6,7 @@ import 'package:camrun/features/admin/presentation/pages/admin_marathon_edit_pag
 import 'package:camrun/features/admin/presentation/pages/admin_marathons_page.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_users_page.dart';
 import 'package:camrun/features/auth/presentation/pages/change_password_page.dart';
+import 'package:camrun/features/auth/presentation/pages/delete_account_page.dart';
 import 'package:camrun/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:camrun/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:camrun/features/auth/presentation/pages/sign_up_page.dart';
@@ -99,6 +100,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.profileLanguage,
         builder: (context, state) => const LanguagePage(),
+      ),
+      GoRoute(
+        path: Routes.profileDeleteAccount,
+        builder: (context, state) => const DeleteAccountPage(),
       ),
       if (kDebugMode)
         GoRoute(

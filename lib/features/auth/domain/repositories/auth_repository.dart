@@ -32,4 +32,9 @@ abstract interface class AuthRepository {
   });
 
   Future<Result<void>> signOut();
+
+  /// Borra la cuenta en el servidor y deja el dispositivo como recien
+  /// instalado. Irreversible: pide la contrasena para confirmar que es el
+  /// dueno quien lo pide.
+  Future<Result<void>> deleteAccount(String password);
 }

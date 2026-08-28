@@ -51,3 +51,6 @@ test/golden/failures/
 # generado en `lib/l10n/gen/` SI se versiona, porque `flutter test` y el
 # analizador no lo regeneran solos y un clon limpio no compilaria sin el.
 lib/l10n/untranslated.json
+# Firma de release: nunca al repo
+android/key.properties
+android/*.jks

@@ -106,4 +106,13 @@ class AuthApi {
       },
     ),
   );
+
+  /// Borra la cuenta y todo lo del usuario en el servidor. Pide la contrasena
+  /// otra vez porque es irreversible y el telefono puede estar en otras manos.
+  Future<void> deleteAccount(String password) => apiCall(
+    () async => _dio.delete<dynamic>(
+      '/auth/me',
+      data: {'password': password},
+    ),
+  );
 }
