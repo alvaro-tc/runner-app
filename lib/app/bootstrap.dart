@@ -1,17 +1,17 @@
 import 'dart:async';
 
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/preferences_provider.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
+import 'package:camrun/features/train/data/repositories/hive_training_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/services/preferences_provider.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
-import 'package:paceup/features/train/data/repositories/hive_training_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Initialises every service the widget tree expects to already be available,

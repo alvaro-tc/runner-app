@@ -1,7 +1,7 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
 
 /// `34d : 10h : 24m` on a dark pill. Digits stay bright, unit letters recede.
 class CountdownPill extends StatelessWidget {

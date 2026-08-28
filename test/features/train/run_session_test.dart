@@ -1,24 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/interceptors.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/core/sync/sync_service.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/tracking/data/tracking_api.dart';
+import 'package:camrun/features/tracking/data/tracking_service.dart';
+import 'package:camrun/features/tracking/tracking_providers.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/presentation/providers/run_session_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/interceptors.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/core/sync/sync_service.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/tracking/data/tracking_api.dart';
-import 'package:paceup/features/tracking/data/tracking_service.dart';
-import 'package:paceup/features/tracking/tracking_providers.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/features/train/presentation/providers/run_session_provider.dart';
 
 import '../../core/fake_http.dart';
 

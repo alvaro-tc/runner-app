@@ -1,14 +1,14 @@
+import 'package:camrun/core/theme/app_theme.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/presentation/widgets/race_card.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_progress_ring.dart';
+import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:paceup/core/theme/app_theme.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/presentation/widgets/race_card.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_progress_ring.dart';
-import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
 
 /// Locale fijo: estas pruebas comprueban la estructura del widget, no la
 /// traduccion. Con el idioma sin fijar, el texto —y el formato de la moneda—

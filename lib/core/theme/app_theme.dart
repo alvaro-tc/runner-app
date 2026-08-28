@@ -1,7 +1,7 @@
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/theme/app_typography.dart';
+import 'package:camrun/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/core/theme/app_typography.dart';
-import 'package:paceup/core/theme/theme_extensions.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _build(AppPalette.light(), Brightness.light);

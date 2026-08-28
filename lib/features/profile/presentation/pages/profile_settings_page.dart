@@ -1,12 +1,13 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 class ProfileSettingsPage extends ConsumerStatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -111,6 +112,19 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
+          Text(t.settingsAccount, style: context.text.headingMd),
+          _Group(
+            children: [
+              StatRow(
+                icon: Icons.delete_forever_outlined,
+                title: t.deleteAccountTitle,
+                subtitle: t.deleteAccountRowSubtitle,
+                tone: c.error,
+                onTap: () => context.push(Routes.profileDeleteAccount),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Text(t.settingsHelp, style: context.text.headingMd),
           _Group(
             children: [
@@ -123,7 +137,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
               StatRow(
                 icon: Icons.mail_outline_rounded,
                 title: t.settingsContactSupport,
-                value: 'support@paceup.app',
+                value: 'support@camrun.app',
                 onTap: () => context.showSnack(t.settingsContactComingSoon),
               ),
               const AppDivider(),

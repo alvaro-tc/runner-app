@@ -1,5 +1,5 @@
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:meta/meta.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
 
 /// El borrador de inscripcion y lo que cuesta, tal como lo lleva el servidor.
 ///
@@ -39,26 +39,19 @@ enum RegistrationState {
   bool get isConfirmed => this == confirmed;
 }
 
-<<<<<<< HEAD
-/// Metodos de cobro que atiende el proveedor simulado.
-/// Solo el codigo de la API: el nombre visible sale del ARB, via
-/// `RacePaymentMethodL10n`.
-enum RacePaymentMethod {
-  card('card'),
-  qr('qr'),
-  bankTransfer('bank_transfer');
-=======
 /// Metodos de cobro.
 ///
 /// [qrManual] es **temporal** y no lo atiende ningun proveedor: se muestra el QR
 /// bancario del organizador, el corredor sube una captura del pago y una
 /// persona lo verifica. Ver `docs/pago-qr-manual.md` en la API.
+///
+/// Solo el codigo de la API: el nombre visible sale del ARB, via
+/// `RacePaymentMethodL10n`.
 enum RacePaymentMethod {
-  card('card', 'Card'),
-  qr('qr', 'QR'),
-  bankTransfer('bank_transfer', 'Bank transfer'),
-  qrManual('qr_manual', 'Bank QR');
->>>>>>> main
+  card('card'),
+  qr('qr'),
+  bankTransfer('bank_transfer'),
+  qrManual('qr_manual');
 
   const RacePaymentMethod(this.api);
   final String api;

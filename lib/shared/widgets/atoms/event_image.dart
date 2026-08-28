@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:camrun/core/extensions/context_x.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
 
 /// Afiche del evento. Si no hay imagen —o la descarga falla— pinta un degradado
 /// de marca con el icono, no un trazado: el hueco tiene que leerse como "falta

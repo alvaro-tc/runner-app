@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'PaceUp';
+  String get appTitle => 'CamRun';
 
   @override
   String get commonRetry => 'Reintentar';
@@ -85,7 +85,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authIdentifierLabel => 'Usuario o correo';
 
   @override
-  String get authEmailHint => 'pandu@paceup.app';
+  String get authEmailHint => 'pandu@camrun.app';
 
   @override
   String get authPasswordLabel => 'Contraseña';
@@ -229,7 +229,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingPlanBody =>
-      'Dile a PaceUp qué carrera persigues. Reparte las semanas, mueve las sesiones cuando la vida se cruza y no pierde de vista el objetivo.';
+      'Dile a CamRun qué carrera persigues. Reparte las semanas, mueve las sesiones cuando la vida se cruza y no pierde de vista el objetivo.';
 
   @override
   String get onboardingTrackTitle => 'Sigue cada salida en tiempo real';
@@ -445,11 +445,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get locationDeniedForever =>
-      'La ubicación está bloqueada para PaceUp. Actívala en los ajustes del sistema y vuelve.';
+      'La ubicación está bloqueada para CamRun. Actívala en los ajustes del sistema y vuelve.';
 
   @override
   String get locationBackgroundDenied =>
-      'La ubicación en segundo plano está desactivada. La grabación sigue mientras PaceUp esté en pantalla, pero puede pararse si cambias de app.';
+      'La ubicación en segundo plano está desactivada. La grabación sigue mientras CamRun esté en pantalla, pero puede pararse si cambias de app.';
 
   @override
   String get setupBackgroundLocationTitle => 'Grabar con la pantalla apagada';
@@ -526,7 +526,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setupFreeRunSubtitle =>
-      'Sin objetivo. Sal y deja que PaceUp lo registre.';
+      'Sin objetivo. Sal y deja que CamRun lo registre.';
 
   @override
   String get setupPlanSession => 'Sesión del plan';
@@ -552,11 +552,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setupLocationGrantedBody =>
-      'PaceUp puede dibujar tu ruta mientras corres.';
+      'CamRun puede dibujar tu ruta mientras corres.';
 
   @override
   String get setupLocationRationale =>
-      'PaceUp lee tu posición solo mientras grabas una salida, y guarda la ruta en este dispositivo.';
+      'CamRun lee tu posición solo mientras grabas una salida, y guarda la ruta en este dispositivo.';
 
   @override
   String get setupAllowLocation => 'Permitir ubicación';
@@ -1077,7 +1077,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registerDefaultRunnerName => 'Corredor';
 
   @override
-  String get registerDefaultCardHolder => 'CORREDOR PACEUP';
+  String get registerDefaultCardHolder => 'CORREDOR CAMRUN';
 
   @override
   String get paymentCardDeclined =>
@@ -1267,7 +1267,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Escribe a support@paceup.app y te respondemos en menos de un día.';
+      'Escribe a support@camrun.app y te respondemos en menos de un día.';
 
   @override
   String get settingsVersion => 'Versión';
@@ -1384,4 +1384,493 @@ class AppLocalizationsEs extends AppLocalizations {
   String marathonPredictedFinish(String range) {
     return 'Tiempo de meta previsto $range';
   }
+
+  @override
+  String get commonYes => 'Sí';
+
+  @override
+  String get commonNo => 'No';
+
+  @override
+  String get authIdLabel => 'Carnet de identidad (CI)';
+
+  @override
+  String get authIdHint => '1234567 LP';
+
+  @override
+  String get authEmailOptionalLabel => 'Correo (opcional)';
+
+  @override
+  String get authEmailOptionalHelp =>
+      'Sin él no podemos enviarte un enlace para restablecer la contraseña, así que ten a mano tu carnet.';
+
+  @override
+  String get validationIdEmpty => 'Escribe tu carnet de identidad.';
+
+  @override
+  String get validationIdInvalid =>
+      'Escríbelo como aparece en tu carnet, por ejemplo 1234567 LP.';
+
+  @override
+  String get validationCurrentPasswordRequired =>
+      'Escribe tu contraseña actual.';
+
+  @override
+  String get changePasswordTitle => 'Elige tu\ncontraseña.';
+
+  @override
+  String get changePasswordBody =>
+      'Tu cuenta se creó con tu carnet como usuario y como contraseña. Cualquiera que haya visto tu carnet la sabe, así que elige otra antes de continuar.';
+
+  @override
+  String get changePasswordCurrentLabel => 'Contraseña actual';
+
+  @override
+  String get changePasswordCurrentHint => 'Tu carnet, si nadie la ha cambiado';
+
+  @override
+  String get changePasswordNewLabel => 'Contraseña nueva';
+
+  @override
+  String get changePasswordNewHint =>
+      'Al menos 8 caracteres, con una letra y un número';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirma la contraseña nueva';
+
+  @override
+  String get changePasswordConfirmHint => 'Escríbela otra vez';
+
+  @override
+  String get changePasswordSubmit => 'Guardar y continuar';
+
+  @override
+  String get homeUpcomingMarathons => 'Tus próximos maratones';
+
+  @override
+  String get racesUpcomingMarathons => 'Próximos maratones';
+
+  @override
+  String get registerEmailHint => 'Donde te enviamos la confirmación';
+
+  @override
+  String get registerCamTitle => 'Sobre el CAM';
+
+  @override
+  String get registerCamKnowsQuestion =>
+      '¿Conoces la labor que realiza el CAM?';
+
+  @override
+  String get registerCamDonorQuestion =>
+      '¿Podemos llamarte para invitarte a ser donante del CAM?';
+
+  @override
+  String get paymentMethodQrManual => 'QR bancario';
+
+  @override
+  String get registerQrManualSubtitle =>
+      'Paga desde tu app del banco y sube el comprobante';
+
+  @override
+  String get registerProofSent =>
+      'Comprobante enviado. El organizador lo revisará y confirmará tu plaza.';
+
+  @override
+  String get registerProofUploadFailed => 'No pudimos subir ese comprobante.';
+
+  @override
+  String get registerPaymentNote => 'Glosa del pago';
+
+  @override
+  String get registerPaymentNoteHelp =>
+      'Escríbela en el detalle de la transferencia. Es lo que le permite al organizador ligar tu pago con esta inscripción.';
+
+  @override
+  String get registerProofInReviewTitle => 'Comprobante en revisión';
+
+  @override
+  String get registerProofInReviewBody =>
+      'Tu plaza todavía no está reservada. El organizador la confirma cuando vea el dinero en la cuenta.';
+
+  @override
+  String get registerProofRejectedTitle => 'Comprobante rechazado';
+
+  @override
+  String get registerProofRejectedFallback => 'Sube uno más claro.';
+
+  @override
+  String get registerProofReferenceLabel => 'Número de transacción (opcional)';
+
+  @override
+  String get registerProofReferenceHint => 'El de tu app del banco';
+
+  @override
+  String get registerProofUpload => 'Subir comprobante';
+
+  @override
+  String get registerProofTakePhoto => 'Tomar una foto';
+
+  @override
+  String get phoneSelectCountry => 'Elige un país';
+
+  @override
+  String get countryBO => 'Bolivia';
+
+  @override
+  String get countryAR => 'Argentina';
+
+  @override
+  String get countryBR => 'Brasil';
+
+  @override
+  String get countryCL => 'Chile';
+
+  @override
+  String get countryCO => 'Colombia';
+
+  @override
+  String get countryEC => 'Ecuador';
+
+  @override
+  String get countryES => 'España';
+
+  @override
+  String get countryUS => 'Estados Unidos';
+
+  @override
+  String get countryMX => 'México';
+
+  @override
+  String get countryPY => 'Paraguay';
+
+  @override
+  String get countryPE => 'Perú';
+
+  @override
+  String get countryUY => 'Uruguay';
+
+  @override
+  String get countryVE => 'Venezuela';
+
+  @override
+  String marathonSlotsLeft(int left) {
+    return 'Quedan $left plazas';
+  }
+
+  @override
+  String get authWelcomeCamTitle => 'CAM · Centro de Apoyo a la Mujer';
+
+  @override
+  String get authWelcomeCamBody =>
+      'CamRun es la app del Centro de Apoyo a la Mujer: una organización sin fines de lucro que acompaña a mujeres en situación de vulnerabilidad. Cada carrera que corres apoya esa labor.';
+
+  @override
+  String get homeNoSessionTitle => 'Sin sesión para este día';
+
+  @override
+  String get homeNoSessionMessage =>
+      'Elige otro día de la semana o sal a correr libre cuando quieras.';
+
+  @override
+  String get homeFreeRun => 'Salida libre';
+
+  @override
+  String get filterWeekdayAll => 'Todos los días';
+
+  @override
+  String get adminLiveTitle => 'En vivo';
+
+  @override
+  String get adminNavLive => 'En vivo';
+
+  @override
+  String get adminNavMarathons => 'Maratones';
+
+  @override
+  String get adminNavUsers => 'Usuarios';
+
+  @override
+  String get adminLoadFailed => 'No se pudo cargar. Reintenta.';
+
+  @override
+  String get adminNoMarathonsTitle => 'Todavía no hay maratones';
+
+  @override
+  String get adminNoMarathonsBody =>
+      'Crea la primera y aparecerá aquí lista para publicar.';
+
+  @override
+  String adminRunnersOnCourse(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count corredores en pista',
+      one: '1 corredor en pista',
+      zero: 'Sin corredores en pista',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminStart => 'Iniciar maratón';
+
+  @override
+  String get adminFinish => 'Finalizar';
+
+  @override
+  String get adminStartConfirmTitle => '¿Dar la largada?';
+
+  @override
+  String adminStartConfirmBody(String name) {
+    return 'A todos los inscritos en «$name» se les abrirá la pantalla de carrera y empezará a contar su tiempo. Esto no se deshace.';
+  }
+
+  @override
+  String get adminFinishConfirmTitle => '¿Cortar la carrera?';
+
+  @override
+  String adminFinishConfirmBody(String name) {
+    return 'Se cerrará la carrera de «$name» y cada corredor pasará a ver sus estadísticas. Esto no se deshace.';
+  }
+
+  @override
+  String get adminAlreadyFinished => 'Esta maratón ya terminó';
+
+  @override
+  String get adminMarathonsTitle => 'Maratones';
+
+  @override
+  String get adminNewMarathon => 'Nueva maratón';
+
+  @override
+  String get adminEditMarathon => 'Editar maratón';
+
+  @override
+  String get adminLive => 'En vivo';
+
+  @override
+  String get adminFinished => 'Terminada';
+
+  @override
+  String get adminPublished => 'Publicada';
+
+  @override
+  String get adminDraft => 'Borrador';
+
+  @override
+  String get adminRegistrationsOpen => 'Inscripciones abiertas';
+
+  @override
+  String get adminRegistrationsClosed => 'Inscripciones cerradas';
+
+  @override
+  String adminSlots(int taken, int total) {
+    return '$taken/$total cupos';
+  }
+
+  @override
+  String get adminName => 'Nombre';
+
+  @override
+  String get adminCity => 'Ciudad';
+
+  @override
+  String get adminDescription => 'Descripción';
+
+  @override
+  String get adminCapacity => 'Cupos';
+
+  @override
+  String get adminPrice => 'Precio (Bs)';
+
+  @override
+  String get adminStartsAt => 'Fecha y hora';
+
+  @override
+  String get adminNameRequired => 'Ponle un nombre a la maratón.';
+
+  @override
+  String get adminCityRequired => 'Indica la ciudad.';
+
+  @override
+  String get adminCapacityRequired => 'Los cupos tienen que ser al menos 1.';
+
+  @override
+  String get adminRouteTitle => 'Recorrido';
+
+  @override
+  String get adminRouteSubtitle => 'Toca el mapa para marcar el trazado';
+
+  @override
+  String get adminRouteMissing => 'Sin marcar';
+
+  @override
+  String get adminRouteHint =>
+      'Toca el mapa para poner el primer punto del recorrido.';
+
+  @override
+  String adminRoutePoints(int count, String distance) {
+    return '$count puntos · $distance';
+  }
+
+  @override
+  String get adminRouteUndo => 'Deshacer';
+
+  @override
+  String get adminRouteClear => 'Borrar todo';
+
+  @override
+  String get adminRouteOutAndBack => 'Ida y vuelta';
+
+  @override
+  String get adminRouteOutAndBackHint =>
+      'Marca solo la ida: la vuelta es el mismo trazado al revés y la distancia se duplica.';
+
+  @override
+  String get adminPublishedSwitch => 'Publicada en el catálogo';
+
+  @override
+  String get adminPublishedHint =>
+      'Retirarla no cancela ninguna inscripción vendida.';
+
+  @override
+  String get adminRegistrationsSwitch => 'Inscripciones habilitadas';
+
+  @override
+  String get adminRegistrationsHint =>
+      'Ciérralas cuando no quieras aceptar más gente.';
+
+  @override
+  String get adminPaymentQr => 'QR de cobro';
+
+  @override
+  String get adminQrLoaded => 'Cargado';
+
+  @override
+  String get adminQrMissing => 'Sin QR';
+
+  @override
+  String get adminQrSubtitle => 'Sin QR, la maratón no admite pago por QR';
+
+  @override
+  String get adminQrAfterSave => 'Guarda la maratón para poder subir el QR';
+
+  @override
+  String get adminQrInstructions => 'Texto junto al QR';
+
+  @override
+  String get adminQrUploaded => 'QR actualizado.';
+
+  @override
+  String get adminDelete => 'Eliminar';
+
+  @override
+  String get adminDeleteMarathonTitle => '¿Eliminar la maratón?';
+
+  @override
+  String get adminDeleteMarathonBody =>
+      'Solo se puede si todavía no tiene inscritos. Si los tiene, retírala del catálogo en vez de borrarla.';
+
+  @override
+  String get adminUsersTitle => 'Usuarios';
+
+  @override
+  String get adminNewUser => 'Nueva cuenta';
+
+  @override
+  String get adminEditUser => 'Editar cuenta';
+
+  @override
+  String get adminSearch => 'Buscar';
+
+  @override
+  String get adminSearchHint => 'Nombre, correo o CI';
+
+  @override
+  String get adminNoUsersTitle => 'Sin resultados';
+
+  @override
+  String get adminNoUsersBody => 'Prueba con otro nombre, correo o cédula.';
+
+  @override
+  String get adminRole => 'Rol';
+
+  @override
+  String get adminRoleAdmin => 'Admin';
+
+  @override
+  String get adminRoleOrganizer => 'Organizador';
+
+  @override
+  String get adminRoleRunner => 'Corredor';
+
+  @override
+  String get adminEmail => 'Correo';
+
+  @override
+  String get adminPassword => 'Contraseña';
+
+  @override
+  String get adminNewPassword => 'Nueva contraseña';
+
+  @override
+  String get adminPasswordKeepHint => 'Déjalo vacío para no cambiarla';
+
+  @override
+  String get adminPasswordTooShort =>
+      'La contraseña necesita al menos 8 caracteres.';
+
+  @override
+  String get adminMustChangePassword => 'Todavía usa su CI como contraseña';
+
+  @override
+  String get adminDeleteUserTitle => '¿Eliminar la cuenta?';
+
+  @override
+  String adminDeleteUserBody(String name) {
+    return 'Se borrará la cuenta de $name y todo lo suyo. Esto no se deshace.';
+  }
+
+  @override
+  String get runRemaining => 'Falta';
+
+  @override
+  String get runAlmostThere => '¡Ya casi!';
+
+  @override
+  String get settingsAccount => 'Cuenta';
+
+  @override
+  String get deleteAccountTitle => 'Eliminar cuenta';
+
+  @override
+  String get deleteAccountRowSubtitle =>
+      'Borra tu cuenta y todo lo que contiene, para siempre';
+
+  @override
+  String get deleteAccountBody =>
+      'Al eliminar tu cuenta desaparece de CamRun y no se puede deshacer. Después no hay forma de recuperarla.';
+
+  @override
+  String get deleteAccountWhatGoes =>
+      'Perderás tu perfil, tus salidas y sus rutas, tu plan de entrenamiento y tus inscripciones a carreras. Los pagos ya realizados se conservan en los registros contables del organizador, sin tu cuenta asociada.';
+
+  @override
+  String get deleteAccountPasswordLabel => 'Contraseña';
+
+  @override
+  String get deleteAccountPasswordHint => 'Confirma que eres tú';
+
+  @override
+  String get deleteAccountSubmit => 'Eliminar mi cuenta';
+
+  @override
+  String get deleteAccountConfirmTitle => '¿Eliminarla para siempre?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Tu cuenta y todos tus datos se borrarán. Esto no se puede deshacer.';
+
+  @override
+  String get deleteAccountConfirmAction => 'Eliminar';
 }

@@ -1,5 +1,5 @@
-name: paceup
-description: "PaceUp - training plans, live run tracking and race history."
+name: camrun
+description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -30,7 +30,7 @@ dependencies:
   latlong2: ^0.10.1
   geolocator: ^14.0.3
   # UI utilities
-  intl: ^0.20.3
+  intl: ^0.20.2
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
   # Comprobante de pago: la unica forma de coger una captura de la galeria o
@@ -44,6 +44,19 @@ dependencies:
   json_annotation: ^4.12.0
   drift: ^2.34.3
   drift_flutter: ^0.3.1
+  # Mapa en vivo de la maraton y aviso de largada. El backend ya expone un
+  # gateway Socket.IO en /live: esto es su cliente, no una capa nueva.
+  socket_io_client: ^3.1.6
+  # Seguimiento en vivo de la maraton oficial: servicio nativo, cola offline y
+  # reintento ya resueltos. Solo se enciende durante la carrera.
+  traccar_client_sdk: ^1.0.10
+
+# traccar_client_sdk aplica kotlin-android, asi que el proyecto va con
+# android.builtInKotlin=false. image_picker_android >=0.8.13+17 movio su
+# Messages.kt (ImagePickerApi) a src/main/kotlin y ya solo compila con
+# built-in Kotlin. +16 es la ultima 100% Java. Quitar cuando traccar migre.
+dependency_overrides:
+  image_picker_android: 0.8.13+16
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +68,8 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.14.1
   drift_dev: ^2.34.0
+  # Genera los mipmap de Android y el appiconset de iOS desde un solo PNG.
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -75,3 +90,13 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
+
+# Ejecutar tras cambiar el logo:  dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icono-tienda-1024.png"
+  # El ícono adaptativo de Android recorta a círculo: el logo va sobre un fondo
+  # plano y con margen, si no se come los bordes.
+  adaptive_icon_background: "#4C1D95"
+  adaptive_icon_foreground: "assets/icons/adaptive-foreground-1024.png"

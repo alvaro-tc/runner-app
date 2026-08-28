@@ -1,14 +1,14 @@
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/features/home/data/datasources/home_api.dart';
+import 'package:camrun/features/home/data/home_mappers.dart';
+import 'package:camrun/features/home/data/repositories/remote_home_repositories.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/features/home/data/datasources/home_api.dart';
-import 'package:paceup/features/home/data/home_mappers.dart';
-import 'package:paceup/features/home/data/repositories/remote_home_repositories.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
 
 import '../../core/fake_http.dart';
 import '../../fake_api.dart';

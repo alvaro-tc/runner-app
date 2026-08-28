@@ -1,10 +1,21 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Live run tracking draws the route while the app is in use. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- Recording keeps going with the app off screen: on Android that needs a
-         foreground service of type `location`, and `always` on top of it. -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <!-- Recording keeps going with the app off screen via a foreground service
+         of type `location`, started by the user. Play rejects builds that ask for
+         ACCESS_BACKGROUND_LOCATION without the extra review, and dependencies
+         inject it on their own, so it is stripped from the merged manifest. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        tools:node="remove"/>
+    <!-- Inyectados por dependencias y sin uso aqui: el reconocimiento de
+         actividad nunca se consulta, y sin background location el servicio
+         tampoco puede arrancar desde el boot. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"
+        tools:node="remove"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
+        tools:node="remove"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
         <!-- Android 13+ requires runtime notification permission for the
@@ -15,7 +26,7 @@
     <!-- Map tiles and, later, the real API. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="PaceUp"
+        android:label="CamRun"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

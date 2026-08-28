@@ -1,6 +1,6 @@
+import 'package:camrun/core/utils/route_generator.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/utils/route_generator.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 void main() {
   final start = DateTime(2026, 8, 1, 6);

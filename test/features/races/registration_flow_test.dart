@@ -1,13 +1,13 @@
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/races/domain/repositories/race_repository.dart';
+import 'package:camrun/features/races/presentation/providers/registration_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/races/domain/repositories/race_repository.dart';
-import 'package:paceup/features/races/presentation/providers/registration_provider.dart';
 
 /// Repositorio de mentira que anota las claves de idempotencia con las que se
 /// le pidio cobrar. Es lo unico que hace falta espiar: el resto del flujo ya se

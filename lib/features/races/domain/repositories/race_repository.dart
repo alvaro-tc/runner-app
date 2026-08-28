@@ -1,6 +1,6 @@
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
 
 /// Mis carreras y el camino para llegar a tener una.
 ///

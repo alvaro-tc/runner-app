@@ -1,5 +1,5 @@
+import 'package:camrun/core/formatters/formatters.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/formatters/formatters.dart';
 
 void main() {
   group('distance', () {

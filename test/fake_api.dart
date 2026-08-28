@@ -47,7 +47,7 @@ Future<ResponseBody> fakeBackend(RequestOptions req) async {
 
 const _usuario = {
   'id': 'u1',
-  'email': 'pandu@paceup.app',
+  'email': 'pandu@camrun.app',
   'name': 'Pandu',
   'role': 'runner',
 };

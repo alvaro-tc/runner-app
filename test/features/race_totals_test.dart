@@ -1,6 +1,6 @@
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
 
 Marathon _marathon({required String id, required double distanceKm}) =>
     Marathon(

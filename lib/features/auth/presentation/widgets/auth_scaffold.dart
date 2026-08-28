@@ -1,9 +1,9 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
 
 /// Shared chrome for sign-in, sign-up and password recovery: back arrow,
 /// screen gutter, and a scroll view so the keyboard never causes an overflow.

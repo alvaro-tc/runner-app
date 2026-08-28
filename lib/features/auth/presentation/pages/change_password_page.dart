@@ -1,14 +1,14 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/utils/validators.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
+import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/core/utils/validators.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
-import 'package:paceup/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
 
 /// Cambio obligatorio de contrasena.
 ///
@@ -43,11 +43,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   }
 
   Future<void> _submit() async {
+    final t = context.l10n;
     setState(() {
       _errors
-        ..['current'] = Validators.required(_current.text, 'current password')
-        ..['next'] = Validators.password(_next.text)
-        ..['confirm'] = Validators.confirmPassword(_confirm.text, _next.text);
+        ..['current'] = Validators.required(
+          _current.text,
+          t.validationCurrentPasswordRequired,
+        )
+        ..['next'] = Validators.password(t, _next.text)
+        ..['confirm'] = Validators.confirmPassword(
+          t,
+          _confirm.text,
+          _next.text,
+        );
     });
     if (_errors.values.any((e) => e != null)) return;
 
@@ -78,22 +86,21 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
 
     return AuthScaffold(
       children: [
-        Text('Choose your\npassword.', style: context.text.displayMd),
+        Text(t.changePasswordTitle, style: context.text.displayMd),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Your account was created with your ID number as both the username '
-          'and the password. Anyone who has seen your ID knows it, so pick a '
-          'new one before you go on.',
+          t.changePasswordBody,
           style: context.text.bodyMd.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xxl),
         AppTextField(
-          label: 'Current password',
+          label: t.changePasswordCurrentLabel,
           controller: _current,
-          hint: 'Your ID number, if nobody changed it',
+          hint: t.changePasswordCurrentHint,
           errorText: _errors['current'],
           isPassword: true,
           textInputAction: TextInputAction.next,
@@ -101,9 +108,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'New password',
+          label: t.changePasswordNewLabel,
           controller: _next,
-          hint: 'At least 8 characters, with a letter and a number',
+          hint: t.changePasswordNewHint,
           errorText: _errors['next'],
           isPassword: true,
           textInputAction: TextInputAction.next,
@@ -112,9 +119,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Confirm new password',
+          label: t.changePasswordConfirmLabel,
           controller: _confirm,
-          hint: 'Type it once more',
+          hint: t.changePasswordConfirmHint,
           errorText: _errors['confirm'],
           isPassword: true,
           textInputAction: TextInputAction.done,
@@ -123,13 +130,13 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         ),
         const SizedBox(height: AppSpacing.xl),
         AppButton(
-          label: 'Save and continue',
+          label: t.changePasswordSubmit,
           isLoading: _loading,
           onPressed: _submit,
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton(
-          label: 'Sign out',
+          label: t.profileLogOut,
           variant: AppButtonVariant.ghost,
           onPressed: () => ref.read(authProvider.notifier).signOut(),
         ),

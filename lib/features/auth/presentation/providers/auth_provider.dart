@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/sync/sync_providers.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habia sesion al arrancar. Se resuelve en `bootstrap()` leyendo el refresh
 /// token del almacen seguro —una lectura asincrona que no puede hacerse dentro
@@ -22,13 +22,25 @@ final initialSessionProvider = Provider<bool>((ref) => false);
 /// unico que se puede hacer en la app es cerrarla.
 @immutable
 class AuthState {
-  const AuthState({this.signedIn = false, this.mustChangePassword = false});
+  const AuthState({
+    this.signedIn = false,
+    this.mustChangePassword = false,
+    this.role = '',
+  });
 
   final bool signedIn;
   final bool mustChangePassword;
 
+  /// `admin`, `organizer` o `runner`. Vacio mientras no se sepa: con sesion
+  /// recuperada del arranque el rol tarda una peticion en llegar, y asumir
+  /// `admin` un instante abriria el panel a cualquiera que reinstale.
+  final String role;
+
   /// Puede moverse por la app con normalidad.
   bool get ready => signedIn && !mustChangePassword;
+
+  /// Le toca el panel y no la app de corredor.
+  bool get isAdmin => role == 'admin';
 }
 
 /// Whether a session exists. The router redirect watches this.
@@ -96,6 +108,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = AuthState(
       signedIn: true,
       mustChangePassword: user.mustChangePassword,
+      role: user.role,
     );
     return null;
   }
@@ -109,6 +122,7 @@ class AuthNotifier extends Notifier<AuthState> {
       (AuthUser user) => state = AuthState(
         signedIn: true,
         mustChangePassword: user.mustChangePassword,
+        role: user.role,
       ),
       (Failure _) {},
     );
@@ -117,6 +131,19 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
     state = const AuthState();
+  }
+
+  /// Borrado de cuenta. Si el servidor lo confirma el repositorio ya dejo el
+  /// dispositivo limpio, asi que aqui solo queda caer la sesion y dejar que el
+  /// guard mande a Welcome.
+  Future<Failure?> deleteAccount(String password) async {
+    final result = await ref
+        .read(authRepositoryProvider)
+        .deleteAccount(password);
+    return result.fold((_) {
+      state = const AuthState();
+      return null;
+    }, (Failure f) => f);
   }
 
   /// La sesion murio sola (refresh rechazado). Los tokens ya los borro

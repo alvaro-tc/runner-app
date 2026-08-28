@@ -1,10 +1,10 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/blob_illustration.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/blob_illustration.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -37,9 +37,14 @@ class WelcomePage extends StatelessWidget {
                           BlobIllustration(
                             icon: Icons.directions_run_rounded,
                             seed: 5,
-                            size: constraints.maxHeight * 0.34,
+                            // Cede altura a la ficha del CAM en pantallas
+                            // bajas, sin desaparecer en las altas.
+                            size: (constraints.maxHeight * 0.24).clamp(
+                              96.0,
+                              200.0,
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.xxl),
+                          const SizedBox(height: AppSpacing.xl),
                           Text(
                             context.l10n.authWelcomeTitle,
                             textAlign: TextAlign.center,
@@ -47,18 +52,49 @@ class WelcomePage extends StatelessWidget {
                               letterSpacing: 0.3,
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.base),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 320),
-                            child: Text(
-                              context.l10n.authWelcomeBody,
-                              textAlign: TextAlign.center,
-                              style: context.text.bodyMd.copyWith(
-                                color: c.textSecondary,
-                              ),
+                          const SizedBox(height: AppSpacing.lg),
+                          // Quien abre la app por primera vez no sabe que hay
+                          // detras: el CAM se presenta antes de pedir cuenta.
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.base),
+                            decoration: BoxDecoration(
+                              color: c.primaryContainer,
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.favorite_rounded,
+                                      size: 16,
+                                      color: c.primary,
+                                    ),
+                                    const SizedBox(width: AppSpacing.xs + 2),
+                                    Flexible(
+                                      child: Text(
+                                        context.l10n.authWelcomeCamTitle,
+                                        textAlign: TextAlign.center,
+                                        style: context.text.labelSm.copyWith(
+                                          color: c.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  context.l10n.authWelcomeCamBody,
+                                  textAlign: TextAlign.center,
+                                  style: context.text.bodySm.copyWith(
+                                    color: c.textSecondary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.xxxl),
+                          const SizedBox(height: AppSpacing.lg),
                           AppButton(
                             label: context.l10n.authLogin,
                             onPressed: () => context.push(Routes.signIn),

@@ -1,5 +1,5 @@
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 
 /// Distance, pace, duration and money rendering. Kept pure so it is unit
 /// testable without a widget tree.
@@ -99,6 +99,11 @@ abstract final class Fmt {
   static String fullDate(DateTime d) => DateFormat('d MMMM y').format(d);
   static String monthYear(DateTime d) => DateFormat('MMMM y').format(d);
   static String weekdayShort(DateTime d) => DateFormat('EEE').format(d);
+
+  /// `1` = lunes … `7` = domingo. El 1 de enero de 2024 cayo en lunes, asi que
+  /// `DateTime(2024, 1, n)` es directamente el dia n de la semana.
+  static String weekdayShortOf(int weekday) =>
+      weekdayShort(DateTime(2024, 1, weekday));
 
   /// Iniciales de lunes a domingo en el idioma activo (`L M X J V S D` en
   /// espanol, `M T W T F S S` en ingles). Las pinta el grafico semanal.

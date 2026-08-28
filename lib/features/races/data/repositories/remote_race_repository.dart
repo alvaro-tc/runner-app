@@ -1,9 +1,9 @@
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/races/data/datasources/races_api.dart';
-import 'package:paceup/features/races/data/race_mappers.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/races/domain/repositories/race_repository.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/races/data/datasources/races_api.dart';
+import 'package:camrun/features/races/data/race_mappers.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/races/domain/repositories/race_repository.dart';
 
 /// Mis carreras y la inscripcion, contra la API.
 ///

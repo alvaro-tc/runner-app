@@ -1,15 +1,15 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/utils/validators.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
+import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/core/utils/validators.dart';
-import 'package:paceup/features/auth/presentation/providers/auth_provider.dart';
-import 'package:paceup/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
 
 class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
@@ -43,24 +43,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final t = context.l10n;
     setState(() {
       _errors
-<<<<<<< HEAD
         ..['name'] = Validators.required(
           _name.text,
           t.validationFullNameRequired,
         )
-        ..['email'] = Validators.email(t, _email.text)
-        ..['password'] = Validators.password(t, _password.text)
-=======
-        ..['name'] = Validators.required(_name.text, 'full name')
-        ..['ci'] = Validators.ci(_ci.text)
+        ..['ci'] = Validators.ci(t, _ci.text)
         // El correo es opcional: solo se valida si escribio algo. Exigirlo
         // dejaria fuera a quien no tiene, que es justo a quien hay que dejar
         // inscribirse.
         ..['email'] = _email.text.trim().isEmpty
             ? null
-            : Validators.email(_email.text)
-        ..['password'] = Validators.password(_password.text)
->>>>>>> main
+            : Validators.email(t, _email.text)
+        ..['password'] = Validators.password(t, _password.text)
         ..['confirm'] = Validators.confirmPassword(
           t,
           _confirm.text,
@@ -122,12 +116,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         // La CI es la credencial que vale en las dos puntas: con ella entras a
         // la app y con ella la web reconoce un pago tuyo hecho fuera de aqui.
         AppTextField(
-<<<<<<< HEAD
-          label: t.authEmailLabel,
-=======
-          label: 'ID number (CI)',
+          label: t.authIdLabel,
           controller: _ci,
-          hint: '1234567 LP',
+          hint: t.authIdHint,
           errorText: _errors['ci'],
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.username],
@@ -135,8 +126,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Email (optional)',
->>>>>>> main
+          label: t.authEmailOptionalLabel,
           controller: _email,
           hint: t.authEmailHint,
           errorText: _errors['email'],
@@ -147,8 +137,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Without it we cannot email you a password reset link, so keep your '
-          'ID number to hand.',
+          t.authEmailOptionalHelp,
           style: context.text.bodySm.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -196,8 +185,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           onPressed: _submit,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               t.authHaveAccount,

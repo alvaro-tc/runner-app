@@ -1,14 +1,14 @@
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/profile/domain/entities/user_profile.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:paceup/features/train/presentation/providers/history_provider.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/train/presentation/providers/history_provider.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 
 /// Etiquetas de los tipos del dominio.
 ///
@@ -117,6 +117,7 @@ extension RacePaymentMethodL10n on RacePaymentMethod {
     RacePaymentMethod.card => t.paymentMethodCard,
     RacePaymentMethod.qr => t.paymentMethodQr,
     RacePaymentMethod.bankTransfer => t.paymentMethodBankTransfer,
+    RacePaymentMethod.qrManual => t.paymentMethodQrManual,
   };
 }
 

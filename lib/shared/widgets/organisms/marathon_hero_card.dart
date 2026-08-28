@@ -1,10 +1,11 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/event_image.dart';
 
 /// Event artwork with a white card overhanging its bottom edge — the hero
 /// block at the top of Home.
@@ -126,8 +127,8 @@ class _InfoCard extends StatelessWidget {
                 ),
               AppBadge(
                 label: marathon.slotsTotal > 0 && marathon.status.acceptsEntries
-                    ? '${marathon.slotsLeft} slots left'
-                    : marathon.status.label,
+                    ? context.l10n.marathonSlotsLeft(marathon.slotsLeft)
+                    : marathon.status.label(context.l10n),
                 icon: Icons.confirmation_number_outlined,
                 tone: switch (marathon.status) {
                   RegistrationStatus.open => AppTone.success,

@@ -1,8 +1,8 @@
-import 'package:paceup/features/home/data/home_mappers.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:camrun/features/home/data/home_mappers.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 
 /// JSON de la API -> entidades de carreras.
 ///

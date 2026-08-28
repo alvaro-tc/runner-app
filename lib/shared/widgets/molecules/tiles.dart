@@ -1,6 +1,6 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
 
 /// Icon bubble + big value + caption. The unit of every metric grid.
 class MetricTile extends StatelessWidget {

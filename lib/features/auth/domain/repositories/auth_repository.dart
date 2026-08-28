@@ -1,5 +1,5 @@
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 
 abstract interface class AuthRepository {
   /// Devuelve el usuario porque trae `onboardingSeenAt` —quien ya vio los
@@ -32,4 +32,9 @@ abstract interface class AuthRepository {
   });
 
   Future<Result<void>> signOut();
+
+  /// Borra la cuenta en el servidor y deja el dispositivo como recien
+  /// instalado. Irreversible: pide la contrasena para confirmar que es el
+  /// dueno quien lo pide.
+  Future<Result<void>> deleteAccount(String password);
 }

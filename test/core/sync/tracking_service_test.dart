@@ -1,19 +1,19 @@
 import 'dart:async';
 
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/network/interceptors.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/core/sync/sync_service.dart';
+import 'package:camrun/features/tracking/data/live_uploader.dart';
+import 'package:camrun/features/tracking/data/tracking_api.dart';
+import 'package:camrun/features/tracking/data/tracking_service.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/network/interceptors.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/services/location_service.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/core/sync/sync_service.dart';
-import 'package:paceup/features/tracking/data/tracking_api.dart';
-import 'package:paceup/features/tracking/data/tracking_service.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../fake_http.dart';
 
@@ -62,6 +62,24 @@ class _FakeStorage implements TokenStorage {
   Future<String> deviceId() async => 'device-1';
 }
 
+/// Traccar de mentira: dice si acepto hacerse cargo y cuenta los arranques.
+class _FakeUploader implements LiveUploader {
+  _FakeUploader({this.acepta = true});
+
+  final bool acepta;
+  int starts = 0;
+  int stops = 0;
+
+  @override
+  Future<bool> start() async {
+    starts++;
+    return acepta;
+  }
+
+  @override
+  Future<void> stop() async => stops++;
+}
+
 Dio _dio(Future<ResponseBody> Function(RequestOptions) handler) =>
     Dio(
         BaseOptions(
@@ -106,7 +124,7 @@ void main() {
   TrackingService armar(
     Future<ResponseBody> Function(RequestOptions) handler, {
     Duration flushEvery = const Duration(days: 1),
-    SharedPreferences? preferences,
+    LiveUploader? uploader,
   }) {
     final dio = _dio(handler);
     return TrackingService(
@@ -114,6 +132,7 @@ void main() {
       TrackingApi(dio, _FakeStorage()),
       gps,
       SyncService(db, dio),
+      liveUploader: uploader,
       flushEvery: flushEvery,
       preferences: preferences,
     );
@@ -275,6 +294,48 @@ void main() {
 
     expect(await db.duePositions(futuro()), isEmpty);
     expect(service.recorded, isEmpty);
+  });
+
+  test('en maraton sube Traccar y la app no encola ni un punto', () async {
+    final traccar = _FakeUploader();
+    final service = armar((o) async => _sesionAbierta(), uploader: traccar);
+    await service.start(live: true);
+    gps
+      ..emit(_punto(1))
+      ..emit(_punto(2));
+    await asentar();
+
+    expect(traccar.starts, 1);
+    // Si estos puntos se encolaran, el servidor recibiria cada posicion dos
+    // veces: los `clientPointId` de Traccar son suyos y no deduplican con estos.
+    expect(await db.duePositions(futuro()), isEmpty);
+    // Y aun asi el mapa se pinta: el stream local no se toca.
+    expect(service.recorded.length, 2);
+
+    await service.stop();
+    await asentar();
+    expect(traccar.stops, 1);
+  });
+
+  test('si Traccar no arranca, la app vuelve a subir los lotes', () async {
+    final traccar = _FakeUploader(acepta: false);
+    final service = armar((o) async => _sesionAbierta(), uploader: traccar);
+    await service.start(live: true);
+    gps.emit(_punto(1));
+    await asentar();
+
+    expect((await db.duePositions(futuro())).length, 1);
+  });
+
+  test('sin maraton Traccar ni se enciende', () async {
+    final traccar = _FakeUploader();
+    final service = armar((o) async => _sesionAbierta(), uploader: traccar);
+    await service.start();
+    gps.emit(_punto(1));
+    await asentar();
+
+    expect(traccar.starts, 0);
+    expect((await db.duePositions(futuro())).length, 1);
   });
 
   test('el cierre sin red va a la outbox con su clave', () async {

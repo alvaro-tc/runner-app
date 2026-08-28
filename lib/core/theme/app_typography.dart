@@ -99,7 +99,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
 abstract final class AppTypography {
   static const family = 'Poppins';
 
-  /// Maps the PaceUp scale onto Material 3 slots so stock widgets inherit it.
+  /// Maps the CamRun scale onto Material 3 slots so stock widgets inherit it.
   static TextTheme textTheme(AppTextStyles s, Color secondary) => TextTheme(
     displayLarge: s.displayLg,
     displayMedium: s.displayMd,

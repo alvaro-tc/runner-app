@@ -1,22 +1,22 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/train/presentation/providers/history_provider.dart';
+import 'package:camrun/features/train/presentation/widgets/training_history_tile.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/home/presentation/providers/home_provider.dart';
-import 'package:paceup/features/train/presentation/providers/history_provider.dart';
-import 'package:paceup/features/train/presentation/widgets/training_history_tile.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 class TrainPage extends ConsumerWidget {
   const TrainPage({super.key});
@@ -393,6 +393,32 @@ class _Filters extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],
+            Container(
+              width: 1,
+              height: 24,
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              color: context.colors.border,
+            ),
+            // Dia de la semana: sin filtro no habia forma de comparar, por
+            // ejemplo, todas las tiradas largas del domingo.
+            AppChip(
+              label: t.filterWeekdayAll,
+              selected: filter.weekdays.isEmpty,
+              onTap: () {
+                for (final d in {...filter.weekdays}) {
+                  notifier.toggleWeekday(d);
+                }
+              },
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            for (var day = 1; day <= 7; day++) ...[
+              AppChip(
+                label: Fmt.weekdayShortOf(day),
+                selected: filter.weekdays.contains(day),
+                onTap: () => notifier.toggleWeekday(day),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
           ],
         ),
       ),

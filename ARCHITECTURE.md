@@ -1,4 +1,4 @@
-# Arquitectura de PaceUp
+# Arquitectura de CamRun
 
 Documento de referencia para trabajar en el proyecto: cómo están organizadas las
 capas, qué convenciones se siguen, cómo añadir una feature nueva y cómo cambiar
@@ -39,7 +39,7 @@ implementación. Es el contenedor de inyección de dependencias del proyecto.
 
 ```
 lib/
-├── main.dart                     # bootstrap(PaceUpApp.new)
+├── main.dart                     # bootstrap(CamRunApp.new)
 ├── app/
 │   ├── app.dart                  # MaterialApp.router + temas
 │   ├── bootstrap.dart            # orientación, system UI, Hive, prefs, overrides
@@ -227,7 +227,7 @@ con el que se publica ya coincide.
 ### Fechas, números y moneda
 
 `core/formatters/formatters.dart` usa `intl` sin locale explícito, así que lee
-`Intl.defaultLocale`. Ese valor lo fija `PaceUpApp` en su `builder`, dentro del
+`Intl.defaultLocale`. Ese valor lo fija `CamRunApp` en su `builder`, dentro del
 subárbol que ya resolvió el locale, de modo que fechas y moneda siguen al
 selector igual que el resto. `bootstrap()` llama a `initializeDateFormatting()`
 porque los símbolos de fecha de `es` no vienen cargados de serie.

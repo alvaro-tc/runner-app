@@ -1,13 +1,13 @@
 import 'dart:async';
 
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/races/data/datasources/races_api.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/races/presentation/providers/races_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/races/data/datasources/races_api.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/races/presentation/providers/races_provider.dart';
 
 /// Cada cuanto se pregunta por un cobro que quedo pendiente (QR, transferencia).
 ///

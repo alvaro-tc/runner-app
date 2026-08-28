@@ -1,9 +1,9 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
 
 /// Per-kilometre pace bars with the average drawn across them. Faster than
 /// average reads green, slower reads neutral, and the best km is highlighted.

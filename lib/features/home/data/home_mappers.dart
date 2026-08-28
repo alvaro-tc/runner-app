@@ -1,6 +1,6 @@
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/domain/repositories/home_repositories.dart';
 
 /// JSON de la API -> entidades del dominio.
 ///
@@ -13,6 +13,11 @@ int _i(Object? v) => (v as num?)?.toInt() ?? 0;
 
 DateTime _fecha(Object? v) =>
     DateTime.tryParse(v as String? ?? '')?.toLocal() ?? DateTime.now();
+
+/// Como [_fecha], pero `null` sigue siendo `null`: hay fechas que significan
+/// "todavia no paso" y sustituirlas por la de hoy diria lo contrario.
+DateTime? _fechaOpcional(Object? v) =>
+    v is String ? DateTime.tryParse(v)?.toLocal() : null;
 
 Marathon marathonFrom(
   Map<String, dynamic> j, {
@@ -48,6 +53,8 @@ Marathon marathonFrom(
       for (final linea in j['includes'] as List? ?? const []) '$linea',
     ],
     routePreview: _recorrido(j['routeGeoJson']),
+    liveStartedAt: _fechaOpcional(j['liveStartedAt']),
+    liveFinishedAt: _fechaOpcional(j['liveFinishedAt']),
     predictedFinishMin: banda?.$1,
     predictedFinishMax: banda?.$2,
     categories: [

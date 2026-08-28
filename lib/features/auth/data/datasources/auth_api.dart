@@ -1,7 +1,7 @@
+import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/network/api_client.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
 
 /// Habla con `/auth/*`. No decide nada: guardar tokens y navegar es del
 /// repositorio (Fase 22).
@@ -104,6 +104,15 @@ class AuthApi {
         'currentPassword': currentPassword,
         'newPassword': newPassword,
       },
+    ),
+  );
+
+  /// Borra la cuenta y todo lo del usuario en el servidor. Pide la contrasena
+  /// otra vez porque es irreversible y el telefono puede estar en otras manos.
+  Future<void> deleteAccount(String password) => apiCall(
+    () async => _dio.delete<dynamic>(
+      '/auth/me',
+      data: {'password': password},
     ),
   );
 }

@@ -1,4 +1,4 @@
-import 'package:paceup/app/app.dart';
-import 'package:paceup/app/bootstrap.dart';
+import 'package:camrun/app/app.dart';
+import 'package:camrun/app/bootstrap.dart';
 
-void main() => bootstrap(PaceUpApp.new);
+void main() => bootstrap(CamRunApp.new);

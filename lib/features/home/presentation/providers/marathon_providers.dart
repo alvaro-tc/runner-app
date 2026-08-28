@@ -1,6 +1,6 @@
+import 'package:camrun/app/dependencies.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:paceup/app/dependencies.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
 
 /// El catalogo de proximas carreras: el carrusel de Home y el fondo de la
 /// pestana "Upcoming" de Carreras.

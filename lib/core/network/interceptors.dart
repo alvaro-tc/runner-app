@@ -1,12 +1,12 @@
 import 'dart:developer' as developer;
 
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/api_config.dart';
+import 'package:camrun/core/network/error_mapper.dart';
+import 'package:camrun/core/network/server_clock.dart';
+import 'package:camrun/core/network/session_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/api_config.dart';
-import 'package:paceup/core/network/error_mapper.dart';
-import 'package:paceup/core/network/server_clock.dart';
-import 'package:paceup/core/network/session_controller.dart';
 
 /// 1. Adjunta el access token, salvo en los endpoints publicos.
 class AuthInterceptor extends Interceptor {

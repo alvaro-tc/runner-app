@@ -1,23 +1,53 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
     required this.currentIndex,
     required this.onTap,
+    this.admin = false,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  /// La barra del panel. Son cuatro pestanas en los dos casos y ocupan el mismo
+  /// sitio —mapa, catalogo, gente, perfil—; lo que cambia es que del lado del
+  /// admin se gestiona lo que del lado del corredor se usa.
+  final bool admin;
+
   /// Los iconos son fijos; la etiqueta se resuelve por `build` para que el
   /// cambio de idioma llegue tambien a la barra.
   static List<({String label, IconData icon, IconData active})> _items(
     AppLocalizations t,
-  ) => [
+    bool admin,
+  ) => admin
+      ? [
+          (
+            label: t.adminNavLive,
+            icon: Icons.map_outlined,
+            active: Icons.map_rounded,
+          ),
+          (
+            label: t.adminNavMarathons,
+            icon: Icons.emoji_events_outlined,
+            active: Icons.emoji_events_rounded,
+          ),
+          (
+            label: t.adminNavUsers,
+            icon: Icons.group_outlined,
+            active: Icons.group_rounded,
+          ),
+          (
+            label: t.navProfile,
+            icon: Icons.person_outline_rounded,
+            active: Icons.person_rounded,
+          ),
+        ]
+      : [
     (label: t.navHome, icon: Icons.home_outlined, active: Icons.home_rounded),
     (
       label: t.navTrain,
@@ -39,7 +69,7 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final items = _items(context.l10n);
+    final items = _items(context.l10n, admin);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface,

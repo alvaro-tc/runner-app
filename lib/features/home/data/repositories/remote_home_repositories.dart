@@ -1,12 +1,12 @@
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/sync/offline_first.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/home/data/datasources/home_api.dart';
-import 'package:paceup/features/home/data/home_mappers.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/domain/entities/training_plan.dart';
-import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/sync/offline_first.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/home/data/datasources/home_api.dart';
+import 'package:camrun/features/home/data/home_mappers.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/domain/repositories/home_repositories.dart';
 
 /// Lo ultimo que trajo la red, o lo ultimo que se cacheo si no la hay.
 ///

@@ -1,5 +1,5 @@
+import 'package:camrun/core/error/failure.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/error/failure.dart';
 
 /// Traduce lo que sale de Dio a un [Failure] del dominio, mapeando **por
 /// `error.code`**. Nada por encima de la capa de datos ve un `DioException`.

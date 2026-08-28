@@ -1,20 +1,20 @@
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/app_progress_ring.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
+import 'package:camrun/shared/widgets/atoms/blob_illustration.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
+import 'package:camrun/shared/widgets/molecules/progress_widgets.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/app_progress_ring.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
-import 'package:paceup/shared/widgets/atoms/blob_illustration.dart';
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/countdown_pill.dart';
-import 'package:paceup/shared/widgets/molecules/progress_widgets.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 /// Debug-only catalogue of every atom and molecule, in both themes. This is the
 /// screen used to check the design system without walking the whole app.
@@ -28,7 +28,7 @@ class ShowcasePage extends ConsumerStatefulWidget {
 class _ShowcasePageState extends ConsumerState<ShowcasePage> {
   bool _checked = true;
   bool _chipSelected = true;
-  final _field = TextEditingController(text: 'pandu@paceup.app');
+  final _field = TextEditingController(text: 'pandu@camrun.app');
 
   @override
   void dispose() {

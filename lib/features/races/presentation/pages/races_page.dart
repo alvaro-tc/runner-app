@@ -1,25 +1,22 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/presentation/providers/races_provider.dart';
+import 'package:camrun/features/races/presentation/widgets/race_card.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/event_image.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/services/settings_provider.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
-import 'package:paceup/features/races/domain/entities/race_entry.dart';
-import 'package:paceup/features/races/presentation/providers/races_provider.dart';
-import 'package:paceup/features/races/presentation/widgets/race_card.dart';
-<<<<<<< HEAD
-import 'package:paceup/l10n/l10n_labels.dart';
-=======
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/event_image.dart';
->>>>>>> main
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 class RacesPage extends ConsumerStatefulWidget {
   const RacesPage({super.key});
@@ -61,13 +58,10 @@ class _RacesPageState extends ConsumerState<RacesPage> {
   }
 
   Widget _body(List<RaceEntry> all) {
-<<<<<<< HEAD
     final t = context.l10n;
-=======
     // El corte lo pone la fecha de largada, igual que en la API. Con el
     // resultado como criterio, una carrera de ayer sin tiempos cargados seguia
     // saliendo en "Upcoming" y una futura no salia en ninguna de las dos.
->>>>>>> main
     final shown = [
       for (final entry in all)
         if (entry.isUpcoming != _showCompleted) entry,
@@ -143,7 +137,7 @@ class _OpenForRegistration extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: AppSpacing.lg),
-        const SectionHeader(title: 'Upcoming marathons'),
+        SectionHeader(title: context.l10n.racesUpcomingMarathons),
         const SizedBox(height: AppSpacing.md),
         for (final marathon in marathons)
           _MarathonRow(
@@ -216,7 +210,7 @@ class _MarathonRow extends StatelessWidget {
                 if (marathon.status != RegistrationStatus.open) ...[
                   const SizedBox(width: AppSpacing.sm),
                   AppBadge(
-                    label: marathon.status.label,
+                    label: marathon.status.label(context.l10n),
                     tone: marathon.status == RegistrationStatus.closingSoon
                         ? AppTone.warning
                         : AppTone.neutral,

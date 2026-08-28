@@ -1,28 +1,28 @@
+import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/races/presentation/providers/registration_provider.dart';
+import 'package:camrun/l10n/gen/app_localizations.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
+import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/phone_field.dart';
+import 'package:camrun/shared/widgets/molecules/states.dart';
+import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:paceup/app/router/app_routes.dart';
-import 'package:paceup/core/extensions/context_x.dart';
-import 'package:paceup/core/formatters/formatters.dart';
-import 'package:paceup/core/theme/app_spacing.dart';
-import 'package:paceup/features/home/domain/entities/marathon.dart';
-import 'package:paceup/features/home/presentation/providers/marathon_providers.dart';
-import 'package:paceup/features/profile/domain/entities/user_profile.dart';
-import 'package:paceup/features/profile/presentation/providers/profile_provider.dart';
-import 'package:paceup/features/races/domain/entities/registration.dart';
-import 'package:paceup/features/races/presentation/providers/registration_provider.dart';
-import 'package:paceup/l10n/gen/app_localizations.dart';
-import 'package:paceup/l10n/l10n_labels.dart';
-import 'package:paceup/shared/widgets/atoms/app_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_icon_button.dart';
-import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
-import 'package:paceup/shared/widgets/atoms/app_text_field.dart';
-import 'package:paceup/shared/widgets/atoms/skeleton.dart';
-import 'package:paceup/shared/widgets/molecules/phone_field.dart';
-import 'package:paceup/shared/widgets/molecules/states.dart';
-import 'package:paceup/shared/widgets/molecules/tiles.dart';
 
 /// Alta en una maraton, en los mismos tres pasos que lleva el servidor:
 /// datos, categoria y extras, y pago.
@@ -201,9 +201,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
     context.showSnack(
       ok
-          ? 'Receipt sent. The organiser will check it and confirm your place.'
+          ? context.l10n.registerProofSent
           : ref.read(registrationFlowProvider).error?.message ??
-                'We could not upload that receipt.',
+                context.l10n.registerProofUploadFailed,
     );
   }
 
@@ -314,13 +314,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
-<<<<<<< HEAD
-        AppTextField(
-          label: t.registerPhone,
-=======
         PhoneField(
-          label: 'Phone',
->>>>>>> main
+          label: t.registerPhone,
           controller: _phone,
           hint: '70000000',
           textInputAction: TextInputAction.next,
@@ -329,34 +324,29 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-<<<<<<< HEAD
-          label: t.registerEmergencyName,
-=======
-          label: 'Email (optional)',
+          label: t.authEmailOptionalLabel,
           controller: _email,
-          hint: 'Where we send your confirmation',
+          hint: t.registerEmailHint,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('About the CAM', style: context.text.titleMd),
+        Text(t.registerCamTitle, style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),
         _YesNo(
-          question: 'Do you know the work the CAM does?',
+          question: t.registerCamKnowsQuestion,
           value: _knowsCam,
           onChanged: (v) => setState(() => _knowsCam = v),
         ),
         const SizedBox(height: AppSpacing.md),
         _YesNo(
-          question:
-              'May we call you about becoming a CAM donor?',
+          question: t.registerCamDonorQuestion,
           value: _acceptsDonorCall,
           onChanged: (v) => setState(() => _acceptsDonorCall = v),
         ),
         const SizedBox(height: AppSpacing.xl),
         AppTextField(
-          label: 'Emergency contact name',
->>>>>>> main
+          label: t.registerEmergencyName,
           controller: _emergencyName,
           hint: t.registerEmergencyNameHint,
           textInputAction: TextInputAction.next,
@@ -511,34 +501,19 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         // cargado: enseñarlo si no, sería prometer un pago que el servidor va a
         // rechazar en el último paso.
         for (final method in RacePaymentMethod.values)
-<<<<<<< HEAD
-          _SelectableTile(
-            title: method.label(t),
-            subtitle: switch (method) {
-              RacePaymentMethod.card => t.registerCardSubtitle,
-              RacePaymentMethod.qr => t.registerQrSubtitle,
-              RacePaymentMethod.bankTransfer => t.registerBankTransferSubtitle,
-            },
-            selected: _method == method,
-            onTap: () => setState(() => _method = method),
-          ),
-=======
           if (method != RacePaymentMethod.qrManual || marathon.acceptsQrPayment)
             _SelectableTile(
-              title: method.label,
+              title: method.label(t),
               subtitle: switch (method) {
-                RacePaymentMethod.card =>
-                  'Charged the moment your place is taken',
-                RacePaymentMethod.qr => 'Scan and pay; we wait for the bank',
+                RacePaymentMethod.card => t.registerCardSubtitle,
+                RacePaymentMethod.qr => t.registerQrSubtitle,
                 RacePaymentMethod.bankTransfer =>
-                  'Transfer and wait for the organiser to confirm',
-                RacePaymentMethod.qrManual =>
-                  'Pay with your banking app, then upload the receipt',
+                  t.registerBankTransferSubtitle,
+                RacePaymentMethod.qrManual => t.registerQrManualSubtitle,
               },
               selected: _method == method,
               onTap: () => setState(() => _method = method),
             ),
->>>>>>> main
         if (_method == RacePaymentMethod.card) ...[
           const SizedBox(height: AppSpacing.md),
           _CardForm(
@@ -831,13 +806,13 @@ class _YesNo extends StatelessWidget {
         Row(
           children: [
             AppChip(
-              label: 'Yes',
+              label: context.l10n.commonYes,
               selected: value == true,
               onTap: () => onChanged(true),
             ),
             const SizedBox(width: AppSpacing.sm),
             AppChip(
-              label: 'No',
+              label: context.l10n.commonNo,
               selected: value == false,
               onTap: () => onChanged(false),
             ),
@@ -870,6 +845,7 @@ class _ManualQrPayment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final t = context.l10n;
     final proof = payment.proof;
 
     return Container(
@@ -906,15 +882,14 @@ class _ManualQrPayment extends StatelessWidget {
           ],
           if (payment.qrReference != null) ...[
             const SizedBox(height: AppSpacing.md),
-            Text('Payment note', style: context.text.labelSm),
+            Text(t.registerPaymentNote, style: context.text.labelSm),
             const SizedBox(height: AppSpacing.xs),
             SelectableText(
               payment.qrReference!,
               style: context.text.headingMd,
             ),
             Text(
-              'Write it in the transfer detail. It is how the organiser links '
-              'your payment to this entry.',
+              t.registerPaymentNoteHelp,
               style: context.text.bodySm.copyWith(color: c.textSecondary),
             ),
           ],
@@ -925,10 +900,8 @@ class _ManualQrPayment extends StatelessWidget {
           if (proof?.state == ProofState.inReview)
             _ProofStatus(
               icon: Icons.hourglass_top_rounded,
-              title: 'Receipt under review',
-              detail:
-                  'Your place is not booked yet. The organiser confirms it '
-                  'once they see the money in the account.',
+              title: t.registerProofInReviewTitle,
+              detail: t.registerProofInReviewBody,
               tone: c.textSecondary,
             )
           else ...[
@@ -937,29 +910,29 @@ class _ManualQrPayment extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: _ProofStatus(
                   icon: Icons.error_outline_rounded,
-                  title: 'Receipt rejected',
+                  title: t.registerProofRejectedTitle,
                   // El motivo lo escribió el organizador: se pinta tal cual,
                   // porque es lo único que le dice al corredor qué corregir.
-                  detail: proof?.note ?? 'Upload a clearer one.',
+                  detail: proof?.note ?? t.registerProofRejectedFallback,
                   tone: c.error,
                 ),
               ),
             AppTextField(
-              label: 'Transaction number (optional)',
+              label: t.registerProofReferenceLabel,
               controller: reference,
-              hint: 'From your banking app',
+              hint: t.registerProofReferenceHint,
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: AppSpacing.md),
             AppButton(
-              label: 'Upload receipt',
+              label: t.registerProofUpload,
               icon: Icons.photo_library_outlined,
               isLoading: busy,
               onPressed: () => onUpload(ImageSource.gallery),
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton(
-              label: 'Take a photo',
+              label: t.registerProofTakePhoto,
               variant: AppButtonVariant.outline,
               icon: Icons.photo_camera_outlined,
               onPressed: busy ? null : () => onUpload(ImageSource.camera),

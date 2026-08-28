@@ -1,5 +1,5 @@
+import 'package:camrun/core/network/api_client.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/network/api_client.dart';
 
 /// `/home/*`, `/marathons/*` y las sesiones del plan. Devuelve el JSON crudo:
 /// quien lo convierte en entidades es el repositorio, que ademas lo cachea tal

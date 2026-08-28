@@ -1,5 +1,5 @@
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/train/domain/entities/training_run.dart';
 
 abstract interface class TrainingRepository {
   /// Newest first.

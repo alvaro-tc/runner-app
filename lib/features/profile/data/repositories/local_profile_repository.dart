@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:paceup/core/constants/fake_data_seed.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/profile/domain/entities/user_profile.dart';
-import 'package:paceup/features/profile/domain/repositories/profile_repository.dart';
+import 'package:camrun/core/constants/fake_data_seed.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/features/profile/domain/repositories/profile_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Profile edits persist to shared preferences, so a restart shows whatever the

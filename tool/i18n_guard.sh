@@ -105,7 +105,7 @@ ALLOW_VALUE = re.compile(
       | [\w.+-]+@[\w-]+\.[\w.-]+       # direcciones de correo
       | [A-Z]{1,3}                    # codigos de talla y unidad: XS, KM, QR
       # Marcas: no se traducen en ningun idioma.
-      | (Google|LinkedIn|Facebook|PaceUp|Apple)
+      | (Google|LinkedIn|Facebook|CamRun|Apple)
     )$""",
     re.X,
 )

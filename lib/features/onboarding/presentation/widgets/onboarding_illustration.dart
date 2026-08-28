@@ -1,5 +1,5 @@
+import 'package:camrun/shared/widgets/atoms/blob_illustration.dart';
 import 'package:flutter/material.dart';
-import 'package:paceup/shared/widgets/atoms/blob_illustration.dart';
 
 enum OnboardingArt {
   plan(Icons.calendar_month_rounded, 3),

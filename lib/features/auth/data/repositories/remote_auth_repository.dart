@@ -1,11 +1,11 @@
-import 'package:paceup/core/db/app_database.dart';
-import 'package:paceup/core/error/failure.dart';
-import 'package:paceup/core/network/session_controller.dart';
-import 'package:paceup/core/storage/token_storage.dart';
-import 'package:paceup/core/utils/result.dart';
-import 'package:paceup/features/auth/data/datasources/auth_api.dart';
-import 'package:paceup/features/auth/data/models/auth_models.dart';
-import 'package:paceup/features/auth/domain/repositories/auth_repository.dart';
+import 'package:camrun/core/db/app_database.dart';
+import 'package:camrun/core/error/failure.dart';
+import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/core/utils/result.dart';
+import 'package:camrun/features/auth/data/datasources/auth_api.dart';
+import 'package:camrun/features/auth/data/models/auth_models.dart';
+import 'package:camrun/features/auth/domain/repositories/auth_repository.dart';
 
 /// `/auth/*` de verdad. Aqui se decide lo que el [AuthApi] no decide: cuando se
 /// guardan los tokens y cuando se borra lo local.
@@ -91,6 +91,16 @@ class RemoteAuthRepository implements AuthRepository {
     } on Failure catch (_) {
       // Sin red o token ya muerto: da igual, lo local se borra igual.
     }
+    await session.clear();
+    await db.wipe();
+  });
+
+  /// El borrado local solo ocurre si el servidor confirmo el borrado remoto:
+  /// al reves —limpiar y que la peticion falle— dejaria la cuenta viva y al
+  /// usuario convencido de que ya no existe.
+  @override
+  Future<Result<void>> deleteAccount(String password) => guard(() async {
+    await api.deleteAccount(password);
     await session.clear();
     await db.wipe();
   });

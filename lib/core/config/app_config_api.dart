@@ -1,6 +1,6 @@
+import 'package:camrun/core/config/app_config.dart';
+import 'package:camrun/core/network/api_client.dart';
 import 'package:dio/dio.dart';
-import 'package:paceup/core/config/app_config.dart';
-import 'package:paceup/core/network/api_client.dart';
 
 /// Publico, sin token. Es lo primero que se pide al arrancar.
 class AppConfigApi {
