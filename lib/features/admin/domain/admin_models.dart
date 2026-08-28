@@ -26,6 +26,7 @@ class AdminMarathon {
     this.description,
     this.currency = 'BOB',
     this.country = 'BO',
+    this.coverUrl,
     this.paymentQrUrl,
     this.paymentQrInstructions,
     this.route = const [],
@@ -48,6 +49,7 @@ class AdminMarathon {
     slotsTaken: (json['slotsTaken'] as num?)?.toInt() ?? 0,
     priceCents: (json['priceCents'] as num?)?.toInt() ?? 0,
     currency: json['currency'] as String? ?? 'BOB',
+    coverUrl: json['coverUrl'] as String?,
     published: json['published'] as bool? ?? false,
     // La lista manda `intent`/`resolved` y el detalle `registrationStatus`. Lo
     // que le importa al panel es el interruptor: si el admin las cerro a mano.
@@ -76,6 +78,11 @@ class AdminMarathon {
   final bool published;
   final bool registrationsOpen;
   final int registrations;
+
+  /// El afiche. Siempre una URL del servidor: desde que se sube en vez de
+  /// pegarse, no hay forma de que apunte a otro sitio.
+  final String? coverUrl;
+
   final String? paymentQrUrl;
   final String? paymentQrInstructions;
 
@@ -96,6 +103,41 @@ class AdminMarathon {
 
   /// Se le puede dar la largada: existe, no termino y todavia no arranco.
   bool get canStart => liveStartedAt == null && liveFinishedAt == null;
+
+  bool get hasCover => (coverUrl ?? '').isNotEmpty;
+
+  bool get hasPaymentQr => (paymentQrUrl ?? '').isNotEmpty;
+
+  /// Ya paso su fecha. Separa las dos mitades de la lista del panel: lo que
+  /// queda por organizar arriba, el archivo abajo.
+  bool get past => startsAt.isBefore(DateTime.now());
+
+  /// Copia con el estado cambiado, para pintar el interruptor de la lista
+  /// antes de que el servidor conteste.
+  AdminMarathon copyWith({bool? published, bool? registrationsOpen}) =>
+      AdminMarathon(
+        id: id,
+        slug: slug,
+        name: name,
+        city: city,
+        country: country,
+        description: description,
+        startsAt: startsAt,
+        distanceMeters: distanceMeters,
+        capacity: capacity,
+        slotsTaken: slotsTaken,
+        priceCents: priceCents,
+        currency: currency,
+        published: published ?? this.published,
+        registrationsOpen: registrationsOpen ?? this.registrationsOpen,
+        registrations: registrations,
+        coverUrl: coverUrl,
+        paymentQrUrl: paymentQrUrl,
+        paymentQrInstructions: paymentQrInstructions,
+        route: route,
+        liveStartedAt: liveStartedAt,
+        liveFinishedAt: liveFinishedAt,
+      );
 }
 
 /// Un `LineString` GeoJSON a puntos. Las coordenadas vienen **`[lng, lat]`**,
