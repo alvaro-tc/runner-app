@@ -204,6 +204,7 @@ class _QuickStart extends ConsumerWidget {
                     label: t.trainStartTraining,
                     variant: AppButtonVariant.secondary,
                     size: AppButtonSize.md,
+                    onBrand: true,
                     onPressed: () => context.push(
                       session == null
                           ? Routes.trainSetup
@@ -217,6 +218,7 @@ class _QuickStart extends ConsumerWidget {
                     label: t.trainFreeRun,
                     variant: AppButtonVariant.ghost,
                     size: AppButtonSize.md,
+                    onBrand: true,
                     onPressed: () => context.push(Routes.trainSession),
                   ),
                 ),

@@ -36,9 +36,16 @@ dependencies:
   # Comprobante de pago: la unica forma de coger una captura de la galeria o
   # hacer una foto. Temporal, igual que el cobro por QR manual que la usa.
   image_picker: ^1.2.0
+  # El QR de cobro se dibuja en el movil desde el texto que manda la API: unos
+  # bytes en vez de una imagen de cientos de KB, nitido a cualquier tamano y
+  # pintado sin depender de la red. Temporal, igual que el cobro por QR manual.
+  qr_flutter: ^4.1.0
   fl_chart: ^1.2.0
   wakelock_plus: ^1.7.0
   dio: ^5.11.0
+  # Abre la politica de privacidad y la pagina de borrado de cuenta en el
+  # navegador: enlazarlas desde la app es requisito de Play Store.
+  url_launcher: ^6.3.1
   flutter_secure_storage: ^11.0.0
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0

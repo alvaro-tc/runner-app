@@ -1245,6 +1245,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsMiles => 'Millas';
 
   @override
+  String get settingsPrivacyPolicy => 'Política de privacidad';
+
+  @override
+  String get settingsPrivacyPolicySubtitle => 'Qué datos recogemos y para qué';
+
+  @override
+  String get legalLinkFailed =>
+      'No se pudo abrir el enlace. Entra a cam-run.tumype.com desde tu navegador.';
+
+  @override
+  String get authReadPrivacyPolicy => 'Leer la política de privacidad';
+
+  @override
+  String get deleteAccountWebTitle => '¿Prefieres pedirlo desde la web?';
+
+  @override
+  String get deleteAccountWebBody =>
+      'También puedes solicitar el borrado en cam-run.tumype.com/eliminar-cuenta.';
+
+  @override
+  String get deleteAccountWebOpen => 'Abrir la página de solicitud';
+
+  @override
   String get settingsHelp => 'Ayuda';
 
   @override
@@ -1506,6 +1529,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get registerProofTakePhoto => 'Tomar una foto';
+
+  @override
+  String get registerCancelPayment => 'Cancelar el pago';
+
+  @override
+  String get registerCancelPaymentTitle => '¿Cancelar el pago?';
+
+  @override
+  String get registerCancelPaymentBody =>
+      'Se cierra este cobro y se anula tu inscripción. Si ya pagaste, el organizador te devolverá el dinero por el mismo medio. Para volver a inscribirte tendrás que empezar de nuevo.';
+
+  @override
+  String get registerCancelPaymentKeep => 'Seguir con el pago';
+
+  @override
+  String get registerCancelPaymentConfirm => 'Sí, cancelar';
+
+  @override
+  String get registerCancelPaymentDone =>
+      'Inscripción cancelada y cobro cerrado.';
+
+  @override
+  String get registerCancelPaymentFailed =>
+      'No pudimos cancelar el pago. Intentalo de nuevo.';
+
+  @override
+  String get registerNoPaymentMethodTitle =>
+      'Esta carrera todavía no acepta pagos';
+
+  @override
+  String get registerNoPaymentMethodBody =>
+      'El organizador aún no cargó su QR de cobro. Escribile o volvé a intentarlo más tarde.';
 
   @override
   String get phoneSelectCountry => 'Elige un país';

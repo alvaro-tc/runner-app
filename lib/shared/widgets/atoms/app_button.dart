@@ -27,6 +27,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.isFullWidth = true,
+    this.onBrand = false,
     this.semanticsLabel,
     super.key,
   });
@@ -38,6 +39,11 @@ class AppButton extends StatelessWidget {
   final IconData? icon;
   final bool isLoading;
   final bool isFullWidth;
+
+  /// Set when the button sits on the brand gradient: the surface-based
+  /// variants would otherwise blend into it in one theme or the other.
+  final bool onBrand;
+
   final String? semanticsLabel;
 
   bool get _enabled => onPressed != null && !isLoading;
@@ -45,17 +51,36 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final (bg, fg, border) = switch (variant) {
-      AppButtonVariant.primary => (c.primary, c.onPrimary, null),
-      AppButtonVariant.secondary => (c.primaryContainer, c.primary, null),
-      AppButtonVariant.outline => (
-        Colors.transparent,
-        c.primary,
-        BorderSide(color: c.primary, width: 1.5),
-      ),
-      AppButtonVariant.ghost => (Colors.transparent, c.textSecondary, null),
-      AppButtonVariant.danger => (c.error, c.onPrimary, null),
-    };
+    final (bg, fg, border) = onBrand
+        ? switch (variant) {
+            AppButtonVariant.secondary => (c.onPrimary, c.primary, null),
+            AppButtonVariant.outline => (
+              Colors.transparent,
+              c.onPrimary,
+              BorderSide(color: c.onPrimary, width: 1.5),
+            ),
+            AppButtonVariant.ghost => (
+              c.onPrimary.withValues(alpha: 0.18),
+              c.onPrimary,
+              BorderSide(color: c.onPrimary.withValues(alpha: 0.55)),
+            ),
+            _ => (c.primary, c.onPrimary, null),
+          }
+        : switch (variant) {
+            AppButtonVariant.primary => (c.primary, c.onPrimary, null),
+            AppButtonVariant.secondary => (c.primaryContainer, c.primary, null),
+            AppButtonVariant.outline => (
+              Colors.transparent,
+              c.primary,
+              BorderSide(color: c.primary, width: 1.5),
+            ),
+            AppButtonVariant.ghost => (
+              Colors.transparent,
+              c.textSecondary,
+              null,
+            ),
+            AppButtonVariant.danger => (c.error, c.onPrimary, null),
+          };
 
     final radius = BorderRadius.circular(AppRadius.pill);
 

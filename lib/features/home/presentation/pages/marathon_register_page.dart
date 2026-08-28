@@ -1,6 +1,7 @@
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
@@ -23,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// Alta en una maraton, en los mismos tres pasos que lleva el servidor:
 /// datos, categoria y extras, y pago.
@@ -69,7 +71,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   String _shirtSize = 'M';
   String? _categoryId;
   final _selectedExtras = <String>{};
-  RacePaymentMethod _method = RacePaymentMethod.card;
+  // Hoy solo se cobra por QR: ver `RacePaymentMethod.offered`. No se elige
+  // "el primero de la lista" para que apagar o encender un metodo alli sea el
+  // unico cambio necesario.
+  RacePaymentMethod _method = RacePaymentMethod.offered.first;
   bool _acceptedTerms = false;
 
   // Las dos preguntas del CAM. Empiezan sin responder y no en `false`: "no
@@ -205,6 +210,55 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           : ref.read(registrationFlowProvider).error?.message ??
                 context.l10n.registerProofUploadFailed,
     );
+  }
+
+  /// Cancela el pago abierto, y con él la inscripción.
+  ///
+  /// Pregunta antes porque no tiene vuelta atrás: el servidor cierra el cobro
+  /// —después de esto ya no se admite ningún comprobante— y suelta el borrador.
+  /// Reinscribirse es empezar de cero.
+  Future<void> _cancelarPago() async {
+    final t = context.l10n;
+
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.registerCancelPaymentTitle),
+        content: Text(t.registerCancelPaymentBody),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(t.registerCancelPaymentKeep),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.error,
+            ),
+            child: Text(t.registerCancelPaymentConfirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado != true || !mounted) return;
+
+    final ok = await _flow.cancelRegistration();
+    if (!mounted) return;
+
+    if (!ok) {
+      context.showSnack(
+        ref.read(registrationFlowProvider).error?.localized(t) ??
+            t.registerCancelPaymentFailed,
+      );
+      return;
+    }
+
+    // Se sale de la pantalla: el borrador ya no existe, y quedarse en el paso 3
+    // con los datos pintados invita a pagar algo que el servidor va a rechazar.
+    context
+      ..showSnack(t.registerCancelPaymentDone)
+      ..go(Routes.home);
   }
 
   /// La caducidad se escribe `MM/AA` y viaja como dos enteros.
@@ -502,8 +556,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         // El QR del organizador sólo se ofrece si esta carrera tiene uno
         // cargado: enseñarlo si no, sería prometer un pago que el servidor va a
         // rechazar en el último paso.
-        for (final method in RacePaymentMethod.values)
-          if (method != RacePaymentMethod.qrManual || marathon.acceptsQrPayment)
+        if (!marathon.acceptsQrPayment)
+          _ProofStatus(
+            icon: Icons.info_outline_rounded,
+            title: t.registerNoPaymentMethodTitle,
+            detail: t.registerNoPaymentMethodBody,
+            tone: c.textSecondary,
+          )
+        else
+          for (final method in RacePaymentMethod.offered)
             _SelectableTile(
               title: method.label(t),
               subtitle: switch (method) {
@@ -533,6 +594,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
               reference: _proofReference,
               busy: flow.busy,
               onUpload: _subirComprobante,
+              onCancel: _cancelarPago,
             )
           else
             _PendingPayment(payment: flow.payment!),
@@ -837,12 +899,14 @@ class _ManualQrPayment extends StatelessWidget {
     required this.reference,
     required this.busy,
     required this.onUpload,
+    required this.onCancel,
   });
 
   final PaymentInfo payment;
   final TextEditingController reference;
   final bool busy;
   final Future<void> Function(ImageSource) onUpload;
+  final Future<void> Function() onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -859,7 +923,12 @@ class _ManualQrPayment extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (payment.qrImageUrl != null)
+          // El QR se dibuja del texto que mandó la API. La imagen sólo se
+          // usa si esta maratón todavía no tiene texto cargado: es el respaldo
+          // de las que se configuraron cuando el QR era un archivo.
+          if (payment.qrPayload != null)
+            Center(child: _QrCode(data: payment.qrPayload!))
+          else if (payment.qrImageUrl != null)
             Center(
               child: ColoredBox(
                 // Un QR sobre fondo de color no siempre lo lee el escáner: el
@@ -937,7 +1006,64 @@ class _ManualQrPayment extends StatelessWidget {
               onPressed: busy ? null : () => onUpload(ImageSource.camera),
             ),
           ],
+          const SizedBox(height: AppSpacing.sm),
+          // Salida del flujo. Va siempre, también con un comprobante en
+          // revisión: quien pagó de más o se equivocó de carrera necesita poder
+          // cerrar esto, y sin botón la única salida es abandonar la pantalla y
+          // dejar un cobro abierto colgando para siempre.
+          AppButton(
+            label: t.registerCancelPayment,
+            variant: AppButtonVariant.ghost,
+            onPressed: busy ? null : onCancel,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// El QR de cobro, dibujado en el móvil desde el texto que manda la API.
+///
+/// Se dibuja y no se descarga: el texto son unos bytes donde la imagen son
+/// cientos de KB, sale nítido a cualquier tamaño y se pinta aunque la conexión
+/// esté caída — que es justo lo que pasa cuando alguien saca el teléfono para
+/// pagar.
+///
+/// El violeta de marca va sobre blanco **siempre**, en los dos temas: un QR es
+/// un contraste antes que un adorno, y el violeta claro del tema oscuro sobre
+/// fondo oscuro no lo lee ningún escáner. La corrección de errores alta es lo
+/// que deja teñir los módulos sin que deje de leerse.
+class _QrCode extends StatelessWidget {
+  const _QrCode({required this.data});
+
+  final String data;
+
+  @override
+  Widget build(BuildContext context) {
+    const tinta = LightTokens.primary;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: QrImageView(
+        data: data,
+        size: 220,
+        backgroundColor: Colors.white,
+        errorCorrectionLevel: QrErrorCorrectLevel.H,
+        // Sin margen propio: el padding blanco del contenedor ya es la zona
+        // silenciosa que el escáner necesita alrededor del código.
+        padding: EdgeInsets.zero,
+        eyeStyle: const QrEyeStyle(
+          eyeShape: QrEyeShape.circle,
+          color: tinta,
+        ),
+        dataModuleStyle: const QrDataModuleStyle(
+          dataModuleShape: QrDataModuleShape.square,
+          color: tinta,
+        ),
       ),
     );
   }

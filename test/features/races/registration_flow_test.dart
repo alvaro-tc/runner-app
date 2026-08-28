@@ -121,9 +121,15 @@ class _FakeRaceRepository implements RaceRepository {
     RaceTotals(racesJoined: 0, distanceRacedKm: 0, totalSpent: Money.zero),
   );
 
+  /// Inscripciones canceladas, para comprobar que el flujo llama al servidor y
+  /// no se limita a limpiar la pantalla.
+  final List<String> canceladas = [];
+
   @override
-  Future<Result<void>> cancel(String registrationId) async =>
-      const Result.success(null);
+  Future<Result<void>> cancel(String registrationId) async {
+    canceladas.add(registrationId);
+    return const Result.success(null);
+  }
 }
 
 void main() {
@@ -319,5 +325,36 @@ void main() {
     // El sondeo corre solo; aqui basta con comprobar que arranco.
     await Future<void>.delayed(const Duration(seconds: 3));
     expect(repo.sondeos, greaterThan(0));
+  });
+
+  test('cancelar cierra el cobro en el servidor y tira el borrador', () async {
+    repo.checkoutResult = CheckoutOutcome(
+      payment: _FakeRaceRepository._pago(
+        RacePaymentState.pending,
+        method: RacePaymentMethod.qrManual,
+      ),
+      registration: _FakeRaceRepository._registro(
+        RegistrationState.pendingPayment,
+      ),
+    );
+
+    flow().openFor('m1');
+    await flow().submitPersonalData(datos);
+    await flow().pay(method: RacePaymentMethod.qrManual);
+
+    expect(await flow().cancelRegistration(), isTrue);
+
+    // Lo importante es que se cancelo **contra el servidor**: limpiar solo la
+    // pantalla dejaria el cobro abierto, y un organizador podria aprobar su
+    // comprobante y confirmar sola una inscripcion que el usuario anulo.
+    expect(repo.canceladas, ['reg1']);
+    expect(estado().payment, isNull);
+    expect(estado().registration, isNull);
+    // La maraton se conserva: se cancelo el pago, no se salio de la carrera.
+    expect(estado().marathonId, 'm1');
+  });
+
+  test('hoy solo se ofrece el QR: no hay pasarela detras de los demas', () {
+    expect(RacePaymentMethod.offered, [RacePaymentMethod.qrManual]);
   });
 }

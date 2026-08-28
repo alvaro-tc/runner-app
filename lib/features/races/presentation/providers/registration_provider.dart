@@ -220,6 +220,37 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
     );
   }
 
+  /// Cancela la inscripcion y con ella el cobro abierto.
+  ///
+  /// El servidor cierra los cobros pendientes al cancelar, asi que despues de
+  /// esto no se puede subir ningun comprobante ni aprobarlo: sin eso, un
+  /// organizador podria aprobar un pago de una inscripcion ya cancelada y
+  /// devolverla sola a confirmada.
+  Future<bool> cancelRegistration() async {
+    final id = state.registration?.id;
+    if (id == null || state.busy) return false;
+
+    _sondeo?.cancel();
+    state = state.copyWith(busy: true, clearError: true);
+
+    final resultado = await ref.read(raceRepositoryProvider).cancel(id);
+
+    return resultado.fold(
+      (_) {
+        // El flujo se tira entero: el borrador ya no existe del otro lado, y
+        // dejarlo pintado invitaria a pagar algo que el servidor va a rechazar.
+        _claveDeCobro = null;
+        state = RegistrationFlowState(marathonId: state.marathonId);
+        ref.invalidate(racesProvider);
+        return true;
+      },
+      (Failure fallo) {
+        state = state.copyWith(busy: false, error: fallo);
+        return false;
+      },
+    );
+  }
+
   /// Vuelve a intentar el cobro tras un rechazo.
   ///
   /// **Con clave nueva**: la anterior identifica el intento que ya se resolvio

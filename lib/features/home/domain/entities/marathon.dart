@@ -52,6 +52,7 @@ class Marathon {
     this.categories = const [],
     this.extras = const [],
     this.paymentQrUrl,
+    this.paymentQrPayload,
     this.paymentQrInstructions,
     this.liveStartedAt,
     this.liveFinishedAt,
@@ -86,6 +87,12 @@ class Marathon {
   /// the method must not be offered: showing it would promise a payment the
   /// server will refuse. Temporary — see `docs/pago-qr-manual.md` in the API.
   final String? paymentQrUrl;
+
+  /// El QR **como texto**: lo dibuja la app. `null` = esta carrera no se puede
+  /// pagar por QR. Es esto y no [paymentQrUrl] lo que habilita el metodo: el
+  /// servidor rechaza el checkout sin texto, aunque haya imagen cargada.
+  final String? paymentQrPayload;
+
   final String? paymentQrInstructions;
 
   /// Cuando el organizador dio la largada de verdad, no la hora programada.
@@ -97,7 +104,8 @@ class Marathon {
   /// Se esta corriendo ahora mismo.
   bool get isLive => liveStartedAt != null && liveFinishedAt == null;
 
-  bool get acceptsQrPayment => paymentQrUrl != null && paymentQrUrl!.isNotEmpty;
+  bool get acceptsQrPayment =>
+      paymentQrPayload != null && paymentQrPayload!.isNotEmpty;
 
   String get location => '$city, $country';
   int get slotsLeft => slotsTotal - slotsTaken;

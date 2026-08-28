@@ -8,6 +8,18 @@ import 'package:camrun/core/network/session_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+/// Reenvia una peticion ya emitida (refresh o reintento).
+///
+/// Un `FormData` es de un solo uso: se consume al enviarlo y reenviar el mismo
+/// objeto revienta con "already finalized" —un error sin respuesta, que el
+/// mapper traduce a "no pudimos conectar con el servidor" y deja al usuario
+/// pensando que es su wifi—. Se clona antes de cada reenvio.
+Future<Response<dynamic>> _reenviar(Dio dio, RequestOptions req) {
+  final data = req.data;
+  if (data is FormData) req.data = data.clone();
+  return dio.fetch<dynamic>(req);
+}
+
 /// 1. Adjunta el access token, salvo en los endpoints publicos.
 class AuthInterceptor extends Interceptor {
   AuthInterceptor(this._session);
@@ -63,7 +75,7 @@ class RefreshInterceptor extends Interceptor {
       ..extra[_reintentado] = true;
 
     try {
-      handler.resolve(await _dio.fetch<dynamic>(req));
+      handler.resolve(await _reenviar(_dio, req));
     } on DioException catch (e) {
       handler.next(e);
     }
@@ -104,7 +116,7 @@ class RetryInterceptor extends Interceptor {
     await Future<void>.delayed(Duration(milliseconds: 400 << intentos));
     req.extra[_intentos] = intentos + 1;
     try {
-      handler.resolve(await _dio.fetch<dynamic>(req));
+      handler.resolve(await _reenviar(_dio, req));
     } on DioException catch (e) {
       handler.next(e);
     }

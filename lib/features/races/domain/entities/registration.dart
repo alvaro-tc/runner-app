@@ -56,6 +56,15 @@ enum RacePaymentMethod {
   const RacePaymentMethod(this.api);
   final String api;
 
+  /// Los metodos que hoy se pueden ofrecer al usuario.
+  ///
+  /// Tarjeta, QR de pasarela y transferencia siguen implementados de punta a
+  /// punta —el proveedor simulado responde a los tres— pero **no hay pasarela
+  /// contratada**, asi que ofrecerlos seria prometer un cobro que nadie va a
+  /// atender. Se apagan aqui, en un solo sitio: el dia que entre el PSP se
+  /// vuelven a listar y no hay que tocar ninguna pantalla.
+  static const List<RacePaymentMethod> offered = [qrManual];
+
   /// Solo la tarjeta resuelve en el acto; el resto queda pendiente y hay que
   /// sondear el cobro.
   bool get settlesImmediately => this == card;
@@ -280,6 +289,7 @@ class PaymentInfo {
     required this.amount,
     this.failureReason,
     this.qrImageUrl,
+    this.qrPayload,
     this.qrInstructions,
     this.qrReference,
     this.bankReference,
@@ -297,6 +307,11 @@ class PaymentInfo {
   final String? failureReason;
 
   final String? qrImageUrl;
+
+  /// El contenido del QR **como texto**. La app dibuja el codigo con esto en
+  /// vez de descargar una imagen: pesa bytes en lugar de cientos de KB, sale
+  /// nitido a cualquier tamano y no depende de la red para pintarse.
+  final String? qrPayload;
 
   /// Instrucciones del organizador junto al QR, y la glosa que hay que poner en
   /// la transferencia. **Temporal**, solo en `qr_manual`.

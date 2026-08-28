@@ -2348,6 +2348,48 @@ abstract class AppLocalizations {
   /// **'Miles'**
   String get settingsMiles;
 
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsPrivacyPolicySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What data we collect and why'**
+  String get settingsPrivacyPolicySubtitle;
+
+  /// No description provided for @legalLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Visit cam-run.tumype.com in your browser.'**
+  String get legalLinkFailed;
+
+  /// No description provided for @authReadPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the privacy policy'**
+  String get authReadPrivacyPolicy;
+
+  /// No description provided for @deleteAccountWebTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer to request it from the web?'**
+  String get deleteAccountWebTitle;
+
+  /// No description provided for @deleteAccountWebBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.'**
+  String get deleteAccountWebBody;
+
+  /// No description provided for @deleteAccountWebOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the request page'**
+  String get deleteAccountWebOpen;
+
   /// No description provided for @settingsHelp.
   ///
   /// In en, this message translates to:
@@ -2809,6 +2851,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Take a photo'**
   String get registerProofTakePhoto;
+
+  /// No description provided for @registerCancelPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel payment'**
+  String get registerCancelPayment;
+
+  /// No description provided for @registerCancelPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this payment?'**
+  String get registerCancelPaymentTitle;
+
+  /// No description provided for @registerCancelPaymentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.'**
+  String get registerCancelPaymentBody;
+
+  /// No description provided for @registerCancelPaymentKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep paying'**
+  String get registerCancelPaymentKeep;
+
+  /// No description provided for @registerCancelPaymentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get registerCancelPaymentConfirm;
+
+  /// No description provided for @registerCancelPaymentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry cancelled and payment closed.'**
+  String get registerCancelPaymentDone;
+
+  /// No description provided for @registerCancelPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not cancel the payment. Please try again.'**
+  String get registerCancelPaymentFailed;
+
+  /// No description provided for @registerNoPaymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This race does not take payments yet'**
+  String get registerNoPaymentMethodTitle;
+
+  /// No description provided for @registerNoPaymentMethodBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The organiser has not set up their payment QR. Get in touch with them or try again later.'**
+  String get registerNoPaymentMethodBody;
 
   /// No description provided for @phoneSelectCountry.
   ///

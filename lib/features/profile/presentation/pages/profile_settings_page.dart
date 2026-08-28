@@ -1,4 +1,5 @@
 import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
@@ -149,6 +150,13 @@ class ProfileSettingsPage extends ConsumerWidget {
           Text(t.settingsHelp, style: context.text.headingMd),
           _Group(
             children: [
+              StatRow(
+                icon: Icons.privacy_tip_outlined,
+                title: t.settingsPrivacyPolicy,
+                subtitle: t.settingsPrivacyPolicySubtitle,
+                onTap: () => context.openExternal(LegalUrls.privacyPolicy),
+              ),
+              const AppDivider(),
               StatRow(
                 icon: Icons.help_outline_rounded,
                 title: t.settingsHelpCentre,

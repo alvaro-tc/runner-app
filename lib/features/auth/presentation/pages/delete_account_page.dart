@@ -1,3 +1,4 @@
+import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
@@ -122,6 +123,20 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
             variant: AppButtonVariant.danger,
             isLoading: _loading,
             onPressed: _submit,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(t.deleteAccountWebTitle, style: context.text.headingMd),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            t.deleteAccountWebBody,
+            style: context.text.bodySm.copyWith(color: c.textSecondary),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => context.openExternal(LegalUrls.deleteAccount),
+              child: Text(t.deleteAccountWebOpen, style: context.text.bodySm),
+            ),
           ),
         ],
       ),

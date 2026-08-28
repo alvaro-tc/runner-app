@@ -1,4 +1,5 @@
 import 'package:camrun/app/router/app_routes.dart';
+import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
@@ -178,7 +179,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => context.openExternal(LegalUrls.privacyPolicy),
+            child: Text(t.authReadPrivacyPolicy, style: context.text.bodySm),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         AppButton(
           label: t.authCreateAccount,
           isLoading: _loading,

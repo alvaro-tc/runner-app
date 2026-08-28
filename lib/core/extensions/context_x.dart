@@ -2,6 +2,7 @@ import 'package:camrun/core/theme/app_typography.dart';
 import 'package:camrun/core/theme/theme_extensions.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 extension ContextX on BuildContext {
   /// Textos traducidos. `AppLocalizations.of` no devuelve null porque el
@@ -22,5 +23,15 @@ extension ContextX on BuildContext {
     ScaffoldMessenger.of(this)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Abre un enlace externo (politica de privacidad, borrado de cuenta). Si no
+  /// hay navegador que lo atienda avisa en vez de fallar en silencio.
+  Future<void> openExternal(String url) async {
+    final ok = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!ok && mounted) showSnack(l10n.legalLinkFailed);
   }
 }

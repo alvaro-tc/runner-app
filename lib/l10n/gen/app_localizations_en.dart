@@ -1232,6 +1232,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMiles => 'Miles';
 
   @override
+  String get settingsPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get settingsPrivacyPolicySubtitle => 'What data we collect and why';
+
+  @override
+  String get legalLinkFailed =>
+      'Could not open the link. Visit cam-run.tumype.com in your browser.';
+
+  @override
+  String get authReadPrivacyPolicy => 'Read the privacy policy';
+
+  @override
+  String get deleteAccountWebTitle => 'Prefer to request it from the web?';
+
+  @override
+  String get deleteAccountWebBody =>
+      'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.';
+
+  @override
+  String get deleteAccountWebOpen => 'Open the request page';
+
+  @override
   String get settingsHelp => 'Help';
 
   @override
@@ -1493,6 +1516,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registerProofTakePhoto => 'Take a photo';
+
+  @override
+  String get registerCancelPayment => 'Cancel payment';
+
+  @override
+  String get registerCancelPaymentTitle => 'Cancel this payment?';
+
+  @override
+  String get registerCancelPaymentBody =>
+      'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.';
+
+  @override
+  String get registerCancelPaymentKeep => 'Keep paying';
+
+  @override
+  String get registerCancelPaymentConfirm => 'Yes, cancel';
+
+  @override
+  String get registerCancelPaymentDone => 'Entry cancelled and payment closed.';
+
+  @override
+  String get registerCancelPaymentFailed =>
+      'We could not cancel the payment. Please try again.';
+
+  @override
+  String get registerNoPaymentMethodTitle =>
+      'This race does not take payments yet';
+
+  @override
+  String get registerNoPaymentMethodBody =>
+      'The organiser has not set up their payment QR. Get in touch with them or try again later.';
 
   @override
   String get phoneSelectCountry => 'Select a country';

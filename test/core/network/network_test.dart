@@ -162,6 +162,30 @@ void main() {
       }
     });
 
+    test(
+      'un multipart sobrevive al refresh (no se reenvia consumido)',
+      () async {
+        // El FormData se consume al enviarlo: reenviar el mismo objeto lanzaba
+        // "already finalized", un error sin respuesta que la UI mostraba como
+        // "no pudimos conectar con el servidor" al subir la foto de perfil.
+        final dio = armar();
+
+        final res = await dio.post<dynamic>(
+          '/users/me/avatar',
+          data: FormData.fromMap({
+            'file': MultipartFile.fromBytes(const [
+              1,
+              2,
+              3,
+            ], filename: 'a.webp'),
+          }),
+        );
+
+        expect(refreshes, 1);
+        expect(res.data, {'ok': true});
+      },
+    );
+
     test('si el refresh es rechazado se limpia el storage', () async {
       final dio = armar(refreshFalla: true);
 
