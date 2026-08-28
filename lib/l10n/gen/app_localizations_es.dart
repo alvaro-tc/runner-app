@@ -452,16 +452,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'La ubicación en segundo plano está desactivada. La grabación sigue mientras CamRun esté en pantalla, pero puede pararse si cambias de app.';
 
   @override
-  String get setupBackgroundLocationTitle => 'Grabar con la pantalla apagada';
-
-  @override
-  String get setupBackgroundLocationBody =>
-      'PaceUp necesita permitir la ubicación en segundo plano para seguir guardando tu ruta cuando bloquees el teléfono o lo lleves en el bolsillo. Puedes continuar sin este permiso, pero podrían faltar puntos.';
-
-  @override
-  String get setupBackgroundLocationContinue => 'Continuar';
-
-  @override
   String get locationServiceDisabled =>
       'La ubicación está desactivada en este dispositivo. Actívala para empezar una salida.';
 
@@ -560,6 +550,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setupAllowLocation => 'Permitir ubicación';
+
+  @override
+  String get setupBackgroundLocationTitle => 'Ubicación en segundo plano';
+
+  @override
+  String get setupBackgroundLocationBody =>
+      'Para seguir dibujando tu ruta con la pantalla apagada, CamRun necesita acceso a la ubicación mientras está en segundo plano. Solo lee tu posición mientras grabas una salida.';
+
+  @override
+  String get setupBackgroundLocationContinue => 'Continuar';
 
   @override
   String get setupStartRun => 'Empezar salida';
@@ -1129,9 +1129,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileHydration => 'Hábito de hidratación';
 
   @override
-  String profileHydrationValue(int days, int window) {
-    return '$days de $window días con el objetivo cumplido';
-  }
+  String get profileHydrationLow => 'Baja';
+
+  @override
+  String get profileHydrationModerate => 'Moderada';
+
+  @override
+  String get profileHydrationHigh => 'Alta';
+
+  @override
+  String get profileInjuryNone => 'Sin lesiones';
 
   @override
   String get profileAppearance => 'Apariencia';
@@ -1289,8 +1296,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get editProfileUpdated => 'Perfil actualizado';
 
   @override
-  String get editPhotoComingSoon =>
-      'La subida de foto llega con el servicio de medios.';
+  String get editPhotoFromGallery => 'Elegir de la galería';
+
+  @override
+  String get editPhotoTakePhoto => 'Tomar una foto';
+
+  @override
+  String get editPhotoUpdated => 'Foto de perfil actualizada.';
 
   @override
   String get editChangePhoto => 'Cambiar foto';
@@ -1873,4 +1885,92 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmAction => 'Eliminar';
+
+  @override
+  String get profileShoes => 'Zapatillas';
+
+  @override
+  String get profileShoesSubtitle => 'Las que sumas kilómetros';
+
+  @override
+  String get profileHealth => 'Salud';
+
+  @override
+  String get shoesEmpty => 'Todavía no has añadido ninguna zapatilla.';
+
+  @override
+  String get shoesEmptyBody =>
+      'Añade las que usas y la app te avisa cuando toque cambiarlas.';
+
+  @override
+  String get shoesAdd => 'Añadir zapatillas';
+
+  @override
+  String get shoesBrand => 'Marca';
+
+  @override
+  String get shoesBrandHint => 'Nike, Asics, Saucony…';
+
+  @override
+  String get shoesModel => 'Modelo';
+
+  @override
+  String get shoesModelHint => 'Pegasus 41';
+
+  @override
+  String get shoesRetireAt => 'Cambiarlas a los (km)';
+
+  @override
+  String get shoesPrimary => 'Principales';
+
+  @override
+  String get shoesRetire => 'Retirar';
+
+  @override
+  String get shoesRetireTitle => '¿Retirar estas zapatillas?';
+
+  @override
+  String get shoesRetireBody =>
+      'Dejan de aparecer en tu perfil y sus kilómetros no se recuperan.';
+
+  @override
+  String get shoesAdded => 'Zapatillas añadidas.';
+
+  @override
+  String get shoesRetired => 'Zapatillas retiradas.';
+
+  @override
+  String shoesWear(String done, String total) {
+    return '$done de $total';
+  }
+
+  @override
+  String get healthTitle => 'Lesiones, sueño e hidratación';
+
+  @override
+  String get healthInjuryZone => 'Zona';
+
+  @override
+  String get healthInjuryZoneHint => 'Rodilla derecha';
+
+  @override
+  String get healthAddInjury => 'Añadir lesión';
+
+  @override
+  String get healthNoInjuries => 'Sin lesiones marcadas.';
+
+  @override
+  String get healthSleepLabel => 'Sueño medio por noche';
+
+  @override
+  String get healthSaved => 'Salud actualizada.';
+
+  @override
+  String get validationShoeBrandRequired => 'Escribe la marca.';
+
+  @override
+  String get validationShoeModelRequired => 'Escribe el modelo.';
+
+  @override
+  String get validationInjuryZoneRequired => 'Escribe la zona de la lesión.';
 }

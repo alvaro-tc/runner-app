@@ -37,6 +37,11 @@ Future<ResponseBody> fakeBackend(RequestOptions req) async {
       'user': _usuario,
     }),
     '/auth/me' => envelope(_usuario),
+    '/users/me' => envelope(_perfil),
+    '/users/me/highlights' => envelope(_highlights),
+    '/users/me/health' => envelope(_salud),
+    '/users/me/shoes' => envelope(_zapatillas),
+    '/users/me/preferences' => envelope(_preferencias),
     '/home/summary' => envelope(homeSummary),
     '/marathons' => envelope([_maraton]),
     '/races/me' => envelope(misCarreras),
@@ -50,6 +55,55 @@ const _usuario = {
   'email': 'pandu@camrun.app',
   'name': 'Pandu',
   'role': 'runner',
+};
+
+/// `GET /users/me`: la cuenta arriba, el atleta anidado, igual que el servidor.
+const _perfil = {
+  'id': 'u1',
+  'email': 'pandu@camrun.app',
+  'name': 'Pandu Wirawan',
+  'role': 'runner',
+  'profile': {
+    'avatarUrl': null,
+    'city': 'Jakarta',
+    'country': 'Indonesia',
+    'birthDate': '1994-04-17',
+    'gender': 'male',
+    'weightGrams': 68000,
+    'heightCm': 174,
+    'defaultBibNumber': '0666',
+  },
+};
+
+const _highlights = {
+  'weekDistanceMeters': 52300,
+  'longestWorkout': {'distanceMeters': 26000},
+};
+
+const _salud = {
+  'injuryFlags': <Object?>[],
+  'avgSleepMinutes': 431,
+  'hydrationHabit': 'moderate',
+};
+
+const _zapatillas = [
+  {
+    'model': 'Pegasus 41',
+    'distanceMeters': 612000,
+    'alertThresholdMeters': 700000,
+    'isPrimary': true,
+  },
+];
+
+const _preferencias = {
+  'units': 'metric',
+  'theme': 'system',
+  'notifications': {
+    'planReminders': true,
+    'raceReminders': true,
+    'weeklyReport': false,
+  },
+  'privacy': {'shareActivity': false},
 };
 
 const _maraton = {

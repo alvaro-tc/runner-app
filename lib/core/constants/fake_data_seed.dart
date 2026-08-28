@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:camrun/core/utils/route_generator.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
-import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 
@@ -31,27 +30,6 @@ abstract final class FakeDataSeed {
 
   /// Monday of the week containing [d].
   // -------------------------------------------------------------- profile
-
-  static final UserProfile profile = UserProfile(
-    id: 'user-1',
-    fullName: 'Pandu Wirawan',
-    email: 'pandu@camrun.app',
-    city: 'Jakarta',
-    country: 'Indonesia',
-    avatarUrl: '',
-    birthDate: DateTime(1994, 4, 17),
-    gender: Gender.male,
-    weightKg: 68,
-    heightCm: 174,
-    highlights: const RunningHighlights(
-      weeklyMileageKm: 52.3,
-      longestRunKm: 26,
-    ),
-    primaryShoes: const ShoeInfo(model: 'Pegasus 41', distanceKm: 612),
-    injuryFlags: 'None in 30 days',
-    sleep: const SleepStats(Duration(hours: 7, minutes: 11)),
-    hydration: const HydrationStats(daysHitTarget: 4),
-  );
 
   // ------------------------------------------------------------ marathons
 

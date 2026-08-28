@@ -80,9 +80,12 @@ extension GenderL10n on Gender {
   };
 }
 
-extension HydrationStatsL10n on HydrationStats {
-  String label(AppLocalizations t) =>
-      t.profileHydrationValue(daysHitTarget, window);
+extension HydrationHabitL10n on HydrationHabit {
+  String label(AppLocalizations t) => switch (this) {
+    HydrationHabit.low => t.profileHydrationLow,
+    HydrationHabit.moderate => t.profileHydrationModerate,
+    HydrationHabit.high => t.profileHydrationHigh,
+  };
 }
 
 extension PaymentStatusL10n on PaymentStatus {

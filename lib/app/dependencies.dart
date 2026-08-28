@@ -1,12 +1,12 @@
 import 'package:camrun/core/network/network_providers.dart';
-import 'package:camrun/core/services/preferences_provider.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:camrun/features/auth/domain/repositories/auth_repository.dart';
 import 'package:camrun/features/home/data/datasources/home_api.dart';
 import 'package:camrun/features/home/data/repositories/remote_home_repositories.dart';
 import 'package:camrun/features/home/domain/repositories/home_repositories.dart';
-import 'package:camrun/features/profile/data/repositories/local_profile_repository.dart';
+import 'package:camrun/features/profile/data/datasources/profile_api.dart';
+import 'package:camrun/features/profile/data/repositories/remote_profile_repository.dart';
 import 'package:camrun/features/profile/domain/repositories/profile_repository.dart';
 import 'package:camrun/features/races/data/datasources/races_api.dart';
 import 'package:camrun/features/races/data/repositories/remote_race_repository.dart';

@@ -11,6 +11,7 @@ import 'package:camrun/features/tracking/data/models/tracking_models.dart';
 import 'package:camrun/features/tracking/data/tracking_api.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Graba un entrenamiento: GPS dentro, puntos en la base local y lotes al
 /// servidor.

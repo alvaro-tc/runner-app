@@ -2,6 +2,9 @@ import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
@@ -9,25 +12,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileSettingsPage extends ConsumerStatefulWidget {
+class ProfileSettingsPage extends ConsumerWidget {
   const ProfileSettingsPage({super.key});
 
-  @override
-  ConsumerState<ProfileSettingsPage> createState() =>
-      _ProfileSettingsPageState();
-}
+  /// Guarda el cambio y avisa si el servidor lo rechaza: el interruptor ya ha
+  /// vuelto solo a su sitio, pero sin mensaje pareceria que no se pulso.
+  Future<void> _save(
+    BuildContext context,
+    WidgetRef ref,
+    ProfilePreferences next,
+  ) async {
+    final t = context.l10n;
+    final error = await ref
+        .read(profilePreferencesProvider.notifier)
+        .save(next);
+    if (error != null && context.mounted) context.showSnack(error.localized(t));
+  }
 
-class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
-  bool _planReminders = true;
-  bool _raceUpdates = true;
-  bool _weeklyReport = false;
-  bool _shareActivity = false;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.l10n;
     final unit = ref.watch(distanceUnitProvider);
+    // Mientras cargan (o si fallan) los interruptores salen apagados y sin
+    // tocar: mejor que enseñar un estado inventado y guardarlo.
+    final prefs = ref.watch(profilePreferencesProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,24 +60,30 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                 icon: Icons.event_available_rounded,
                 title: t.settingsPlanReminders,
                 subtitle: t.settingsPlanRemindersSubtitle,
-                value: _planReminders,
-                onChanged: (v) => setState(() => _planReminders = v),
+                value: prefs?.planReminders ?? false,
+                onChanged: prefs == null
+                    ? null
+                    : (v) => _save(context, ref, prefs.copyWith(planReminders: v)),
               ),
               const AppDivider(),
               _SwitchRow(
                 icon: Icons.emoji_events_outlined,
                 title: t.settingsRaceUpdates,
                 subtitle: t.settingsRaceUpdatesSubtitle,
-                value: _raceUpdates,
-                onChanged: (v) => setState(() => _raceUpdates = v),
+                value: prefs?.raceUpdates ?? false,
+                onChanged: prefs == null
+                    ? null
+                    : (v) => _save(context, ref, prefs.copyWith(raceUpdates: v)),
               ),
               const AppDivider(),
               _SwitchRow(
                 icon: Icons.insights_rounded,
                 title: t.settingsWeeklyReport,
                 subtitle: t.settingsWeeklyReportSubtitle,
-                value: _weeklyReport,
-                onChanged: (v) => setState(() => _weeklyReport = v),
+                value: prefs?.weeklyReport ?? false,
+                onChanged: prefs == null
+                    ? null
+                    : (v) => _save(context, ref, prefs.copyWith(weeklyReport: v)),
               ),
             ],
           ),
@@ -80,8 +95,10 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                 icon: Icons.public_rounded,
                 title: t.settingsShareActivity,
                 subtitle: t.settingsShareActivitySubtitle,
-                value: _shareActivity,
-                onChanged: (v) => setState(() => _shareActivity = v),
+                value: prefs?.shareActivity ?? false,
+                onChanged: prefs == null
+                    ? null
+                    : (v) => _save(context, ref, prefs.copyWith(shareActivity: v)),
               ),
               const AppDivider(),
               StatRow(
@@ -189,7 +206,7 @@ class _SwitchRow extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) => StatRow(

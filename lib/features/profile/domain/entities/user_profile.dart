@@ -1,5 +1,50 @@
 import 'package:meta/meta.dart';
 
+/// Lo que guarda `GET/PATCH /users/me/preferences`: los interruptores de la
+/// pantalla de ajustes y la apariencia (tema, unidades, idioma).
+///
+/// `theme`, `units` y `locale` viajan como los strings del servidor
+/// (`light|dark|system`, `metric|imperial`, un tag BCP-47). El dominio no
+/// conoce `ThemeMode` ni `DistanceUnit`: son tipos de Flutter.
+@immutable
+class ProfilePreferences {
+  const ProfilePreferences({
+    required this.planReminders,
+    required this.raceUpdates,
+    required this.weeklyReport,
+    required this.shareActivity,
+    required this.theme,
+    required this.units,
+    required this.locale,
+  });
+
+  final bool planReminders;
+  final bool raceUpdates;
+  final bool weeklyReport;
+  final bool shareActivity;
+  final String theme;
+  final String units;
+  final String locale;
+
+  ProfilePreferences copyWith({
+    bool? planReminders,
+    bool? raceUpdates,
+    bool? weeklyReport,
+    bool? shareActivity,
+    String? theme,
+    String? units,
+    String? locale,
+  }) => ProfilePreferences(
+    planReminders: planReminders ?? this.planReminders,
+    raceUpdates: raceUpdates ?? this.raceUpdates,
+    weeklyReport: weeklyReport ?? this.weeklyReport,
+    shareActivity: shareActivity ?? this.shareActivity,
+    theme: theme ?? this.theme,
+    units: units ?? this.units,
+    locale: locale ?? this.locale,
+  );
+}
+
 /// Sin etiqueta: el nombre visible sale del ARB, via `GenderL10n`.
 enum Gender { female, male, other, undisclosed }
 
@@ -8,27 +53,32 @@ class ShoeInfo {
   const ShoeInfo({
     required this.model,
     required this.distanceKm,
+    this.id = '',
     this.retireAtKm = 700,
+    this.isPrimary = false,
   });
 
-  factory ShoeInfo.fromJson(Map<String, dynamic> json) => ShoeInfo(
-    model: json['model'] as String,
-    distanceKm: (json['distanceKm'] as num).toDouble(),
-    retireAtKm: (json['retireAtKm'] as num?)?.toDouble() ?? 700,
-  );
-
+  /// El del servidor. Vacio en una que todavia no se ha guardado.
+  final String id;
   final String model;
   final double distanceKm;
   final double retireAtKm;
+  final bool isPrimary;
 
   double get wear => (distanceKm / retireAtKm).clamp(0.0, 1.0);
   bool get needsReplacing => distanceKm >= retireAtKm;
+}
 
-  Map<String, dynamic> toJson() => {
-    'model': model,
-    'distanceKm': distanceKm,
-    'retireAtKm': retireAtKm,
-  };
+/// Una lesion marcada en `GET/PATCH /users/me/health`. `notes` y `since` no se
+/// editan en la app, pero se conservan: el PATCH reescribe la lista entera y
+/// mandarla sin ellos los borraria.
+@immutable
+class Injury {
+  const Injury({required this.zone, this.notes, this.since});
+
+  final String zone;
+  final String? notes;
+  final String? since;
 }
 
 @immutable
@@ -48,12 +98,9 @@ class SleepStats {
   final Duration averageLast7Days;
 }
 
-@immutable
-class HydrationStats {
-  const HydrationStats({required this.daysHitTarget, this.window = 7});
-  final int daysHitTarget;
-  final int window;
-}
+/// Habito de hidratacion tal y como lo guarda el servidor
+/// (`GET /users/me/health`). Sin etiqueta: el nombre visible sale del ARB.
+enum HydrationHabit { low, moderate, high }
 
 @immutable
 class UserProfile {
@@ -69,36 +116,12 @@ class UserProfile {
     required this.weightKg,
     required this.heightCm,
     required this.highlights,
-    required this.primaryShoes,
-    required this.injuryFlags,
+    required this.shoes,
+    required this.injuries,
     required this.sleep,
     required this.hydration,
     this.bibNumber = '0666',
   });
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    id: json['id'] as String,
-    fullName: json['fullName'] as String,
-    email: json['email'] as String,
-    city: json['city'] as String,
-    country: json['country'] as String,
-    avatarUrl: json['avatarUrl'] as String,
-    birthDate: DateTime.fromMillisecondsSinceEpoch(json['birthDate'] as int),
-    gender: Gender.values.byName(json['gender'] as String),
-    weightKg: (json['weightKg'] as num).toDouble(),
-    heightCm: (json['heightCm'] as num).toDouble(),
-    highlights: RunningHighlights(
-      weeklyMileageKm: (json['weeklyMileageKm'] as num).toDouble(),
-      longestRunKm: (json['longestRunKm'] as num).toDouble(),
-    ),
-    primaryShoes: ShoeInfo.fromJson(
-      Map<String, dynamic>.from(json['shoes'] as Map),
-    ),
-    injuryFlags: json['injuryFlags'] as String,
-    sleep: SleepStats(Duration(minutes: json['sleepMinutes'] as int)),
-    hydration: HydrationStats(daysHitTarget: json['hydrationDays'] as int),
-    bibNumber: json['bibNumber'] as String? ?? '0666',
-  );
 
   final String id;
   final String fullName;
@@ -106,16 +129,25 @@ class UserProfile {
   final String city;
   final String country;
   final String avatarUrl;
-  final DateTime birthDate;
+  final DateTime? birthDate;
   final Gender gender;
   final double weightKg;
   final double heightCm;
   final RunningHighlights highlights;
-  final ShoeInfo primaryShoes;
-  final String injuryFlags;
+  final List<ShoeInfo> shoes;
+  final List<Injury> injuries;
   final SleepStats sleep;
-  final HydrationStats hydration;
+  final HydrationHabit hydration;
   final String bibNumber;
+
+  /// La marcada como principal, y si ninguna lo esta, la primera que llegue.
+  /// Sin ninguna, una vacia: la ficha tiene una fila fija que rellenar.
+  ShoeInfo get primaryShoes => shoes.isEmpty
+      ? const ShoeInfo(model: '—', distanceKm: 0)
+      : shoes.firstWhere((s) => s.isPrimary, orElse: () => shoes.first);
+
+  /// La ficha enseña las zonas en una linea.
+  String get injuryFlags => injuries.map((i) => i.zone).join(', ');
 
   String get firstName => fullName.split(' ').first;
   String get location => '$city, $country';
@@ -126,36 +158,8 @@ class UserProfile {
       .map((p) => p[0].toUpperCase())
       .join();
 
-  int ageAt(DateTime now) {
-    var age = now.year - birthDate.year;
-    final hadBirthday =
-        now.month > birthDate.month ||
-        (now.month == birthDate.month && now.day >= birthDate.day);
-    if (!hadBirthday) age--;
-    return age;
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'fullName': fullName,
-    'email': email,
-    'city': city,
-    'country': country,
-    'avatarUrl': avatarUrl,
-    'birthDate': birthDate.millisecondsSinceEpoch,
-    'gender': gender.name,
-    'weightKg': weightKg,
-    'heightCm': heightCm,
-    'weeklyMileageKm': highlights.weeklyMileageKm,
-    'longestRunKm': highlights.longestRunKm,
-    'shoes': primaryShoes.toJson(),
-    'injuryFlags': injuryFlags,
-    'sleepMinutes': sleep.averageLast7Days.inMinutes,
-    'hydrationDays': hydration.daysHitTarget,
-    'bibNumber': bibNumber,
-  };
-
   UserProfile copyWith({
+    String? avatarUrl,
     String? fullName,
     String? email,
     String? city,
@@ -170,14 +174,14 @@ class UserProfile {
     email: email ?? this.email,
     city: city ?? this.city,
     country: country ?? this.country,
-    avatarUrl: avatarUrl,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
     birthDate: birthDate ?? this.birthDate,
     gender: gender ?? this.gender,
     weightKg: weightKg ?? this.weightKg,
     heightCm: heightCm ?? this.heightCm,
     highlights: highlights,
-    primaryShoes: primaryShoes,
-    injuryFlags: injuryFlags,
+    shoes: shoes,
+    injuries: injuries,
     sleep: sleep,
     hydration: hydration,
     bibNumber: bibNumber,

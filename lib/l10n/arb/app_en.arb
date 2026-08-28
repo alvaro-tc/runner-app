@@ -239,6 +239,9 @@
   "setupLocationGrantedBody": "CamRun can draw your route while you run.",
   "setupLocationRationale": "CamRun reads your position only while a run is recording, and stores the route on this device.",
   "setupAllowLocation": "Allow location",
+  "setupBackgroundLocationTitle": "Location in the background",
+  "setupBackgroundLocationBody": "To keep drawing your route with the screen off, CamRun needs location access while it runs in the background. It only reads your position while a run is recording.",
+  "setupBackgroundLocationContinue": "Continue",
   "setupStartRun": "Start run",
   "goalDistanceTitle": "{distance} goal",
   "@goalDistanceTitle": {
@@ -532,17 +535,10 @@
   "profileSleep": "Sleep",
   "profileSleepSubtitle": "Avg in last 7 days",
   "profileHydration": "Hydration Habit",
-  "profileHydrationValue": "{days}/{window} days hit target",
-  "@profileHydrationValue": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      },
-      "window": {
-        "type": "int"
-      }
-    }
-  },
+  "profileHydrationLow": "Low",
+  "profileHydrationModerate": "Moderate",
+  "profileHydrationHigh": "High",
+  "profileInjuryNone": "None reported",
   "profileAppearance": "Appearance",
   "profileUnits": "Units",
   "profileNotificationsPrivacyHelp": "Notifications, privacy and help",
@@ -591,7 +587,9 @@
   "editDiscardBody": "You have edits that are not saved yet. Leaving now loses them.",
   "editKeepEditing": "Keep editing",
   "editProfileUpdated": "Profile updated",
-  "editPhotoComingSoon": "Photo upload arrives with the media service.",
+  "editPhotoFromGallery": "Choose from gallery",
+  "editPhotoTakePhoto": "Take a photo",
+  "editPhotoUpdated": "Profile photo updated.",
   "editChangePhoto": "Change photo",
   "editCity": "City",
   "editCountry": "Country",
@@ -887,5 +885,39 @@
   "deleteAccountSubmit": "Delete my account",
   "deleteAccountConfirmTitle": "Delete it for good?",
   "deleteAccountConfirmBody": "Your account and all your data will be erased. This cannot be undone.",
-  "deleteAccountConfirmAction": "Delete"
+  "deleteAccountConfirmAction": "Delete",
+  "profileShoes": "Shoes",
+  "profileShoesSubtitle": "The ones you put the miles on",
+  "profileHealth": "Health",
+  "shoesEmpty": "You have not added any shoes yet.",
+  "shoesEmptyBody": "Add the ones you run in and the app tells you when to replace them.",
+  "shoesAdd": "Add shoes",
+  "shoesBrand": "Brand",
+  "shoesBrandHint": "Nike, Asics, Saucony…",
+  "shoesModel": "Model",
+  "shoesModelHint": "Pegasus 41",
+  "shoesRetireAt": "Replace them at (km)",
+  "shoesPrimary": "Primary",
+  "shoesRetire": "Retire",
+  "shoesRetireTitle": "Retire these shoes?",
+  "shoesRetireBody": "They stop showing on your profile and their distance is not kept.",
+  "shoesAdded": "Shoes added.",
+  "shoesRetired": "Shoes retired.",
+  "shoesWear": "{done} of {total}",
+  "@shoesWear": {
+    "placeholders": {
+      "done": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "healthTitle": "Injuries, sleep and hydration",
+  "healthInjuryZone": "Area",
+  "healthInjuryZoneHint": "Right knee",
+  "healthAddInjury": "Add injury",
+  "healthNoInjuries": "No injuries flagged.",
+  "healthSleepLabel": "Average sleep per night",
+  "healthSaved": "Health updated.",
+  "validationShoeBrandRequired": "Enter the brand.",
+  "validationShoeModelRequired": "Enter the model.",
+  "validationInjuryZoneRequired": "Enter the area of the injury."
 }

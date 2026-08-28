@@ -28,6 +28,8 @@ abstract final class Routes {
   static const profileSettings = '/profile/settings';
   static const profileAppearance = '/profile/appearance';
   static const profileLanguage = '/profile/language';
+  static const profileShoes = '/profile/shoes';
+  static const profileHealth = '/profile/health';
   static const profileDeleteAccount = '/profile/delete-account';
 
   /// El panel. Solo para `admin`: el guard manda ahi a quien lo sea y saca de

@@ -17,10 +17,12 @@ import 'package:camrun/features/home/presentation/pages/marathon_detail_page.dar
 import 'package:camrun/features/home/presentation/pages/marathon_register_page.dart';
 import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:camrun/features/profile/presentation/pages/appearance_page.dart';
+import 'package:camrun/features/profile/presentation/pages/health_page.dart';
 import 'package:camrun/features/profile/presentation/pages/language_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_edit_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_settings_page.dart';
+import 'package:camrun/features/profile/presentation/pages/shoes_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_start_page.dart';
 import 'package:camrun/features/races/presentation/pages/races_page.dart';
@@ -100,6 +102,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.profileLanguage,
         builder: (context, state) => const LanguagePage(),
+      ),
+      GoRoute(
+        path: Routes.profileShoes,
+        builder: (context, state) => const ShoesPage(),
+      ),
+      GoRoute(
+        path: Routes.profileHealth,
+        builder: (context, state) => const HealthPage(),
       ),
       GoRoute(
         path: Routes.profileDeleteAccount,

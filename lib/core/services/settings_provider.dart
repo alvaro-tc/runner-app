@@ -27,6 +27,15 @@ enum AppLanguage {
   final Locale? locale;
 }
 
+/// Los tres ajustes que el servidor guarda en `/users/me/preferences`. Como
+/// record tiene igualdad por valor, que es lo que usa la sincronizacion para
+/// no devolver al servidor lo que acaba de llegar de el.
+typedef Appearance = ({
+  ThemeMode themeMode,
+  AppLanguage language,
+  DistanceUnit unit,
+});
+
 @immutable
 class AppSettings {
   const AppSettings({
@@ -40,6 +49,9 @@ class AppSettings {
   final AppLanguage language;
   final DistanceUnit unit;
   final bool onboardingSeen;
+
+  Appearance get appearance =>
+      (themeMode: themeMode, language: language, unit: unit);
 
   AppSettings copyWith({
     ThemeMode? themeMode,
@@ -102,6 +114,22 @@ class SettingsNotifier extends Notifier<AppSettings> {
   Future<void> setUnit(DistanceUnit unit) async {
     state = state.copyWith(unit: unit);
     await ref.read(sharedPreferencesProvider).setString(_kUnit, unit.name);
+  }
+
+  /// Lo que llega del servidor. Se guarda tambien en disco: asi la proxima
+  /// arrancada pinta el tema correcto antes de que haya red.
+  Future<void> applyAppearance(Appearance next) async {
+    state = state.copyWith(
+      themeMode: next.themeMode,
+      language: next.language,
+      unit: next.unit,
+    );
+    final prefs = ref.read(sharedPreferencesProvider);
+    await Future.wait([
+      prefs.setString(_kTheme, next.themeMode.name),
+      prefs.setString(_kLanguage, next.language.name),
+      prefs.setString(_kUnit, next.unit.name),
+    ]);
   }
 
   void markOnboardingSeen() => state = state.copyWith(onboardingSeen: true);

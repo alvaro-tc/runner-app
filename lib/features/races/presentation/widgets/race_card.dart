@@ -1,21 +1,23 @@
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RaceCard extends StatelessWidget {
+class RaceCard extends ConsumerWidget {
   const RaceCard({required this.entry, required this.onTap, super.key});
 
   final RaceEntry entry;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.l10n;
     final result = entry.result;
@@ -110,7 +112,7 @@ class RaceCard extends StatelessWidget {
                     if (entry.isUpcoming)
                       AppBadge(
                         label: Fmt.relativeShort(
-                          entry.marathon.date.difference(DateTime.now()),
+                          entry.marathon.date.difference(ref.watch(nowProvider)()),
                           t,
                         ),
                         icon: Icons.schedule_rounded,

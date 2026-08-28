@@ -11,6 +11,7 @@ import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/features/train/domain/repositories/training_repository.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -89,6 +90,7 @@ Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   Map<String, Object> prefs = const {},
   bool signedIn = false,
+  bool syncAppearance = false,
   Future<ResponseBody> Function(RequestOptions)? api,
 }) async {
   SharedPreferences.setMockInitialValues(prefs);
@@ -119,6 +121,10 @@ Future<ProviderContainer> pumpApp(
       useSimulatedLocationProvider.overrideWithValue(true),
       // A live clock would make the Home countdown golden change every minute.
       nowProvider.overrideWithValue(() => DateTime(2026, 8, 15, 9, 30)),
+      // El puente con `/users/me/preferences` haria que el tema, el idioma y
+      // las unidades del backend falso pisaran los que fija cada test. Se
+      // enciende solo donde se prueba el puente mismo.
+      if (!syncAppearance) appearanceSyncProvider.overrideWith((ref) {}),
     ],
   );
   addTearDown(container.dispose);

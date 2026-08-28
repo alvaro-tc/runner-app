@@ -2,6 +2,7 @@ import 'package:camrun/app/router/app_router.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_theme.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,10 @@ class CamRunApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Nadie lo lee: se observa aqui para que el puente entre las preferencias
+    // del servidor y los ajustes locales viva mientras viva la app.
+    ref.watch(appearanceSyncProvider);
+
     return MaterialApp.router(
       onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,

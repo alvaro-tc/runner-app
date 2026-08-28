@@ -914,24 +914,6 @@ abstract class AppLocalizations {
   /// **'Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.'**
   String get locationBackgroundDenied;
 
-  /// No description provided for @setupBackgroundLocationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Record with the screen off'**
-  String get setupBackgroundLocationTitle;
-
-  /// No description provided for @setupBackgroundLocationBody.
-  ///
-  /// In en, this message translates to:
-  /// **'PaceUp needs background location access to keep recording your route when you lock your phone or carry it in your pocket. You can continue without it, but some points may be missing.'**
-  String get setupBackgroundLocationBody;
-
-  /// No description provided for @setupBackgroundLocationContinue.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get setupBackgroundLocationContinue;
-
   /// No description provided for @locationServiceDisabled.
   ///
   /// In en, this message translates to:
@@ -1111,6 +1093,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow location'**
   String get setupAllowLocation;
+
+  /// No description provided for @setupBackgroundLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location in the background'**
+  String get setupBackgroundLocationTitle;
+
+  /// No description provided for @setupBackgroundLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep drawing your route with the screen off, CamRun needs location access while it runs in the background. It only reads your position while a run is recording.'**
+  String get setupBackgroundLocationBody;
+
+  /// No description provided for @setupBackgroundLocationContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get setupBackgroundLocationContinue;
 
   /// No description provided for @setupStartRun.
   ///
@@ -2132,11 +2132,29 @@ abstract class AppLocalizations {
   /// **'Hydration Habit'**
   String get profileHydration;
 
-  /// No description provided for @profileHydrationValue.
+  /// No description provided for @profileHydrationLow.
   ///
   /// In en, this message translates to:
-  /// **'{days}/{window} days hit target'**
-  String profileHydrationValue(int days, int window);
+  /// **'Low'**
+  String get profileHydrationLow;
+
+  /// No description provided for @profileHydrationModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get profileHydrationModerate;
+
+  /// No description provided for @profileHydrationHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get profileHydrationHigh;
+
+  /// No description provided for @profileInjuryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None reported'**
+  String get profileInjuryNone;
 
   /// No description provided for @profileAppearance.
   ///
@@ -2426,11 +2444,23 @@ abstract class AppLocalizations {
   /// **'Profile updated'**
   String get editProfileUpdated;
 
-  /// No description provided for @editPhotoComingSoon.
+  /// No description provided for @editPhotoFromGallery.
   ///
   /// In en, this message translates to:
-  /// **'Photo upload arrives with the media service.'**
-  String get editPhotoComingSoon;
+  /// **'Choose from gallery'**
+  String get editPhotoFromGallery;
+
+  /// No description provided for @editPhotoTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get editPhotoTakePhoto;
+
+  /// No description provided for @editPhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated.'**
+  String get editPhotoUpdated;
 
   /// No description provided for @editChangePhoto.
   ///
@@ -3469,6 +3499,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get deleteAccountConfirmAction;
+
+  /// No description provided for @profileShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes'**
+  String get profileShoes;
+
+  /// No description provided for @profileShoesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The ones you put the miles on'**
+  String get profileShoesSubtitle;
+
+  /// No description provided for @profileHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get profileHealth;
+
+  /// No description provided for @shoesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not added any shoes yet.'**
+  String get shoesEmpty;
+
+  /// No description provided for @shoesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the ones you run in and the app tells you when to replace them.'**
+  String get shoesEmptyBody;
+
+  /// No description provided for @shoesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add shoes'**
+  String get shoesAdd;
+
+  /// No description provided for @shoesBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get shoesBrand;
+
+  /// No description provided for @shoesBrandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nike, Asics, Saucony…'**
+  String get shoesBrandHint;
+
+  /// No description provided for @shoesModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get shoesModel;
+
+  /// No description provided for @shoesModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pegasus 41'**
+  String get shoesModelHint;
+
+  /// No description provided for @shoesRetireAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace them at (km)'**
+  String get shoesRetireAt;
+
+  /// No description provided for @shoesPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get shoesPrimary;
+
+  /// No description provided for @shoesRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire'**
+  String get shoesRetire;
+
+  /// No description provided for @shoesRetireTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire these shoes?'**
+  String get shoesRetireTitle;
+
+  /// No description provided for @shoesRetireBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They stop showing on your profile and their distance is not kept.'**
+  String get shoesRetireBody;
+
+  /// No description provided for @shoesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes added.'**
+  String get shoesAdded;
+
+  /// No description provided for @shoesRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes retired.'**
+  String get shoesRetired;
+
+  /// No description provided for @shoesWear.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String shoesWear(String done, String total);
+
+  /// No description provided for @healthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Injuries, sleep and hydration'**
+  String get healthTitle;
+
+  /// No description provided for @healthInjuryZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get healthInjuryZone;
+
+  /// No description provided for @healthInjuryZoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Right knee'**
+  String get healthInjuryZoneHint;
+
+  /// No description provided for @healthAddInjury.
+  ///
+  /// In en, this message translates to:
+  /// **'Add injury'**
+  String get healthAddInjury;
+
+  /// No description provided for @healthNoInjuries.
+  ///
+  /// In en, this message translates to:
+  /// **'No injuries flagged.'**
+  String get healthNoInjuries;
+
+  /// No description provided for @healthSleepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average sleep per night'**
+  String get healthSleepLabel;
+
+  /// No description provided for @healthSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Health updated.'**
+  String get healthSaved;
+
+  /// No description provided for @validationShoeBrandRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the brand.'**
+  String get validationShoeBrandRequired;
+
+  /// No description provided for @validationShoeModelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the model.'**
+  String get validationShoeModelRequired;
+
+  /// No description provided for @validationInjuryZoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the area of the injury.'**
+  String get validationInjuryZoneRequired;
 }
 
 class _AppLocalizationsDelegate

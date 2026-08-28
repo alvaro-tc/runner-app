@@ -1,5 +1,6 @@
 import 'package:camrun/core/theme/app_theme.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/features/races/presentation/widgets/race_card.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
@@ -7,6 +8,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_progress_ring.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
@@ -15,12 +17,17 @@ import 'package:intl/intl.dart';
 /// dependerian del locale de la maquina que ejecute la suite.
 Widget wrap(Widget child, {bool dark = false}) {
   Intl.defaultLocale = 'en';
-  return MaterialApp(
-    theme: dark ? AppTheme.dark : AppTheme.light,
-    locale: const Locale('en'),
-    supportedLocales: AppLocalizations.supportedLocales,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    home: Scaffold(body: Center(child: child)),
+  return ProviderScope(
+    // `RaceCard` lee el reloj de `nowProvider`; se fija para que el "faltan N
+    // dias" de la insignia no dependa del dia en que corra la suite.
+    overrides: [nowProvider.overrideWithValue(() => DateTime(2026, 8, 15))],
+    child: MaterialApp(
+      theme: dark ? AppTheme.dark : AppTheme.light,
+      locale: const Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: Scaffold(body: Center(child: child)),
+    ),
   );
 }
 

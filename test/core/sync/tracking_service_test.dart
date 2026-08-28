@@ -14,6 +14,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../fake_http.dart';
 
@@ -125,6 +126,7 @@ void main() {
     Future<ResponseBody> Function(RequestOptions) handler, {
     Duration flushEvery = const Duration(days: 1),
     LiveUploader? uploader,
+    SharedPreferences? preferences,
   }) {
     final dio = _dio(handler);
     return TrackingService(

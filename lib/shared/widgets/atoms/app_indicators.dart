@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
@@ -193,6 +194,15 @@ class AppAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final fallback = Center(
+      child: Text(
+        initials,
+        style: context.text.titleMd.copyWith(
+          color: c.primary,
+          fontSize: size * 0.34,
+        ),
+      ),
+    );
     return Container(
       width: size,
       height: size,
@@ -204,15 +214,18 @@ class AppAvatar extends StatelessWidget {
       child: ClipOval(
         child: ColoredBox(
           color: c.primaryContainer,
-          child: Center(
-            child: Text(
-              initials,
-              style: context.text.titleMd.copyWith(
-                color: c.primary,
-                fontSize: size * 0.34,
-              ),
+          child: switch (imageUrl) {
+            // Las iniciales son el fondo: si la imagen no carga, se ven ellas.
+            final String url when url.isNotEmpty => CachedNetworkImage(
+              imageUrl: url,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              placeholder: (_, _) => fallback,
+              errorWidget: (_, _, _) => fallback,
             ),
-          ),
+            _ => fallback,
+          },
         ),
       ),
     );

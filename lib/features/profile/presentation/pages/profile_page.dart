@@ -128,6 +128,7 @@ class _Body extends ConsumerWidget {
                 child: Center(
                   child: AppAvatar(
                     initials: profile.initials,
+                    imageUrl: profile.avatarUrl,
                     size: _avatarSize,
                     ringWidth: 4,
                     ringColor: c.background,
@@ -162,13 +163,20 @@ class _Body extends ConsumerWidget {
                 Text(t.profileYourWeek, style: context.text.headingMd),
                 _Card(
                   children: [
-                    _ShoesRow(shoes: profile.primaryShoes, miles: miles),
+                    _ShoesRow(
+                      shoes: profile.primaryShoes,
+                      miles: miles,
+                      onTap: () => context.push(Routes.profileShoes),
+                    ),
                     const AppDivider(),
                     StatRow(
                       icon: Icons.healing_outlined,
                       title: t.profileInjuryFlags,
-                      value: profile.injuryFlags,
+                      value: profile.injuryFlags.isEmpty
+                          ? t.profileInjuryNone
+                          : profile.injuryFlags,
                       tone: c.success,
+                      onTap: () => context.push(Routes.profileHealth),
                     ),
                     const AppDivider(),
                     StatRow(
@@ -176,6 +184,7 @@ class _Body extends ConsumerWidget {
                       title: t.profileSleep,
                       subtitle: t.profileSleepSubtitle,
                       value: Fmt.durationShort(profile.sleep.averageLast7Days),
+                      onTap: () => context.push(Routes.profileHealth),
                     ),
                     const AppDivider(),
                     StatRow(
@@ -183,6 +192,7 @@ class _Body extends ConsumerWidget {
                       title: t.profileHydration,
                       value: profile.hydration.label(t),
                       tone: c.accentBlue,
+                      onTap: () => context.push(Routes.profileHealth),
                     ),
                   ],
                 ),
@@ -351,10 +361,15 @@ class _Highlight extends StatelessWidget {
 }
 
 class _ShoesRow extends StatelessWidget {
-  const _ShoesRow({required this.shoes, required this.miles});
+  const _ShoesRow({
+    required this.shoes,
+    required this.miles,
+    required this.onTap,
+  });
 
   final ShoeInfo shoes;
   final bool miles;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -367,6 +382,7 @@ class _ShoesRow extends StatelessWidget {
           subtitle: shoes.model,
           value: Fmt.distance(shoes.distanceKm, miles: miles, decimals: 0),
           tone: shoes.needsReplacing ? c.warning : c.primary,
+          onTap: onTap,
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),

@@ -14,6 +14,7 @@ import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileEditPage extends ConsumerStatefulWidget {
   const ProfileEditPage({super.key});
@@ -35,6 +36,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   Gender? _gender;
   bool _dirty = false;
   bool _saving = false;
+  bool _uploadingPhoto = false;
   bool _loaded = false;
 
   @override
@@ -142,6 +144,52 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       ..showSnack(t.editProfileUpdated);
   }
 
+  /// Elige la foto y la sube. La camara y la galeria se ofrecen antes de que
+  /// el sistema pida el permiso, para que el usuario sepa a que dice que si.
+  Future<void> _changePhoto() async {
+    final t = context.l10n;
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(t.editPhotoFromGallery),
+              onTap: () => context.pop(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text(t.editPhotoTakePhoto),
+              onTap: () => context.pop(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    // Cuadrada y reducida antes de salir del telefono: el servidor la
+    // reescala igual, y subir 12 MP por datos moviles es lo que hace que el
+    // usuario abandone.
+    final photo = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    if (photo == null || !mounted) return;
+
+    setState(() => _uploadingPhoto = true);
+    final error = await ref
+        .read(profileProvider.notifier)
+        .uploadAvatar(photo.path);
+    if (!mounted) return;
+    setState(() => _uploadingPhoto = false);
+    context.showSnack(error == null ? t.editPhotoUpdated : error.localized(t));
+  }
+
   Future<void> _pickBirthDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -194,10 +242,24 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 Center(
                   child: Column(
                     children: [
-                      AppAvatar(initials: data.initials, size: 92),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AppAvatar(
+                            initials: data.initials,
+                            imageUrl: data.avatarUrl,
+                            size: 92,
+                          ),
+                          if (_uploadingPhoto)
+                            const SizedBox(
+                              width: 92,
+                              height: 92,
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            ),
+                        ],
+                      ),
                       TextButton(
-                        onPressed: () =>
-                            context.showSnack(t.editPhotoComingSoon),
+                        onPressed: _uploadingPhoto ? null : _changePhoto,
                         child: Text(t.editChangePhoto),
                       ),
                     ],

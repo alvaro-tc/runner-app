@@ -297,7 +297,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ),
         _ReadOnlyField(
           label: t.registerDateOfBirth,
-          value: profile == null ? '—' : Fmt.fullDate(profile.birthDate),
+          value: profile?.birthDate == null
+              ? '—'
+              : Fmt.fullDate(profile!.birthDate!),
         ),
         _ReadOnlyField(
           label: t.registerGender,
@@ -884,10 +886,7 @@ class _ManualQrPayment extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(t.registerPaymentNote, style: context.text.labelSm),
             const SizedBox(height: AppSpacing.xs),
-            SelectableText(
-              payment.qrReference!,
-              style: context.text.headingMd,
-            ),
+            SelectableText(payment.qrReference!, style: context.text.headingMd),
             Text(
               t.registerPaymentNoteHelp,
               style: context.text.bodySm.copyWith(color: c.textSecondary),
@@ -963,7 +962,10 @@ class _UploadedProof extends StatelessWidget {
           context: context,
           builder: (context) => Dialog(
             child: InteractiveViewer(
-              child: Image.network(imageUrl, errorBuilder: (_, _, _) => const SizedBox.shrink()),
+              child: Image.network(
+                imageUrl,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
             ),
           ),
         ),
