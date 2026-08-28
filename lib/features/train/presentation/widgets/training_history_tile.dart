@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/core/extensions/context_x.dart';
 import 'package:paceup/core/formatters/formatters.dart';
 import 'package:paceup/core/theme/app_spacing.dart';
 import 'package:paceup/features/home/domain/entities/training_plan.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:paceup/features/train/presentation/providers/history_provider.dart';
 import 'package:paceup/l10n/l10n_labels.dart';
+import 'package:paceup/shared/widgets/atoms/app_indicators.dart';
 import 'package:paceup/shared/widgets/organisms/route_map_view.dart';
 
 IconData iconForSessionType(SessionType type) => switch (type) {
@@ -16,7 +19,7 @@ IconData iconForSessionType(SessionType type) => switch (type) {
   SessionType.race => Icons.emoji_events_outlined,
 };
 
-class TrainingHistoryTile extends StatelessWidget {
+class TrainingHistoryTile extends ConsumerWidget {
   const TrainingHistoryTile({
     required this.run,
     required this.onTap,
@@ -27,8 +30,9 @@ class TrainingHistoryTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final sync = ref.watch(trainingSyncStatusProvider(run.id));
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Material(
@@ -78,6 +82,19 @@ class TrainingHistoryTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
+                      sync.when(
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
+                        data: (info) => _SyncStatus(
+                          info: info,
+                          onRetry: () =>
+                              ref.read(historyProvider.notifier).retrySync(run),
+                          onDiscard: () => ref
+                              .read(historyProvider.notifier)
+                              .discardSync(run),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
                       Wrap(
                         spacing: AppSpacing.md,
                         children: [
@@ -105,6 +122,58 @@ class TrainingHistoryTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SyncStatus extends StatelessWidget {
+  const _SyncStatus({
+    required this.info,
+    required this.onRetry,
+    required this.onDiscard,
+  });
+
+  final TrainingSyncStatusInfo info;
+  final VoidCallback onRetry;
+  final VoidCallback onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+    final (label, tone, icon) = switch (info.status) {
+      TrainingSyncStatus.synced => (
+        t.syncStatusSynced,
+        AppTone.success,
+        Icons.cloud_done_outlined,
+      ),
+      TrainingSyncStatus.pending => (
+        t.syncStatusPending,
+        AppTone.warning,
+        Icons.cloud_upload_outlined,
+      ),
+      TrainingSyncStatus.rejected => (
+        t.syncStatusRejected,
+        AppTone.error,
+        Icons.cloud_off_outlined,
+      ),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppBadge(label: label, tone: tone, icon: icon),
+        if (info.status == TrainingSyncStatus.rejected) ...[
+          if (info.reason != null)
+            Text(info.reason!, style: context.text.bodySm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            children: [
+              TextButton(onPressed: onRetry, child: Text(t.commonRetry)),
+              TextButton(onPressed: onDiscard, child: Text(t.commonDelete)),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

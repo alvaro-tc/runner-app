@@ -5,6 +5,9 @@
     "description": "App name shown in the OS task switcher. Brand, not translated."
   },
   "commonRetry": "Try again",
+  "syncStatusSynced": "Synced",
+  "syncStatusPending": "Waiting to sync",
+  "syncStatusRejected": "Sync rejected",
   "commonCancel": "Cancel",
   "commonSave": "Save",
   "commonDone": "Done",

@@ -58,6 +58,8 @@ class TrackingService {
 
   String? get sessionId => _sesion?.sessionId;
 
+  String? get clientUuid => _clientUuid;
+
   bool get isRecording => _gps != null || _pausado;
 
   /// Metadata needed to diagnose and recover points after the Dart process is

@@ -15,6 +15,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonRetry => 'Reintentar';
 
   @override
+  String get syncStatusSynced => 'Sincronizado';
+
+  @override
+  String get syncStatusPending => 'Pendiente de sincronizar';
+
+  @override
+  String get syncStatusRejected => 'Sincronización rechazada';
+
+  @override
   String get commonCancel => 'Cancelar';
 
   @override

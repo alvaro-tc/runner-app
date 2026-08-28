@@ -229,6 +229,25 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<PendingWorkout?> pendingWorkout(String clientUuid) => (select(
+    pendingWorkouts,
+  )..where((t) => t.clientUuid.equals(clientUuid))).getSingleOrNull();
+
+  Future<void> retryRejectedWorkout(String clientUuid) =>
+      (update(
+        pendingWorkouts,
+      )..where((t) => t.clientUuid.equals(clientUuid))).write(
+        PendingWorkoutsCompanion(
+          rejectedReason: const Value(null),
+          attempts: const Value(0),
+          nextAttemptAt: Value(DateTime.now()),
+        ),
+      );
+
+  Future<void> deletePendingWorkout(String clientUuid) => (delete(
+    pendingWorkouts,
+  )..where((t) => t.clientUuid.equals(clientUuid))).go();
+
   // ─── Posiciones pendientes ───────────────────────────────────────────────
 
   /// Guarda el lote recien grabado. `insertOnConflictUpdate` para que un punto

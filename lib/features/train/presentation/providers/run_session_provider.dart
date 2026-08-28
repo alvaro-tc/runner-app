@@ -336,6 +336,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     await ref
         .read(trackingServiceProvider)
         .stop(feeling: feeling, notes: notes);
+    final clientUuid = ref.read(trackingServiceProvider).clientUuid;
 
     final started = _startedAt ?? DateTime.now();
     final elapsed = state.elapsed;
@@ -362,6 +363,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       },
       title: _titleFor(started),
       calories: state.calories,
+      clientUuid: clientUuid,
     );
   }
 

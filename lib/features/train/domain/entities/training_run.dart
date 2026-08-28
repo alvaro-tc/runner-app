@@ -106,6 +106,8 @@ enum RunFeeling {
   final String emoji;
 }
 
+enum TrainingSyncStatus { synced, pending, rejected }
+
 /// Titulos que genera la propia app para una salida.
 ///
 /// Se guardan como identificador, no como texto: una salida grabada en ingles
@@ -141,6 +143,9 @@ class TrainingRun {
     this.calories,
     this.feeling,
     this.notes,
+    this.clientUuid,
+    this.syncStatus = TrainingSyncStatus.synced,
+    this.syncError,
   });
 
   factory TrainingRun.fromJson(Map<String, dynamic> json) => TrainingRun(
@@ -169,6 +174,11 @@ class TrainingRun {
         ? null
         : RunFeeling.values.byName(json['feeling'] as String),
     notes: json['notes'] as String?,
+    clientUuid: json['clientUuid'] as String?,
+    syncStatus: TrainingSyncStatus.values.byName(
+      json['syncStatus'] as String? ?? TrainingSyncStatus.synced.name,
+    ),
+    syncError: json['syncError'] as String?,
   );
 
   final String id;
@@ -188,6 +198,9 @@ class TrainingRun {
   final int? calories;
   final RunFeeling? feeling;
   final String? notes;
+  final String? clientUuid;
+  final TrainingSyncStatus syncStatus;
+  final String? syncError;
 
   KmSplit? get fastestSplit =>
       splits.isEmpty ? null : splits.reduce((a, b) => a.pace <= b.pace ? a : b);
@@ -210,9 +223,18 @@ class TrainingRun {
     'calories': calories,
     'feeling': feeling?.name,
     'notes': notes,
+    'clientUuid': clientUuid,
+    'syncStatus': syncStatus.name,
+    'syncError': syncError,
   };
 
-  TrainingRun copyWith({RunFeeling? feeling, String? notes}) => TrainingRun(
+  TrainingRun copyWith({
+    RunFeeling? feeling,
+    String? notes,
+    String? clientUuid,
+    TrainingSyncStatus? syncStatus,
+    String? syncError,
+  }) => TrainingRun(
     id: id,
     startedAt: startedAt,
     finishedAt: finishedAt,
@@ -230,5 +252,8 @@ class TrainingRun {
     calories: calories,
     feeling: feeling ?? this.feeling,
     notes: notes ?? this.notes,
+    clientUuid: clientUuid ?? this.clientUuid,
+    syncStatus: syncStatus ?? this.syncStatus,
+    syncError: syncError ?? this.syncError,
   );
 }

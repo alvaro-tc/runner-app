@@ -11,6 +11,21 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
+class SyncRevisionNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state++;
+}
+
+final syncRevisionProvider = NotifierProvider<SyncRevisionNotifier, int>(
+  SyncRevisionNotifier.new,
+);
+
 final syncServiceProvider = Provider<SyncService>(
-  (ref) => SyncService(ref.watch(appDatabaseProvider), ref.watch(dioProvider)),
+  (ref) => SyncService(
+    ref.watch(appDatabaseProvider),
+    ref.watch(dioProvider),
+    onChanged: () => ref.read(syncRevisionProvider.notifier).bump(),
+  ),
 );

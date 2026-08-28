@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:paceup/core/db/app_database.dart';
 import 'package:paceup/core/error/failure.dart';
 
@@ -23,7 +24,7 @@ typedef SyncReport = ({
 /// La regla de la Fase 20 en una linea: **leer de local, refrescar desde red,
 /// escribir en la outbox**. Esta clase es la tercera parte.
 class SyncService {
-  SyncService(this._db, this._dio);
+  SyncService(this._db, this._dio, {this.onChanged});
 
   /// Primer reintento a los 5 s; de ahi se dobla hasta media hora. Sin tope,
   /// una cola vieja se pasaria el dia despertando la radio del telefono.
@@ -32,6 +33,7 @@ class SyncService {
 
   final AppDatabase _db;
   final Dio _dio;
+  final VoidCallback? onChanged;
 
   bool _drenando = false;
 
@@ -75,6 +77,7 @@ class SyncService {
       );
     } finally {
       _drenando = false;
+      onChanged?.call();
     }
   }
 

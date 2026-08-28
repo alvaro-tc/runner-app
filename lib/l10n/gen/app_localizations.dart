@@ -110,6 +110,24 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get commonRetry;
 
+  /// No description provided for @syncStatusSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get syncStatusSynced;
+
+  /// No description provided for @syncStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to sync'**
+  String get syncStatusPending;
+
+  /// No description provided for @syncStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync rejected'**
+  String get syncStatusRejected;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:
