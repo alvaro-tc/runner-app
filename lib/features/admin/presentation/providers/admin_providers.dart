@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/features/admin/data/admin_api.dart';
@@ -12,10 +13,97 @@ final adminApiProvider = Provider<AdminApi>(
 );
 
 /// Todas las maratones del panel, la mas proxima primero.
-final adminMarathonsProvider = FutureProvider<List<AdminMarathon>>((ref) async {
-  final filas = await ref.watch(adminApiProvider).marathons();
-  return [for (final fila in filas) AdminMarathon.fromJson(fila)];
-});
+///
+/// Es un `AsyncNotifier` y no un `FutureProvider` porque la lista no solo se
+/// lee: publica, retira y abre inscripciones sin abrir el detalle, y eso pide
+/// poder tocar el estado ya cargado. Con un `FutureProvider` cada interruptor
+/// tendria que recargar las trece carreras para pintar un cambio de una.
+class AdminMarathonsNotifier extends AsyncNotifier<List<AdminMarathon>> {
+  @override
+  Future<List<AdminMarathon>> build() async {
+    final filas = await ref.watch(adminApiProvider).marathons();
+    return ordenarParaElPanel([
+      for (final fila in filas) AdminMarathon.fromJson(fila),
+    ]);
+  }
+
+  /// Publica o retira del catalogo. Retirar **no** cancela inscripciones.
+  Future<Failure?> setPublished(AdminMarathon maraton, {required bool value}) =>
+      _cambiar(
+        maraton.id,
+        (m) => m.copyWith(published: value),
+        (api) => api.setPublished(maraton.id, value),
+      );
+
+  Future<Failure?> setRegistrationsOpen(
+    AdminMarathon maraton, {
+    required bool value,
+  }) => _cambiar(
+    maraton.id,
+    (m) => m.copyWith(registrationsOpen: value),
+    (api) => api.setRegistrationsOpen(maraton.id, value),
+  );
+
+  /// Pinta primero y pregunta despues.
+  ///
+  /// El interruptor cambia en el acto y la peticion va detras; si el servidor
+  /// dice que no, se vuelve a lo anterior y quien llamo se queda con el fallo
+  /// para contarlo. Esperar la respuesta con el dedo encima seria medio segundo
+  /// de nada en la oficina y varios en el arco de meta, que es justo donde se
+  /// cierran las inscripciones.
+  ///
+  /// Se llama tambien desde el detalle, al que se puede entrar sin haber
+  /// pasado por la lista: por eso la peticion no depende de que haya estado
+  /// cargado que retocar, y lo optimista es lo unico opcional.
+  Future<Failure?> _cambiar(
+    String id,
+    AdminMarathon Function(AdminMarathon) aplicar,
+    Future<void> Function(AdminApi) enviar,
+  ) async {
+    final antes = state.value;
+    if (antes != null) {
+      final i = antes.indexWhere((m) => m.id == id);
+      if (i >= 0) state = AsyncData([...antes]..[i] = aplicar(antes[i]));
+    }
+
+    try {
+      await enviar(ref.read(adminApiProvider));
+      // El detalle guarda su propia copia del mismo estado: sin esto, entrar a
+      // la carrera recien publicada la mostraria todavia como borrador.
+      ref.invalidate(adminMarathonProvider(id));
+      return null;
+    } on Failure catch (f) {
+      if (antes != null) state = AsyncData(antes);
+      return f;
+    }
+  }
+}
+
+final adminMarathonsProvider =
+    AsyncNotifierProvider<AdminMarathonsNotifier, List<AdminMarathon>>(
+      AdminMarathonsNotifier.new,
+    );
+
+/// Proximas primero y, detras, las que ya pasaron de la mas reciente a la mas
+/// vieja.
+///
+/// El servidor las manda de la mas lejana a la mas cercana, que es el orden
+/// contrario al que se trabaja: lo que un admin abre el panel a mirar es la
+/// carrera que viene, no la del ano que viene ni la del ano pasado.
+List<AdminMarathon> ordenarParaElPanel(List<AdminMarathon> maratones) {
+  final ahora = DateTime.now();
+  final proximas = <AdminMarathon>[];
+  final pasadas = <AdminMarathon>[];
+
+  for (final m in maratones) {
+    (m.startsAt.isBefore(ahora) ? pasadas : proximas).add(m);
+  }
+
+  proximas.sort((a, b) => a.startsAt.compareTo(b.startsAt));
+  pasadas.sort((a, b) => b.startsAt.compareTo(a.startsAt));
+
+  return [...proximas, ...pasadas];
+}
 
 /// El detalle, que es lo unico que trae el trazado.
 final adminMarathonProvider = FutureProvider.family<AdminMarathon, String>((

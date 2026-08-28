@@ -158,6 +158,12 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get commonClose;
 
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
   /// No description provided for @commonNext.
   ///
   /// In en, this message translates to:
@@ -3361,6 +3367,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Empty: this race does not accept QR payments yet.'**
   String get adminQrPayloadMissing;
+
+  /// No description provided for @adminSectionUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get adminSectionUpcoming;
+
+  /// No description provided for @adminSectionPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get adminSectionPast;
+
+  /// No description provided for @adminPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get adminPublish;
+
+  /// No description provided for @adminUnpublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish'**
+  String get adminUnpublish;
+
+  /// No description provided for @adminOpenRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Open registrations'**
+  String get adminOpenRegistrations;
+
+  /// No description provided for @adminCloseRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Close registrations'**
+  String get adminCloseRegistrations;
+
+  /// No description provided for @adminPublishedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Published in the catalogue.'**
+  String get adminPublishedSnack;
+
+  /// No description provided for @adminUnpublishedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulled from the catalogue. Entries already sold still stand.'**
+  String get adminUnpublishedSnack;
+
+  /// No description provided for @adminRegistrationsOpenedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations open.'**
+  String get adminRegistrationsOpenedSnack;
+
+  /// No description provided for @adminRegistrationsClosedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations closed. Nobody else can sign up.'**
+  String get adminRegistrationsClosedSnack;
+
+  /// No description provided for @adminCoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathon photo'**
+  String get adminCoverTitle;
+
+  /// No description provided for @adminCoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the poster runners see in the catalogue.'**
+  String get adminCoverHint;
+
+  /// No description provided for @adminCoverEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get adminCoverEmpty;
+
+  /// No description provided for @adminCoverAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the marathon first to upload the photo'**
+  String get adminCoverAfterSave;
+
+  /// No description provided for @adminCoverUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo updated.'**
+  String get adminCoverUploaded;
+
+  /// No description provided for @adminQrEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add QR'**
+  String get adminQrEmpty;
+
+  /// No description provided for @adminImageUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get adminImageUploading;
+
+  /// No description provided for @adminImageUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The image did not upload.'**
+  String get adminImageUploadFailed;
+
+  /// No description provided for @adminImageChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get adminImageChange;
+
+  /// No description provided for @adminImageFromCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get adminImageFromCamera;
+
+  /// No description provided for @adminImageFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get adminImageFromGallery;
+
+  /// No description provided for @adminImageRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get adminImageRemove;
+
+  /// No description provided for @adminDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (km)'**
+  String get adminDistance;
+
+  /// No description provided for @adminDistanceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the distance in kilometres.'**
+  String get adminDistanceRequired;
+
+  /// No description provided for @adminCreateMarathon.
+  ///
+  /// In en, this message translates to:
+  /// **'Create marathon'**
+  String get adminCreateMarathon;
+
+  /// No description provided for @adminMarathonSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathon saved.'**
+  String get adminMarathonSaved;
+
+  /// No description provided for @adminMarathonCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathon created. You can upload its photo and QR now.'**
+  String get adminMarathonCreated;
+
+  /// No description provided for @adminNothingChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to save.'**
+  String get adminNothingChanged;
 
   /// No description provided for @adminDelete.
   ///

@@ -1,5 +1,6 @@
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/network/api_config.dart';
 import 'package:camrun/core/network/error_mapper.dart';
 import 'package:camrun/core/network/server_clock.dart';
 import 'package:camrun/core/network/session_controller.dart';
@@ -56,6 +57,55 @@ Failure _mapear(Map<String, Object?> body, int status) {
 }
 
 void main() {
+  group('rutas publicas', () {
+    test('una ruta privada que contiene a una publica NO es publica', () {
+      // El panel llama a `/admin/marathons`, que contiene `/marathons`. Con una
+      // comparacion por subcadena salia sin token y el servidor devolvia 401.
+      expect(isPublicPath('/admin/marathons'), isFalse);
+      expect(isPublicPath('/admin/marathons/abc'), isFalse);
+      expect(isPublicPath('/admin/marathons/abc/cover'), isFalse);
+      expect(isPublicPath('/admin/marathons/abc/qr'), isFalse);
+      expect(isPublicPath('/admin/marathons/abc/publish'), isFalse);
+    });
+
+    test('el catalogo del corredor sigue siendo publico', () {
+      expect(isPublicPath('/marathons'), isTrue);
+      expect(isPublicPath('/marathons/upcoming'), isTrue);
+      expect(isPublicPath('/marathons/maraton-la-paz-3600'), isTrue);
+      expect(isPublicPath('/marathons/abc/categories'), isTrue);
+    });
+
+    test('las entradas con barra final solo cubren lo que cuelga', () {
+      expect(isPublicPath('/links/marathon/x'), isTrue);
+      expect(isPublicPath('/tracking/osmand'), isTrue);
+    });
+
+    test('auth: solo las de entrar, no las de sesion ya iniciada', () {
+      expect(isPublicPath('/auth/login'), isTrue);
+      expect(isPublicPath('/auth/refresh'), isTrue);
+      // Si `/auth/me` se creyera publica, un 401 suyo no renovaria la sesion.
+      expect(isPublicPath('/auth/me'), isFalse);
+      expect(isPublicPath('/auth/sessions'), isFalse);
+    });
+
+    test('el resto del panel se mantiene privado', () {
+      expect(isPublicPath('/admin/users'), isFalse);
+      expect(isPublicPath('/admin/routes'), isFalse);
+      expect(isPublicPath('/home/summary'), isFalse);
+      expect(isPublicPath('/races/me'), isFalse);
+    });
+
+    test('la query y el prefijo de la base no cambian la decision', () {
+      expect(isPublicPath('/marathons/upcoming?limit=8'), isTrue);
+      expect(isPublicPath('/api/v1/marathons/upcoming'), isTrue);
+      expect(isPublicPath('/api/v1/admin/marathons'), isFalse);
+      expect(
+        isPublicPath('http://localhost:3000/api/v1/admin/marathons'),
+        isFalse,
+      );
+    });
+  });
+
   group('mapDioError', () {
     test('sin red devuelve NetworkFailure', () {
       final f = mapDioError(

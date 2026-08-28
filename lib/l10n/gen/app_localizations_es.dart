@@ -39,6 +39,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonClose => 'Cerrar';
 
   @override
+  String get commonUndo => 'Deshacer';
+
+  @override
   String get commonNext => 'Siguiente';
 
   @override
@@ -1818,6 +1821,95 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get adminQrPayloadMissing =>
       'Vacío: esta carrera no acepta pagos por QR todavía.';
+
+  @override
+  String get adminSectionUpcoming => 'Próximas';
+
+  @override
+  String get adminSectionPast => 'Pasadas';
+
+  @override
+  String get adminPublish => 'Publicar';
+
+  @override
+  String get adminUnpublish => 'Retirar';
+
+  @override
+  String get adminOpenRegistrations => 'Abrir inscripciones';
+
+  @override
+  String get adminCloseRegistrations => 'Cerrar inscripciones';
+
+  @override
+  String get adminPublishedSnack => 'Publicada en el catálogo.';
+
+  @override
+  String get adminUnpublishedSnack =>
+      'Retirada del catálogo. Las inscripciones vendidas siguen en pie.';
+
+  @override
+  String get adminRegistrationsOpenedSnack => 'Inscripciones abiertas.';
+
+  @override
+  String get adminRegistrationsClosedSnack =>
+      'Inscripciones cerradas. Nadie más puede anotarse.';
+
+  @override
+  String get adminCoverTitle => 'Foto de la maratón';
+
+  @override
+  String get adminCoverHint =>
+      'Es el afiche que ve el corredor en el catálogo.';
+
+  @override
+  String get adminCoverEmpty => 'Añadir foto';
+
+  @override
+  String get adminCoverAfterSave =>
+      'Guarda la maratón para poder subir la foto';
+
+  @override
+  String get adminCoverUploaded => 'Foto actualizada.';
+
+  @override
+  String get adminQrEmpty => 'Añadir QR';
+
+  @override
+  String get adminImageUploading => 'Subiendo…';
+
+  @override
+  String get adminImageUploadFailed => 'No se pudo subir la imagen.';
+
+  @override
+  String get adminImageChange => 'Cambiar';
+
+  @override
+  String get adminImageFromCamera => 'Cámara';
+
+  @override
+  String get adminImageFromGallery => 'Galería';
+
+  @override
+  String get adminImageRemove => 'Quitar';
+
+  @override
+  String get adminDistance => 'Distancia (km)';
+
+  @override
+  String get adminDistanceRequired => 'Indica la distancia en kilómetros.';
+
+  @override
+  String get adminCreateMarathon => 'Crear maratón';
+
+  @override
+  String get adminMarathonSaved => 'Maratón guardada.';
+
+  @override
+  String get adminMarathonCreated =>
+      'Maratón creada. Ya puedes subirle la foto y el QR.';
+
+  @override
+  String get adminNothingChanged => 'No hay cambios que guardar.';
 
   @override
   String get adminDelete => 'Eliminar';

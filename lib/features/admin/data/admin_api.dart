@@ -53,6 +53,33 @@ class AdminApi {
     await _dio.post<dynamic>('/admin/marathons/$id/$accion');
   });
 
+  /// Sube el QR de cobro del organizador. La imagen la reencoda el servidor.
+  ///
+  /// El texto que acompana al QR **no** va aqui: es un campo mas de la maraton
+  /// y viaja por [updateMarathon]. Duplicarlo en dos endpoints daria dos
+  /// maneras de dejarlo a medias.
+  Future<Map<String, dynamic>> uploadPaymentQr(String id, String filePath) =>
+      _subirImagen('/admin/marathons/$id/qr', filePath);
+
+  /// Sube la foto de la maraton: el afiche que el corredor ve en el catalogo.
+  ///
+  /// No hay variante con URL a proposito. Un enlace a un servidor ajeno se
+  /// rompe sin avisar y deja la carrera sin cartel; subiendola, el archivo es
+  /// nuestro. El servidor la reencoda y devuelve el detalle ya actualizado.
+  Future<Map<String, dynamic>> uploadCover(String id, String filePath) =>
+      _subirImagen('/admin/marathons/$id/cover', filePath);
+
+  /// Las dos subidas de imagen de una maraton son el mismo `multipart` con el
+  /// archivo en `file`; lo unico que cambia es a que endpoint va.
+  Future<Map<String, dynamic>> _subirImagen(String path, String filePath) =>
+      apiCall(() async {
+        final form = FormData.fromMap({
+          'file': await MultipartFile.fromFile(filePath),
+        });
+        final res = await _dio.post<dynamic>(path, data: form);
+        return res.data as Map<String, dynamic>;
+      });
+
   // ─── Largada en vivo ─────────────────────────────────────────────────────
 
   /// Da la largada. La hora la pone el servidor: si cada telefono arrancara

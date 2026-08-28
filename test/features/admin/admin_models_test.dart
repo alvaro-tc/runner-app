@@ -1,4 +1,5 @@
 import 'package:camrun/features/admin/domain/admin_models.dart';
+import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -81,6 +82,97 @@ void main() {
       expect(m.running, isFalse);
       expect(m.finished, isTrue);
       expect(m.canStart, isFalse);
+    });
+  });
+
+  group('imagenes de la maraton', () {
+    AdminMarathon con({String? cover, String? qr}) => AdminMarathon.fromJson({
+      'id': 'm1',
+      'name': 'Maraton',
+      'city': 'La Paz',
+      'startsAt': '2026-09-13T11:00:00.000Z',
+      'capacity': 100,
+      'coverUrl': cover,
+      'paymentQrUrl': qr,
+    });
+
+    test('sin subir nada, los dos huecos estan vacios', () {
+      final m = con();
+      expect(m.hasCover, isFalse);
+      expect(m.hasPaymentQr, isFalse);
+    });
+
+    test('la portada llega como URL del servidor y se reconoce', () {
+      final m = con(
+        cover: 'http://localhost:3000/uploads/marathons/cover/a.webp',
+      );
+      expect(m.hasCover, isTrue);
+      expect(m.coverUrl, contains('/uploads/'));
+    });
+
+    test('un campo vacio no cuenta como imagen puesta', () {
+      expect(con(cover: '', qr: '').hasCover, isFalse);
+      expect(con(cover: '', qr: '').hasPaymentQr, isFalse);
+    });
+
+    test('cambiar el estado no se lleva por delante las imagenes', () {
+      final m = con(cover: 'c.webp', qr: 'q.webp');
+      final retirada = m.copyWith(published: false, registrationsOpen: false);
+
+      expect(retirada.coverUrl, 'c.webp');
+      expect(retirada.paymentQrUrl, 'q.webp');
+      expect(retirada.published, isFalse);
+      expect(retirada.registrationsOpen, isFalse);
+      // Lo que no se pide no se toca.
+      expect(retirada.name, m.name);
+      expect(retirada.capacity, m.capacity);
+      expect(retirada.startsAt, m.startsAt);
+    });
+  });
+
+  group('orden del panel', () {
+    AdminMarathon el(String nombre, DateTime cuando) => AdminMarathon(
+      id: nombre,
+      name: nombre,
+      city: 'La Paz',
+      startsAt: cuando,
+      distanceMeters: 10000,
+      capacity: 100,
+      slotsTaken: 0,
+      priceCents: 0,
+      published: true,
+      registrationsOpen: true,
+      registrations: 0,
+    );
+
+    test('primero la mas proxima, y el pasado al final', () {
+      final ahora = DateTime.now();
+      final ordenadas = ordenarParaElPanel([
+        el('dentro de un ano', ahora.add(const Duration(days: 365))),
+        el('hace un mes', ahora.subtract(const Duration(days: 30))),
+        el('la semana que viene', ahora.add(const Duration(days: 7))),
+        el('hace un ano', ahora.subtract(const Duration(days: 365))),
+      ]);
+
+      expect(ordenadas.map((m) => m.name), [
+        'la semana que viene',
+        'dentro de un ano',
+        // Las pasadas, de la mas reciente a la mas vieja: el archivo se lee
+        // hacia atras.
+        'hace un mes',
+        'hace un ano',
+      ]);
+    });
+
+    test('sin carreras pasadas no se inventa ninguna seccion', () {
+      final ahora = DateTime.now();
+      final ordenadas = ordenarParaElPanel([
+        el('b', ahora.add(const Duration(days: 20))),
+        el('a', ahora.add(const Duration(days: 2))),
+      ]);
+
+      expect(ordenadas.map((m) => m.name), ['a', 'b']);
+      expect(ordenadas.every((m) => !m.past), isTrue);
     });
   });
 }

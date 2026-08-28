@@ -39,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonClose => 'Close';
 
   @override
+  String get commonUndo => 'Undo';
+
+  @override
   String get commonNext => 'Next';
 
   @override
@@ -1804,6 +1807,95 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminQrPayloadMissing =>
       'Empty: this race does not accept QR payments yet.';
+
+  @override
+  String get adminSectionUpcoming => 'Upcoming';
+
+  @override
+  String get adminSectionPast => 'Past';
+
+  @override
+  String get adminPublish => 'Publish';
+
+  @override
+  String get adminUnpublish => 'Unpublish';
+
+  @override
+  String get adminOpenRegistrations => 'Open registrations';
+
+  @override
+  String get adminCloseRegistrations => 'Close registrations';
+
+  @override
+  String get adminPublishedSnack => 'Published in the catalogue.';
+
+  @override
+  String get adminUnpublishedSnack =>
+      'Pulled from the catalogue. Entries already sold still stand.';
+
+  @override
+  String get adminRegistrationsOpenedSnack => 'Registrations open.';
+
+  @override
+  String get adminRegistrationsClosedSnack =>
+      'Registrations closed. Nobody else can sign up.';
+
+  @override
+  String get adminCoverTitle => 'Marathon photo';
+
+  @override
+  String get adminCoverHint =>
+      'This is the poster runners see in the catalogue.';
+
+  @override
+  String get adminCoverEmpty => 'Add photo';
+
+  @override
+  String get adminCoverAfterSave =>
+      'Save the marathon first to upload the photo';
+
+  @override
+  String get adminCoverUploaded => 'Photo updated.';
+
+  @override
+  String get adminQrEmpty => 'Add QR';
+
+  @override
+  String get adminImageUploading => 'Uploading…';
+
+  @override
+  String get adminImageUploadFailed => 'The image did not upload.';
+
+  @override
+  String get adminImageChange => 'Change';
+
+  @override
+  String get adminImageFromCamera => 'Camera';
+
+  @override
+  String get adminImageFromGallery => 'Gallery';
+
+  @override
+  String get adminImageRemove => 'Remove';
+
+  @override
+  String get adminDistance => 'Distance (km)';
+
+  @override
+  String get adminDistanceRequired => 'Enter the distance in kilometres.';
+
+  @override
+  String get adminCreateMarathon => 'Create marathon';
+
+  @override
+  String get adminMarathonSaved => 'Marathon saved.';
+
+  @override
+  String get adminMarathonCreated =>
+      'Marathon created. You can upload its photo and QR now.';
+
+  @override
+  String get adminNothingChanged => 'Nothing to save.';
 
   @override
   String get adminDelete => 'Delete';
