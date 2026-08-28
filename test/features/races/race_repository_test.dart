@@ -44,8 +44,7 @@ void main() {
 
   setUp(() => llamadas = []);
 
-  Map<String, dynamic> cuerpo(RequestOptions req) =>
-      req.data is String
+  Map<String, dynamic> cuerpo(RequestOptions req) => req.data is String
       ? jsonDecode(req.data as String) as Map<String, dynamic>
       : (req.data as Map).cast<String, dynamic>();
 
@@ -89,93 +88,102 @@ void main() {
       expect((await repo.fetchEntries()).unwrap().first.canStart, isFalse);
     });
 
-    test('una carrera pasada sin resultado es un DNF, no una completada', () async {
-      final repo = build(
-        (_) async => envelope([
-          {...carrera, 'status': 'completed', 'result': null},
-        ]),
-      );
+    test(
+      'una carrera pasada sin resultado es un DNF, no una completada',
+      () async {
+        final repo = build(
+          (_) async => envelope([
+            {...carrera, 'status': 'completed', 'result': null},
+          ]),
+        );
 
-      final entry = (await repo.fetchEntries()).unwrap().first;
+        final entry = (await repo.fetchEntries()).unwrap().first;
 
-      expect(entry.status, RaceEntryStatus.dnf);
-      expect(entry.canStart, isFalse);
-    });
+        expect(entry.status, RaceEntryStatus.dnf);
+        expect(entry.canStart, isFalse);
+      },
+    );
 
-    test('los parciales llevan la diferencia con el kilometro anterior', () async {
-      final repo = build(
-        (_) async => envelope([
-          {
-            ...carrera,
-            'status': 'completed',
-            'result': {
-              'finishTimeSeconds': 700,
-              'chipTimeSeconds': 0,
-              'distanceMeters': 2000,
-              'avgPaceSecPerKm': 350,
-              'avgSpeedMps': 2.86,
-              'elevationGainMeters': 30,
-              'bestKmIndex': 0,
-              'overallRank': 4,
-              'categoryRank': 1,
-              'finishers': 40,
-              'finishedAt': '2026-09-12T11:00:00Z',
-              'shareCardUrl': null,
-              'workoutId': 'w1',
+    test(
+      'los parciales llevan la diferencia con el kilometro anterior',
+      () async {
+        final repo = build(
+          (_) async => envelope([
+            {
+              ...carrera,
+              'status': 'completed',
+              'result': {
+                'finishTimeSeconds': 700,
+                'chipTimeSeconds': 0,
+                'distanceMeters': 2000,
+                'avgPaceSecPerKm': 350,
+                'avgSpeedMps': 2.86,
+                'elevationGainMeters': 30,
+                'bestKmIndex': 0,
+                'overallRank': 4,
+                'categoryRank': 1,
+                'finishers': 40,
+                'finishedAt': '2026-09-12T11:00:00Z',
+                'shareCardUrl': null,
+                'workoutId': 'w1',
+              },
+              'splits': [
+                {
+                  'index': 0,
+                  'distanceMeters': 1000,
+                  'durationSeconds': 340,
+                  'paceSecPerKm': 340,
+                  'elevationGainMeters': 10,
+                },
+                {
+                  'index': 1,
+                  'distanceMeters': 1000,
+                  'durationSeconds': 360,
+                  'paceSecPerKm': 360,
+                  'elevationGainMeters': 20,
+                },
+              ],
             },
-            'splits': [
-              {
-                'index': 0,
-                'distanceMeters': 1000,
-                'durationSeconds': 340,
-                'paceSecPerKm': 340,
-                'elevationGainMeters': 10,
-              },
-              {
-                'index': 1,
-                'distanceMeters': 1000,
-                'durationSeconds': 360,
-                'paceSecPerKm': 360,
-                'elevationGainMeters': 20,
-              },
-            ],
-          },
-        ]),
-      );
+          ]),
+        );
 
-      final result = (await repo.fetchEntries()).unwrap().first.result!;
+        final result = (await repo.fetchEntries()).unwrap().first.result!;
 
-      // Los indices de la API empiezan en 0; los kilometros que se pintan, en 1.
-      expect(result.splits.map((s) => s.km), [1, 2]);
-      expect(result.splits.first.deltaToPrevious, Duration.zero);
-      expect(result.splits.last.deltaToPrevious, const Duration(seconds: 20));
-      // Sin chip, el tiempo oficial hace de chip en vez de quedarse en cero.
-      expect(result.chipTime, const Duration(seconds: 700));
-      expect(result.bestKm, const Duration(seconds: 340));
-    });
+        // Los indices de la API empiezan en 0; los kilometros que se pintan, en 1.
+        expect(result.splits.map((s) => s.km), [1, 2]);
+        expect(result.splits.first.deltaToPrevious, Duration.zero);
+        expect(result.splits.last.deltaToPrevious, const Duration(seconds: 20));
+        // Sin chip, el tiempo oficial hace de chip en vez de quedarse en cero.
+        expect(result.chipTime, const Duration(seconds: 700));
+        expect(result.bestKm, const Duration(seconds: 340));
+      },
+    );
   });
 
   // ─── Totales ─────────────────────────────────────────────────────────────
 
-  test('los totales de la cabecera salen del servidor, no de la lista', () async {
-    final repo = build(
-      (_) async => envelope({
-        'racesCompleted': 3,
-        'racesUpcoming': 1,
-        'totalDistanceMeters': 84_390,
-        'totalSpentCents': 45_000,
-        'currency': 'BOB',
-        'nextRace': null,
-      }),
-    );
+  test(
+    'los totales de la cabecera salen del servidor, no de la lista',
+    () async {
+      final repo = build(
+        (_) async => envelope({
+          'racesCompleted': 3,
+          'racesUpcoming': 1,
+          'totalDistanceMeters': 84_390,
+          'totalSpentCents': 45_000,
+          'currency': 'BOB',
+          'nextRace': null,
+        }),
+      );
 
-    final totals = (await repo.fetchTotals()).unwrap();
+      final totals = (await repo.fetchTotals()).unwrap();
 
-    expect(totals.racesJoined, 4);
-    expect(totals.distanceRacedKm, closeTo(84.39, 0.001));
-    expect(totals.totalSpent.amount, 450);
-    expect(totals.totalSpent.currency, 'BOB');
-  });
+      expect(totals.racesJoined, 4);
+      expect(totals.distanceRacedKm, closeTo(84.39, 0.001));
+      expect(totals.totalSpent.amount, 450);
+      expect(totals.totalSpent.currency, 'BOB');
+    },
+  );
 
   // ─── Inscripcion ─────────────────────────────────────────────────────────
 
@@ -252,74 +260,84 @@ void main() {
       expect(registro.quote.serviceFee, isNull);
     });
 
-    test('los extras se mandan enteros, porque reemplazan la seleccion', () async {
-      final repo = build((_) async => envelope(borrador(step: 2)));
+    test(
+      'los extras se mandan enteros, porque reemplazan la seleccion',
+      () async {
+        final repo = build((_) async => envelope(borrador(step: 2)));
 
-      await repo.setCategoryAndExtras(
-        registrationId: 'reg1',
-        categoryId: 'c1',
-        extras: const [
-          ExtraSelection(extraId: 'e1'),
-          ExtraSelection(extraId: 'e2', quantity: 3),
-        ],
-      );
+        await repo.setCategoryAndExtras(
+          registrationId: 'reg1',
+          categoryId: 'c1',
+          extras: const [
+            ExtraSelection(extraId: 'e1'),
+            ExtraSelection(extraId: 'e2', quantity: 3),
+          ],
+        );
 
-      final body = cuerpo(llamadas.single);
-      expect(llamadas.single.method, 'PATCH');
-      expect(body['categoryId'], 'c1');
-      expect(body['extras'], [
-        {'extraId': 'e1', 'quantity': 1},
-        {'extraId': 'e2', 'quantity': 3},
-      ]);
-    });
+        final body = cuerpo(llamadas.single);
+        expect(llamadas.single.method, 'PATCH');
+        expect(body['categoryId'], 'c1');
+        expect(body['extras'], [
+          {'extraId': 'e1', 'quantity': 1},
+          {'extraId': 'e2', 'quantity': 3},
+        ]);
+      },
+    );
   });
 
   group('paso 3: el cobro', () {
-    test('una tarjeta aceptada deja la inscripcion confirmada y con dorsal', () async {
-      final repo = build(
-        (_) async => envelope({
-          'payment': {
-            'id': 'pay1',
-            'registrationId': 'reg1',
-            'method': 'card',
-            'status': 'paid',
-            'amountCents': 51_000,
-            'currency': 'BOB',
-            'methodDetails': {'brand': 'visa', 'last4': '4242'},
-            'failureReason': null,
-            'expiresAt': null,
-            'paidAt': '2026-07-01T12:00:05Z',
-            'refundedAt': null,
-            'createdAt': '2026-07-01T12:00:00Z',
-          },
-          'registration': borrador(status: 'confirmed', step: 3, bibNumber: 'MLP-0042'),
-        }),
-      );
+    test(
+      'una tarjeta aceptada deja la inscripcion confirmada y con dorsal',
+      () async {
+        final repo = build(
+          (_) async => envelope({
+            'payment': {
+              'id': 'pay1',
+              'registrationId': 'reg1',
+              'method': 'card',
+              'status': 'paid',
+              'amountCents': 51_000,
+              'currency': 'BOB',
+              'methodDetails': {'brand': 'visa', 'last4': '4242'},
+              'failureReason': null,
+              'expiresAt': null,
+              'paidAt': '2026-07-01T12:00:05Z',
+              'refundedAt': null,
+              'createdAt': '2026-07-01T12:00:00Z',
+            },
+            'registration': borrador(
+              status: 'confirmed',
+              step: 3,
+              bibNumber: 'MLP-0042',
+            ),
+          }),
+        );
 
-      final salida = (await repo.checkout(
-        registrationId: 'reg1',
-        method: RacePaymentMethod.card,
-        idempotencyKey: 'clave-1',
-        card: const CardDetails(
-          number: '4242 4242 4242 4242',
-          holder: 'ALVARO QUISPE',
-          expMonth: 12,
-          expYear: 2030,
-          cvv: '123',
-        ),
-      )).unwrap();
+        final salida = (await repo.checkout(
+          registrationId: 'reg1',
+          method: RacePaymentMethod.card,
+          idempotencyKey: 'clave-1',
+          card: const CardDetails(
+            number: '4242 4242 4242 4242',
+            holder: 'ALVARO QUISPE',
+            expMonth: 12,
+            expYear: 2030,
+            cvv: '123',
+          ),
+        )).unwrap();
 
-      expect(salida.isConfirmed, isTrue);
-      expect(salida.registration.bibNumber, 'MLP-0042');
-      expect(salida.payment.state, RacePaymentState.paid);
-      expect(salida.payment.last4, '4242');
+        expect(salida.isConfirmed, isTrue);
+        expect(salida.registration.bibNumber, 'MLP-0042');
+        expect(salida.payment.state, RacePaymentState.paid);
+        expect(salida.payment.last4, '4242');
 
-      final req = llamadas.single;
-      expect(req.headers['Idempotency-Key'], 'clave-1');
-      // Los espacios del formulario no llegan al proveedor.
-      expect((cuerpo(req)['card']! as Map)['number'], '4242424242424242');
-      expect(cuerpo(req)['termsAccepted'], isTrue);
-    });
+        final req = llamadas.single;
+        expect(req.headers['Idempotency-Key'], 'clave-1');
+        // Los espacios del formulario no llegan al proveedor.
+        expect((cuerpo(req)['card']! as Map)['number'], '4242424242424242');
+        expect(cuerpo(req)['termsAccepted'], isTrue);
+      },
+    );
 
     test('un rechazo llega como fallo con su motivo, no como exito', () async {
       final repo = build(
@@ -332,48 +350,53 @@ void main() {
         idempotencyKey: 'clave-2',
       );
 
-      salida.fold(
-        (_) => fail('un cobro rechazado no puede devolver exito'),
-        (fallo) {
-          expect(fallo, isA<ApiFailure>());
-          expect((fallo as ApiFailure).code, 'PAYMENT_DECLINED');
-        },
-      );
+      salida.fold((_) => fail('un cobro rechazado no puede devolver exito'), (
+        fallo,
+      ) {
+        expect(fallo, isA<ApiFailure>());
+        expect((fallo as ApiFailure).code, 'PAYMENT_DECLINED');
+      });
     });
 
-    test('el QR queda pendiente y trae la imagen que hay que escanear', () async {
-      final repo = build(
-        (_) async => envelope({
-          'payment': {
-            'id': 'pay2',
-            'registrationId': 'reg1',
-            'method': 'qr',
-            'status': 'pending',
-            'amountCents': 51_000,
-            'currency': 'BOB',
-            'methodDetails': {
-              'qr': {'imageUrl': 'http://x/qr.png', 'payload': 'CAMRUN-QR|...'},
+    test(
+      'el QR queda pendiente y trae la imagen que hay que escanear',
+      () async {
+        final repo = build(
+          (_) async => envelope({
+            'payment': {
+              'id': 'pay2',
+              'registrationId': 'reg1',
+              'method': 'qr',
+              'status': 'pending',
+              'amountCents': 51_000,
+              'currency': 'BOB',
+              'methodDetails': {
+                'qr': {
+                  'imageUrl': 'http://x/qr.png',
+                  'payload': 'CAMRUN-QR|...',
+                },
+              },
+              'failureReason': null,
+              'expiresAt': '2026-07-01T12:15:00Z',
+              'paidAt': null,
+              'refundedAt': null,
+              'createdAt': '2026-07-01T12:00:00Z',
             },
-            'failureReason': null,
-            'expiresAt': '2026-07-01T12:15:00Z',
-            'paidAt': null,
-            'refundedAt': null,
-            'createdAt': '2026-07-01T12:00:00Z',
-          },
-          'registration': borrador(status: 'pending_payment', step: 3),
-        }),
-      );
+            'registration': borrador(status: 'pending_payment', step: 3),
+          }),
+        );
 
-      final salida = (await repo.checkout(
-        registrationId: 'reg1',
-        method: RacePaymentMethod.qr,
-        idempotencyKey: 'clave-3',
-      )).unwrap();
+        final salida = (await repo.checkout(
+          registrationId: 'reg1',
+          method: RacePaymentMethod.qr,
+          idempotencyKey: 'clave-3',
+        )).unwrap();
 
-      expect(salida.isConfirmed, isFalse);
-      expect(salida.payment.isSettled, isFalse);
-      expect(salida.payment.qrImageUrl, 'http://x/qr.png');
-      expect(salida.registration.state, RegistrationState.pendingPayment);
-    });
+        expect(salida.isConfirmed, isFalse);
+        expect(salida.payment.isSettled, isFalse);
+        expect(salida.payment.qrImageUrl, 'http://x/qr.png');
+        expect(salida.registration.state, RegistrationState.pendingPayment);
+      },
+    );
   });
 }

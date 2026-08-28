@@ -59,7 +59,8 @@ Marathon marathonFrom(
     predictedFinishMax: banda?.$2,
     categories: [
       for (final c
-          in (j['categories'] as List? ?? const []).cast<Map<String, dynamic>>())
+          in (j['categories'] as List? ?? const [])
+              .cast<Map<String, dynamic>>())
         RaceCategory(
           id: c['id'] as String,
           label: c['name'] as String? ?? '',
@@ -184,8 +185,9 @@ HomeSummary summaryFrom(Map<String, dynamic> j) {
   final plan = j['plan'] as Map<String, dynamic>?;
   final planWeek = j['planWeek'] as Map<String, dynamic>?;
   final sesiones = {
-    for (final s in (planWeek?['sessions'] as List? ?? const [])
-        .cast<Map<String, dynamic>>())
+    for (final s
+        in (planWeek?['sessions'] as List? ?? const [])
+            .cast<Map<String, dynamic>>())
       s['id'] as String: s,
   };
 
@@ -226,7 +228,10 @@ TrainingWeek _tira(
   );
 }
 
-PlannedSession _casilla(Map<String, dynamic> dia, Map<String, dynamic>? sesion) {
+PlannedSession _casilla(
+  Map<String, dynamic> dia,
+  Map<String, dynamic>? sesion,
+) {
   final planificado = _d(dia['plannedDistanceMeters']);
   final corrido = _d(dia['distanceMeters']);
   final progreso = planificado > 0

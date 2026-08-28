@@ -100,19 +100,13 @@ class AuthApi {
   }) => apiCall(
     () async => _dio.post<dynamic>(
       '/auth/change-password',
-      data: {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      },
+      data: {'currentPassword': currentPassword, 'newPassword': newPassword},
     ),
   );
 
   /// Borra la cuenta y todo lo del usuario en el servidor. Pide la contrasena
   /// otra vez porque es irreversible y el telefono puede estar en otras manos.
   Future<void> deleteAccount(String password) => apiCall(
-    () async => _dio.delete<dynamic>(
-      '/auth/me',
-      data: {'password': password},
-    ),
+    () async => _dio.delete<dynamic>('/auth/me', data: {'password': password}),
   );
 }

@@ -63,7 +63,8 @@ class ProfileSettingsPage extends ConsumerWidget {
                 value: prefs?.planReminders ?? false,
                 onChanged: prefs == null
                     ? null
-                    : (v) => _save(context, ref, prefs.copyWith(planReminders: v)),
+                    : (v) =>
+                          _save(context, ref, prefs.copyWith(planReminders: v)),
               ),
               const AppDivider(),
               _SwitchRow(
@@ -73,7 +74,8 @@ class ProfileSettingsPage extends ConsumerWidget {
                 value: prefs?.raceUpdates ?? false,
                 onChanged: prefs == null
                     ? null
-                    : (v) => _save(context, ref, prefs.copyWith(raceUpdates: v)),
+                    : (v) =>
+                          _save(context, ref, prefs.copyWith(raceUpdates: v)),
               ),
               const AppDivider(),
               _SwitchRow(
@@ -83,7 +85,8 @@ class ProfileSettingsPage extends ConsumerWidget {
                 value: prefs?.weeklyReport ?? false,
                 onChanged: prefs == null
                     ? null
-                    : (v) => _save(context, ref, prefs.copyWith(weeklyReport: v)),
+                    : (v) =>
+                          _save(context, ref, prefs.copyWith(weeklyReport: v)),
               ),
             ],
           ),
@@ -98,7 +101,8 @@ class ProfileSettingsPage extends ConsumerWidget {
                 value: prefs?.shareActivity ?? false,
                 onChanged: prefs == null
                     ? null
-                    : (v) => _save(context, ref, prefs.copyWith(shareActivity: v)),
+                    : (v) =>
+                          _save(context, ref, prefs.copyWith(shareActivity: v)),
               ),
               const AppDivider(),
               StatRow(

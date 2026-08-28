@@ -36,7 +36,11 @@ void main() {
 
     testWidgets('races ($suffix)', (tester) async {
       await _phone(tester);
-      final container = await pumpApp(tester, prefs: _signedIn(theme), signedIn: true);
+      final container = await pumpApp(
+        tester,
+        prefs: _signedIn(theme),
+        signedIn: true,
+      );
       await _settleFakes(tester);
       container.read(routerProvider).go(Routes.races);
       await _settleFakes(tester);
@@ -49,7 +53,11 @@ void main() {
 
     testWidgets('profile ($suffix)', (tester) async {
       await _phone(tester);
-      final container = await pumpApp(tester, prefs: _signedIn(theme), signedIn: true);
+      final container = await pumpApp(
+        tester,
+        prefs: _signedIn(theme),
+        signedIn: true,
+      );
       await _settleFakes(tester);
       container.read(routerProvider).go(Routes.profile);
       await _settleFakes(tester);

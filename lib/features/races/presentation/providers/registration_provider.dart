@@ -135,7 +135,10 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
 
   /// Paso 3. Devuelve `true` cuando la inscripcion queda confirmada; con QR o
   /// transferencia vuelve `false` y arranca el sondeo.
-  Future<bool> pay({required RacePaymentMethod method, CardDetails? card}) async {
+  Future<bool> pay({
+    required RacePaymentMethod method,
+    CardDetails? card,
+  }) async {
     final id = state.registration?.id;
     if (id == null || state.busy) return false;
 
@@ -188,7 +191,10 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
   ///
   /// No confirma nada: el cobro sigue pendiente y pasa a esperar a que un
   /// organizador mire la imagen. Devuelve `true` si la subida entro.
-  Future<bool> uploadProof({required String filePath, String? reference}) async {
+  Future<bool> uploadProof({
+    required String filePath,
+    String? reference,
+  }) async {
     final pago = state.payment;
     if (pago == null || state.busy) return false;
 

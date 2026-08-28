@@ -194,7 +194,10 @@ class _CountryPickerSheet extends StatelessWidget {
               horizontal: AppSpacing.screenH,
               vertical: AppSpacing.sm,
             ),
-            child: Text(context.l10n.phoneSelectCountry, style: context.text.titleMd),
+            child: Text(
+              context.l10n.phoneSelectCountry,
+              style: context.text.titleMd,
+            ),
           ),
           for (final pais in kPhoneCountries)
             ListTile(

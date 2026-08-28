@@ -56,11 +56,17 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     _email.text = p.email;
     _city.text = p.city;
     _country.text = p.country;
-    _weight.text = p.weightKg.toStringAsFixed(1);
-    _height.text = p.heightCm.toStringAsFixed(0);
+    // Un perfil recien creado no tiene peso ni altura: el campo sale vacio,
+    // no con un 0 que el usuario tendria que borrar para poder guardar.
+    _weight.text = p.weightKg > 0 ? p.weightKg.toStringAsFixed(1) : '';
+    _height.text = p.heightCm > 0 ? p.heightCm.toStringAsFixed(0) : '';
     _birthDate = p.birthDate;
     _gender = p.gender;
   }
+
+  /// Vacio es 0: el mapper omite del PATCH lo que no llega a positivo.
+  double _numero(String value) =>
+      double.tryParse(value.trim().replaceAll(',', '.')) ?? 0;
 
   void _touch() {
     if (!_dirty) setState(() => _dirty = true);
@@ -102,16 +108,21 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         )
         ..['email'] = Validators.email(t, _email.text)
         ..['city'] = Validators.required(_city.text, t.validationCityRequired)
-        ..['weight'] = Validators.positiveNumber(
-          _weight.text,
-          notANumber: t.validationWeightNotANumber,
-          notPositive: t.validationWeightNotPositive,
-        )
-        ..['height'] = Validators.positiveNumber(
-          _height.text,
-          notANumber: t.validationHeightNotANumber,
-          notPositive: t.validationHeightNotPositive,
-        );
+        // Peso y altura son opcionales: se validan solo si hay algo escrito.
+        ..['weight'] = _weight.text.trim().isEmpty
+            ? null
+            : Validators.positiveNumber(
+                _weight.text,
+                notANumber: t.validationWeightNotANumber,
+                notPositive: t.validationWeightNotPositive,
+              )
+        ..['height'] = _height.text.trim().isEmpty
+            ? null
+            : Validators.positiveNumber(
+                _height.text,
+                notANumber: t.validationHeightNotANumber,
+                notPositive: t.validationHeightNotPositive,
+              );
     });
     if (_errors.values.any((e) => e != null)) return;
 
@@ -126,8 +137,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             country: _country.text.trim(),
             birthDate: _birthDate,
             gender: _gender,
-            weightKg: double.parse(_weight.text.replaceAll(',', '.')),
-            heightCm: double.parse(_height.text.replaceAll(',', '.')),
+            weightKg: _numero(_weight.text),
+            heightCm: _numero(_height.text),
           ),
         );
     if (!mounted) return;

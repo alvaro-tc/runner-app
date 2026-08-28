@@ -22,10 +22,7 @@ void main() {
   ) {
     db = AppDatabase(NativeDatabase.memory());
     storage = MemoryTokenStorage();
-    final session = SessionController(
-      storage: storage,
-      refreshClient: Dio(),
-    );
+    final session = SessionController(storage: storage, refreshClient: Dio());
     final dio = buildApiClient(session: session, clock: ServerClock())
       ..httpClientAdapter = FakeAdapter((req) {
         llamadas.add(req.path);
@@ -57,7 +54,10 @@ void main() {
       }),
     );
 
-    final result = await repo.signIn(identifier: 'a@b.c', password: 'runfast123');
+    final result = await repo.signIn(
+      identifier: 'a@b.c',
+      password: 'runfast123',
+    );
 
     expect(result.unwrap().name, 'Pandu');
     expect(storage.access, 'a1');
@@ -68,7 +68,9 @@ void main() {
 
   test('cerrar sesion borra tokens y cache aunque el servidor falle', () async {
     final repo = build((req) async {
-      if (req.path == '/auth/logout') return errorBody('INTERNAL_ERROR', status: 500);
+      if (req.path == '/auth/logout') {
+        return errorBody('INTERNAL_ERROR', status: 500);
+      }
       return envelope({
         'accessToken': 'a1',
         'refreshToken': 'r1',

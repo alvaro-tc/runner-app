@@ -52,7 +52,10 @@ void main() {
     test('sin prediccion no se inventa un rango', () {
       final sinDatos = summaryFrom({
         ...homeSummary,
-        'prediction': {'finishTimeSeconds': null, 'reason': 'insufficient_data'},
+        'prediction': {
+          'finishTimeSeconds': null,
+          'reason': 'insufficient_data',
+        },
       });
       expect(sinDatos.featuredMarathon!.predictedFinishMin, isNull);
     });
@@ -93,14 +96,12 @@ void main() {
   Future<ResponseBody> Function(RequestOptions) handler,
 ) {
   final db = AppDatabase(NativeDatabase.memory());
-  final dio =
-      buildApiClient(
-          session: SessionController(
-            storage: MemoryTokenStorage(),
-            refreshClient: Dio(),
-          ),
-          clock: ServerClock(),
-        )
-        ..httpClientAdapter = FakeAdapter(handler);
+  final dio = buildApiClient(
+    session: SessionController(
+      storage: MemoryTokenStorage(),
+      refreshClient: Dio(),
+    ),
+    clock: ServerClock(),
+  )..httpClientAdapter = FakeAdapter(handler);
   return (RemoteMarathonRepository(HomeApi(dio), db), db);
 }

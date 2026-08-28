@@ -121,9 +121,7 @@ class _Fila extends StatelessWidget {
                   ),
                 AppBadge(
                   tone: marathon.published ? AppTone.info : AppTone.neutral,
-                  label: marathon.published
-                      ? t.adminPublished
-                      : t.adminDraft,
+                  label: marathon.published ? t.adminPublished : t.adminDraft,
                   icon: marathon.published
                       ? Icons.visibility_outlined
                       : Icons.edit_note_rounded,

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Lesiones, sueno e hidratacion: lo que guarda `PATCH /users/me/health`.
+/// Lesiones y sueno: lo que guarda `PATCH /users/me/health`.
 class HealthPage extends ConsumerWidget {
   const HealthPage({super.key});
 
@@ -72,7 +72,6 @@ class _FormState extends ConsumerState<_Form> {
       TextEditingController(text: i.zone),
   ];
   late Duration _sleep = widget.profile.sleep.averageLast7Days;
-  late HydrationHabit _hydration = widget.profile.hydration;
   bool _saving = false;
 
   @override
@@ -101,7 +100,6 @@ class _FormState extends ConsumerState<_Form> {
                 ),
           ],
           sleep: _sleep,
-          hydration: _hydration,
         );
     if (!mounted) return;
     setState(() => _saving = false);
@@ -157,8 +155,7 @@ class _FormState extends ConsumerState<_Form> {
           icon: Icons.add_rounded,
           variant: AppButtonVariant.outline,
           size: AppButtonSize.md,
-          onPressed: () =>
-              setState(() => _zones.add(TextEditingController())),
+          onPressed: () => setState(() => _zones.add(TextEditingController())),
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(t.healthSleepLabel, style: context.text.headingMd),
@@ -174,17 +171,6 @@ class _FormState extends ConsumerState<_Form> {
           label: Fmt.durationShort(_sleep),
           onChanged: (v) =>
               setState(() => _sleep = Duration(minutes: v.round())),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(t.profileHydration, style: context.text.headingMd),
-        const SizedBox(height: AppSpacing.md),
-        SegmentedButton<HydrationHabit>(
-          segments: [
-            for (final habit in HydrationHabit.values)
-              ButtonSegment(value: habit, label: Text(habit.label(t))),
-          ],
-          selected: {_hydration},
-          onSelectionChanged: (s) => setState(() => _hydration = s.first),
         ),
         const SizedBox(height: AppSpacing.xxl),
         AppButton(

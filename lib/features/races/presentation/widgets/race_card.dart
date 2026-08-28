@@ -112,7 +112,9 @@ class RaceCard extends ConsumerWidget {
                     if (entry.isUpcoming)
                       AppBadge(
                         label: Fmt.relativeShort(
-                          entry.marathon.date.difference(ref.watch(nowProvider)()),
+                          entry.marathon.date.difference(
+                            ref.watch(nowProvider)(),
+                          ),
                           t,
                         ),
                         icon: Icons.schedule_rounded,

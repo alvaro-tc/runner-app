@@ -77,15 +77,9 @@ class _Tablero extends ConsumerWidget {
       children: [
         _Selector(marathons: marathons, current: maraton),
         Expanded(
-          child: _Mapa(
-            route: detalle.value?.route ?? const [],
-            board: tablero,
-          ),
+          child: _Mapa(route: detalle.value?.route ?? const [], board: tablero),
         ),
-        _Controles(
-          marathon: detalle.value ?? maraton,
-          board: tablero,
-        ),
+        _Controles(marathon: detalle.value ?? maraton, board: tablero),
       ],
     );
   }
@@ -197,7 +191,10 @@ class _Mapa extends StatelessWidget {
             child: SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: c.primary),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: c.primary,
+              ),
             ),
           ),
       ],
@@ -228,10 +225,7 @@ class _Dorsal extends StatelessWidget {
         bib == null || bib!.isEmpty
             ? '·'
             : bib!.substring(bib!.length > 3 ? bib!.length - 3 : 0),
-        style: context.text.labelSm.copyWith(
-          color: c.onPrimary,
-          fontSize: 9,
-        ),
+        style: context.text.labelSm.copyWith(color: c.onPrimary, fontSize: 9),
       ),
     );
   }
@@ -299,7 +293,9 @@ class _ControlesState extends ConsumerState<_Controles> {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (dialogo) => AlertDialog(
-        title: Text(largar ? t.adminStartConfirmTitle : t.adminFinishConfirmTitle),
+        title: Text(
+          largar ? t.adminStartConfirmTitle : t.adminFinishConfirmTitle,
+        ),
         content: Text(
           largar
               ? t.adminStartConfirmBody(widget.marathon.name)
@@ -360,7 +356,11 @@ class _ControlesState extends ConsumerState<_Controles> {
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.sports_score_rounded, size: 18, color: c.textSecondary),
+                  Icon(
+                    Icons.sports_score_rounded,
+                    size: 18,
+                    color: c.textSecondary,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     t.adminAlreadyFinished,

@@ -93,14 +93,15 @@ class AdminApi {
 
   // ─── Usuarios ────────────────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> users({String? search}) =>
-      apiCall(() async {
-        final res = await _dio.get<dynamic>(
-          '/admin/users',
-          queryParameters: {if (search != null && search.isNotEmpty) 'q': search},
-        );
-        return (res.data as List).cast<Map<String, dynamic>>();
-      });
+  Future<List<Map<String, dynamic>>> users({String? search}) => apiCall(
+    () async {
+      final res = await _dio.get<dynamic>(
+        '/admin/users',
+        queryParameters: {if (search != null && search.isNotEmpty) 'q': search},
+      );
+      return (res.data as List).cast<Map<String, dynamic>>();
+    },
+  );
 
   Future<Map<String, dynamic>> createUser(Map<String, dynamic> body) =>
       apiCall(() async {

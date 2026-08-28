@@ -8,6 +8,17 @@ import 'package:flutter/foundation.dart';
 String get apiBaseUrl {
   const fromEnv = String.fromEnvironment('API_BASE_URL');
   if (fromEnv.isNotEmpty) return fromEnv;
+
+  // Un APK compilado sin `--dart-define-from-file` se quedaba apuntando a
+  // `10.0.2.2`, que solo existe dentro del emulador: en un telefono real no
+  // conecta con nada y parece que "la app no funciona". Mejor que reviente al
+  // arrancar, con el motivo escrito, que repartir un instalador mudo.
+  if (kReleaseMode) {
+    throw StateError(
+      'API_BASE_URL no esta definido. Compila con '
+      '`flutter build apk --release --dart-define-from-file=.env` (o `make apk`).',
+    );
+  }
   // `defaultTargetPlatform` y no `dart:io`: importar `Platform` rompe la
   // compilacion a web, donde esa biblioteca no existe.
   final esAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;

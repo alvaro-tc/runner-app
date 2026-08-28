@@ -48,23 +48,27 @@ class AppBottomNavBar extends StatelessWidget {
           ),
         ]
       : [
-    (label: t.navHome, icon: Icons.home_outlined, active: Icons.home_rounded),
-    (
-      label: t.navTrain,
-      icon: Icons.directions_run_outlined,
-      active: Icons.directions_run_rounded,
-    ),
-    (
-      label: t.navRaces,
-      icon: Icons.emoji_events_outlined,
-      active: Icons.emoji_events_rounded,
-    ),
-    (
-      label: t.navProfile,
-      icon: Icons.person_outline_rounded,
-      active: Icons.person_rounded,
-    ),
-  ];
+          (
+            label: t.navHome,
+            icon: Icons.home_outlined,
+            active: Icons.home_rounded,
+          ),
+          (
+            label: t.navTrain,
+            icon: Icons.directions_run_outlined,
+            active: Icons.directions_run_rounded,
+          ),
+          (
+            label: t.navRaces,
+            icon: Icons.emoji_events_outlined,
+            active: Icons.emoji_events_rounded,
+          ),
+          (
+            label: t.navProfile,
+            icon: Icons.person_outline_rounded,
+            active: Icons.person_rounded,
+          ),
+        ];
 
   @override
   Widget build(BuildContext context) {

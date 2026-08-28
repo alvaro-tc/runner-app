@@ -27,9 +27,7 @@ class RemoteAuthRepository implements AuthRepository {
     required String identifier,
     required String password,
   }) => guard(
-    () => _entrar(
-      () => api.login(identifier: identifier, password: password),
-    ),
+    () => _entrar(() => api.login(identifier: identifier, password: password)),
   );
 
   @override

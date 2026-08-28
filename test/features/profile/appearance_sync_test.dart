@@ -75,8 +75,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    final body =
-        jsonDecode(jsonEncode(patch!.data)) as Map<String, dynamic>;
+    final body = jsonDecode(jsonEncode(patch!.data)) as Map<String, dynamic>;
     expect(body['units'], 'metric');
     // Los interruptores viajan enteros: el PATCH reescribe el bloque.
     expect((body['privacy'] as Map)['shareActivity'], true);

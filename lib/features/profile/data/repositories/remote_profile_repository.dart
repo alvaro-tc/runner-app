@@ -47,39 +47,15 @@ class RemoteProfileRepository implements ProfileRepository {
   });
 
   @override
-  Future<Result<UserProfile>> addShoe({
-    required String brand,
-    required String model,
-    required double retireAtKm,
-  }) => guard(() async {
-    await api.addShoe(
-      shoePost(brand: brand, model: model, retireAtKm: retireAtKm),
-    );
-    return _refreshShoes();
-  });
-
-  @override
-  Future<Result<UserProfile>> removeShoe(String id) => guard(() async {
-    await api.deleteShoe(id);
-    return _refreshShoes();
-  });
-
-  @override
   Future<Result<UserProfile>> saveHealth({
     required List<Injury> injuries,
     required Duration sleep,
-    required HydrationHabit hydration,
   }) => guard(() async {
     final health = await api.updateHealth(
-      healthPatch(injuries: injuries, sleep: sleep, hydration: hydration),
+      healthPatch(injuries: injuries, sleep: sleep),
     );
     return _cache({...await _cached(), 'health': health});
   });
-
-  /// El POST devuelve solo la zapatilla nueva y el DELETE ni eso, y ninguno
-  /// dice a quien le quito el `isPrimary`: la lista se relee entera.
-  Future<UserProfile> _refreshShoes() async =>
-      _cache({...await _cached(), 'shoes': await api.shoes()});
 
   @override
   Future<Result<ProfilePreferences>> fetchPreferences() => guard(

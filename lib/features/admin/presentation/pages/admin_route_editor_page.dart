@@ -134,15 +134,16 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
                     _puntos.isEmpty
                         ? t.adminRouteHint
                         : t.adminRoutePoints(_puntos.length, Fmt.distance(_km)),
-                    style: context.text.bodySm.copyWith(
-                      color: c.textSecondary,
-                    ),
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
                   ),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
                     value: _idaYVuelta,
                     onChanged: (v) => setState(() => _idaYVuelta = v),
-                    title: Text(t.adminRouteOutAndBack, style: context.text.bodyMd),
+                    title: Text(
+                      t.adminRouteOutAndBack,
+                      style: context.text.bodyMd,
+                    ),
                     subtitle: Text(
                       t.adminRouteOutAndBackHint,
                       style: context.text.bodySm.copyWith(

@@ -140,7 +140,9 @@ class LiveSocket {
       })
       ..on('marathon:state', (data) {
         if (data is Map) {
-          _estados.add(MarathonLiveState.fromJson(data.cast<String, dynamic>()));
+          _estados.add(
+            MarathonLiveState.fromJson(data.cast<String, dynamic>()),
+          );
         }
       })
       // Al reconectar el servidor no recuerda las salas: hay que volver a

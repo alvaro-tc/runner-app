@@ -79,7 +79,8 @@ class _FormularioState extends ConsumerState<_Formulario> {
     text: _m?.paymentQrInstructions ?? '',
   );
 
-  late DateTime _fecha = _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
+  late DateTime _fecha =
+      _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
   late List<GeoPoint> _ruta = _m?.route ?? const [];
   late bool _publicada = _m?.published ?? false;
   late bool _inscripciones = _m?.registrationsOpen ?? true;
@@ -138,9 +139,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
   Future<void> _marcarRuta() async {
     final trazado = await Navigator.of(context).push<List<GeoPoint>>(
-      MaterialPageRoute(
-        builder: (_) => AdminRouteEditorPage(initial: _ruta),
-      ),
+      MaterialPageRoute(builder: (_) => AdminRouteEditorPage(initial: _ruta)),
     );
     if (trazado != null && mounted) setState(() => _ruta = trazado);
   }
@@ -203,7 +202,9 @@ class _FormularioState extends ConsumerState<_Formulario> {
     final t = context.l10n;
     if (_nombre.text.trim().isEmpty) return t.adminNameRequired;
     if (_ciudad.text.trim().isEmpty) return t.adminCityRequired;
-    if ((int.tryParse(_cupo.text.trim()) ?? 0) < 1) return t.adminCapacityRequired;
+    if ((int.tryParse(_cupo.text.trim()) ?? 0) < 1) {
+      return t.adminCapacityRequired;
+    }
     return null;
   }
 
@@ -417,10 +418,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
           ),
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
-            Text(
-              _error!,
-              style: context.text.bodySm.copyWith(color: c.error),
-            ),
+            Text(_error!, style: context.text.bodySm.copyWith(color: c.error)),
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(

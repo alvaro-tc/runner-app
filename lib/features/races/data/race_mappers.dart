@@ -73,9 +73,8 @@ PaymentStatus _estadoDePago(String? valor) => switch (valor) {
 /// diga lo contrario.
 RaceEntryStatus _estadoDeCarrera(String? valor, Map<String, dynamic>? result) =>
     switch (valor) {
-      'completed' => result == null
-          ? RaceEntryStatus.dnf
-          : RaceEntryStatus.completed,
+      'completed' =>
+        result == null ? RaceEntryStatus.dnf : RaceEntryStatus.completed,
       _ => RaceEntryStatus.upcoming,
     };
 
@@ -211,8 +210,8 @@ RegistrationQuote quoteFrom(Map<String, dynamic> j) {
 
   return RegistrationQuote(
     lines: [
-      for (final l in (j['items'] as List? ?? const [])
-          .cast<Map<String, dynamic>>())
+      for (final l
+          in (j['items'] as List? ?? const []).cast<Map<String, dynamic>>())
         QuoteLine(
           label: l['label'] as String? ?? '',
           quantity: _i(l['quantity']) == 0 ? 1 : _i(l['quantity']),
@@ -248,8 +247,7 @@ PaymentInfo paymentFrom(Map<String, dynamic> j) {
     state: RacePaymentState.fromApi(j['status'] as String?),
     amount: _dinero(j['amountCents'], j['currency'] as String? ?? 'BOB'),
     failureReason: j['failureReason'] as String?,
-    qrImageUrl:
-        (qrManual?['imageUrl'] ?? qr?['imageUrl']) as String?,
+    qrImageUrl: (qrManual?['imageUrl'] ?? qr?['imageUrl']) as String?,
     qrInstructions: qrManual?['instructions'] as String?,
     qrReference: qrManual?['reference'] as String?,
     bankReference: banco?['reference'] as String?,

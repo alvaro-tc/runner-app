@@ -76,15 +76,7 @@ extension GenderL10n on Gender {
     Gender.female => t.genderFemale,
     Gender.male => t.genderMale,
     Gender.other => t.genderOther,
-    Gender.undisclosed => t.genderUndisclosed,
-  };
-}
-
-extension HydrationHabitL10n on HydrationHabit {
-  String label(AppLocalizations t) => switch (this) {
-    HydrationHabit.low => t.profileHydrationLow,
-    HydrationHabit.moderate => t.profileHydrationModerate,
-    HydrationHabit.high => t.profileHydrationHigh,
+    Gender.unspecified => t.genderUndisclosed,
   };
 }
 

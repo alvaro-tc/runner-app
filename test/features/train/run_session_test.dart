@@ -122,8 +122,7 @@ void main() {
     return c;
   }
 
-  Map<String, dynamic> cuerpo(RequestOptions req) =>
-      req.data is String
+  Map<String, dynamic> cuerpo(RequestOptions req) => req.data is String
       ? jsonDecode(req.data as String) as Map<String, dynamic>
       : (req.data as Map).cast<String, dynamic>();
 
@@ -139,9 +138,7 @@ void main() {
   test('un entrenamiento suelto abre sesion en el servidor', () async {
     await arrancar(RunGoal.free);
 
-    final arranque = llamadas.firstWhere(
-      (r) => r.path == '/workouts/sessions',
-    );
+    final arranque = llamadas.firstWhere((r) => r.path == '/workouts/sessions');
     expect(cuerpo(arranque)['type'], 'free_run');
     // Sin inscripcion: es un entrenamiento, no una carrera.
     expect(cuerpo(arranque).containsKey('registrationId'), isFalse);
@@ -156,46 +153,47 @@ void main() {
       ),
     );
 
-    final arranque = llamadas.firstWhere(
-      (r) => r.path == '/workouts/sessions',
-    );
+    final arranque = llamadas.firstWhere((r) => r.path == '/workouts/sessions');
     // Es lo unico que convierte la sesion en carrera del lado del servidor.
     expect(cuerpo(arranque)['registrationId'], 'reg1');
     expect(cuerpo(arranque)['type'], 'race');
   });
 
-  test('los puntos del GPS llegan a la UI y a la base, con una sola suscripcion', () async {
-    await arrancar(RunGoal.free);
+  test(
+    'los puntos del GPS llegan a la UI y a la base, con una sola suscripcion',
+    () async {
+      await arrancar(RunGoal.free);
 
-    gps
-      ..emit(_punto(1))
-      ..emit(_punto(2, metros: 100));
-    await asentar();
+      gps
+        ..emit(_punto(1))
+        ..emit(_punto(2, metros: 100));
+      await asentar();
 
-    final state = container.read(runSessionProvider);
-    expect(state.route, hasLength(2));
-    expect(state.distanceKm, closeTo(0.1, 0.005));
+      final state = container.read(runSessionProvider);
+      expect(state.route, hasLength(2));
+      expect(state.distanceKm, closeTo(0.1, 0.005));
 
-    // Una sola: el notifier se cuelga del stream del servicio en vez de abrir
-    // su propio `track()`. Dos suscripciones serian el doble de bateria y dos
-    // series de puntos que no cuadran.
-    expect(gps.tracks, 1);
+      // Una sola: el notifier se cuelga del stream del servicio en vez de abrir
+      // su propio `track()`. Dos suscripciones serian el doble de bateria y dos
+      // series de puntos que no cuadran.
+      expect(gps.tracks, 1);
 
-    final pendientes = await db.duePositions(
-      DateTime.now().add(const Duration(hours: 1)),
-    );
-    expect(pendientes, hasLength(2));
-    expect(pendientes.first.sessionId, 'sesion-1');
-  });
+      final pendientes = await db.duePositions(
+        DateTime.now().add(const Duration(hours: 1)),
+      );
+      expect(pendientes, hasLength(2));
+      expect(pendientes.first.sessionId, 'sesion-1');
+    },
+  );
 
   test('cerrar la sesion la cierra tambien en el servidor', () async {
     await arrancar(RunGoal.free);
     gps.emit(_punto(1));
     await asentar();
 
-    final run = await container.read(runSessionProvider.notifier).finish(
-      feeling: 4,
-    );
+    final run = await container
+        .read(runSessionProvider.notifier)
+        .finish(feeling: 4);
 
     expect(run.type, SessionType.easy);
     expect(

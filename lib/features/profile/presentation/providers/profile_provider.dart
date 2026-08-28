@@ -27,30 +27,11 @@ class ProfileNotifier extends AsyncNotifier<UserProfile> {
     });
   }
 
-  /// Zapatillas y salud no son optimistas: los dos llegan con la lista o el
-  /// bloque que devuelve el servidor, y ese es el que se pinta.
-  Future<Failure?> addShoe({
-    required String brand,
-    required String model,
-    required double retireAtKm,
-  }) => _apply(
-    (repo) =>
-        repo.addShoe(brand: brand, model: model, retireAtKm: retireAtKm),
-  );
-
-  Future<Failure?> removeShoe(String id) => _apply((repo) => repo.removeShoe(id));
-
+  /// Salud no es optimista: se pinta el bloque que devuelve el servidor.
   Future<Failure?> saveHealth({
     required List<Injury> injuries,
     required Duration sleep,
-    required HydrationHabit hydration,
-  }) => _apply(
-    (repo) => repo.saveHealth(
-      injuries: injuries,
-      sleep: sleep,
-      hydration: hydration,
-    ),
-  );
+  }) => _apply((repo) => repo.saveHealth(injuries: injuries, sleep: sleep));
 
   Future<Failure?> _apply(
     Future<Result<UserProfile>> Function(ProfileRepository) call,

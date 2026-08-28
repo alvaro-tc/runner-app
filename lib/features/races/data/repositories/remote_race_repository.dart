@@ -17,8 +17,9 @@ class RemoteRaceRepository implements RaceRepository {
   final RacesApi _api;
 
   @override
-  Future<Result<List<RaceEntry>>> fetchEntries() =>
-      guard(() async => [for (final j in await _api.myRaces()) raceEntryFrom(j)]);
+  Future<Result<List<RaceEntry>>> fetchEntries() => guard(
+    () async => [for (final j in await _api.myRaces()) raceEntryFrom(j)],
+  );
 
   @override
   Future<Result<RaceTotals>> fetchTotals() =>

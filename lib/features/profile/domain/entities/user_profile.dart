@@ -46,28 +46,8 @@ class ProfilePreferences {
 }
 
 /// Sin etiqueta: el nombre visible sale del ARB, via `GenderL10n`.
-enum Gender { female, male, other, undisclosed }
-
-@immutable
-class ShoeInfo {
-  const ShoeInfo({
-    required this.model,
-    required this.distanceKm,
-    this.id = '',
-    this.retireAtKm = 700,
-    this.isPrimary = false,
-  });
-
-  /// El del servidor. Vacio en una que todavia no se ha guardado.
-  final String id;
-  final String model;
-  final double distanceKm;
-  final double retireAtKm;
-  final bool isPrimary;
-
-  double get wear => (distanceKm / retireAtKm).clamp(0.0, 1.0);
-  bool get needsReplacing => distanceKm >= retireAtKm;
-}
+/// Los nombres son los del enum `Gender` de la API: viajan tal cual en el PATCH.
+enum Gender { female, male, other, unspecified }
 
 /// Una lesion marcada en `GET/PATCH /users/me/health`. `notes` y `since` no se
 /// editan en la app, pero se conservan: el PATCH reescribe la lista entera y
@@ -98,10 +78,6 @@ class SleepStats {
   final Duration averageLast7Days;
 }
 
-/// Habito de hidratacion tal y como lo guarda el servidor
-/// (`GET /users/me/health`). Sin etiqueta: el nombre visible sale del ARB.
-enum HydrationHabit { low, moderate, high }
-
 @immutable
 class UserProfile {
   const UserProfile({
@@ -116,10 +92,8 @@ class UserProfile {
     required this.weightKg,
     required this.heightCm,
     required this.highlights,
-    required this.shoes,
     required this.injuries,
     required this.sleep,
-    required this.hydration,
     this.bibNumber = '0666',
   });
 
@@ -134,17 +108,9 @@ class UserProfile {
   final double weightKg;
   final double heightCm;
   final RunningHighlights highlights;
-  final List<ShoeInfo> shoes;
   final List<Injury> injuries;
   final SleepStats sleep;
-  final HydrationHabit hydration;
   final String bibNumber;
-
-  /// La marcada como principal, y si ninguna lo esta, la primera que llegue.
-  /// Sin ninguna, una vacia: la ficha tiene una fila fija que rellenar.
-  ShoeInfo get primaryShoes => shoes.isEmpty
-      ? const ShoeInfo(model: '—', distanceKm: 0)
-      : shoes.firstWhere((s) => s.isPrimary, orElse: () => shoes.first);
 
   /// La ficha enseña las zonas en una linea.
   String get injuryFlags => injuries.map((i) => i.zone).join(', ');
@@ -180,10 +146,8 @@ class UserProfile {
     weightKg: weightKg ?? this.weightKg,
     heightCm: heightCm ?? this.heightCm,
     highlights: highlights,
-    shoes: shoes,
     injuries: injuries,
     sleep: sleep,
-    hydration: hydration,
     bibNumber: bibNumber,
   );
 }

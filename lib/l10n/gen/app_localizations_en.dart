@@ -1114,18 +1114,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSleepSubtitle => 'Avg in last 7 days';
 
   @override
-  String get profileHydration => 'Hydration Habit';
-
-  @override
-  String get profileHydrationLow => 'Low';
-
-  @override
-  String get profileHydrationModerate => 'Moderate';
-
-  @override
-  String get profileHydrationHigh => 'High';
-
-  @override
   String get profileInjuryNone => 'None reported';
 
   @override
@@ -1150,9 +1138,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileLongestRun => 'Longest Run';
-
-  @override
-  String get profilePrimaryShoes => 'Primary Shoes';
 
   @override
   String get themeLight => 'Light';
@@ -1876,65 +1861,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountConfirmAction => 'Delete';
 
   @override
-  String get profileShoes => 'Shoes';
-
-  @override
-  String get profileShoesSubtitle => 'The ones you put the miles on';
-
-  @override
   String get profileHealth => 'Health';
 
   @override
-  String get shoesEmpty => 'You have not added any shoes yet.';
-
-  @override
-  String get shoesEmptyBody =>
-      'Add the ones you run in and the app tells you when to replace them.';
-
-  @override
-  String get shoesAdd => 'Add shoes';
-
-  @override
-  String get shoesBrand => 'Brand';
-
-  @override
-  String get shoesBrandHint => 'Nike, Asics, Saucony…';
-
-  @override
-  String get shoesModel => 'Model';
-
-  @override
-  String get shoesModelHint => 'Pegasus 41';
-
-  @override
-  String get shoesRetireAt => 'Replace them at (km)';
-
-  @override
-  String get shoesPrimary => 'Primary';
-
-  @override
-  String get shoesRetire => 'Retire';
-
-  @override
-  String get shoesRetireTitle => 'Retire these shoes?';
-
-  @override
-  String get shoesRetireBody =>
-      'They stop showing on your profile and their distance is not kept.';
-
-  @override
-  String get shoesAdded => 'Shoes added.';
-
-  @override
-  String get shoesRetired => 'Shoes retired.';
-
-  @override
-  String shoesWear(String done, String total) {
-    return '$done of $total';
-  }
-
-  @override
-  String get healthTitle => 'Injuries, sleep and hydration';
+  String get healthTitle => 'Injuries and sleep';
 
   @override
   String get healthInjuryZone => 'Area';

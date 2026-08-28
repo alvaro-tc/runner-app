@@ -135,9 +135,7 @@ class _Fila extends StatelessWidget {
                   Text(user.name, style: context.text.bodyMd),
                   Text(
                     user.email ?? user.ci ?? '—',
-                    style: context.text.bodySm.copyWith(
-                      color: c.textSecondary,
-                    ),
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
                   ),
                 ],
               ),

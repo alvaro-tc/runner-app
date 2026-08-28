@@ -5,6 +5,9 @@ import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/features/auth/data/models/auth_models.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
+import 'package:camrun/features/races/presentation/providers/races_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,9 +104,24 @@ class AuthNotifier extends Notifier<AuthState> {
     return _aplicar(result.fold((user) => user, (f) => f));
   }
 
+  /// Lo que se cargo del usuario anterior no vale para el siguiente.
+  ///
+  /// Estos providers no son `autoDispose`: su estado sobrevive a la pantalla y,
+  /// sin esto, al cerrar sesion y entrar con otra cuenta la app seguiria
+  /// enseñando el nombre, la foto y las carreras del primero —la cache de disco
+  /// si se borra (`db.wipe()`), pero la copia en memoria no—.
+  void _olvidarUsuario() {
+    ref
+      ..invalidate(profileProvider)
+      ..invalidate(profilePreferencesProvider)
+      ..invalidate(homeProvider)
+      ..invalidate(racesProvider);
+  }
+
   Failure? _aplicar(Object resultado) {
     if (resultado is Failure) return resultado;
 
+    _olvidarUsuario();
     final user = resultado as AuthUser;
     state = AuthState(
       signedIn: true,
@@ -131,6 +149,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
     state = const AuthState();
+    _olvidarUsuario();
   }
 
   /// Borrado de cuenta. Si el servidor lo confirma el repositorio ya dejo el
@@ -142,6 +161,7 @@ class AuthNotifier extends Notifier<AuthState> {
         .deleteAccount(password);
     return result.fold((_) {
       state = const AuthState();
+      _olvidarUsuario();
       return null;
     }, (Failure f) => f);
   }
@@ -150,6 +170,7 @@ class AuthNotifier extends Notifier<AuthState> {
   /// [SessionController]; falta la cache, que es de ese usuario y de nadie mas.
   Future<void> _cerrarLocal() async {
     state = const AuthState();
+    _olvidarUsuario();
     await ref.read(appDatabaseProvider).wipe();
   }
 }

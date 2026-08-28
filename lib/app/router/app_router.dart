@@ -22,7 +22,6 @@ import 'package:camrun/features/profile/presentation/pages/language_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_edit_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_settings_page.dart';
-import 'package:camrun/features/profile/presentation/pages/shoes_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_start_page.dart';
 import 'package:camrun/features/races/presentation/pages/races_page.dart';
@@ -104,10 +103,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LanguagePage(),
       ),
       GoRoute(
-        path: Routes.profileShoes,
-        builder: (context, state) => const ShoesPage(),
-      ),
-      GoRoute(
         path: Routes.profileHealth,
         builder: (context, state) => const HealthPage(),
       ),
@@ -125,8 +120,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // meterlo como quinta pestana del otro obligaria a esconderla a mano en
       // cada pantalla.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) =>
-            AppShell(shell: shell, admin: true),
+        builder: (context, state, shell) => AppShell(shell: shell, admin: true),
         branches: [
           StatefulShellBranch(
             routes: [

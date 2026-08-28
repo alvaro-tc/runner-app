@@ -41,19 +41,7 @@ final _healthJson = <String, dynamic>{
     {'zone': 'rodilla derecha'},
   ],
   'avgSleepMinutes': 431,
-  'hydrationHabit': 'high',
 };
-
-final _shoesJson = <Map<String, dynamic>>[
-  {
-    'id': 's1',
-    'brand': 'Nike',
-    'model': 'Pegasus 41',
-    'distanceMeters': 612000,
-    'alertThresholdMeters': 700000,
-    'isPrimary': true,
-  },
-];
 
 final _preferencesJson = <String, dynamic>{
   'notifications': {'planReminders': false, 'raceReminders': true},
@@ -78,7 +66,6 @@ Future<ResponseBody> _server(RequestOptions request) async =>
     switch (request.path) {
       '/users/me/highlights' => envelope(_highlightsJson),
       '/users/me/health' => envelope(_healthJson),
-      '/users/me/shoes' => envelope(_shoesJson),
       '/users/me/preferences' => envelope(_preferencesJson),
       _ => envelope(_userJson),
     };
@@ -110,9 +97,7 @@ void main() {
       expect(profile.weightKg, 68);
       expect(profile.birthDate!.year, 1994);
       expect(profile.highlights.weeklyMileageKm, 52.3);
-      expect(profile.primaryShoes.model, 'Nike Pegasus 41');
       expect(profile.injuryFlags, 'rodilla derecha');
-      expect(profile.hydration, HydrationHabit.high);
 
       final updated = profile.copyWith(fullName: 'Pandu Server');
       await repository.save(updated);
@@ -126,22 +111,18 @@ void main() {
     },
   );
 
-  test(
-    'guardar el formulario no borra highlights, salud ni zapatillas',
-    () async {
-      final dio = _dio(_server);
-      final repository = RemoteProfileRepository(ProfileApi(dio), db);
+  test('guardar el formulario no borra highlights ni salud', () async {
+    final dio = _dio(_server);
+    final repository = RemoteProfileRepository(ProfileApi(dio), db);
 
-      await repository.fetch();
-      // El PATCH solo devuelve la cuenta: lo demas sale de la cache.
-      final saved = (await repository.save(
-        (await repository.fetch()).unwrap().copyWith(city: 'Cochabamba'),
-      )).unwrap();
-      expect(saved.highlights.weeklyMileageKm, 52.3);
-      expect(saved.primaryShoes.model, 'Nike Pegasus 41');
-      expect(saved.sleep.averageLast7Days.inMinutes, 431);
-    },
-  );
+    await repository.fetch();
+    // El PATCH solo devuelve la cuenta: lo demas sale de la cache.
+    final saved = (await repository.save(
+      (await repository.fetch()).unwrap().copyWith(city: 'Cochabamba'),
+    )).unwrap();
+    expect(saved.highlights.weeklyMileageKm, 52.3);
+    expect(saved.sleep.averageLast7Days.inMinutes, 431);
+  });
 
   test('subir la foto deja la nueva URL en el perfil y en la cache', () async {
     // No se borra al terminar: en Windows el MultipartFile deja el descriptor
@@ -161,7 +142,10 @@ void main() {
 
     await repository.fetch();
     final updated = (await repository.uploadAvatar(file.path)).unwrap();
-    expect(updated.avatarUrl, 'https://cam-run.test/uploads/avatars/nueva.webp');
+    expect(
+      updated.avatarUrl,
+      'https://cam-run.test/uploads/avatars/nueva.webp',
+    );
     expect(updated.fullName, 'Pandu Updated');
 
     final doc = await db.readDoc('profile.current');
@@ -187,7 +171,11 @@ void main() {
     expect(prefs.weeklyReport, isFalse);
 
     await repository.savePreferences(
-      prefs.copyWith(planReminders: true, raceUpdates: false, units: 'imperial'),
+      prefs.copyWith(
+        planReminders: true,
+        raceUpdates: false,
+        units: 'imperial',
+      ),
     );
     final body = (patch!.data as Map).cast<String, dynamic>();
     expect(patch!.path, '/users/me/preferences');
@@ -218,54 +206,6 @@ void main() {
     },
   );
 
-  test('anadir y retirar zapatillas relee la lista entera', () async {
-    var lista = [..._shoesJson];
-    RequestOptions? post;
-    final dio = _dio((request) async {
-      if (request.path == '/users/me/shoes' && request.method == 'POST') {
-        post = request;
-        lista = [
-          ...lista,
-          {
-            'id': 's2',
-            'brand': 'Asics',
-            'model': 'Nimbus 26',
-            'distanceMeters': 0,
-            'alertThresholdMeters': 800000,
-            'isPrimary': false,
-          },
-        ];
-        return envelope(lista.last);
-      }
-      if (request.method == 'DELETE') {
-        lista = lista.where((s) => s['id'] != 's2').toList();
-        return envelope({'ok': true});
-      }
-      if (request.path == '/users/me/shoes') return envelope(lista);
-      return _server(request);
-    });
-    final repository = RemoteProfileRepository(ProfileApi(dio), db);
-
-    await repository.fetch();
-    final conDos = (await repository.addShoe(
-      brand: 'Asics',
-      model: 'Nimbus 26',
-      retireAtKm: 800,
-    )).unwrap();
-    final body = (post!.data as Map).cast<String, dynamic>();
-    expect(body['brand'], 'Asics');
-    expect(body['alertThresholdMeters'], 800000);
-    expect(conDos.shoes.map((s) => s.model), [
-      'Nike Pegasus 41',
-      'Asics Nimbus 26',
-    ]);
-    // La principal sigue siendo la marcada, no la ultima anadida.
-    expect(conDos.primaryShoes.model, 'Nike Pegasus 41');
-
-    final conUna = (await repository.removeShoe('s2')).unwrap();
-    expect(conUna.shoes, hasLength(1));
-  });
-
   test('PATCH /users/me/health manda la lista de lesiones entera', () async {
     RequestOptions? patch;
     final dio = _dio((request) async {
@@ -276,7 +216,6 @@ void main() {
             {'zone': 'tobillo', 'notes': 'vieja'},
           ],
           'avgSleepMinutes': 465,
-          'hydrationHabit': 'low',
         });
       }
       return _server(request);
@@ -287,12 +226,10 @@ void main() {
     final saved = (await repository.saveHealth(
       injuries: const [Injury(zone: 'tobillo', notes: 'vieja')],
       sleep: const Duration(hours: 7, minutes: 45),
-      hydration: HydrationHabit.low,
     )).unwrap();
 
     final body = (patch!.data as Map).cast<String, dynamic>();
     expect(body['avgSleepMinutes'], 465);
-    expect(body['hydrationHabit'], 'low');
     // `notes` se conserva: el PATCH reescribe la lista, no la fusiona.
     expect((body['injuryFlags'] as List).first, {
       'zone': 'tobillo',
@@ -304,5 +241,4 @@ void main() {
     // El resto del perfil sigue en pie: solo se reemplazo el bloque de salud.
     expect(saved.fullName, 'Pandu Updated');
   });
-
 }

@@ -163,12 +163,6 @@ class _Body extends ConsumerWidget {
                 Text(t.profileYourWeek, style: context.text.headingMd),
                 _Card(
                   children: [
-                    _ShoesRow(
-                      shoes: profile.primaryShoes,
-                      miles: miles,
-                      onTap: () => context.push(Routes.profileShoes),
-                    ),
-                    const AppDivider(),
                     StatRow(
                       icon: Icons.healing_outlined,
                       title: t.profileInjuryFlags,
@@ -184,14 +178,6 @@ class _Body extends ConsumerWidget {
                       title: t.profileSleep,
                       subtitle: t.profileSleepSubtitle,
                       value: Fmt.durationShort(profile.sleep.averageLast7Days),
-                      onTap: () => context.push(Routes.profileHealth),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.water_drop_outlined,
-                      title: t.profileHydration,
-                      value: profile.hydration.label(t),
-                      tone: c.accentBlue,
                       onTap: () => context.push(Routes.profileHealth),
                     ),
                   ],
@@ -354,49 +340,6 @@ class _Highlight extends StatelessWidget {
         Text(
           label,
           style: context.text.labelSm.copyWith(color: c.textSecondary),
-        ),
-      ],
-    );
-  }
-}
-
-class _ShoesRow extends StatelessWidget {
-  const _ShoesRow({
-    required this.shoes,
-    required this.miles,
-    required this.onTap,
-  });
-
-  final ShoeInfo shoes;
-  final bool miles;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Column(
-      children: [
-        StatRow(
-          icon: Icons.directions_walk_rounded,
-          title: context.l10n.profilePrimaryShoes,
-          subtitle: shoes.model,
-          value: Fmt.distance(shoes.distanceKm, miles: miles, decimals: 0),
-          tone: shoes.needsReplacing ? c.warning : c.primary,
-          onTap: onTap,
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: LinearProgressIndicator(
-              value: shoes.wear,
-              minHeight: 4,
-              backgroundColor: c.ringTrack,
-              valueColor: AlwaysStoppedAnimation(
-                shoes.needsReplacing ? c.warning : c.primary,
-              ),
-            ),
-          ),
         ),
       ],
     );

@@ -5,6 +5,7 @@ abstract final class Routes {
   static const signIn = '/sign-in';
   static const signUp = '/sign-up';
   static const forgotPassword = '/forgot-password';
+
   /// Puerta obligatoria para quien entro con una contrasena que no eligio
   /// (alta desde la web: usuario CI, contrasena CI).
   static const changePassword = '/change-password';
@@ -28,7 +29,6 @@ abstract final class Routes {
   static const profileSettings = '/profile/settings';
   static const profileAppearance = '/profile/appearance';
   static const profileLanguage = '/profile/language';
-  static const profileShoes = '/profile/shoes';
   static const profileHealth = '/profile/health';
   static const profileDeleteAccount = '/profile/delete-account';
 

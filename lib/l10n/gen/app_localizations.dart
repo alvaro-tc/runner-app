@@ -2126,30 +2126,6 @@ abstract class AppLocalizations {
   /// **'Avg in last 7 days'**
   String get profileSleepSubtitle;
 
-  /// No description provided for @profileHydration.
-  ///
-  /// In en, this message translates to:
-  /// **'Hydration Habit'**
-  String get profileHydration;
-
-  /// No description provided for @profileHydrationLow.
-  ///
-  /// In en, this message translates to:
-  /// **'Low'**
-  String get profileHydrationLow;
-
-  /// No description provided for @profileHydrationModerate.
-  ///
-  /// In en, this message translates to:
-  /// **'Moderate'**
-  String get profileHydrationModerate;
-
-  /// No description provided for @profileHydrationHigh.
-  ///
-  /// In en, this message translates to:
-  /// **'High'**
-  String get profileHydrationHigh;
-
   /// No description provided for @profileInjuryNone.
   ///
   /// In en, this message translates to:
@@ -2197,12 +2173,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Longest Run'**
   String get profileLongestRun;
-
-  /// No description provided for @profilePrimaryShoes.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary Shoes'**
-  String get profilePrimaryShoes;
 
   /// No description provided for @themeLight.
   ///
@@ -3500,118 +3470,16 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get deleteAccountConfirmAction;
 
-  /// No description provided for @profileShoes.
-  ///
-  /// In en, this message translates to:
-  /// **'Shoes'**
-  String get profileShoes;
-
-  /// No description provided for @profileShoesSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'The ones you put the miles on'**
-  String get profileShoesSubtitle;
-
   /// No description provided for @profileHealth.
   ///
   /// In en, this message translates to:
   /// **'Health'**
   String get profileHealth;
 
-  /// No description provided for @shoesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'You have not added any shoes yet.'**
-  String get shoesEmpty;
-
-  /// No description provided for @shoesEmptyBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Add the ones you run in and the app tells you when to replace them.'**
-  String get shoesEmptyBody;
-
-  /// No description provided for @shoesAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add shoes'**
-  String get shoesAdd;
-
-  /// No description provided for @shoesBrand.
-  ///
-  /// In en, this message translates to:
-  /// **'Brand'**
-  String get shoesBrand;
-
-  /// No description provided for @shoesBrandHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Nike, Asics, Saucony…'**
-  String get shoesBrandHint;
-
-  /// No description provided for @shoesModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Model'**
-  String get shoesModel;
-
-  /// No description provided for @shoesModelHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Pegasus 41'**
-  String get shoesModelHint;
-
-  /// No description provided for @shoesRetireAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace them at (km)'**
-  String get shoesRetireAt;
-
-  /// No description provided for @shoesPrimary.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary'**
-  String get shoesPrimary;
-
-  /// No description provided for @shoesRetire.
-  ///
-  /// In en, this message translates to:
-  /// **'Retire'**
-  String get shoesRetire;
-
-  /// No description provided for @shoesRetireTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Retire these shoes?'**
-  String get shoesRetireTitle;
-
-  /// No description provided for @shoesRetireBody.
-  ///
-  /// In en, this message translates to:
-  /// **'They stop showing on your profile and their distance is not kept.'**
-  String get shoesRetireBody;
-
-  /// No description provided for @shoesAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Shoes added.'**
-  String get shoesAdded;
-
-  /// No description provided for @shoesRetired.
-  ///
-  /// In en, this message translates to:
-  /// **'Shoes retired.'**
-  String get shoesRetired;
-
-  /// No description provided for @shoesWear.
-  ///
-  /// In en, this message translates to:
-  /// **'{done} of {total}'**
-  String shoesWear(String done, String total);
-
   /// No description provided for @healthTitle.
   ///
   /// In en, this message translates to:
-  /// **'Injuries, sleep and hydration'**
+  /// **'Injuries and sleep'**
   String get healthTitle;
 
   /// No description provided for @healthInjuryZone.

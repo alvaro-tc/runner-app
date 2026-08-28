@@ -16,22 +16,6 @@ Map<String, dynamic> _map(Object? value) =>
 
 double _km(Object? meters) => ((meters as num?) ?? 0).toDouble() / 1000;
 
-List<ShoeInfo> _shoes(Object? raw) => [
-  if (raw is List)
-    for (final s in raw.cast<Map<String, dynamic>>())
-      ShoeInfo(
-        id: s['id'] as String? ?? '',
-        model: [s['brand'], s['model']].whereType<String>().join(' ').trim(),
-        distanceKm: _km(s['distanceMeters']),
-        // Sin umbral no hay barra de desgaste posible: 700 km es el que la app
-        // ya usaba por defecto.
-        retireAtKm: s['alertThresholdMeters'] == null
-            ? 700
-            : _km(s['alertThresholdMeters']),
-        isPrimary: s['isPrimary'] == true,
-      ),
-];
-
 List<Injury> _injuries(Object? raw) => [
   if (raw is List)
     for (final i in raw.map(_map))
@@ -48,7 +32,6 @@ List<Injury> _injuries(Object? raw) => [
 Map<String, Object?> healthPatch({
   required List<Injury> injuries,
   required Duration sleep,
-  required HydrationHabit hydration,
 }) => {
   'injuryFlags': [
     for (final i in injuries)
@@ -59,19 +42,6 @@ Map<String, Object?> healthPatch({
       },
   ],
   'avgSleepMinutes': sleep.inMinutes,
-  'hydrationHabit': hydration.name,
-};
-
-/// El cuerpo de `POST /users/me/shoes`. El servidor parte marca y modelo, la
-/// app los junta en una sola linea al leerlos.
-Map<String, Object?> shoePost({
-  required String brand,
-  required String model,
-  required double retireAtKm,
-}) => {
-  'brand': brand,
-  'model': model,
-  'alertThresholdMeters': (retireAtKm * 1000).round(),
 };
 
 UserProfile profileFromApi(Map<String, dynamic> json) {
@@ -99,14 +69,13 @@ UserProfile profileFromApi(Map<String, dynamic> json) {
     country: source['country'] as String? ?? 'BO',
     avatarUrl: source['avatarUrl'] as String? ?? '',
     birthDate: birthDate,
-    gender: Gender.values.asNameMap()[source['gender']] ?? Gender.undisclosed,
+    gender: Gender.values.asNameMap()[source['gender']] ?? Gender.unspecified,
     weightKg: weightKg,
     heightCm: ((source['heightCm'] as num?) ?? 0).toDouble(),
     highlights: RunningHighlights(
       weeklyMileageKm: _km(highlights['weekDistanceMeters']),
       longestRunKm: _km(_map(highlights['longestWorkout'])['distanceMeters']),
     ),
-    shoes: _shoes(source['shoes']),
     injuries: _injuries(health['injuryFlags'] ?? source['injuryFlags']),
     sleep: SleepStats(
       Duration(
@@ -116,10 +85,6 @@ UserProfile profileFromApi(Map<String, dynamic> json) {
                 .toInt(),
       ),
     ),
-    hydration:
-        HydrationHabit.values.asNameMap()[health['hydrationHabit'] ??
-            source['hydration']] ??
-        HydrationHabit.moderate,
     bibNumber:
         (source['defaultBibNumber'] ?? source['bibNumber']) as String? ??
         '0666',
@@ -156,15 +121,18 @@ Map<String, Object?> preferencesPatch(ProfilePreferences prefs) => {
   'locale': prefs.locale,
 };
 
-/// El PATCH manda **todos** los campos del perfil, no solo los que cambiaron:
-/// el servidor reescribe el bloque entero y omitir uno lo deja a null.
+/// El cuerpo de `PATCH /users/me`. Es parcial: el servidor solo toca las claves
+/// que llegan, asi que lo que la app no tiene todavia —una cuenta creada con CI
+/// no tiene email, un perfil recien hecho no tiene peso ni altura— se omite en
+/// vez de mandarse a cero, que es lo que el validador del servidor rechaza.
 Map<String, Object?> profilePatch(UserProfile profile) => {
   'name': profile.fullName,
-  'email': profile.email,
+  if (profile.email.isNotEmpty) 'email': profile.email,
   'city': profile.city,
   'country': profile.country,
   'birthDate': profile.birthDate?.toUtc().toIso8601String(),
   'gender': profile.gender.name,
-  'weightGrams': (profile.weightKg * 1000).round(),
-  'heightCm': profile.heightCm,
+  // Enteros: el servidor los valida con `@IsInt()`, un 72.5 seria un 400.
+  if (profile.weightKg > 0) 'weightGrams': (profile.weightKg * 1000).round(),
+  if (profile.heightCm > 0) 'heightCm': profile.heightCm.round(),
 };

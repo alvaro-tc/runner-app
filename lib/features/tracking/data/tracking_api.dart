@@ -63,5 +63,4 @@ class TrackingApi {
 
   Future<void> discard(String sessionId) =>
       apiCall(() => _dio.delete<dynamic>('/workouts/sessions/$sessionId'));
-
 }
