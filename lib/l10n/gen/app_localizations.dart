@@ -896,6 +896,24 @@ abstract class AppLocalizations {
   /// **'Background location is off. Recording keeps working while PaceUp is on screen, but may stop if you switch apps.'**
   String get locationBackgroundDenied;
 
+  /// No description provided for @setupBackgroundLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record with the screen off'**
+  String get setupBackgroundLocationTitle;
+
+  /// No description provided for @setupBackgroundLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PaceUp needs background location access to keep recording your route when you lock your phone or carry it in your pocket. You can continue without it, but some points may be missing.'**
+  String get setupBackgroundLocationBody;
+
+  /// No description provided for @setupBackgroundLocationContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get setupBackgroundLocationContinue;
+
   /// No description provided for @locationServiceDisabled.
   ///
   /// In en, this message translates to:

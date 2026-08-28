@@ -120,7 +120,16 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                       }
                     },
                   ),
-                  if (state.error != null) _ErrorBanner(outcome: state.error!),
+                  if (state.error != null)
+                    _ErrorBanner(
+                      outcome: state.error!,
+                      onOpenSettings: state.error ==
+                              LocationPermissionOutcome.deniedForever
+                          ? () => ref
+                              .read(locationServiceProvider)
+                              .openSettings()
+                          : null,
+                    ),
                   if (state.goal.laps != null) _LapCard(state: state),
                   const Spacer(),
                   Align(
@@ -188,9 +197,10 @@ class _TopBar extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.outcome});
+  const _ErrorBanner({required this.outcome, this.onOpenSettings});
 
   final LocationPermissionOutcome outcome;
+  final VoidCallback? onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -207,9 +217,19 @@ class _ErrorBanner extends StatelessWidget {
           Icon(Icons.location_off_rounded, size: 18, color: c.error),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              outcome.message(context.l10n),
-              style: context.text.bodySm.copyWith(color: c.error),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  outcome.message(context.l10n),
+                  style: context.text.bodySm.copyWith(color: c.error),
+                ),
+                if (onOpenSettings != null)
+                  TextButton(
+                    onPressed: onOpenSettings,
+                    child: Text(context.l10n.commonSettings),
+                  ),
+              ],
             ),
           ),
         ],

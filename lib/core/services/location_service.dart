@@ -34,16 +34,22 @@ abstract interface class LocationService {
 }
 
 class GeolocatorLocationService implements LocationService {
+  GeolocatorLocationService({
+    this.maxAccuracyM = 30,
+    this.interval = const Duration(seconds: 1),
+  });
+
   /// Anything less accurate than this is noise and gets dropped.
-  static const _maxAccuracyM = 30.0;
+  final int maxAccuracyM;
+  final Duration interval;
 
   /// Un punto por segundo mientras se corre. Sin `distanceFilter`: en pausa el
   /// stream se para entero, que ahorra mas que filtrar por distancia.
-  static LocationSettings get _settings {
+  LocationSettings get _settings {
     if (kIsWeb) return const LocationSettings(accuracy: LocationAccuracy.high);
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
-        intervalDuration: const Duration(seconds: 1),
+        intervalDuration: interval,
         // Sin servicio en primer plano, Android mata el stream a los pocos
         // minutos de salir de pantalla y el entrenamiento se corta solo.
         foregroundNotificationConfig: const ForegroundNotificationConfig(
@@ -92,9 +98,12 @@ class GeolocatorLocationService implements LocationService {
     // En Android el sistema no deja pedir `always` en el mismo dialogo: la
     // segunda peticion abre la pantalla de ajustes de la app.
     final pedido = await Geolocator.requestPermission();
-    return pedido == LocationPermission.always
-        ? LocationPermissionOutcome.granted
-        : LocationPermissionOutcome.backgroundDenied;
+    return switch (pedido) {
+      LocationPermission.always => LocationPermissionOutcome.granted,
+      LocationPermission.deniedForever =>
+        LocationPermissionOutcome.deniedForever,
+      _ => LocationPermissionOutcome.backgroundDenied,
+    };
   }
 
   @override
@@ -107,7 +116,7 @@ class GeolocatorLocationService implements LocationService {
   @override
   Stream<GeoPoint> track() =>
       Geolocator.getPositionStream(locationSettings: _settings)
-          .where((p) => p.accuracy <= _maxAccuracyM)
+          .where((p) => p.accuracy <= maxAccuracyM)
           .map(
             (p) => GeoPoint(
               lat: p.latitude,

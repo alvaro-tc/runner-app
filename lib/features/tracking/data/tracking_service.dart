@@ -10,6 +10,7 @@ import 'package:paceup/core/utils/uuid.dart';
 import 'package:paceup/features/tracking/data/models/tracking_models.dart';
 import 'package:paceup/features/tracking/data/tracking_api.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Graba un entrenamiento: GPS dentro, puntos en la base local y lotes al
 /// servidor.
@@ -25,7 +26,10 @@ class TrackingService {
     this._location,
     this._sync, {
     this.flushEvery = const Duration(seconds: 20),
+    this.preferences,
   });
+
+  static const _activeRunKey = 'tracking.activeRun';
 
   /// Lotes de 15-30 s, nunca punto por punto: una peticion por segundo se come
   /// la bateria y no adelanta nada.
@@ -35,6 +39,7 @@ class TrackingService {
   final TrackingApi _api;
   final LocationService _location;
   final SyncService _sync;
+  final SharedPreferences? preferences;
 
   final _puntos = StreamController<GeoPoint>.broadcast();
   final _grabado = <GeoPoint>[];
@@ -54,6 +59,10 @@ class TrackingService {
   String? get sessionId => _sesion?.sessionId;
 
   bool get isRecording => _gps != null || _pausado;
+
+  /// Metadata needed to diagnose and recover points after the Dart process is
+  /// recreated. The points themselves remain in Drift with their ingest token.
+  Map<String, String>? get activeRun => _readActiveRun();
 
   /// Abre la sesion y empieza a grabar.
   ///
@@ -88,6 +97,7 @@ class TrackingService {
     }
 
     _pausado = false;
+    await _saveActiveRun();
     _gps = _location.track().listen(_onPoint);
     _reloj = Timer.periodic(flushEvery, (_) => unawaited(flush()));
     return _sesion;
@@ -138,6 +148,7 @@ class TrackingService {
     }
 
     _sesion = null;
+    await _clearActiveRun();
     unawaited(_sync.drain());
   }
 
@@ -152,6 +163,7 @@ class TrackingService {
     }
     _grabado.clear();
     _sesion = null;
+    await _clearActiveRun();
   }
 
   /// Manda lo pendiente ya, sin esperar al siguiente tic. La cola —y su
@@ -170,6 +182,31 @@ class TrackingService {
     _reloj?.cancel();
     await _gps?.cancel();
     await _puntos.close();
+  }
+
+  Map<String, String>? _readActiveRun() {
+    final value = preferences?.getString(_activeRunKey);
+    if (value == null) return null;
+    final parts = value.split('|');
+    if (parts.length != 3) return null;
+    return {
+      'clientUuid': parts[0],
+      'startedAt': parts[1],
+      'sessionId': parts[2],
+    };
+  }
+
+  Future<void> _saveActiveRun() async {
+    final storedPreferences = preferences;
+    if (storedPreferences == null) return;
+    await storedPreferences.setString(
+      _activeRunKey,
+      '$_clientUuid|${_startedAt!.toIso8601String()}|${_sesion?.sessionId ?? ''}',
+    );
+  }
+
+  Future<void> _clearActiveRun() async {
+    await preferences?.remove(_activeRunKey);
   }
 
   // ─── Interno ─────────────────────────────────────────────────────────────

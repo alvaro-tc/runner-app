@@ -13,6 +13,7 @@ import 'package:paceup/core/sync/sync_service.dart';
 import 'package:paceup/features/tracking/data/tracking_api.dart';
 import 'package:paceup/features/tracking/data/tracking_service.dart';
 import 'package:paceup/features/train/domain/entities/training_run.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../fake_http.dart';
 
@@ -105,6 +106,7 @@ void main() {
   TrackingService armar(
     Future<ResponseBody> Function(RequestOptions) handler, {
     Duration flushEvery = const Duration(days: 1),
+    SharedPreferences? preferences,
   }) {
     final dio = _dio(handler);
     return TrackingService(
@@ -113,6 +115,7 @@ void main() {
       gps,
       SyncService(db, dio),
       flushEvery: flushEvery,
+      preferences: preferences,
     );
   }
 
@@ -134,6 +137,25 @@ void main() {
     // El credencial viaja con la fila: la cola puede drenarse horas despues.
     expect(pendientes.first.ingestToken, 'token-de-ingesta');
     expect(pendientes.first.speed, 3.2);
+  });
+
+  test('persiste y limpia los metadatos de la sesion activa', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final service = armar(
+      (o) async => _sesionAbierta(),
+      preferences: preferences,
+    );
+
+    await service.start();
+    expect(service.activeRun, isNotNull);
+    expect(service.activeRun!['clientUuid'], isNotEmpty);
+    expect(service.activeRun!['startedAt'], isNotEmpty);
+    expect(service.activeRun!['sessionId'], 'sesion-1');
+
+    await service.stop();
+    await asentar();
+    expect(service.activeRun, isNull);
   });
 
   test('el lote sube con el ingestToken, no con el JWT', () async {

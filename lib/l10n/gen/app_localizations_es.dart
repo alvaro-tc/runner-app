@@ -443,6 +443,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'La ubicación en segundo plano está desactivada. La grabación sigue mientras PaceUp esté en pantalla, pero puede pararse si cambias de app.';
 
   @override
+  String get setupBackgroundLocationTitle => 'Grabar con la pantalla apagada';
+
+  @override
+  String get setupBackgroundLocationBody =>
+      'PaceUp necesita permitir la ubicación en segundo plano para seguir guardando tu ruta cuando bloquees el teléfono o lo lleves en el bolsillo. Puedes continuar sin este permiso, pero podrían faltar puntos.';
+
+  @override
+  String get setupBackgroundLocationContinue => 'Continuar';
+
+  @override
   String get locationServiceDisabled =>
       'La ubicación está desactivada en este dispositivo. Actívala para empezar una salida.';
 

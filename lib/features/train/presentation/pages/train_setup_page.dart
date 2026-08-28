@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,9 +97,28 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
     });
   }
 
-  void _start() {
-    ref.read(runSessionProvider.notifier).start(_buildGoal());
-    context.push(Routes.trainSession);
+  Future<void> _start() async {
+    final t = context.l10n;
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.setupBackgroundLocationTitle),
+        content: Text(t.setupBackgroundLocationBody),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(t.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => context.pop(true),
+            child: Text(t.setupBackgroundLocationContinue),
+          ),
+        ],
+      ),
+    );
+    if (accepted != true || !mounted) return;
+    unawaited(ref.read(runSessionProvider.notifier).start(_buildGoal()));
+    if (context.mounted) unawaited(context.push(Routes.trainSession));
   }
 
   @override
@@ -227,7 +248,10 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          AppButton(label: t.setupStartRun, onPressed: _start),
+          AppButton(
+            label: t.setupStartRun,
+            onPressed: () => unawaited(_start()),
+          ),
         ],
       ),
     );

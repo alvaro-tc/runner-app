@@ -439,6 +439,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Background location is off. Recording keeps working while PaceUp is on screen, but may stop if you switch apps.';
 
   @override
+  String get setupBackgroundLocationTitle => 'Record with the screen off';
+
+  @override
+  String get setupBackgroundLocationBody =>
+      'PaceUp needs background location access to keep recording your route when you lock your phone or carry it in your pocket. You can continue without it, but some points may be missing.';
+
+  @override
+  String get setupBackgroundLocationContinue => 'Continue';
+
+  @override
   String get locationServiceDisabled =>
       'Location services are off on this device. Switch them on to start a run.';
 

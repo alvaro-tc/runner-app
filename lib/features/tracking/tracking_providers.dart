@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/core/network/network_providers.dart';
 import 'package:paceup/core/services/location_service.dart';
+import 'package:paceup/core/services/preferences_provider.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
 import 'package:paceup/features/tracking/data/tracking_api.dart';
 import 'package:paceup/features/tracking/data/tracking_service.dart';
@@ -17,6 +18,7 @@ final trackingServiceProvider = Provider<TrackingService>((ref) {
     ref.watch(trackingApiProvider),
     ref.watch(locationServiceProvider),
     ref.watch(syncServiceProvider),
+    preferences: ref.watch(sharedPreferencesProvider),
   );
   ref.onDispose(service.dispose);
   return service;

@@ -64,21 +64,4 @@ class TrackingApi {
   Future<void> discard(String sessionId) =>
       apiCall(() => _dio.delete<dynamic>('/workouts/sessions/$sessionId'));
 
-  /// Sube un lote de puntos.
-  ///
-  /// Se autentica con el `ingestToken` de la sesion, **no** con el JWT: el
-  /// credencial que sale del telefono cada veinte segundos durante una carrera
-  /// tiene que ser el de menor alcance posible.
-  Future<IngestResult> sendPositions({
-    required String sessionId,
-    required String ingestToken,
-    required List<Map<String, Object?>> points,
-  }) => apiCall(() async {
-    final res = await _dio.post<dynamic>(
-      '/tracking/sessions/$sessionId/positions',
-      data: {'points': points},
-      options: Options(headers: {'Authorization': 'Bearer $ingestToken'}),
-    );
-    return IngestResult.fromJson(res.data as Map<String, dynamic>);
-  });
 }

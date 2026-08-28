@@ -359,9 +359,11 @@ desaparece en la Fase 22 cuando ese repositorio pase a drift + API.
 
 `features/tracking/` graba un entrenamiento: `TrackingService` con
 `start` / `pause` / `resume` / `stop` / `discard` y un `stream` de puntos para
-el mapa. El GPS lo pone `core/services/location_service.dart` —**`geolocator`,
-que ya estaba**: servicio en primer plano en Android y `UIBackgroundModes` en
-iOS, sin paquete de pago (el porqué, en `running-api/docs/decisiones.md`).
+el mapa. El GPS lo pone `core/services/location_service.dart` mediante
+`geolocator`: en Android usa su `ForegroundNotificationConfig` y en iOS usa
+`AppleSettings` con `UIBackgroundModes = location`. La continuidad con la
+pantalla bloqueada debe validarse en dispositivo físico; la configuración no es
+una garantía contra restricciones del fabricante o la terminación del proceso.
 
 El camino de un punto:
 
@@ -391,9 +393,35 @@ Lo que no es negociable:
 - **En pausa se apaga el sensor entero**, que ahorra más que cualquier
   `distanceFilter`. Pausar, reanudar y descartar, si fallan, van a la outbox:
   no valen un entrenamiento y su error no sube a la UI.
-- **Permisos en dos tiempos**: `whileInUse` para empezar, y `always` después,
-  cuando ya hay una grabación que lo justifica. Denegado el segundo, se graba
-  igual y se avisa (`backgroundDenied`); no se bloquea nada.
+- **Permisos en dos tiempos**: antes de arrancar se explica que la grabación
+  continuará con la pantalla apagada y se solicita el permiso básico; al entrar
+  en la sesión se solicita `always`. Denegado el segundo, se graba igual y se
+  avisa (`backgroundDenied`); un permiso bloqueado ofrece abrir Ajustes.
+- **Recuperación local**: `TrackingService` guarda `clientUuid`, `startedAt` y
+  `sessionId` en `SharedPreferences` mientras la carrera está activa. Los
+  puntos y su `ingestToken` siguen en `pending_positions`, por lo que el
+  siguiente arranque puede detectar una sesión interrumpida y drenar la cola
+  sin crear otra vía de ingesta.
+
+### Verificación de background y batería (PU-033)
+
+La aceptación requiere una prueba manual en un Android y un iPhone físicos,
+con build de release y GPS real. Para cada plataforma:
+
+1. Registrar batería inicial, modelo, versión del sistema y versión de la app.
+2. Conceder el permiso de ubicación en segundo plano (`Always` en iOS).
+3. Iniciar una salida, bloquear la pantalla y llevar el teléfono en el bolsillo
+  durante 10 minutos; repetir con una ruta de 5 km para la entrega final.
+4. Registrar batería final, número de puntos generados, puntos guardados en
+  `pending_positions`, puntos aceptados por el backend y huecos mayores de 5 s.
+5. Repetir tres veces por plataforma y anotar promedio y rango. Repetir una
+  vez con red intermitente para confirmar que la cola conserva los puntos.
+
+El criterio operativo es cero huecos mayores de 5 s durante la grabación y
+100% de los puntos finalmente aceptados o duplicados por el endpoint de
+ingesta. La prueba debe confirmar además que la notificación Android permanece
+visible durante toda la sesión. Los resultados se deben añadir a la entrega de
+PU-033; no se pueden simular de forma fiable en `flutter test`.
 
 ### Auth conectado (Fase 22.1)
 
