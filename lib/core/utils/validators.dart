@@ -16,14 +16,9 @@ abstract final class Validators {
     return null;
   }
 
-<<<<<<< HEAD
   /// Sign-in accepts either a username or an email, so only emptiness is fatal.
   static String? identifier(AppLocalizations t, String value) =>
       value.trim().isEmpty ? t.validationIdentifierEmpty : null;
-=======
-  /// Sign-in accepts either a CI or an email, so only emptiness is fatal.
-  static String? identifier(String value) =>
-      value.trim().isEmpty ? 'Enter your ID number or email.' : null;
 
   /// Bolivian CI: digits, optionally followed by the issuing-department code.
   ///
@@ -41,7 +36,6 @@ abstract final class Validators {
     }
     return null;
   }
->>>>>>> main
 
   static String? password(AppLocalizations t, String value) {
     if (value.isEmpty) return t.validationPasswordEmpty;

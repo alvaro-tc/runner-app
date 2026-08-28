@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paceup/core/network/network_providers.dart';
-import 'package:paceup/core/services/preferences_provider.dart';
 import 'package:paceup/core/sync/sync_providers.dart';
 import 'package:paceup/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:paceup/features/auth/domain/repositories/auth_repository.dart';
 import 'package:paceup/features/home/data/datasources/home_api.dart';
 import 'package:paceup/features/home/data/repositories/remote_home_repositories.dart';
 import 'package:paceup/features/home/domain/repositories/home_repositories.dart';
-import 'package:paceup/features/profile/data/repositories/local_profile_repository.dart';
+import 'package:paceup/features/profile/data/datasources/profile_api.dart';
+import 'package:paceup/features/profile/data/repositories/remote_profile_repository.dart';
 import 'package:paceup/features/profile/domain/repositories/profile_repository.dart';
 import 'package:paceup/features/races/data/datasources/races_api.dart';
 import 'package:paceup/features/races/data/repositories/remote_race_repository.dart';
@@ -55,7 +55,10 @@ final raceRepositoryProvider = Provider<RaceRepository>(
 );
 
 final profileRepositoryProvider = Provider<ProfileRepository>(
-  (ref) => LocalProfileRepository(ref.watch(sharedPreferencesProvider)),
+  (ref) => RemoteProfileRepository(
+    ProfileApi(ref.watch(dioProvider)),
+    ref.watch(appDatabaseProvider),
+  ),
 );
 
 /// Backed by Hive, whose box has to be opened before the first frame — the
