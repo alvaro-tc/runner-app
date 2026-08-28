@@ -166,7 +166,7 @@ class ProfileSettingsPage extends ConsumerWidget {
               StatRow(
                 icon: Icons.mail_outline_rounded,
                 title: t.settingsContactSupport,
-                value: 'support@camrun.app',
+                value: 'alvarocallet@gmail.com',
                 onTap: () => context.showSnack(t.settingsContactComingSoon),
               ),
               const AppDivider(),

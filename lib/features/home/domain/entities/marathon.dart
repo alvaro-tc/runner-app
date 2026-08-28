@@ -51,7 +51,6 @@ class Marathon {
     this.predictedFinishMax,
     this.categories = const [],
     this.extras = const [],
-    this.paymentQrUrl,
     this.paymentQrPayload,
     this.paymentQrInstructions,
     this.liveStartedAt,
@@ -83,14 +82,9 @@ class Marathon {
   final List<RaceCategory> categories;
   final List<RaceExtra> extras;
 
-  /// Organiser's payment QR. `null` means this race cannot be paid that way, so
-  /// the method must not be offered: showing it would promise a payment the
-  /// server will refuse. Temporary — see `docs/pago-qr-manual.md` in the API.
-  final String? paymentQrUrl;
-
-  /// El QR **como texto**: lo dibuja la app. `null` = esta carrera no se puede
-  /// pagar por QR. Es esto y no [paymentQrUrl] lo que habilita el metodo: el
-  /// servidor rechaza el checkout sin texto, aunque haya imagen cargada.
+  /// El QR de cobro **como texto**: lo dibuja la app. `null` o vacio = esta
+  /// carrera no se puede pagar por QR, y el metodo no se ofrece. No hay
+  /// version imagen: el QR es texto y nada mas.
   final String? paymentQrPayload;
 
   final String? paymentQrInstructions;
@@ -104,8 +98,7 @@ class Marathon {
   /// Se esta corriendo ahora mismo.
   bool get isLive => liveStartedAt != null && liveFinishedAt == null;
 
-  bool get acceptsQrPayment =>
-      paymentQrPayload != null && paymentQrPayload!.isNotEmpty;
+  bool get acceptsQrPayment => paymentQrPayload?.isNotEmpty ?? false;
 
   String get location => '$city, $country';
   int get slotsLeft => slotsTotal - slotsTaken;

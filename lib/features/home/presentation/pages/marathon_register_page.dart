@@ -61,7 +61,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   final _email = TextEditingController();
   final _emergencyName = TextEditingController();
   final _emergencyPhone = TextEditingController();
-  final _proofReference = TextEditingController();
   final _cardNumber = TextEditingController(text: _tarjetaDeEjemplo);
   final _cardHolder = TextEditingController();
   final _cardExpiry = TextEditingController(text: '12/30');
@@ -91,7 +90,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     _email.dispose();
     _emergencyName.dispose();
     _emergencyPhone.dispose();
-    _proofReference.dispose();
     _cardNumber.dispose();
     _cardHolder.dispose();
     _cardExpiry.dispose();
@@ -198,10 +196,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     );
     if (imagen == null || !mounted) return;
 
-    final ok = await _flow.uploadProof(
-      filePath: imagen.path,
-      reference: _proofReference.text.trim(),
-    );
+    final ok = await _flow.uploadProof(filePath: imagen.path);
     if (!mounted) return;
 
     context.showSnack(
@@ -232,9 +227,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           ),
           TextButton(
             onPressed: () => context.pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.error,
-            ),
+            style: TextButton.styleFrom(foregroundColor: context.colors.error),
             child: Text(t.registerCancelPaymentConfirm),
           ),
         ],
@@ -325,7 +318,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             ],
           ),
         ),
-        _footer(marathon, profile, flow),
+        if (!_enPagoQr(flow)) _footer(marathon, profile, flow),
       ],
     );
   }
@@ -489,10 +482,31 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   // ----------------------------------------------------------- step three
 
+  /// Con un cobro por QR abierto la pantalla es **solo** el QR y los dos
+  /// botones para mandar el comprobante. El desglose, los metodos y los
+  /// terminos ya se aceptaron un paso antes: dejarlos ahi solo empuja hacia
+  /// abajo lo unico que queda por hacer.
+  bool _enPagoQr(RegistrationFlowState flow) =>
+      flow.isAwaitingPayment && flow.payment!.method.needsProof;
+
   Widget _reviewStep(Marathon marathon, RegistrationFlowState flow) {
     final c = context.colors;
     final t = context.l10n;
     final quote = flow.quote;
+
+    if (_enPagoQr(flow)) {
+      return ListView(
+        padding: const EdgeInsets.all(AppSpacing.screenH),
+        children: [
+          _ManualQrPayment(
+            payment: flow.payment!,
+            busy: flow.busy,
+            onUpload: _subirComprobante,
+            onCancel: _cancelarPago,
+          ),
+        ],
+      );
+    }
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
@@ -588,16 +602,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         ],
         if (flow.isAwaitingPayment) ...[
           const SizedBox(height: AppSpacing.md),
-          if (flow.payment!.method.needsProof)
-            _ManualQrPayment(
-              payment: flow.payment!,
-              reference: _proofReference,
-              busy: flow.busy,
-              onUpload: _subirComprobante,
-              onCancel: _cancelarPago,
-            )
-          else
-            _PendingPayment(payment: flow.payment!),
+          _PendingPayment(payment: flow.payment!),
         ],
         const SizedBox(height: AppSpacing.md),
         Row(
@@ -811,12 +816,6 @@ class _PendingPayment extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (payment.qrImageUrl != null)
-            Image.network(
-              payment.qrImageUrl!,
-              height: 180,
-              errorBuilder: (_, _, _) => const SizedBox.shrink(),
-            ),
           if (payment.bankReference != null)
             Text(
               context.l10n.registerReference(payment.bankReference!),
@@ -896,14 +895,12 @@ class _YesNo extends StatelessWidget {
 class _ManualQrPayment extends StatelessWidget {
   const _ManualQrPayment({
     required this.payment,
-    required this.reference,
     required this.busy,
     required this.onUpload,
     required this.onCancel,
   });
 
   final PaymentInfo payment;
-  final TextEditingController reference;
   final bool busy;
   final Future<void> Function(ImageSource) onUpload;
   final Future<void> Function() onCancel;
@@ -914,110 +911,83 @@ class _ManualQrPayment extends StatelessWidget {
     final t = context.l10n;
     final proof = payment.proof;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: BoxDecoration(
-        color: c.warningBg,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // El QR se dibuja del texto que mandó la API. La imagen sólo se
-          // usa si esta maratón todavía no tiene texto cargado: es el respaldo
-          // de las que se configuraron cuando el QR era un archivo.
-          if (payment.qrPayload != null)
-            Center(child: _QrCode(data: payment.qrPayload!))
-          else if (payment.qrImageUrl != null)
-            Center(
-              child: ColoredBox(
-                // Un QR sobre fondo de color no siempre lo lee el escáner: el
-                // contraste es parte del código, no decoración.
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: Image.network(
-                    payment.qrImageUrl!,
-                    height: 200,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-          if (payment.qrInstructions != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              payment.qrInstructions!,
-              style: context.text.bodySm.copyWith(color: c.textSecondary),
-            ),
-          ],
-          if (payment.qrReference != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(t.registerPaymentNote, style: context.text.labelSm),
-            const SizedBox(height: AppSpacing.xs),
-            SelectableText(payment.qrReference!, style: context.text.headingMd),
-            Text(
-              t.registerPaymentNoteHelp,
-              style: context.text.bodySm.copyWith(color: c.textSecondary),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          // Lo que subió, no solo que subió algo: sin la imagen a la vista no
-          // hay forma de comprobar que se mandó la captura correcta.
-          if (proof != null) _UploadedProof(imageUrl: proof.imageUrl),
-          if (proof?.state == ProofState.inReview)
-            _ProofStatus(
-              icon: Icons.hourglass_top_rounded,
-              title: t.registerProofInReviewTitle,
-              detail: t.registerProofInReviewBody,
-              tone: c.textSecondary,
-            )
-          else ...[
-            if (proof?.state == ProofState.rejected)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: _ProofStatus(
-                  icon: Icons.error_outline_rounded,
-                  title: t.registerProofRejectedTitle,
-                  // El motivo lo escribió el organizador: se pinta tal cual,
-                  // porque es lo único que le dice al corredor qué corregir.
-                  detail: proof?.note ?? t.registerProofRejectedFallback,
-                  tone: c.error,
-                ),
-              ),
-            AppTextField(
-              label: t.registerProofReferenceLabel,
-              controller: reference,
-              hint: t.registerProofReferenceHint,
-              textInputAction: TextInputAction.done,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: t.registerProofUpload,
-              icon: Icons.photo_library_outlined,
-              isLoading: busy,
-              onPressed: () => onUpload(ImageSource.gallery),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppButton(
-              label: t.registerProofTakePhoto,
-              variant: AppButtonVariant.outline,
-              icon: Icons.photo_camera_outlined,
-              onPressed: busy ? null : () => onUpload(ImageSource.camera),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          // Salida del flujo. Va siempre, también con un comprobante en
-          // revisión: quien pagó de más o se equivocó de carrera necesita poder
-          // cerrar esto, y sin botón la única salida es abandonar la pantalla y
-          // dejar un cobro abierto colgando para siempre.
-          AppButton(
-            label: t.registerCancelPayment,
-            variant: AppButtonVariant.ghost,
-            onPressed: busy ? null : onCancel,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // El QR lo dibuja la app con el texto que mandó la API. No hay
+        // version imagen: el QR es texto y nada mas.
+        if (payment.qrPayload != null)
+          Center(child: _QrCode(data: payment.qrPayload!)),
+        if (payment.qrReference != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            t.registerPaymentNote,
+            style: context.text.labelSm,
+            textAlign: TextAlign.center,
+          ),
+          SelectableText(
+            payment.qrReference!,
+            style: context.text.titleMd,
+            textAlign: TextAlign.center,
           ),
         ],
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        // Lo que subió, no solo que subió algo: sin la imagen a la vista no hay
+        // forma de comprobar que se mandó la captura correcta.
+        if (proof != null) _UploadedProof(imageUrl: proof.imageUrl),
+        if (proof?.state == ProofState.inReview)
+          _ProofStatus(
+            icon: Icons.hourglass_top_rounded,
+            title: t.registerProofInReviewTitle,
+            detail: t.registerProofInReviewBody,
+            tone: c.textSecondary,
+          )
+        else ...[
+          if (proof?.state == ProofState.rejected)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: _ProofStatus(
+                icon: Icons.error_outline_rounded,
+                title: t.registerProofRejectedTitle,
+                // El motivo lo escribió el organizador: se pinta tal cual,
+                // porque es lo único que le dice al corredor qué corregir.
+                detail: proof?.note ?? t.registerProofRejectedFallback,
+                tone: c.error,
+              ),
+            ),
+          AppButton(
+            label: t.registerProofUpload,
+            icon: Icons.photo_library_outlined,
+            isLoading: busy,
+            onPressed: () => onUpload(ImageSource.gallery),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton(
+            label: t.registerProofTakePhoto,
+            variant: AppButtonVariant.outline,
+            icon: Icons.photo_camera_outlined,
+            onPressed: busy ? null : () => onUpload(ImageSource.camera),
+          ),
+        ],
+        if (payment.qrInstructions != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            payment.qrInstructions!,
+            style: context.text.bodySm.copyWith(color: c.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        // Salida del flujo. Va siempre, también con un comprobante en revisión:
+        // quien pagó de más o se equivocó de carrera necesita poder cerrar
+        // esto, y sin botón la única salida es abandonar la pantalla y dejar un
+        // cobro abierto colgando para siempre.
+        AppButton(
+          label: t.registerCancelPayment,
+          variant: AppButtonVariant.ghost,
+          onPressed: busy ? null : onCancel,
+        ),
+      ],
     );
   }
 }
@@ -1056,10 +1026,7 @@ class _QrCode extends StatelessWidget {
         // Sin margen propio: el padding blanco del contenedor ya es la zona
         // silenciosa que el escáner necesita alrededor del código.
         padding: EdgeInsets.zero,
-        eyeStyle: const QrEyeStyle(
-          eyeShape: QrEyeShape.circle,
-          color: tinta,
-        ),
+        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle, color: tinta),
         dataModuleStyle: const QrDataModuleStyle(
           dataModuleShape: QrDataModuleShape.square,
           color: tinta,

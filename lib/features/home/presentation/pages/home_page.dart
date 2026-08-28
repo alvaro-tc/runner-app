@@ -6,9 +6,6 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
-import 'package:camrun/features/home/presentation/widgets/today_session_card.dart';
-import 'package:camrun/features/home/presentation/widgets/weekly_plan_strip.dart';
-import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
@@ -52,38 +49,13 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class _HomeBody extends ConsumerStatefulWidget {
+class _HomeBody extends ConsumerWidget {
   const _HomeBody({required this.data});
 
   final HomeData data;
 
   @override
-  ConsumerState<_HomeBody> createState() => _HomeBodyState();
-}
-
-class _HomeBodyState extends ConsumerState<_HomeBody> {
-  /// El dia que se esta mirando en la tira. `null` = el que decide el plan.
-  String? _selectedSessionId;
-
-  @override
-  void didUpdateWidget(_HomeBody old) {
-    super.didUpdateWidget(old);
-    // Al cambiar de semana el id seleccionado ya no existe: vuelve al foco.
-    if (old.data.selectedWeekIndex != widget.data.selectedWeekIndex) {
-      _selectedSessionId = null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final data = widget.data;
-    final c = context.colors;
-    final planTitle = ref
-        .watch(profileProvider)
-        .maybeWhen(
-          data: (p) => context.l10n.homePlanTitleOf(p.firstName),
-          orElse: () => context.l10n.homePlanTitleGeneric,
-        );
+  Widget build(BuildContext context, WidgetRef ref) {
     // La del usuario abre el carrusel —es la que tiene una cuenta atras que le
     // importa—; detras van las del catalogo, sin repetirla.
     final destacada = data.nextMarathon;
@@ -93,12 +65,6 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
       for (final m in catalogo)
         if (m.id != destacada?.id) m,
     ];
-    final plan = data.plan;
-    final session = _selectedSessionId == null
-        ? data.focusSession
-        : data.week.sessions
-              .where((s) => s.id == _selectedSessionId)
-              .firstOrNull;
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -116,47 +82,61 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
           _UpcomingMarathons(marathons: marathons),
           const SizedBox(height: AppSpacing.xl),
         ],
-        SectionHeader(
-          title: planTitle,
-          action: plan == null
-              ? null
-              : _WeekPicker(
-                  weekCount: plan.totalWeeks,
-                  selected: data.selectedWeekIndex,
-                  onSelected: (i) =>
-                      ref.read(homeProvider.notifier).selectWeek(i),
-                ),
-        ),
+        SectionHeader(title: context.l10n.homeCamTitle),
         const SizedBox(height: AppSpacing.md),
-        // La tira existe con plan y sin el: lo corrido se pinta igual.
-        WeeklyPlanStrip(
-          week: data.week,
-          selectedSessionId: session?.id,
-          onSessionTap: (s) => setState(() => _selectedSessionId = s.id),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        if (session == null)
-          // Sin sesion la pantalla se quedaba cortada a media altura.
-          EmptyState(
-            icon: Icons.self_improvement_rounded,
-            title: context.l10n.homeNoSessionTitle,
-            message: context.l10n.homeNoSessionMessage,
-            actionLabel: context.l10n.homeFreeRun,
-            onAction: () => context.push(Routes.trainSession),
-          )
-        else
-          TodaySessionCard(
-            session: session,
-            onToggleCompleted: (value) => ref
-                .read(homeProvider.notifier)
-                .toggleSession(session.id, completed: value),
-            onReschedule: () =>
-                context.showSnack(context.l10n.homeRescheduleComingSoon),
-            onStart: () =>
-                context.push('${Routes.trainSetup}?session=${session.id}'),
-          ),
-        SizedBox(height: c.isDark ? AppSpacing.base : AppSpacing.base),
+        const _CamCard(),
       ],
+    );
+  }
+}
+
+/// Quien esta detras de la app: el CAM y lo que hace, en dos lineas.
+class _CamCard extends StatelessWidget {
+  const _CamCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: c.border),
+        boxShadow: c.cardShadow,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: c.primary.withValues(alpha: 0.12),
+            ),
+            child: Icon(Icons.volunteer_activism_rounded, color: c.primary),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.homeCamSubtitle,
+                  style: context.text.headingMd,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  context.l10n.homeCamBody,
+                  style: context.text.bodyMd.copyWith(color: c.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -314,63 +294,6 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
 /// Lo que `MarathonHeroCard` deja libre por debajo del afiche para la ficha.
 const _heroOverhang = 44.0;
 
-class _WeekPicker extends StatelessWidget {
-  const _WeekPicker({
-    required this.weekCount,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final int weekCount;
-  final int selected;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return PopupMenuButton<int>(
-      onSelected: onSelected,
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      itemBuilder: (context) => [
-        for (var i = 1; i <= weekCount; i++)
-          PopupMenuItem(
-            value: i,
-            child: Text(
-              context.l10n.homeTrainingWeek(i),
-              style: context.text.bodyMd.copyWith(
-                color: i == selected ? c.primary : c.textPrimary,
-              ),
-            ),
-          ),
-      ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: c.primaryContainer,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.l10n.homeTrainingWeek(selected),
-              style: context.text.labelSm.copyWith(color: c.primary),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(Icons.expand_more_rounded, size: 16, color: c.primary),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _HomeSkeleton extends StatelessWidget {
   const _HomeSkeleton();
 
@@ -384,16 +307,16 @@ class _HomeSkeleton extends StatelessWidget {
         AppSpacing.screenH,
         AppSpacing.xxl,
       ),
-      children: [
-        const Row(
+      children: const [
+        Row(
           children: [
             Expanded(child: Skeleton(width: double.infinity, height: 28)),
             SizedBox(width: AppSpacing.sm),
             Skeleton(width: 130, height: 38, radius: AppRadius.pill),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        const AspectRatio(
+        SizedBox(height: AppSpacing.lg),
+        AspectRatio(
           aspectRatio: 16 / 11,
           child: Skeleton(
             width: double.infinity,
@@ -401,24 +324,12 @@ class _HomeSkeleton extends StatelessWidget {
             radius: AppRadius.xxl,
           ),
         ),
-        const SizedBox(height: AppSpacing.xxl + AppSpacing.base),
-        const Skeleton(width: 220, height: 24),
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            for (var i = 0; i < 7; i++)
-              const Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  child: Skeleton.circle(size: 48),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        const Skeleton(
+        SizedBox(height: AppSpacing.xxl + AppSpacing.base),
+        Skeleton(width: 220, height: 24),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(
           width: double.infinity,
-          height: 180,
+          height: 110,
           radius: AppRadius.xl,
         ),
       ],

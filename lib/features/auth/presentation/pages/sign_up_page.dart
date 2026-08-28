@@ -1,10 +1,13 @@
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/features/profile/domain/entities/user_profile.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
@@ -27,6 +30,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final _confirm = TextEditingController();
 
   final _errors = <String, String?>{};
+  DateTime? _birthDate;
+  Gender? _gender;
   bool _acceptedTerms = false;
   bool _loading = false;
 
@@ -76,6 +81,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           password: _password.text,
           email: _email.text.trim().isEmpty ? null : _email.text.trim(),
           ci: _ci.text.trim(),
+          birthDate: _birthDate,
+          gender: _gender?.name,
         );
     if (!mounted) return;
     setState(() => _loading = false);
@@ -89,6 +96,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   void _clear(String key) {
     if (_errors[key] != null) setState(() => _errors[key] = null);
+  }
+
+  Future<void> _pickBirthDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime(1995),
+      firstDate: DateTime(1930),
+      lastDate: DateTime.now(),
+      helpText: context.l10n.registerDateOfBirth,
+    );
+    if (picked == null) return;
+    setState(() => _birthDate = picked);
   }
 
   @override
@@ -124,6 +143,53 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.username],
           onChanged: (_) => _clear('ci'),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(t.registerDateOfBirth, style: context.text.labelSm),
+        const SizedBox(height: AppSpacing.sm),
+        InkWell(
+          onTap: _pickBirthDate,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Container(
+            height: AppSizes.controlHeight,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: c.border, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _birthDate == null
+                        ? t.editPickADate
+                        : Fmt.fullDate(_birthDate!),
+                    style: context.text.bodyMd,
+                  ),
+                ),
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 18,
+                  color: c.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(t.registerGender, style: context.text.labelSm),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final gender in Gender.values)
+              AppChip(
+                label: gender.label(t),
+                selected: _gender == gender,
+                onTap: () => setState(() => _gender = gender),
+              ),
+          ],
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(

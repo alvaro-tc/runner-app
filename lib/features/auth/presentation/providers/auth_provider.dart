@@ -83,10 +83,19 @@ class AuthNotifier extends Notifier<AuthState> {
     required String password,
     String? email,
     String? ci,
+    DateTime? birthDate,
+    String? gender,
   }) async {
     final result = await ref
         .read(authRepositoryProvider)
-        .signUp(fullName: name, password: password, email: email, ci: ci);
+        .signUp(
+          fullName: name,
+          password: password,
+          email: email,
+          ci: ci,
+          birthDate: birthDate,
+          gender: gender,
+        );
     return _aplicar(result.fold((user) => user, (f) => f));
   }
 

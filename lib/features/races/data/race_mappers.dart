@@ -229,7 +229,6 @@ RegistrationQuote quoteFrom(Map<String, dynamic> j) {
 
 PaymentInfo paymentFrom(Map<String, dynamic> j) {
   final detalles = j['methodDetails'] as Map<String, dynamic>? ?? const {};
-  final qr = detalles['qr'] as Map<String, dynamic>?;
   // El QR del organizador viaja en su propio campo, no en el del QR simulado:
   // son dos cosas distintas y mezclarlas haria que la pantalla pintara un QR
   // que se paga solo cuando en realidad espera a una persona.
@@ -247,7 +246,6 @@ PaymentInfo paymentFrom(Map<String, dynamic> j) {
     state: RacePaymentState.fromApi(j['status'] as String?),
     amount: _dinero(j['amountCents'], j['currency'] as String? ?? 'BOB'),
     failureReason: j['failureReason'] as String?,
-    qrImageUrl: (qrManual?['imageUrl'] ?? qr?['imageUrl']) as String?,
     qrPayload: qrManual?['payload'] as String?,
     qrInstructions: qrManual?['instructions'] as String?,
     qrReference: qrManual?['reference'] as String?,

@@ -242,6 +242,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.';
 
   @override
+  String get homeCamTitle => 'Who we are';
+
+  @override
+  String get homeCamSubtitle => 'CAM · Women\'s Help Centre';
+
+  @override
+  String get homeCamBody =>
+      'The Women\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.';
+
+  @override
   String get homeUpcomingMarathon => 'Upcoming Marathon In';
 
   @override
@@ -1269,7 +1279,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Write to support@camrun.app and we will answer within a day.';
+      'Write to alvarocallet@gmail.com and we will answer within a day.';
 
   @override
   String get settingsVersion => 'Version';
@@ -1779,26 +1789,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Close them when you stop taking entries.';
 
   @override
-  String get adminPaymentQr => 'Payment QR';
-
-  @override
-  String get adminQrLoaded => 'Uploaded';
-
-  @override
-  String get adminQrMissing => 'No QR';
-
-  @override
-  String get adminQrSubtitle =>
-      'Without a QR this marathon cannot take QR payments';
-
-  @override
-  String get adminQrAfterSave => 'Save the marathon first to upload the QR';
-
-  @override
   String get adminQrInstructions => 'Text shown next to the QR';
 
   @override
-  String get adminQrUploaded => 'QR updated.';
+  String get adminQrPayload => 'Payment QR text';
+
+  @override
+  String get adminQrPayloadHint =>
+      'Paste the QR contents your banking app exports';
+
+  @override
+  String get adminQrPayloadHelp => 'Set: this race accepts QR payments.';
+
+  @override
+  String get adminQrPayloadMissing =>
+      'Empty: this race does not accept QR payments yet.';
 
   @override
   String get adminDelete => 'Delete';

@@ -18,6 +18,8 @@ abstract interface class AuthRepository {
     required String password,
     String? email,
     String? ci,
+    DateTime? birthDate,
+    String? gender,
   });
 
   /// El usuario de la sesion guardada. Se pide al arrancar: `mustChangePassword`

@@ -17,7 +17,6 @@ import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 
 /// Alta y edicion de una maraton, entera desde el movil.
 ///
@@ -78,6 +77,11 @@ class _FormularioState extends ConsumerState<_Formulario> {
   late final _qrTexto = TextEditingController(
     text: _m?.paymentQrInstructions ?? '',
   );
+  // El QR **como texto**: es lo que la app dibuja en el checkout, y sin esto la
+  // maraton no admite el pago por QR. Ver `docs/pago-qr-manual.md` en la API.
+  late final _qrPayload = TextEditingController(
+    text: _m?.paymentQrPayload ?? '',
+  );
 
   late DateTime _fecha =
       _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
@@ -100,6 +104,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     _cupo.dispose();
     _precio.dispose();
     _qrTexto.dispose();
+    _qrPayload.dispose();
     super.dispose();
   }
 
@@ -144,31 +149,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
     if (trazado != null && mounted) setState(() => _ruta = trazado);
   }
 
-  Future<void> _subirQr() async {
-    final id = _m?.id;
-    // El QR se sube contra una maraton que ya existe: no hay donde ponerlo
-    // antes de que tenga id.
-    if (id == null) return;
-
-    final foto = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (foto == null || !mounted) return;
-
-    setState(() => _guardando = true);
-    try {
-      await ref.read(adminApiProvider).uploadPaymentQr(id, foto.path);
-      ref.invalidate(adminMarathonProvider(id));
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.l10n.adminQrUploaded)));
-      }
-    } on Failure catch (f) {
-      if (mounted) setState(() => _error = f.localized(context.l10n));
-    } finally {
-      if (mounted) setState(() => _guardando = false);
-    }
-  }
-
   /// Lo que viaja al servidor. Solo lo que el formulario controla: mandar todo
   /// el objeto pisaria campos que esta pantalla ni muestra.
   Map<String, dynamic> _cuerpo() {
@@ -181,6 +161,9 @@ class _FormularioState extends ConsumerState<_Formulario> {
       'capacity': int.tryParse(_cupo.text.trim()) ?? 0,
       'priceCents': ((double.tryParse(_precio.text.trim()) ?? 0) * 100).round(),
       'paymentQrInstructions': _qrTexto.text.trim(),
+      // Vacio = sin QR, y el servidor rechaza el cobro. Se manda igual: es como
+      // se apaga el metodo en una carrera que dejo de cobrar por ahi.
+      'paymentQrPayload': _qrPayload.text.trim(),
       'published': _publicada,
       // `registrationStatus` guarda la intencion del admin; el resto lo deriva
       // el servidor de cupos y fechas.
@@ -396,16 +379,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
           const SizedBox(height: AppSpacing.lg),
           _Tarjeta(
             children: [
-              StatRow(
-                icon: Icons.qr_code_2_rounded,
-                title: t.adminPaymentQr,
-                value: _m?.paymentQrUrl?.isNotEmpty ?? false
-                    ? t.adminQrLoaded
-                    : t.adminQrMissing,
-                subtitle: _esAlta ? t.adminQrAfterSave : t.adminQrSubtitle,
-                onTap: _esAlta || _guardando ? null : _subirQr,
-              ),
-              const AppDivider(),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 child: AppTextField(
@@ -413,6 +386,23 @@ class _FormularioState extends ConsumerState<_Formulario> {
                   controller: _qrTexto,
                   maxLines: 2,
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: AppTextField(
+                  label: t.adminQrPayload,
+                  controller: _qrPayload,
+                  hint: t.adminQrPayloadHint,
+                  maxLines: 3,
+                ),
+              ),
+              // Se dice aqui y no en un error del corredor tres pantallas mas
+              // tarde: sin este texto la carrera no cobra.
+              Text(
+                _qrPayload.text.trim().isEmpty
+                    ? t.adminQrPayloadMissing
+                    : t.adminQrPayloadHelp,
+                style: context.text.bodySm.copyWith(color: c.textSecondary),
               ),
             ],
           ),

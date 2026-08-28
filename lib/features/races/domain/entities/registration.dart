@@ -288,7 +288,6 @@ class PaymentInfo {
     required this.state,
     required this.amount,
     this.failureReason,
-    this.qrImageUrl,
     this.qrPayload,
     this.qrInstructions,
     this.qrReference,
@@ -305,8 +304,6 @@ class PaymentInfo {
   /// Motivo estable del rechazo (`card_declined`, `expired_card`…). Se ramifica
   /// por esto y nunca por el texto del mensaje.
   final String? failureReason;
-
-  final String? qrImageUrl;
 
   /// El contenido del QR **como texto**. La app dibuja el codigo con esto en
   /// vez de descargar una imagen: pesa bytes en lugar de cientos de KB, sale

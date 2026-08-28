@@ -530,6 +530,24 @@ abstract class AppLocalizations {
   /// **'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.'**
   String get onboardingRaceBody;
 
+  /// No description provided for @homeCamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who we are'**
+  String get homeCamTitle;
+
+  /// No description provided for @homeCamSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CAM · Women\'\'s Help Centre'**
+  String get homeCamSubtitle;
+
+  /// No description provided for @homeCamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Women\'\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.'**
+  String get homeCamBody;
+
   /// No description provided for @homeUpcomingMarathon.
   ///
   /// In en, this message translates to:
@@ -2417,7 +2435,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsContactComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'Write to support@camrun.app and we will answer within a day.'**
+  /// **'Write to alvarocallet@gmail.com and we will answer within a day.'**
   String get settingsContactComingSoon;
 
   /// No description provided for @settingsVersion.
@@ -3314,47 +3332,35 @@ abstract class AppLocalizations {
   /// **'Close them when you stop taking entries.'**
   String get adminRegistrationsHint;
 
-  /// No description provided for @adminPaymentQr.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment QR'**
-  String get adminPaymentQr;
-
-  /// No description provided for @adminQrLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Uploaded'**
-  String get adminQrLoaded;
-
-  /// No description provided for @adminQrMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'No QR'**
-  String get adminQrMissing;
-
-  /// No description provided for @adminQrSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Without a QR this marathon cannot take QR payments'**
-  String get adminQrSubtitle;
-
-  /// No description provided for @adminQrAfterSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save the marathon first to upload the QR'**
-  String get adminQrAfterSave;
-
   /// No description provided for @adminQrInstructions.
   ///
   /// In en, this message translates to:
   /// **'Text shown next to the QR'**
   String get adminQrInstructions;
 
-  /// No description provided for @adminQrUploaded.
+  /// No description provided for @adminQrPayload.
   ///
   /// In en, this message translates to:
-  /// **'QR updated.'**
-  String get adminQrUploaded;
+  /// **'Payment QR text'**
+  String get adminQrPayload;
+
+  /// No description provided for @adminQrPayloadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the QR contents your banking app exports'**
+  String get adminQrPayloadHint;
+
+  /// No description provided for @adminQrPayloadHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set: this race accepts QR payments.'**
+  String get adminQrPayloadHelp;
+
+  /// No description provided for @adminQrPayloadMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty: this race does not accept QR payments yet.'**
+  String get adminQrPayloadMissing;
 
   /// No description provided for @adminDelete.
   ///

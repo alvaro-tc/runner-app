@@ -26,8 +26,8 @@ class AdminMarathon {
     this.description,
     this.currency = 'BOB',
     this.country = 'BO',
-    this.paymentQrUrl,
     this.paymentQrInstructions,
+    this.paymentQrPayload,
     this.route = const [],
     this.liveStartedAt,
     this.liveFinishedAt,
@@ -54,8 +54,8 @@ class AdminMarathon {
     registrationsOpen:
         (json['intent'] ?? json['registrationStatus']) != 'closed',
     registrations: (json['registrations'] as num?)?.toInt() ?? 0,
-    paymentQrUrl: json['paymentQrUrl'] as String?,
     paymentQrInstructions: json['paymentQrInstructions'] as String?,
+    paymentQrPayload: json['paymentQrPayload'] as String?,
     route: routeFromGeoJson(json['routeGeoJson']),
     liveStartedAt: DateTime.tryParse(json['liveStartedAt'] as String? ?? ''),
     liveFinishedAt: DateTime.tryParse(json['liveFinishedAt'] as String? ?? ''),
@@ -76,8 +76,11 @@ class AdminMarathon {
   final bool published;
   final bool registrationsOpen;
   final int registrations;
-  final String? paymentQrUrl;
   final String? paymentQrInstructions;
+
+  /// El QR de cobro **como texto**. Vacio o `null` = esta carrera no admite el
+  /// pago por QR: el checkout lo rechaza.
+  final String? paymentQrPayload;
 
   /// El trazado oficial. Solo llega en el detalle: la lista no lo trae porque
   /// son miles de coordenadas por carrera y ahi no se pinta ningun mapa.

@@ -394,7 +394,7 @@ void main() {
 
         expect(salida.isConfirmed, isFalse);
         expect(salida.payment.isSettled, isFalse);
-        expect(salida.payment.qrImageUrl, 'http://x/qr.png');
+        expect(salida.payment.state, RacePaymentState.pending);
         expect(salida.registration.state, RegistrationState.pendingPayment);
       },
     );

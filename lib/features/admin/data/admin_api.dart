@@ -53,23 +53,6 @@ class AdminApi {
     await _dio.post<dynamic>('/admin/marathons/$id/$accion');
   });
 
-  /// Sube el QR de cobro del organizador. La imagen la reencoda el servidor.
-  ///
-  /// El texto que acompana al QR **no** va aqui: es un campo mas de la maraton
-  /// y viaja por [updateMarathon]. Duplicarlo en dos endpoints daria dos
-  /// maneras de dejarlo a medias.
-  Future<Map<String, dynamic>> uploadPaymentQr(String id, String filePath) =>
-      apiCall(() async {
-        final form = FormData.fromMap({
-          'file': await MultipartFile.fromFile(filePath),
-        });
-        final res = await _dio.post<dynamic>(
-          '/admin/marathons/$id/qr',
-          data: form,
-        );
-        return res.data as Map<String, dynamic>;
-      });
-
   // ─── Largada en vivo ─────────────────────────────────────────────────────
 
   /// Da la largada. La hora la pone el servidor: si cada telefono arrancara

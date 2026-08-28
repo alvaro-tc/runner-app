@@ -36,6 +36,8 @@ class RemoteAuthRepository implements AuthRepository {
     required String password,
     String? email,
     String? ci,
+    DateTime? birthDate,
+    String? gender,
   }) => guard(
     () => _entrar(
       () => api.register(
@@ -43,6 +45,8 @@ class RemoteAuthRepository implements AuthRepository {
         password: password,
         email: email,
         ci: ci,
+        birthDate: birthDate,
+        gender: gender,
       ),
     ),
   );

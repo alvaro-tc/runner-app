@@ -23,6 +23,8 @@ class AuthApi {
     required String password,
     String? email,
     String? ci,
+    DateTime? birthDate,
+    String? gender,
   }) => apiCall(() async {
     final res = await _dio.post<dynamic>(
       '/auth/register',
@@ -31,6 +33,8 @@ class AuthApi {
         'password': password,
         if (email != null && email.isNotEmpty) 'email': email,
         if (ci != null && ci.isNotEmpty) 'ci': ci,
+        'birthDate': ?birthDate?.toUtc().toIso8601String(),
+        'gender': ?gender,
         ...await _device(),
       },
     );

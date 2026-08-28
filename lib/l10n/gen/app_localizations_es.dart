@@ -246,6 +246,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inscríbete en eventos desde la app y guarda tu dorsal, tu tiempo de meta y tus parciales en un mismo sitio.';
 
   @override
+  String get homeCamTitle => 'Quiénes somos';
+
+  @override
+  String get homeCamSubtitle => 'CAM · Centro de Ayuda a la Mujer';
+
+  @override
+  String get homeCamBody =>
+      'El Centro de Ayuda a la Mujer acompaña a mujeres en situación de violencia o vulnerabilidad con apoyo legal, psicológico y social. Cada carrera que corres con nosotras sostiene ese trabajo.';
+
+  @override
   String get homeUpcomingMarathon => 'Tu próximo maratón en';
 
   @override
@@ -1282,7 +1292,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Escribe a support@camrun.app y te respondemos en menos de un día.';
+      'Escribe a alvarocallet@gmail.com y te respondemos en menos de un día.';
 
   @override
   String get settingsVersion => 'Versión';
@@ -1793,25 +1803,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ciérralas cuando no quieras aceptar más gente.';
 
   @override
-  String get adminPaymentQr => 'QR de cobro';
-
-  @override
-  String get adminQrLoaded => 'Cargado';
-
-  @override
-  String get adminQrMissing => 'Sin QR';
-
-  @override
-  String get adminQrSubtitle => 'Sin QR, la maratón no admite pago por QR';
-
-  @override
-  String get adminQrAfterSave => 'Guarda la maratón para poder subir el QR';
-
-  @override
   String get adminQrInstructions => 'Texto junto al QR';
 
   @override
-  String get adminQrUploaded => 'QR actualizado.';
+  String get adminQrPayload => 'Texto del QR de cobro';
+
+  @override
+  String get adminQrPayloadHint =>
+      'Pega el contenido del QR que exporta tu banca móvil';
+
+  @override
+  String get adminQrPayloadHelp => 'Cargado: esta carrera acepta pagos por QR.';
+
+  @override
+  String get adminQrPayloadMissing =>
+      'Vacío: esta carrera no acepta pagos por QR todavía.';
 
   @override
   String get adminDelete => 'Eliminar';
