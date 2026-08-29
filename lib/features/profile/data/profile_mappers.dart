@@ -85,6 +85,7 @@ UserProfile profileFromApi(Map<String, dynamic> json) {
                 .toInt(),
       ),
     ),
+    ci: (source['ci'] as String?)?.trim(),
     bibNumber:
         (source['defaultBibNumber'] ?? source['bibNumber']) as String? ??
         '0666',

@@ -28,6 +28,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   final _busqueda = TextEditingController();
   String _filtro = '';
 
+  /// null = todos. El rol no viaja al servidor: la lista ya viene entera y
+  /// filtrarla aqui evita una ida y vuelta por cada toque de chip.
+  String? _rol;
+
   @override
   void dispose() {
     _busqueda.dispose();
@@ -64,6 +68,28 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
               onSubmitted: (v) => setState(() => _filtro = v.trim()),
             ),
           ),
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenH,
+              ),
+              children: [
+                for (final rol in <String?>[null, ...adminRoles]) ...[
+                  ChoiceChip(
+                    label: Text(
+                      rol == null ? t.adminRoleAll : roleLabel(t, rol),
+                    ),
+                    selected: _rol == rol,
+                    onSelected: (_) => setState(() => _rol = rol),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Expanded(
             child: usuarios.when(
               loading: () =>
@@ -74,26 +100,34 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
                     : t.adminLoadFailed,
                 onRetry: () => ref.invalidate(adminUsersProvider(_filtro)),
               ),
-              data: (lista) => lista.isEmpty
-                  ? EmptyState(
-                      icon: Icons.person_search_outlined,
-                      title: t.adminNoUsersTitle,
-                      message: t.adminNoUsersBody,
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.screenH,
-                        0,
-                        AppSpacing.screenH,
-                        AppSpacing.xxl * 2,
-                      ),
-                      itemCount: lista.length,
-                      separatorBuilder: (_, _) => const AppDivider(),
-                      itemBuilder: (context, i) => _Fila(
-                        user: lista[i],
-                        onTap: () => _abrirFicha(context, lista[i]),
-                      ),
-                    ),
+              data: (todos) {
+                final lista = _rol == null
+                    ? todos
+                    : [
+                        for (final u in todos)
+                          if (u.role == _rol) u,
+                      ];
+                return lista.isEmpty
+                    ? EmptyState(
+                        icon: Icons.person_search_outlined,
+                        title: t.adminNoUsersTitle,
+                        message: t.adminNoUsersBody,
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.screenH,
+                          0,
+                          AppSpacing.screenH,
+                          AppSpacing.xxl * 2,
+                        ),
+                        itemCount: lista.length,
+                        separatorBuilder: (_, _) => const AppDivider(),
+                        itemBuilder: (context, i) => _Fila(
+                          user: lista[i],
+                          onTap: () => _abrirFicha(context, lista[i]),
+                        ),
+                      );
+              },
             ),
           ),
         ],

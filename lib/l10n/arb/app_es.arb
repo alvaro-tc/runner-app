@@ -527,12 +527,8 @@
   "adminRegistrationsSwitch": "Inscripciones habilitadas",
   "adminRegistrationsHint": "Ciérralas cuando no quieras aceptar más gente.",
   "adminPaymentQr": "QR de cobro",
-  "adminQrLoaded": "Cargado",
-  "adminQrMissing": "Sin QR",
-  "adminQrSubtitle": "Sin QR, la maratón no admite pago por QR",
-  "adminQrAfterSave": "Guarda la maratón para poder subir el QR",
+  "adminQrSubtitle": "Sube la foto del QR de tu banca: se guarda su contenido, no la imagen",
   "adminQrInstructions": "Texto junto al QR",
-  "adminQrUploaded": "QR actualizado.",
   "adminSectionUpcoming": "Próximas",
   "adminSectionPast": "Pasadas",
   "adminPublish": "Publicar",
@@ -572,6 +568,7 @@
   "adminNoUsersTitle": "Sin resultados",
   "adminNoUsersBody": "Prueba con otro nombre, correo o cédula.",
   "adminRole": "Rol",
+  "adminRoleAll": "Todos",
   "adminRoleAdmin": "Admin",
   "adminRoleOrganizer": "Organizador",
   "adminRoleRunner": "Corredor",
@@ -653,8 +650,7 @@
   "registerCancelPaymentFailed": "No pudimos cancelar el pago. Inténtalo de nuevo.",
   "registerNoPaymentMethodTitle": "Esta carrera todavía no acepta pagos",
   "registerNoPaymentMethodBody": "El organizador aún no cargó su QR de cobro. Escríbele o vuelve a intentarlo más tarde.",
-  "adminQrPayload": "Texto del QR de cobro",
-  "adminQrPayloadHint": "Pega el contenido del QR que exporta tu banca móvil",
-  "adminQrPayloadHelp": "Cargado: esta carrera acepta pagos por QR.",
-  "adminQrPayloadMissing": "Vacío: esta carrera no acepta pagos por QR todavía."
+  "adminQrPayloadHelp": "QR leído: esta carrera acepta pagos por QR.",
+  "adminQrPayloadMissing": "Sin QR: esta carrera no acepta pagos por QR todavía.",
+  "adminQrUnreadable": "No se pudo leer ningún QR en esa imagen. Prueba con una foto más nítida."
 }

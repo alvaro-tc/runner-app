@@ -144,10 +144,15 @@ class RouteMapViewState extends State<RouteMapView> {
               : (_, punto) => widget.onTap!(punto.latitude, punto.longitude),
         ),
         children: [
+          // CARTO y no tile.openstreetmap.org: OSM bloquea las peticiones que
+          // salen de un navegador y en web se veian recuadros grises en vez
+          // del mapa. CARTO manda CORS y trae version oscura propia.
           TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            urlTemplate:
+                'https://basemaps.cartocdn.com/'
+                '${c.isDark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png',
+            retinaMode: RetinaMode.isHighDensity(context),
             userAgentPackageName: 'com.camrun.app',
-            tileBuilder: c.isDark ? _darkenTile : null,
           ),
           // La guia primero: va por debajo del recorrido real.
           if (guide.length > 1)
@@ -264,34 +269,6 @@ class RouteMapViewState extends State<RouteMapView> {
       ),
     ),
   );
-
-  /// OSM ships light tiles only; invert + hue-rotate keeps dark mode readable.
-  Widget _darkenTile(BuildContext context, Widget tile, TileImage image) =>
-      ColorFiltered(
-        colorFilter: const ColorFilter.matrix(<double>[
-          -0.6,
-          -0.2,
-          -0.2,
-          0,
-          235,
-          -0.2,
-          -0.6,
-          -0.2,
-          0,
-          235,
-          -0.2,
-          -0.2,
-          -0.6,
-          0,
-          235,
-          0,
-          0,
-          0,
-          1,
-          0,
-        ]),
-        child: tile,
-      );
 }
 
 class _UserDot extends StatelessWidget {

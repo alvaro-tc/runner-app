@@ -85,7 +85,7 @@ void main() {
     });
   });
 
-  group('imagenes de la maraton', () {
+  group('afiche y QR de cobro', () {
     AdminMarathon con({String? cover, String? qr}) => AdminMarathon.fromJson({
       'id': 'm1',
       'name': 'Maraton',
@@ -93,7 +93,7 @@ void main() {
       'startsAt': '2026-09-13T11:00:00.000Z',
       'capacity': 100,
       'coverUrl': cover,
-      'paymentQrUrl': qr,
+      'paymentQrPayload': qr,
     });
 
     test('sin subir nada, los dos huecos estan vacios', () {
@@ -115,12 +115,12 @@ void main() {
       expect(con(cover: '', qr: '').hasPaymentQr, isFalse);
     });
 
-    test('cambiar el estado no se lleva por delante las imagenes', () {
-      final m = con(cover: 'c.webp', qr: 'q.webp');
+    test('cambiar el estado no se lleva por delante el afiche ni el QR', () {
+      final m = con(cover: 'c.webp', qr: '00020101021226580014BR.GOV.BCB.PIX');
       final retirada = m.copyWith(published: false, registrationsOpen: false);
 
       expect(retirada.coverUrl, 'c.webp');
-      expect(retirada.paymentQrUrl, 'q.webp');
+      expect(retirada.paymentQrPayload, '00020101021226580014BR.GOV.BCB.PIX');
       expect(retirada.published, isFalse);
       expect(retirada.registrationsOpen, isFalse);
       // Lo que no se pide no se toca.
@@ -174,5 +174,12 @@ void main() {
       expect(ordenadas.map((m) => m.name), ['a', 'b']);
       expect(ordenadas.every((m) => !m.past), isTrue);
     });
+  });
+
+  test('el rol en castellano no cae en corredor', () {
+    expect(normalizeRole('Organizador'), 'organizer');
+    expect(normalizeRole('organizer'), 'organizer');
+    expect(normalizeRole('administrador'), 'admin');
+    expect(normalizeRole(null), 'runner');
   });
 }

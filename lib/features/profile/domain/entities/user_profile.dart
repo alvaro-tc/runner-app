@@ -94,6 +94,7 @@ class UserProfile {
     required this.highlights,
     required this.injuries,
     required this.sleep,
+    this.ci,
     this.bibNumber = '0666',
   });
 
@@ -110,6 +111,10 @@ class UserProfile {
   final RunningHighlights highlights;
   final List<Injury> injuries;
   final SleepStats sleep;
+  /// Cedula de identidad de la cuenta. `null` en cuentas dadas de alta solo
+  /// con correo. Cuando esta, es la que va en cualquier inscripcion: no se
+  /// pide otra.
+  final String? ci;
   final String bibNumber;
 
   /// La ficha enseña las zonas en una linea.
@@ -148,6 +153,7 @@ class UserProfile {
     highlights: highlights,
     injuries: injuries,
     sleep: sleep,
+    ci: ci,
     bibNumber: bibNumber,
   );
 }

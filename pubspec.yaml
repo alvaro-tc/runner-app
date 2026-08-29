@@ -40,6 +40,11 @@ dependencies:
   # bytes en vez de una imagen de cientos de KB, nitido a cualquier tamano y
   # pintado sin depender de la red. Temporal, igual que el cobro por QR manual.
   qr_flutter: ^4.1.0
+  # El admin sube la foto del QR de su banca y la app le saca el texto ahi
+  # mismo: zxing2 lo decodifica y image_picker/image solo le dan los pixeles.
+  # Puro Dart, sin camara ni permisos. Temporal, igual que el cobro por QR.
+  zxing2: ^0.2.3
+  image: ^4.9.2
   fl_chart: ^1.2.0
   wakelock_plus: ^1.7.0
   dio: ^5.11.0
@@ -71,6 +76,8 @@ dev_dependencies:
 
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
+  # Solo para el test del lector de QR: pinta uno de verdad para decodificarlo.
+  qr: ^3.0.2
   build_runner: ^2.15.1
   freezed: ^3.2.5
   json_serializable: ^6.14.1

@@ -127,48 +127,15 @@ class MarathonImageField extends StatelessWidget {
   };
 
   Future<void> _elegirFuente(BuildContext context) async {
-    final t = context.l10n;
-    final fuente = await showModalBottomSheet<_Accion>(
-      context: context,
-      showDragHandle: true,
-      builder: (hoja) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: Text(t.adminImageFromCamera),
-              onTap: () => Navigator.of(hoja).pop(_Accion.camara),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(t.adminImageFromGallery),
-              onTap: () => Navigator.of(hoja).pop(_Accion.galeria),
-            ),
-            if (_hasImage && onRemove != null)
-              ListTile(
-                leading: Icon(
-                  Icons.delete_outline_rounded,
-                  color: context.colors.error,
-                ),
-                title: Text(
-                  t.adminImageRemove,
-                  style: TextStyle(color: context.colors.error),
-                ),
-                onTap: () => Navigator.of(hoja).pop(_Accion.quitar),
-              ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-        ),
-      ),
-    );
-
-    switch (fuente) {
-      case _Accion.camara:
+    switch (await pickImageSource(
+      context,
+      canRemove: _hasImage && onRemove != null,
+    )) {
+      case ImagePick.camera:
         onPick(ImageSource.camera);
-      case _Accion.galeria:
+      case ImagePick.gallery:
         onPick(ImageSource.gallery);
-      case _Accion.quitar:
+      case ImagePick.remove:
         onRemove?.call();
       case null:
         break;
@@ -176,7 +143,51 @@ class MarathonImageField extends StatelessWidget {
   }
 }
 
-enum _Accion { camara, galeria, quitar }
+/// Lo que el usuario elige en la hoja: de donde sacar la imagen, o quitarla.
+enum ImagePick { camera, gallery, remove }
+
+/// La hoja de "camara / galeria / quitar", compartida por el afiche y el QR de
+/// cobro. Devuelve `null` si se cerro sin elegir.
+Future<ImagePick?> pickImageSource(
+  BuildContext context, {
+  required bool canRemove,
+}) {
+  final t = context.l10n;
+  return showModalBottomSheet<ImagePick>(
+    context: context,
+    showDragHandle: true,
+    builder: (hoja) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: Text(t.adminImageFromCamera),
+            onTap: () => Navigator.of(hoja).pop(ImagePick.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined),
+            title: Text(t.adminImageFromGallery),
+            onTap: () => Navigator.of(hoja).pop(ImagePick.gallery),
+          ),
+          if (canRemove)
+            ListTile(
+              leading: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colors.error,
+              ),
+              title: Text(
+                t.adminImageRemove,
+                style: TextStyle(color: context.colors.error),
+              ),
+              onTap: () => Navigator.of(hoja).pop(ImagePick.remove),
+            ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    ),
+  );
+}
 
 /// La imagen guardada, con la pista de que se puede cambiar.
 class _Imagen extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camrun/core/extensions/context_x.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Afiche del evento. Si no hay imagen —o la descarga falla— pinta un degradado
@@ -25,6 +26,18 @@ class EventImage extends StatelessWidget {
     decoration: BoxDecoration(gradient: context.colors.routeGradient),
     child: imageUrl.isEmpty
         ? _placeholder(context)
+        : kIsWeb
+        // En web la descarga va por XHR y el servidor de imagenes no manda
+        // cabeceras CORS: falla y solo quedaria el hueco. La etiqueta <img>
+        // del navegador pinta igual sin pedir permiso.
+        ? Image.network(
+            imageUrl,
+            fit: fit,
+            width: double.infinity,
+            height: double.infinity,
+            webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+            errorBuilder: (context, _, _) => _placeholder(context),
+          )
         : CachedNetworkImage(
             imageUrl: imageUrl,
             fit: fit,

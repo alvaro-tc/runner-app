@@ -27,7 +27,7 @@ class AdminMarathon {
     this.currency = 'BOB',
     this.country = 'BO',
     this.coverUrl,
-    this.paymentQrUrl,
+    this.paymentQrPayload,
     this.paymentQrInstructions,
     this.route = const [],
     this.liveStartedAt,
@@ -56,7 +56,7 @@ class AdminMarathon {
     registrationsOpen:
         (json['intent'] ?? json['registrationStatus']) != 'closed',
     registrations: (json['registrations'] as num?)?.toInt() ?? 0,
-    paymentQrUrl: json['paymentQrUrl'] as String?,
+    paymentQrPayload: json['paymentQrPayload'] as String?,
     paymentQrInstructions: json['paymentQrInstructions'] as String?,
     route: routeFromGeoJson(json['routeGeoJson']),
     liveStartedAt: DateTime.tryParse(json['liveStartedAt'] as String? ?? ''),
@@ -83,7 +83,11 @@ class AdminMarathon {
   /// pegarse, no hay forma de que apunte a otro sitio.
   final String? coverUrl;
 
-  final String? paymentQrUrl;
+  /// El **contenido** del QR de cobro, no su imagen: el movil lo redibuja
+  /// desde este texto. Lo que el organizador sube es una foto, y de ella solo
+  /// se guarda lo que lleva escrito dentro.
+  final String? paymentQrPayload;
+
   final String? paymentQrInstructions;
 
   /// El trazado oficial. Solo llega en el detalle: la lista no lo trae porque
@@ -106,7 +110,7 @@ class AdminMarathon {
 
   bool get hasCover => (coverUrl ?? '').isNotEmpty;
 
-  bool get hasPaymentQr => (paymentQrUrl ?? '').isNotEmpty;
+  bool get hasPaymentQr => (paymentQrPayload ?? '').isNotEmpty;
 
   /// Ya paso su fecha. Separa las dos mitades de la lista del panel: lo que
   /// queda por organizar arriba, el archivo abajo.
@@ -132,7 +136,7 @@ class AdminMarathon {
         registrationsOpen: registrationsOpen ?? this.registrationsOpen,
         registrations: registrations,
         coverUrl: coverUrl,
-        paymentQrUrl: paymentQrUrl,
+        paymentQrPayload: paymentQrPayload,
         paymentQrInstructions: paymentQrInstructions,
         route: route,
         liveStartedAt: liveStartedAt,
@@ -191,7 +195,7 @@ class AdminUser {
   factory AdminUser.fromJson(Map<String, dynamic> json) => AdminUser(
     id: json['id'] as String,
     name: json['name'] as String? ?? '',
-    role: json['role'] as String? ?? 'runner',
+    role: normalizeRole(json['role'] as String?),
     email: json['email'] as String?,
     ci: json['ci'] as String?,
     verified: json['verified'] as bool? ?? false,
@@ -215,3 +219,12 @@ class AdminUser {
 
 /// Los roles que el panel sabe asignar. En el mismo orden en que se ofrecen.
 const adminRoles = <String>['admin', 'organizer', 'runner'];
+
+/// El rol tal cual lo entiende el panel. El servidor lo ha mandado en ingles y
+/// en castellano segun por donde se creo la cuenta, y sin esto un
+/// 'organizador' se pintaba y filtraba como corredor.
+String normalizeRole(String? raw) => switch (raw?.trim().toLowerCase()) {
+  'admin' || 'administrador' => 'admin',
+  'organizer' || 'organizador' => 'organizer',
+  _ => 'runner',
+};

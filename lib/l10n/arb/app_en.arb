@@ -839,12 +839,8 @@
   "adminRegistrationsSwitch": "Registrations enabled",
   "adminRegistrationsHint": "Close them when you stop taking entries.",
   "adminPaymentQr": "Payment QR",
-  "adminQrLoaded": "Uploaded",
-  "adminQrMissing": "No QR",
-  "adminQrSubtitle": "Without a QR this marathon cannot take QR payments",
-  "adminQrAfterSave": "Save the marathon first to upload the QR",
+  "adminQrSubtitle": "Upload a photo of your bank QR: its contents are saved, not the image",
   "adminQrInstructions": "Text shown next to the QR",
-  "adminQrUploaded": "QR updated.",
   "adminSectionUpcoming": "Upcoming",
   "adminSectionPast": "Past",
   "adminPublish": "Publish",
@@ -884,6 +880,7 @@
   "adminNoUsersTitle": "No results",
   "adminNoUsersBody": "Try another name, email or ID number.",
   "adminRole": "Role",
+  "adminRoleAll": "All",
   "adminRoleAdmin": "Admin",
   "adminRoleOrganizer": "Organiser",
   "adminRoleRunner": "Runner",
@@ -972,8 +969,7 @@
   "registerCancelPaymentFailed": "We could not cancel the payment. Please try again.",
   "registerNoPaymentMethodTitle": "This race does not take payments yet",
   "registerNoPaymentMethodBody": "The organiser has not set up their payment QR. Get in touch with them or try again later.",
-  "adminQrPayload": "Payment QR text",
-  "adminQrPayloadHint": "Paste the QR contents your banking app exports",
-  "adminQrPayloadHelp": "Set: this race accepts QR payments.",
-  "adminQrPayloadMissing": "Empty: this race does not accept QR payments yet."
+  "adminQrPayloadHelp": "QR read: this race accepts QR payments.",
+  "adminQrPayloadMissing": "No QR: this race does not accept QR payments yet.",
+  "adminQrUnreadable": "No QR could be read from that image. Try a sharper photo."
 }

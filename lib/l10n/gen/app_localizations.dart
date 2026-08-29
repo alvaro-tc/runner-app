@@ -3260,41 +3260,17 @@ abstract class AppLocalizations {
   /// **'Payment QR'**
   String get adminPaymentQr;
 
-  /// No description provided for @adminQrLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Uploaded'**
-  String get adminQrLoaded;
-
-  /// No description provided for @adminQrMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'No QR'**
-  String get adminQrMissing;
-
   /// No description provided for @adminQrSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Without a QR this marathon cannot take QR payments'**
+  /// **'Upload a photo of your bank QR: its contents are saved, not the image'**
   String get adminQrSubtitle;
-
-  /// No description provided for @adminQrAfterSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save the marathon first to upload the QR'**
-  String get adminQrAfterSave;
 
   /// No description provided for @adminQrInstructions.
   ///
   /// In en, this message translates to:
   /// **'Text shown next to the QR'**
   String get adminQrInstructions;
-
-  /// No description provided for @adminQrUploaded.
-  ///
-  /// In en, this message translates to:
-  /// **'QR updated.'**
-  String get adminQrUploaded;
 
   /// No description provided for @adminSectionUpcoming.
   ///
@@ -3529,6 +3505,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role'**
   String get adminRole;
+
+  /// No description provided for @adminRoleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get adminRoleAll;
 
   /// No description provided for @adminRoleAdmin.
   ///
@@ -3956,29 +3938,23 @@ abstract class AppLocalizations {
   /// **'The organiser has not set up their payment QR. Get in touch with them or try again later.'**
   String get registerNoPaymentMethodBody;
 
-  /// No description provided for @adminQrPayload.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment QR text'**
-  String get adminQrPayload;
-
-  /// No description provided for @adminQrPayloadHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste the QR contents your banking app exports'**
-  String get adminQrPayloadHint;
-
   /// No description provided for @adminQrPayloadHelp.
   ///
   /// In en, this message translates to:
-  /// **'Set: this race accepts QR payments.'**
+  /// **'QR read: this race accepts QR payments.'**
   String get adminQrPayloadHelp;
 
   /// No description provided for @adminQrPayloadMissing.
   ///
   /// In en, this message translates to:
-  /// **'Empty: this race does not accept QR payments yet.'**
+  /// **'No QR: this race does not accept QR payments yet.'**
   String get adminQrPayloadMissing;
+
+  /// No description provided for @adminQrUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR could be read from that image. Try a sharper photo.'**
+  String get adminQrUnreadable;
 }
 
 class _AppLocalizationsDelegate

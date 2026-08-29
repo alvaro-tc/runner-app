@@ -2,7 +2,9 @@ import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/admin/data/qr_image_reader.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_route_editor_page.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
@@ -22,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// Alta y edicion de una maraton, entera desde el movil.
 ///
@@ -112,12 +115,15 @@ class _FormularioState extends ConsumerState<_Formulario> {
   Failure? _errorGuardado;
 
   var _estadoFoto = ImageSlotStatus.idle;
-  var _estadoQr = ImageSlotStatus.idle;
 
-  /// El ultimo archivo elegido para cada hueco. Reintentar una subida que
-  /// fallo tiene que reenviar **ese** archivo, no abrir la galeria otra vez.
+  /// El ultimo archivo elegido para el afiche. Reintentar una subida que fallo
+  /// tiene que reenviar **ese** archivo, no abrir la galeria otra vez.
   String? _ultimaFoto;
-  String? _ultimoQr;
+
+  /// El contenido del QR de cobro. De la foto que elige el organizador solo
+  /// queda esto: la imagen se lee y se tira, y lo que se guarda es el texto.
+  late String? _qrPayload = _m?.paymentQrPayload;
+  bool _leyendoQr = false;
 
   bool _cambiandoEstado = false;
 
@@ -167,6 +173,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     'capacity': int.tryParse(_cupo.text.trim()) ?? 0,
     'priceCents': ((double.tryParse(_precio.text.trim()) ?? 0) * 100).round(),
     'distanceMeters': _metros,
+    'paymentQrPayload': _qrPayload ?? '',
     'paymentQrInstructions': _qrTexto.text.trim(),
     // El trazado se compara por su forma, no por la lista entera: son miles de
     // puntos y basta con saber si cambio.
@@ -247,46 +254,33 @@ class _FormularioState extends ConsumerState<_Formulario> {
     });
   }
 
-  /// Sube una de las dos imagenes.
+  /// Sube el afiche.
   ///
   /// Con [fuente] abre camara o galeria; con [reintentar] reenvia el archivo
   /// que ya se habia elegido. El estado no vuelve a `idle` hasta que el detalle
   /// se releyo del servidor: asi lo que se ve al terminar es la imagen
   /// guardada, y no la del telefono.
-  Future<void> _subirImagen({
-    required bool portada,
+  Future<void> _subirPortada({
     ImageSource? fuente,
     bool reintentar = false,
   }) async {
     final id = _m?.id;
     if (id == null) return;
 
-    String? ruta;
-    if (reintentar) {
-      ruta = portada ? _ultimaFoto : _ultimoQr;
-    } else if (fuente != null) {
-      final foto = await ImagePicker().pickImage(source: fuente);
-      ruta = foto?.path;
-    }
+    final ruta = reintentar
+        ? _ultimaFoto
+        : (fuente == null
+              ? null
+              : (await ImagePicker().pickImage(source: fuente))?.path);
     if (ruta == null || !mounted) return;
 
     setState(() {
-      if (portada) {
-        _ultimaFoto = ruta;
-        _estadoFoto = ImageSlotStatus.uploading;
-      } else {
-        _ultimoQr = ruta;
-        _estadoQr = ImageSlotStatus.uploading;
-      }
+      _ultimaFoto = ruta;
+      _estadoFoto = ImageSlotStatus.uploading;
     });
 
-    final api = ref.read(adminApiProvider);
     try {
-      if (portada) {
-        await api.uploadCover(id, ruta);
-      } else {
-        await api.uploadPaymentQr(id, ruta);
-      }
+      await ref.read(adminApiProvider).uploadCover(id, ruta);
       // Se espera la relectura, no solo se pide: mientras no llegue, la URL
       // que hay en pantalla sigue siendo la anterior.
       ref.invalidate(adminMarathonProvider(id));
@@ -295,75 +289,57 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
       if (!mounted) return;
       setState(() {
-        if (portada) {
-          _estadoFoto = ImageSlotStatus.idle;
-          _ultimaFoto = null;
-        } else {
-          _estadoQr = ImageSlotStatus.idle;
-          _ultimoQr = null;
-        }
+        _estadoFoto = ImageSlotStatus.idle;
+        _ultimaFoto = null;
       });
-      context.showSnack(
-        portada
-            ? context.l10n.adminCoverUploaded
-            : context.l10n.adminQrUploaded,
-      );
+      context.showSnack(context.l10n.adminCoverUploaded);
     } on Failure {
-      if (!mounted) return;
-      setState(() {
-        if (portada) {
-          _estadoFoto = ImageSlotStatus.failed;
-        } else {
-          _estadoQr = ImageSlotStatus.failed;
-        }
-      });
+      if (mounted) setState(() => _estadoFoto = ImageSlotStatus.failed);
     }
   }
 
-  /// Quitar una imagen es vaciar su campo, y eso si va por la edicion normal:
+  /// Quitar el afiche es vaciar su campo, y eso si va por la edicion normal:
   /// no hay endpoint que borre un archivo, ni hace falta.
-  Future<void> _quitarImagen({required bool portada}) async {
+  Future<void> _quitarPortada() async {
     final id = _m?.id;
     if (id == null) return;
 
-    setState(() {
-      if (portada) {
-        _estadoFoto = ImageSlotStatus.uploading;
-      } else {
-        _estadoQr = ImageSlotStatus.uploading;
-      }
-    });
+    setState(() => _estadoFoto = ImageSlotStatus.uploading);
 
     try {
-      await ref.read(adminApiProvider).updateMarathon(id, {
-        if (portada) 'coverUrl': null else 'paymentQrUrl': null,
-      });
+      await ref.read(adminApiProvider).updateMarathon(id, {'coverUrl': null});
       ref.invalidate(adminMarathonProvider(id));
       await ref.read(adminMarathonProvider(id).future);
       ref.invalidate(adminMarathonsProvider);
-
-      if (!mounted) return;
-      setState(() {
-        if (portada) {
-          _estadoFoto = ImageSlotStatus.idle;
-        } else {
-          _estadoQr = ImageSlotStatus.idle;
-        }
-      });
     } on Failure catch (f) {
       // Quitar no deja nada que reintentar —no hay archivo—, asi que el hueco
       // vuelve a como estaba, con su imagen, y el fallo se cuenta aparte. El
       // estado `failed` pintaria un boton de reintentar que no haria nada.
-      if (!mounted) return;
-      setState(() {
-        if (portada) {
-          _estadoFoto = ImageSlotStatus.idle;
-        } else {
-          _estadoQr = ImageSlotStatus.idle;
-        }
-      });
-      context.showSnack(f.localized(context.l10n));
+      if (mounted) context.showSnack(f.localized(context.l10n));
+    } finally {
+      if (mounted) setState(() => _estadoFoto = ImageSlotStatus.idle);
     }
+  }
+
+  /// Lee el QR de una foto y se queda **solo con su texto**.
+  ///
+  /// La imagen no se sube ni se guarda en ningun sitio: es el vehiculo para
+  /// que el organizador no tenga que copiar a mano el contenido del QR que le
+  /// dio su banca. Lo que se guarda —y lo que luego se redibuja en el movil
+  /// del corredor— es el texto que llevaba dentro.
+  Future<void> _leerQr(ImageSource fuente) async {
+    final foto = await ImagePicker().pickImage(source: fuente);
+    if (foto == null || !mounted) return;
+
+    setState(() => _leyendoQr = true);
+    final texto = await readQrFromImage(foto.path);
+    if (!mounted) return;
+
+    setState(() {
+      _leyendoQr = false;
+      if (texto != null) _qrPayload = texto;
+    });
+    if (texto == null) context.showSnack(context.l10n.adminQrUnreadable);
   }
 
   Future<void> _cambiarEstado({
@@ -560,9 +536,9 @@ class _FormularioState extends ConsumerState<_Formulario> {
         emptyLabel: t.adminCoverEmpty,
         enabled: !_esAlta,
         disabledHint: _esAlta ? t.adminCoverAfterSave : null,
-        onPick: (fuente) => _subirImagen(portada: true, fuente: fuente),
-        onRetry: () => _subirImagen(portada: true, reintentar: true),
-        onRemove: () => _quitarImagen(portada: true),
+        onPick: (fuente) => _subirPortada(fuente: fuente),
+        onRetry: () => _subirPortada(reintentar: true),
+        onRemove: _quitarPortada,
       ),
     ],
   );
@@ -667,6 +643,10 @@ class _FormularioState extends ConsumerState<_Formulario> {
     ],
   );
 
+  /// El QR de cobro. A diferencia del afiche, aqui no se sube nada: la foto
+  /// solo sirve para sacarle el texto, y el que se ve es un QR **redibujado**
+  /// desde ese texto —el mismo que vera el corredor—. Si el de la pantalla se
+  /// escanea bien, el guardado tambien.
   Widget _seccionQr(AppLocalizations t) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -677,16 +657,11 @@ class _FormularioState extends ConsumerState<_Formulario> {
         children: [
           SizedBox(
             width: 116,
-            child: MarathonImageField(
-              imageUrl: _m?.paymentQrUrl,
-              status: _estadoQr,
-              aspectRatio: 1,
-              emptyIcon: Icons.qr_code_2_rounded,
-              emptyLabel: t.adminQrEmpty,
-              enabled: !_esAlta,
-              onPick: (fuente) => _subirImagen(portada: false, fuente: fuente),
-              onRetry: () => _subirImagen(portada: false, reintentar: true),
-              onRemove: () => _quitarImagen(portada: false),
+            height: 116,
+            child: _QrSlot(
+              payload: _qrPayload,
+              reading: _leyendoQr,
+              onTap: _leyendoQr ? null : _elegirQr,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -699,17 +674,121 @@ class _FormularioState extends ConsumerState<_Formulario> {
           ),
         ],
       ),
-      if (_esAlta) ...[
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          t.adminQrAfterSave,
-          style: context.text.bodySm.copyWith(
-            color: context.colors.textSecondary,
-          ),
+      const SizedBox(height: AppSpacing.sm),
+      Text(
+        (_qrPayload ?? '').isEmpty
+            ? t.adminQrPayloadMissing
+            : t.adminQrPayloadHelp,
+        style: context.text.bodySm.copyWith(
+          color: context.colors.textSecondary,
         ),
-      ],
+      ),
     ],
   );
+
+  Future<void> _elegirQr() async {
+    final accion = await pickImageSource(
+      context,
+      canRemove: (_qrPayload ?? '').isNotEmpty,
+    );
+    switch (accion) {
+      case ImagePick.camera:
+        await _leerQr(ImageSource.camera);
+      case ImagePick.gallery:
+        await _leerQr(ImageSource.gallery);
+      case ImagePick.remove:
+        setState(() => _qrPayload = null);
+      case null:
+        break;
+    }
+  }
+}
+
+/// El QR de cobro **redibujado desde su texto**, no la foto que se subio.
+///
+/// Es a proposito: la foto ya cumplio su papel —traer el contenido— y lo que
+/// hay que comprobar antes de guardar es que lo leido es lo correcto. Lo que
+/// se ve aqui es exactamente lo que se pintara en el movil del corredor.
+///
+/// El violeta de marca va sobre blanco **siempre**, en los dos temas: un QR es
+/// contraste antes que adorno, y el violeta claro del tema oscuro sobre fondo
+/// oscuro no lo lee ningun escaner.
+class _QrSlot extends StatelessWidget {
+  const _QrSlot({
+    required this.payload,
+    required this.reading,
+    required this.onTap,
+  });
+
+  final String? payload;
+  final bool reading;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+    final tiene = (payload ?? '').isNotEmpty;
+
+    return Semantics(
+      button: true,
+      label: tiene ? t.adminImageChange : t.adminQrEmpty,
+      child: Material(
+        color: tiene ? Colors.white : context.colors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: switch ((reading, tiene)) {
+              (true, _) => Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ),
+              (_, true) => QrImageView(
+                data: payload!,
+                backgroundColor: Colors.white,
+                errorCorrectionLevel: QrErrorCorrectLevel.H,
+                padding: EdgeInsets.zero,
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.circle,
+                  color: LightTokens.primary,
+                ),
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.square,
+                  color: LightTokens.primary,
+                ),
+              ),
+              _ => Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.qr_code_2_rounded,
+                    size: 28,
+                    color: context.colors.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    t.adminQrEmpty,
+                    textAlign: TextAlign.center,
+                    style: context.text.bodySm.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            },
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Rotulo extends StatelessWidget {

@@ -1746,23 +1746,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPaymentQr => 'Payment QR';
 
   @override
-  String get adminQrLoaded => 'Uploaded';
-
-  @override
-  String get adminQrMissing => 'No QR';
-
-  @override
   String get adminQrSubtitle =>
-      'Without a QR this marathon cannot take QR payments';
-
-  @override
-  String get adminQrAfterSave => 'Save the marathon first to upload the QR';
+      'Upload a photo of your bank QR: its contents are saved, not the image';
 
   @override
   String get adminQrInstructions => 'Text shown next to the QR';
-
-  @override
-  String get adminQrUploaded => 'QR updated.';
 
   @override
   String get adminSectionUpcoming => 'Upcoming';
@@ -1886,6 +1874,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminRole => 'Role';
+
+  @override
+  String get adminRoleAll => 'All';
 
   @override
   String get adminRoleAdmin => 'Admin';
@@ -2120,16 +2111,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The organiser has not set up their payment QR. Get in touch with them or try again later.';
 
   @override
-  String get adminQrPayload => 'Payment QR text';
-
-  @override
-  String get adminQrPayloadHint =>
-      'Paste the QR contents your banking app exports';
-
-  @override
-  String get adminQrPayloadHelp => 'Set: this race accepts QR payments.';
+  String get adminQrPayloadHelp => 'QR read: this race accepts QR payments.';
 
   @override
   String get adminQrPayloadMissing =>
-      'Empty: this race does not accept QR payments yet.';
+      'No QR: this race does not accept QR payments yet.';
+
+  @override
+  String get adminQrUnreadable =>
+      'No QR could be read from that image. Try a sharper photo.';
 }

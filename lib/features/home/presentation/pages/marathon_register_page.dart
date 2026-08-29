@@ -136,12 +136,19 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     if (ok && mounted) _goTo(_step + 1);
   }
 
+  /// El CI de la cuenta manda. Solo se escribe a mano cuando el perfil no lo
+  /// tiene: dejar teclear otro creaba inscripciones que no cruzan con el pago.
+  String _docIdDe(UserProfile? profile) {
+    final ci = profile?.ci?.trim() ?? '';
+    return ci.isNotEmpty ? ci : _docId.text.trim();
+  }
+
   RegistrationPersonalData _datosPersonales(UserProfile? profile) =>
       RegistrationPersonalData(
         fullName: profile?.fullName.trim().isNotEmpty ?? false
             ? profile!.fullName
             : context.l10n.registerDefaultRunnerName,
-        docId: _docId.text.trim(),
+        docId: _docIdDe(profile),
         phone: _phone.text.trim(),
         // El footer no deja llegar aqui sin las dos respuestas; el `?? false`
         // es solo para que el tipo cierre.
@@ -353,15 +360,18 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           value: profile?.gender.label(t) ?? '—',
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppTextField(
-          label: t.registerIdNumber,
-          controller: _docId,
-          hint: t.registerIdNumberHint,
-          textInputAction: TextInputAction.next,
-          // El boton de continuar depende de este campo: sin repintar, se
-          // quedaria gris con el documento ya escrito.
-          onChanged: (_) => setState(() {}),
-        ),
+        if ((profile?.ci?.trim() ?? '').isNotEmpty)
+          _ReadOnlyField(label: t.registerIdNumber, value: profile!.ci!.trim())
+        else
+          AppTextField(
+            label: t.registerIdNumber,
+            controller: _docId,
+            hint: t.registerIdNumberHint,
+            textInputAction: TextInputAction.next,
+            // El boton de continuar depende de este campo: sin repintar, se
+            // quedaria gris con el documento ya escrito.
+            onChanged: (_) => setState(() {}),
+          ),
         const SizedBox(height: AppSpacing.lg),
         PhoneField(
           label: t.registerPhone,
@@ -662,7 +672,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final total = flow.quote?.total;
     final puedeAvanzar = switch (_step) {
       0 =>
-        _docId.text.trim().isNotEmpty &&
+        _docIdDe(profile).isNotEmpty &&
             _phone.text.trim().isNotEmpty &&
             _knowsCam != null &&
             _acceptsDonorCall != null,
