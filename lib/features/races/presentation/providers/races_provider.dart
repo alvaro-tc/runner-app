@@ -1,6 +1,7 @@
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Mis carreras. Solo lo confirmado: los borradores viven en el flujo de
@@ -46,6 +47,22 @@ final racesSummaryProvider = FutureProvider<RaceTotals>((ref) async {
   // Se recalcula cuando cambia la lista: inscribirse o cancelar mueve el total.
   ref.watch(racesProvider);
   return (await ref.watch(raceRepositoryProvider).fetchTotals()).unwrap();
+});
+
+/// Las inscripciones con el comprobante subido, esperando a un administrador.
+///
+/// No son carreras: el servidor no las devuelve en "mis carreras" hasta que el
+/// pago se valida. Se piden aparte para que quien subio su captura la siga
+/// viendo, y para no dejarle empezar una segunda inscripcion a la misma
+/// maraton mientras tanto.
+final awaitingValidationProvider = FutureProvider<List<Registration>>((
+  ref,
+) async {
+  // Cuelga de la lista: refrescar "mis carreras" —o inscribirse, o cancelar—
+  // tiene que refrescar tambien lo que esta esperando validacion.
+  ref.watch(racesProvider);
+  return (await ref.watch(raceRepositoryProvider).awaitingValidation())
+      .unwrap();
 });
 
 /// El detalle **se pide aparte**: la lista no trae recorrido, parciales ni

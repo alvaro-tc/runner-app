@@ -4,6 +4,8 @@ import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/races/presentation/providers/races_provider.dart';
+import 'package:camrun/features/races/presentation/widgets/pending_validation.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -298,15 +300,22 @@ class _TimelineRow extends StatelessWidget {
   }
 }
 
-class _BottomBar extends StatelessWidget {
+class _BottomBar extends ConsumerWidget {
   const _BottomBar({required this.marathon});
 
   final Marathon marathon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final canRegister = marathon.status.acceptsEntries;
+    // Con el comprobante ya subido no se vuelve a empezar: el servidor
+    // reutilizaria la misma inscripcion y acabaria con dos cobros abiertos
+    // para la misma plaza. Lo que falta aqui no es pagar, es esperar.
+    final esperandoValidacion =
+        (ref.watch(awaitingValidationProvider).value ?? const []).any(
+          (registro) => registro.marathonId == marathon.id,
+        );
+    final canRegister = marathon.status.acceptsEntries && !esperandoValidacion;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenH,
@@ -342,10 +351,16 @@ class _BottomBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.base),
             Expanded(
               child: AppButton(
-                label: canRegister
+                label: esperandoValidacion
+                    ? context.l10n.racesPendingValidation
+                    : canRegister
                     ? context.l10n.marathonRegisterNow
                     : marathon.status.label(context.l10n),
-                onPressed: canRegister
+                // Esperando validacion el boton sigue vivo, pero no lleva al
+                // alta: lleva al motivo por el que no se puede repetir.
+                onPressed: esperandoValidacion
+                    ? () => showPendingValidationDialog(context)
+                    : canRegister
                     ? () => context.push(Routes.marathonRegisterOf(marathon.id))
                     : null,
               ),

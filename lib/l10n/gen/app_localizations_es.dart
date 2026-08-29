@@ -776,6 +776,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get racesViewDetails => 'Ver detalles';
 
   @override
+  String get racesPendingValidation => 'Pendiente de validación';
+
+  @override
+  String get racesPendingValidationBody =>
+      'Espera 1 o 2 días hasta que un administrador valide tu pago por QR.';
+
+  @override
   String get raceDetailTitle => 'Mi carrera';
 
   @override

@@ -8,6 +8,7 @@ import 'package:camrun/features/home/presentation/providers/marathon_providers.d
 import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/features/races/domain/entities/registration.dart';
+import 'package:camrun/features/races/presentation/providers/races_provider.dart';
 import 'package:camrun/features/races/presentation/providers/registration_provider.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
@@ -206,12 +207,22 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final ok = await _flow.uploadProof(filePath: imagen.path);
     if (!mounted) return;
 
-    context.showSnack(
-      ok
-          ? context.l10n.registerProofSent
-          : ref.read(registrationFlowProvider).error?.message ??
-                context.l10n.registerProofUploadFailed,
-    );
+    if (!ok) {
+      context.showSnack(
+        ref.read(registrationFlowProvider).error?.message ??
+            context.l10n.registerProofUploadFailed,
+      );
+      return;
+    }
+
+    // Con la captura mandada ya no queda nada que hacer en esta pantalla: lo
+    // siguiente lo hace un administrador, y dejar al usuario mirando el QR le
+    // hace creer que todavia le falta un paso. La inscripcion queda visible en
+    // "Mis carreras" como pendiente de validacion.
+    ref.invalidate(racesProvider);
+    context
+      ..showSnack(context.l10n.registerProofSent)
+      ..go(Routes.home);
   }
 
   /// Cancela el pago abierto, y con él la inscripción.

@@ -38,6 +38,33 @@ class RemoteRaceRepository implements RaceRepository {
     return raceEntryFrom(carrera, payments: pagos);
   });
 
+  /// Las que esperan validacion: pendientes de pago **con comprobante en
+  /// revision**.
+  ///
+  /// El estado de la inscripcion no alcanza para saberlo: una que se quedo en
+  /// el paso 3 sin subir nada tambien esta `pending_payment`, y anunciarle que
+  /// espere a un administrador seria mandarla a esperar algo que nadie va a
+  /// mirar. Quien lo dice es el comprobante del ultimo cobro.
+  @override
+  Future<Result<List<Registration>>> awaitingValidation() => guard(() async {
+    final pendientes = [
+      for (final j in await _api.myRegistrations(status: 'pending_payment'))
+        registrationFrom(j),
+    ];
+
+    final conPago = await Future.wait(
+      pendientes.map((registro) async {
+        final pagos = await _api.paymentsOf(registro.id);
+        return (registro, pagos.isEmpty ? null : paymentFrom(pagos.first));
+      }),
+    );
+
+    return [
+      for (final (registro, pago) in conPago)
+        if (pago?.isAwaitingReview ?? false) registro,
+    ];
+  });
+
   @override
   Future<Result<Registration>> startRegistration({
     required String marathonId,

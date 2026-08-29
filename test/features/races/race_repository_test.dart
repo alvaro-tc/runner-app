@@ -160,6 +160,72 @@ void main() {
     );
   });
 
+  // ─── Esperando validacion ────────────────────────────────────────────────
+
+  group('awaitingValidation', () {
+    const inscripcion = {
+      'id': 'r9',
+      'marathon': {
+        'id': 'm1',
+        'name': 'Maraton de prueba',
+        'city': 'La Paz',
+        'startsAt': '2026-09-12T10:00:00Z',
+        'distanceMeters': 42195,
+      },
+      'status': 'pending_payment',
+      'step': 3,
+      'items': <Object?>[],
+      'subtotalCents': 49000,
+      'totalCents': 51000,
+      'currency': 'BOB',
+    };
+
+    Map<String, Object?> pago({Map<String, Object?>? proof}) => {
+      'id': 'p9',
+      'method': 'qr_manual',
+      'status': 'pending',
+      'amountCents': 51000,
+      'currency': 'BOB',
+      'methodDetails': const <String, Object?>{},
+      'proof': proof,
+    };
+
+    ResponseBody responder(RequestOptions req, Object pagos) =>
+        req.path.endsWith('/payments')
+        ? envelope(pagos)
+        : envelope([inscripcion]);
+
+    test('con el comprobante en revision, la inscripcion se ve', () async {
+      final repo = build(
+        (req) async => responder(req, [
+          pago(proof: {'id': 'pr1', 'status': 'in_review', 'imageUrl': 'x'}),
+        ]),
+      );
+
+      final esperando = (await repo.awaitingValidation()).unwrap();
+
+      expect(esperando, hasLength(1));
+      expect(esperando.first.marathonId, 'm1');
+      expect(esperando.first.marathonCity, 'La Paz');
+    });
+
+    test('sin comprobante subido no se espera a nadie', () async {
+      final repo = build((req) async => responder(req, [pago()]));
+
+      expect((await repo.awaitingValidation()).unwrap(), isEmpty);
+    });
+
+    test('un comprobante rechazado tampoco espera', () async {
+      final repo = build(
+        (req) async => responder(req, [
+          pago(proof: {'id': 'pr1', 'status': 'rejected', 'imageUrl': 'x'}),
+        ]),
+      );
+
+      expect((await repo.awaitingValidation()).unwrap(), isEmpty);
+    });
+  });
+
   // ─── Totales ─────────────────────────────────────────────────────────────
 
   test(

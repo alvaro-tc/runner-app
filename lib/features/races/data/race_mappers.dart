@@ -197,6 +197,8 @@ Registration registrationFrom(Map<String, dynamic> j) {
     state: RegistrationState.fromApi(j['status'] as String?),
     step: RegistrationStep.fromNumber(_i(j['step'])),
     quote: quoteFrom(j),
+    marathonDate: _fechaOpcional(maraton['startsAt']),
+    marathonCity: maraton['city'] as String?,
     categoryId: j['categoryId'] as String?,
     bibNumber: j['bibNumber'] as String?,
   );

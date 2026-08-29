@@ -126,6 +126,10 @@ class _FakeRaceRepository implements RaceRepository {
   final List<String> canceladas = [];
 
   @override
+  Future<Result<List<Registration>>> awaitingValidation() async =>
+      const Result.success([]);
+
+  @override
   Future<Result<void>> cancel(String registrationId) async {
     canceladas.add(registrationId);
     return const Result.success(null);

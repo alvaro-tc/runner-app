@@ -1490,6 +1490,18 @@ abstract class AppLocalizations {
   /// **'View details'**
   String get racesViewDetails;
 
+  /// No description provided for @racesPendingValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending validation'**
+  String get racesPendingValidation;
+
+  /// No description provided for @racesPendingValidationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait 1 or 2 days until an administrator validates your QR payment.'**
+  String get racesPendingValidationBody;
+
   /// No description provided for @raceDetailTitle.
   ///
   /// In en, this message translates to:

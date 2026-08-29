@@ -18,6 +18,15 @@ abstract interface class RaceRepository {
   /// lista: el gasto sale de los cobros, que la lista no trae.
   Future<Result<RaceTotals>> fetchTotals();
 
+  /// Las inscripciones que ya mandaron el comprobante y esperan a que un
+  /// administrador lo mire.
+  ///
+  /// Van aparte de [fetchEntries] porque **no son carreras todavia**: el
+  /// servidor no las devuelve en "mis carreras" hasta que el pago se valida, y
+  /// sin esto el usuario que sube su captura no vuelve a ver su inscripcion en
+  /// ningun sitio.
+  Future<Result<List<Registration>>> awaitingValidation();
+
   // ─── Inscripcion ─────────────────────────────────────────────────────────
 
   /// Paso 1. Devuelve el borrador que ya hubiera para esa maraton en vez de

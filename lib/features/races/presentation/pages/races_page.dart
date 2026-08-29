@@ -6,7 +6,9 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/domain/entities/registration.dart';
 import 'package:camrun/features/races/presentation/providers/races_provider.dart';
+import 'package:camrun/features/races/presentation/widgets/pending_validation.dart';
 import 'package:camrun/features/races/presentation/widgets/race_card.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
@@ -71,6 +73,13 @@ class _RacesPageState extends ConsumerState<RacesPage> {
     final catalogo = _showCompleted
         ? const <Marathon>[]
         : ref.watch(upcomingMarathonsProvider).value ?? const <Marathon>[];
+    // Las que subieron comprobante y esperan a un administrador. Van solo en
+    // "Upcoming" y **antes** que las confirmadas: es lo que el usuario acaba de
+    // hacer y de lo que quiere saber. Si la peticion falla no se pinta nada:
+    // un error aqui no puede llevarse por delante la lista de carreras.
+    final esperando = _showCompleted
+        ? const <Registration>[]
+        : ref.watch(awaitingValidationProvider).value ?? const <Registration>[];
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -92,9 +101,11 @@ class _RacesPageState extends ConsumerState<RacesPage> {
           onChanged: (v) => setState(() => _showCompleted = v),
         ),
         const SizedBox(height: AppSpacing.lg),
+        for (final registro in esperando)
+          PendingValidationCard(registration: registro),
         // Con el catalogo debajo, el cartel de vacio sobra: ya hay algo que
         // mirar y donde tocar.
-        if (shown.isEmpty && catalogo.isEmpty)
+        if (shown.isEmpty && esperando.isEmpty && catalogo.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xl),
             child: EmptyState(

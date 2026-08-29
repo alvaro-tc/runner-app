@@ -377,6 +377,8 @@
     }
   },
   "racesViewDetails": "View details",
+  "racesPendingValidation": "Pending validation",
+  "racesPendingValidationBody": "Wait 1 or 2 days until an administrator validates your QR payment.",
   "raceDetailTitle": "My race",
   "raceDetailNotFound": "We could not find that registration.",
   "raceCancelTitle": "Cancel this registration?",

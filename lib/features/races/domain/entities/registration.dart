@@ -235,6 +235,8 @@ class Registration {
     required this.state,
     required this.step,
     required this.quote,
+    this.marathonDate,
+    this.marathonCity,
     this.categoryId,
     this.bibNumber,
   });
@@ -242,6 +244,12 @@ class Registration {
   final String id;
   final String marathonId;
   final String marathonName;
+
+  /// Fecha y ciudad de la maraton. Solo para pintar una inscripcion que
+  /// todavia no es carrera —no sale en `/races/me`— sin ir a buscar el
+  /// catalogo entero por dos lineas de texto.
+  final DateTime? marathonDate;
+  final String? marathonCity;
   final RegistrationState state;
   final RegistrationStep step;
   final RegistrationQuote quote;

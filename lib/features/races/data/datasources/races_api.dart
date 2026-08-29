@@ -50,6 +50,20 @@ class RacesApi {
 
   // ─── Inscripcion, en tres pasos ──────────────────────────────────────────
 
+  /// Mis inscripciones, filtradas por estado (`pending_payment`, `draft`…).
+  ///
+  /// `/races/me` solo devuelve las **confirmadas**, asi que una inscripcion que
+  /// espera a que un administrador valide el comprobante no sale por alli: es
+  /// esta la unica forma de verla.
+  Future<List<Map<String, dynamic>>> myRegistrations({String? status}) =>
+      apiCall(() async {
+        final res = await _dio.get<dynamic>(
+          '/registrations',
+          queryParameters: {'status': ?status},
+        );
+        return (res.data as List).cast<Map<String, dynamic>>();
+      });
+
   /// Paso 1. Idempotente del lado del servidor: si ya hay un borrador para esa
   /// maraton lo devuelve actualizado en vez de abrir un segundo.
   Future<Map<String, dynamic>> createDraft({

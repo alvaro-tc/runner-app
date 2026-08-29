@@ -232,6 +232,8 @@
   "racesAvgPace": "Ritmo medio",
   "racesOfTotal": "de {total}",
   "racesViewDetails": "Ver detalles",
+  "racesPendingValidation": "Pendiente de validación",
+  "racesPendingValidationBody": "Espera 1 o 2 días hasta que un administrador valide tu pago por QR.",
   "raceDetailTitle": "Mi carrera",
   "raceDetailNotFound": "No encontramos esa inscripción.",
   "raceCancelTitle": "¿Cancelar esta inscripción?",
