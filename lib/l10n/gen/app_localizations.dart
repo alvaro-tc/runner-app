@@ -3458,6 +3458,198 @@ abstract class AppLocalizations {
   /// **'Only possible while it has no entrants. If it does, pull it from the catalogue instead.'**
   String get adminDeleteMarathonBody;
 
+  /// No description provided for @adminScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get adminScheduleTitle;
+
+  /// No description provided for @adminScheduleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The race-day programme, as runners see it.'**
+  String get adminScheduleHint;
+
+  /// No description provided for @adminScheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activities yet.'**
+  String get adminScheduleEmpty;
+
+  /// No description provided for @adminScheduleAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add activity'**
+  String get adminScheduleAdd;
+
+  /// No description provided for @adminScheduleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get adminScheduleTime;
+
+  /// No description provided for @adminScheduleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get adminScheduleName;
+
+  /// No description provided for @adminScheduleDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail (optional)'**
+  String get adminScheduleDetail;
+
+  /// No description provided for @adminIncludesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'\'s included'**
+  String get adminIncludesTitle;
+
+  /// No description provided for @adminIncludesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the entry gets you: tee, medal, hydration…'**
+  String get adminIncludesHint;
+
+  /// No description provided for @adminIncludesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing listed yet.'**
+  String get adminIncludesEmpty;
+
+  /// No description provided for @adminIncludesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get adminIncludesAdd;
+
+  /// No description provided for @adminIncludesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes'**
+  String get adminIncludesLabel;
+
+  /// No description provided for @adminCategoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminCategoriesTitle;
+
+  /// No description provided for @adminCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The surcharge is added on top of the base entry fee.'**
+  String get adminCategoriesHint;
+
+  /// No description provided for @adminCategoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories: everyone enters at the base price.'**
+  String get adminCategoriesEmpty;
+
+  /// No description provided for @adminCategoryAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get adminCategoryAdd;
+
+  /// No description provided for @adminCategoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminCategoryName;
+
+  /// No description provided for @adminCategorySurcharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Surcharge (Bs)'**
+  String get adminCategorySurcharge;
+
+  /// No description provided for @adminCategoryFree.
+  ///
+  /// In en, this message translates to:
+  /// **'No surcharge'**
+  String get adminCategoryFree;
+
+  /// No description provided for @adminExtrasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add-ons'**
+  String get adminExtrasTitle;
+
+  /// No description provided for @adminExtrasHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What runners can buy alongside their entry.'**
+  String get adminExtrasHint;
+
+  /// No description provided for @adminExtrasEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on sale yet.'**
+  String get adminExtrasEmpty;
+
+  /// No description provided for @adminExtraAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add add-on'**
+  String get adminExtraAdd;
+
+  /// No description provided for @adminExtraName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminExtraName;
+
+  /// No description provided for @adminExtraPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (Bs)'**
+  String get adminExtraPrice;
+
+  /// No description provided for @adminExtraStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock (empty = unlimited)'**
+  String get adminExtraStock;
+
+  /// No description provided for @adminExtraStockLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} left'**
+  String adminExtraStockLeft(int count);
+
+  /// No description provided for @adminAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the marathon first to add these'**
+  String get adminAfterSave;
+
+  /// No description provided for @adminRequiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field can\'\'t be empty.'**
+  String get adminRequiredField;
+
+  /// No description provided for @adminDeleteRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String adminDeleteRowTitle(Object name);
+
+  /// No description provided for @adminDeleteCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries that used it keep their bib and payment; they\'\'re just left without a category.'**
+  String get adminDeleteCategoryBody;
+
+  /// No description provided for @adminDeleteExtraBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It stops being on sale. Anything already bought is kept.'**
+  String get adminDeleteExtraBody;
+
   /// No description provided for @adminUsersTitle.
   ///
   /// In en, this message translates to:

@@ -30,6 +30,10 @@ class AdminMarathon {
     this.paymentQrPayload,
     this.paymentQrInstructions,
     this.route = const [],
+    this.schedule = const [],
+    this.includes = const [],
+    this.categories = const [],
+    this.extras = const [],
     this.liveStartedAt,
     this.liveFinishedAt,
   });
@@ -59,6 +63,21 @@ class AdminMarathon {
     paymentQrPayload: json['paymentQrPayload'] as String?,
     paymentQrInstructions: json['paymentQrInstructions'] as String?,
     route: routeFromGeoJson(json['routeGeoJson']),
+    schedule: [
+      for (final fila in json['schedule'] as List? ?? const [])
+        if (fila is Map) AdminScheduleItem.fromJson(fila),
+    ],
+    includes: [
+      for (final linea in json['includes'] as List? ?? const []) '$linea',
+    ],
+    categories: [
+      for (final fila in json['categories'] as List? ?? const [])
+        if (fila is Map) AdminCategory.fromJson(fila),
+    ],
+    extras: [
+      for (final fila in json['extras'] as List? ?? const [])
+        if (fila is Map) AdminExtra.fromJson(fila),
+    ],
     liveStartedAt: DateTime.tryParse(json['liveStartedAt'] as String? ?? ''),
     liveFinishedAt: DateTime.tryParse(json['liveFinishedAt'] as String? ?? ''),
   );
@@ -93,6 +112,16 @@ class AdminMarathon {
   /// El trazado oficial. Solo llega en el detalle: la lista no lo trae porque
   /// son miles de coordenadas por carrera y ahi no se pinta ningun mapa.
   final List<GeoPoint> route;
+
+  /// El programa del dia y lo que la inscripcion incluye. Van como `jsonb` en
+  /// la maraton, asi que se guardan con el resto del formulario.
+  final List<AdminScheduleItem> schedule;
+  final List<String> includes;
+
+  /// Categorias y adicionales. Son tablas aparte con su propio CRUD: se
+  /// guardan al momento, no con el boton de guardar. Solo llegan en el detalle.
+  final List<AdminCategory> categories;
+  final List<AdminExtra> extras;
 
   /// Cuando el admin dio la largada de verdad, no la hora programada.
   final DateTime? liveStartedAt;
@@ -139,9 +168,84 @@ class AdminMarathon {
         paymentQrPayload: paymentQrPayload,
         paymentQrInstructions: paymentQrInstructions,
         route: route,
+        schedule: schedule,
+        includes: includes,
+        categories: categories,
+        extras: extras,
         liveStartedAt: liveStartedAt,
         liveFinishedAt: liveFinishedAt,
       );
+}
+
+/// Una linea del programa del dia.
+@immutable
+class AdminScheduleItem {
+  const AdminScheduleItem({
+    required this.time,
+    required this.title,
+    this.detail = '',
+  });
+
+  factory AdminScheduleItem.fromJson(Map<dynamic, dynamic> json) =>
+      AdminScheduleItem(
+        time: json['time'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        detail: json['detail'] as String? ?? '',
+      );
+
+  final String time;
+  final String title;
+  final String detail;
+
+  Map<String, Object?> toJson() => {
+    'time': time,
+    'title': title,
+    if (detail.isNotEmpty) 'detail': detail,
+  };
+}
+
+/// Una categoria: el mismo recorrido, distinto publico y —a veces— distinto
+/// precio. El recargo se suma al precio base al inscribirse.
+@immutable
+class AdminCategory {
+  const AdminCategory({
+    required this.id,
+    required this.name,
+    this.extraPriceCents = 0,
+  });
+
+  factory AdminCategory.fromJson(Map<dynamic, dynamic> json) => AdminCategory(
+    id: json['id'] as String,
+    name: json['name'] as String? ?? '',
+    extraPriceCents: (json['extraPriceCents'] as num?)?.toInt() ?? 0,
+  );
+
+  final String id;
+  final String name;
+  final int extraPriceCents;
+}
+
+/// Un adicional comprable: remera, bolsa, foto. `stock` nulo = sin limite.
+@immutable
+class AdminExtra {
+  const AdminExtra({
+    required this.id,
+    required this.name,
+    this.priceCents = 0,
+    this.stock,
+  });
+
+  factory AdminExtra.fromJson(Map<dynamic, dynamic> json) => AdminExtra(
+    id: json['id'] as String,
+    name: json['name'] as String? ?? '',
+    priceCents: (json['priceCents'] as num?)?.toInt() ?? 0,
+    stock: (json['stock'] as num?)?.toInt(),
+  );
+
+  final String id;
+  final String name;
+  final int priceCents;
+  final int? stock;
 }
 
 /// Un `LineString` GeoJSON a puntos. Las coordenadas vienen **`[lng, lat]`**,

@@ -182,4 +182,53 @@ void main() {
     expect(normalizeRole('administrador'), 'admin');
     expect(normalizeRole(null), 'runner');
   });
+
+  group('el detalle trae cronograma, incluye, categorias y extras', () {
+    test('los cuatro se leen del JSON del panel', () {
+      final m = AdminMarathon.fromJson({
+        'id': 'm1',
+        'name': '10K',
+        'schedule': [
+          {'time': '06:00', 'title': 'Acreditacion', 'detail': 'Plaza mayor'},
+        ],
+        'includes': ['remera', 'medalla'],
+        'categories': [
+          {'id': 'c1', 'name': 'Elite', 'extraPriceCents': 5000},
+        ],
+        'extras': [
+          {'id': 'e1', 'name': 'Foto', 'priceCents': 3000, 'stock': 20},
+        ],
+      });
+
+      expect(m.schedule.single.time, '06:00');
+      expect(m.schedule.single.detail, 'Plaza mayor');
+      expect(m.includes, ['remera', 'medalla']);
+      expect(m.categories.single.extraPriceCents, 5000);
+      expect(m.extras.single.stock, 20);
+    });
+
+    test('sin ellos —la lista no los trae— quedan vacios, no nulos', () {
+      final m = AdminMarathon.fromJson({'id': 'm1', 'name': '10K'});
+
+      expect(m.schedule, isEmpty);
+      expect(m.includes, isEmpty);
+      expect(m.categories, isEmpty);
+      expect(m.extras, isEmpty);
+    });
+
+    test('stock nulo es «sin limite», y sobrevive el ida y vuelta', () {
+      final item = AdminScheduleItem.fromJson(const {
+        'time': '07:00',
+        'title': 'Largada',
+      });
+
+      // Sin detalle no se manda la clave: un `detail: ""` pinta una linea
+      // vacia bajo el titulo en la pantalla del corredor.
+      expect(item.toJson(), {'time': '07:00', 'title': 'Largada'});
+      expect(
+        AdminExtra.fromJson(const {'id': 'e1', 'name': 'Foto'}).stock,
+        isNull,
+      );
+    });
+  });
 }

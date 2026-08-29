@@ -1865,6 +1865,113 @@ class AppLocalizationsEs extends AppLocalizations {
       'Solo se puede si todavía no tiene inscritos. Si los tiene, retírala del catálogo en vez de borrarla.';
 
   @override
+  String get adminScheduleTitle => 'Cronograma';
+
+  @override
+  String get adminScheduleHint =>
+      'El programa del día, tal como lo ve el corredor.';
+
+  @override
+  String get adminScheduleEmpty => 'Todavía no hay ninguna actividad.';
+
+  @override
+  String get adminScheduleAdd => 'Añadir actividad';
+
+  @override
+  String get adminScheduleTime => 'Hora';
+
+  @override
+  String get adminScheduleName => 'Actividad';
+
+  @override
+  String get adminScheduleDetail => 'Detalle (opcional)';
+
+  @override
+  String get adminIncludesTitle => 'Qué incluye';
+
+  @override
+  String get adminIncludesHint =>
+      'Lo que la inscripción da: remera, medalla, hidratación…';
+
+  @override
+  String get adminIncludesEmpty => 'Todavía no has puesto nada.';
+
+  @override
+  String get adminIncludesAdd => 'Añadir';
+
+  @override
+  String get adminIncludesLabel => 'Incluye';
+
+  @override
+  String get adminCategoriesTitle => 'Categorías';
+
+  @override
+  String get adminCategoriesHint =>
+      'El recargo se suma al precio base de la inscripción.';
+
+  @override
+  String get adminCategoriesEmpty =>
+      'Sin categorías: todos se inscriben al precio base.';
+
+  @override
+  String get adminCategoryAdd => 'Añadir categoría';
+
+  @override
+  String get adminCategoryName => 'Nombre';
+
+  @override
+  String get adminCategorySurcharge => 'Recargo (Bs)';
+
+  @override
+  String get adminCategoryFree => 'Sin recargo';
+
+  @override
+  String get adminExtrasTitle => 'Adicionales';
+
+  @override
+  String get adminExtrasHint =>
+      'Lo que el corredor puede comprar aparte al inscribirse.';
+
+  @override
+  String get adminExtrasEmpty => 'Todavía no hay adicionales a la venta.';
+
+  @override
+  String get adminExtraAdd => 'Añadir adicional';
+
+  @override
+  String get adminExtraName => 'Nombre';
+
+  @override
+  String get adminExtraPrice => 'Precio (Bs)';
+
+  @override
+  String get adminExtraStock => 'Stock (vacío = sin límite)';
+
+  @override
+  String adminExtraStockLeft(int count) {
+    return '$count disponibles';
+  }
+
+  @override
+  String get adminAfterSave => 'Guarda la maratón para poder añadirlos';
+
+  @override
+  String get adminRequiredField => 'Este campo no puede quedar vacío.';
+
+  @override
+  String adminDeleteRowTitle(Object name) {
+    return '¿Eliminar «$name»?';
+  }
+
+  @override
+  String get adminDeleteCategoryBody =>
+      'Las inscripciones que la usaban se quedan sin categoría, con su dorsal y su pago intactos.';
+
+  @override
+  String get adminDeleteExtraBody =>
+      'Deja de estar a la venta. Lo que ya se compró no se pierde.';
+
+  @override
   String get adminUsersTitle => 'Usuarios';
 
   @override

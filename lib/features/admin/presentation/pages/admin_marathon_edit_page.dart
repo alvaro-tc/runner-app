@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/data/qr_image_reader.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_route_editor_page.dart';
@@ -106,6 +109,12 @@ class _FormularioState extends ConsumerState<_Formulario> {
       _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
   late List<GeoPoint> _ruta = _m?.route ?? const [];
 
+  /// Cronograma y "que incluye" son dos campos `jsonb` de la propia maraton,
+  /// asi que se editan aqui y viajan con el boton de guardar, como el nombre.
+  /// Categorias y extras no: esos son tablas aparte y se guardan al momento.
+  late List<AdminScheduleItem> _cronograma = _m?.schedule ?? const [];
+  late List<String> _incluye = _m?.includes ?? const [];
+
   /// Como estaba todo al abrir. Es contra esto que se decide que viaja: la
   /// edicion es parcial, y mandar el objeto entero pisaria con valores viejos
   /// lo que otro haya cambiado mientras tanto.
@@ -175,6 +184,10 @@ class _FormularioState extends ConsumerState<_Formulario> {
     'distanceMeters': _metros,
     'paymentQrPayload': _qrPayload ?? '',
     'paymentQrInstructions': _qrTexto.text.trim(),
+    // Las listas se comparan por su JSON: es lo mismo que se va a mandar, y
+    // asi un `==` de String basta para saber si cambiaron.
+    'schedule': jsonEncode([for (final i in _cronograma) i.toJson()]),
+    'includes': jsonEncode(_incluye),
     // El trazado se compara por su forma, no por la lista entera: son miles de
     // puntos y basta con saber si cambio.
     'routeGeoJson': _huellaDeRuta(_ruta),
@@ -194,7 +207,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     if (_esAlta) {
       return {
         for (final e in ahora.entries)
-          if (e.key != 'routeGeoJson') e.key: e.value,
+          if (e.key != 'routeGeoJson') e.key: _paraLaApi(e.key, e.value),
         if (_ruta.length > 1) 'routeGeoJson': routeToGeoJson(_ruta),
       };
     }
@@ -204,10 +217,17 @@ class _FormularioState extends ConsumerState<_Formulario> {
       if (e.value == _inicial[e.key]) continue;
       cambios[e.key] = e.key == 'routeGeoJson'
           ? (_ruta.length > 1 ? routeToGeoJson(_ruta) : null)
-          : e.value;
+          : _paraLaApi(e.key, e.value);
     }
     return cambios;
   }
+
+  /// Las listas viven en la instantanea como JSON —para poder compararlas— y
+  /// salen de ella como listas, que es lo que espera la API.
+  static Object? _paraLaApi(String campo, Object? valor) =>
+      const {'schedule', 'includes'}.contains(campo)
+      ? jsonDecode(valor! as String)
+      : valor;
 
   // ─── Acciones ─────────────────────────────────────────────────────────────
 
@@ -424,24 +444,11 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
   Future<void> _borrar() async {
     final t = context.l10n;
-    final confirmado = await showDialog<bool>(
-      context: context,
-      builder: (dialogo) => AlertDialog(
-        title: Text(t.adminDeleteMarathonTitle),
-        content: Text(t.adminDeleteMarathonBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogo).pop(false),
-            child: Text(t.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogo).pop(true),
-            child: Text(t.adminDelete),
-          ),
-        ],
-      ),
+    final confirmado = await _confirmar(
+      t.adminDeleteMarathonTitle,
+      t.adminDeleteMarathonBody,
     );
-    if (confirmado != true || !mounted) return;
+    if (!confirmado || !mounted) return;
 
     setState(() => _guardando = true);
     try {
@@ -502,6 +509,14 @@ class _FormularioState extends ConsumerState<_Formulario> {
               ),
             ),
           ],
+          const SizedBox(height: AppSpacing.lg),
+          _seccionCronograma(t),
+          const SizedBox(height: AppSpacing.lg),
+          _seccionIncluye(t),
+          const SizedBox(height: AppSpacing.lg),
+          _seccionCategorias(t),
+          const SizedBox(height: AppSpacing.lg),
+          _seccionExtras(t),
           if (!_esAlta) ...[
             const SizedBox(height: AppSpacing.lg),
             _seccionEstado(t),
@@ -641,6 +656,336 @@ class _FormularioState extends ConsumerState<_Formulario> {
         ),
       ),
     ],
+  );
+
+  // ─── Cronograma, incluye, categorias y extras ─────────────────────────────
+
+  /// El programa del dia. Se guarda con el resto del formulario.
+  Widget _seccionCronograma(AppLocalizations t) => _ListaEditable(
+    title: t.adminScheduleTitle,
+    hint: t.adminScheduleHint,
+    emptyLabel: t.adminScheduleEmpty,
+    addLabel: t.adminScheduleAdd,
+    icon: Icons.schedule_rounded,
+    onAdd: _editarActividad,
+    rows: [
+      for (final (i, item) in _cronograma.indexed)
+        (
+          title: [
+            item.time,
+            item.title,
+          ].where((x) => x.isNotEmpty).join('  ·  '),
+          subtitle: item.detail.isEmpty ? null : item.detail,
+          onEdit: () => _editarActividad(indice: i),
+          onDelete: () =>
+              setState(() => _cronograma = [..._cronograma]..removeAt(i)),
+        ),
+    ],
+  );
+
+  Future<void> _editarActividad({int? indice}) async {
+    final t = context.l10n;
+    final actual = indice == null ? null : _cronograma[indice];
+    final valores = await _pedirCampos(
+      title: t.adminScheduleTitle,
+      campos: [
+        (
+          label: t.adminScheduleTime,
+          value: actual?.time ?? '',
+          numeric: false,
+          obligatorio: true,
+        ),
+        (
+          label: t.adminScheduleName,
+          value: actual?.title ?? '',
+          numeric: false,
+          obligatorio: true,
+        ),
+        (
+          label: t.adminScheduleDetail,
+          value: actual?.detail ?? '',
+          numeric: false,
+          obligatorio: false,
+        ),
+      ],
+    );
+    if (valores == null) return;
+
+    final item = AdminScheduleItem(
+      time: valores[0],
+      title: valores[1],
+      detail: valores[2],
+    );
+    setState(() {
+      final lista = [..._cronograma];
+      if (indice == null) {
+        lista.add(item);
+      } else {
+        lista[indice] = item;
+      }
+      _cronograma = lista;
+    });
+  }
+
+  /// Lo que la inscripcion incluye. Tambien viaja con el boton de guardar.
+  Widget _seccionIncluye(AppLocalizations t) => _ListaEditable(
+    title: t.adminIncludesTitle,
+    hint: t.adminIncludesHint,
+    emptyLabel: t.adminIncludesEmpty,
+    addLabel: t.adminIncludesAdd,
+    icon: Icons.check_circle_outline_rounded,
+    onAdd: _editarIncluye,
+    rows: [
+      for (final (i, linea) in _incluye.indexed)
+        (
+          title: linea,
+          subtitle: null,
+          onEdit: () => _editarIncluye(indice: i),
+          onDelete: () => setState(() => _incluye = [..._incluye]..removeAt(i)),
+        ),
+    ],
+  );
+
+  Future<void> _editarIncluye({int? indice}) async {
+    final t = context.l10n;
+    final valores = await _pedirCampos(
+      title: t.adminIncludesTitle,
+      campos: [
+        (
+          label: t.adminIncludesLabel,
+          value: indice == null ? '' : _incluye[indice],
+          numeric: false,
+          obligatorio: true,
+        ),
+      ],
+    );
+    if (valores == null) return;
+
+    setState(() {
+      final lista = [..._incluye];
+      if (indice == null) {
+        lista.add(valores[0]);
+      } else {
+        lista[indice] = valores[0];
+      }
+      _incluye = lista;
+    });
+  }
+
+  /// Las categorias. A diferencia de las dos de arriba son filas de su propia
+  /// tabla, con su id: se crean y se borran al momento, no al guardar. Por eso
+  /// necesitan que la maraton exista antes, igual que el afiche.
+  Widget _seccionCategorias(AppLocalizations t) => _ListaEditable(
+    title: t.adminCategoriesTitle,
+    hint: t.adminCategoriesHint,
+    emptyLabel: t.adminCategoriesEmpty,
+    addLabel: t.adminCategoryAdd,
+    icon: Icons.groups_outlined,
+    enabled: !_esAlta && !_guardando,
+    disabledHint: _esAlta ? t.adminAfterSave : null,
+    onAdd: _editarCategoria,
+    rows: [
+      for (final c in _m?.categories ?? const <AdminCategory>[])
+        (
+          title: c.name,
+          subtitle: c.extraPriceCents == 0
+              ? t.adminCategoryFree
+              : '+ ${Fmt.money(c.extraPriceCents / 100, _moneda)}',
+          onEdit: () => _editarCategoria(actual: c),
+          onDelete: () => _borrarFila(
+            nombre: c.name,
+            cuerpo: t.adminDeleteCategoryBody,
+            borrar: (api) => api.deleteCategory(c.id),
+          ),
+        ),
+    ],
+  );
+
+  Future<void> _editarCategoria({AdminCategory? actual}) async {
+    final t = context.l10n;
+    final valores = await _pedirCampos(
+      title: t.adminCategoriesTitle,
+      campos: [
+        (
+          label: t.adminCategoryName,
+          value: actual?.name ?? '',
+          numeric: false,
+          obligatorio: true,
+        ),
+        (
+          label: t.adminCategorySurcharge,
+          value: actual == null
+              ? ''
+              : (actual.extraPriceCents / 100).toStringAsFixed(2),
+          numeric: true,
+          obligatorio: false,
+        ),
+      ],
+    );
+    if (valores == null) return;
+
+    final cuerpo = <String, dynamic>{
+      'name': valores[0],
+      'extraPriceCents': _aCentavos(valores[1]) ?? 0,
+    };
+    await _guardarFila(
+      (api, id) => actual == null
+          ? api.createCategory(id, cuerpo)
+          : api.updateCategory(actual.id, cuerpo),
+    );
+  }
+
+  /// Los adicionales comprables. Mismo trato que las categorias.
+  Widget _seccionExtras(AppLocalizations t) => _ListaEditable(
+    title: t.adminExtrasTitle,
+    hint: t.adminExtrasHint,
+    emptyLabel: t.adminExtrasEmpty,
+    addLabel: t.adminExtraAdd,
+    icon: Icons.shopping_bag_outlined,
+    enabled: !_esAlta && !_guardando,
+    disabledHint: _esAlta ? t.adminAfterSave : null,
+    onAdd: _editarExtra,
+    rows: [
+      for (final e in _m?.extras ?? const <AdminExtra>[])
+        (
+          title: e.name,
+          subtitle: [
+            Fmt.money(e.priceCents / 100, _moneda),
+            if (e.stock != null) t.adminExtraStockLeft(e.stock!),
+          ].join('  ·  '),
+          onEdit: () => _editarExtra(actual: e),
+          onDelete: () => _borrarFila(
+            nombre: e.name,
+            cuerpo: t.adminDeleteExtraBody,
+            borrar: (api) => api.deleteExtra(e.id),
+          ),
+        ),
+    ],
+  );
+
+  Future<void> _editarExtra({AdminExtra? actual}) async {
+    final t = context.l10n;
+    final valores = await _pedirCampos(
+      title: t.adminExtrasTitle,
+      campos: [
+        (
+          label: t.adminExtraName,
+          value: actual?.name ?? '',
+          numeric: false,
+          obligatorio: true,
+        ),
+        (
+          label: t.adminExtraPrice,
+          value: actual == null
+              ? ''
+              : (actual.priceCents / 100).toStringAsFixed(2),
+          numeric: true,
+          obligatorio: true,
+        ),
+        (
+          label: t.adminExtraStock,
+          value: actual?.stock?.toString() ?? '',
+          numeric: true,
+          obligatorio: false,
+        ),
+      ],
+    );
+    if (valores == null) return;
+
+    // Stock vacio es `null`, no cero: uno significa "sin limite" y el otro
+    // "agotado", y confundirlos deja el adicional fuera de venta.
+    final stock = valores[2].trim();
+    final cuerpo = <String, dynamic>{
+      'name': valores[0],
+      'priceCents': _aCentavos(valores[1]) ?? 0,
+      'stock': stock.isEmpty ? null : int.tryParse(stock),
+    };
+    await _guardarFila(
+      (api, id) => actual == null
+          ? api.createExtra(id, cuerpo)
+          : api.updateExtra(actual.id, cuerpo),
+    );
+  }
+
+  String get _moneda => _m?.currency ?? 'BOB';
+
+  static int? _aCentavos(String texto) {
+    final valor = double.tryParse(texto.trim().replaceAll(',', '.'));
+    return valor == null ? null : (valor * 100).round();
+  }
+
+  /// El ida y vuelta de guardar una categoria o un extra: manda, relee el
+  /// detalle y **espera** a que llegue, para que lo que se pinta sea la lista
+  /// del servidor y no una copia optimista que puede no haber cuajado.
+  Future<void> _guardarFila(
+    Future<void> Function(AdminApi api, String marathonId) enviar,
+  ) async {
+    final id = _m?.id;
+    if (id == null) return;
+
+    setState(() {
+      _guardando = true;
+      _errorGuardado = null;
+    });
+    try {
+      await enviar(ref.read(adminApiProvider), id);
+      ref.invalidate(adminMarathonProvider(id));
+      await ref.read(adminMarathonProvider(id).future);
+      ref.invalidate(adminMarathonsProvider);
+    } on Failure catch (f) {
+      if (mounted) setState(() => _errorGuardado = f);
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
+  }
+
+  Future<void> _borrarFila({
+    required String nombre,
+    required String cuerpo,
+    required Future<void> Function(AdminApi api) borrar,
+  }) async {
+    final confirmado = await _confirmar(
+      context.l10n.adminDeleteRowTitle(nombre),
+      cuerpo,
+    );
+    if (!confirmado || !mounted) return;
+    await _guardarFila((api, _) => borrar(api));
+  }
+
+  /// Un si/no destructivo. Lo usan el borrado de la maraton y el de cada
+  /// categoria o extra: son la misma pregunta con distinto texto.
+  Future<bool> _confirmar(String titulo, String cuerpo) async {
+    final t = context.l10n;
+    final respuesta = await showDialog<bool>(
+      context: context,
+      builder: (dialogo) => AlertDialog(
+        title: Text(titulo),
+        content: Text(cuerpo),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(false),
+            child: Text(t.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(true),
+            child: Text(t.adminDelete),
+          ),
+        ],
+      ),
+    );
+    return respuesta ?? false;
+  }
+
+  /// El unico formulario emergente de la pantalla: una actividad, una linea de
+  /// "incluye", una categoria o un extra. Son cuatro formas de lo mismo —dos o
+  /// tres campos y aceptar—, y cuatro dialogos separados se habrian ido
+  /// pareciendo cada vez menos entre si.
+  Future<List<String>?> _pedirCampos({
+    required String title,
+    required List<CampoDeDialogo> campos,
+  }) => showDialog<List<String>>(
+    context: context,
+    builder: (_) => _DialogoDeCampos(title: title, campos: campos),
   );
 
   /// El QR de cobro. A diferencia del afiche, aqui no se sube nada: la foto
@@ -787,6 +1132,181 @@ class _QrSlot extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Una fila de cualquiera de las cuatro listas del formulario.
+typedef FilaEditable = ({
+  String title,
+  String? subtitle,
+  VoidCallback onEdit,
+  VoidCallback onDelete,
+});
+
+/// Un campo del dialogo de alta/edicion.
+typedef CampoDeDialogo = ({
+  String label,
+  String value,
+  bool numeric,
+  bool obligatorio,
+});
+
+/// Una lista corta que se edita a mano: cronograma, "que incluye", categorias
+/// y extras. Las cuatro se pintan igual porque son lo mismo —unas pocas filas,
+/// tocar para editar, un boton de anadir—, y lo unico que cambia es de donde
+/// salen las filas y adonde van al guardarse.
+class _ListaEditable extends StatelessWidget {
+  const _ListaEditable({
+    required this.title,
+    required this.hint,
+    required this.emptyLabel,
+    required this.addLabel,
+    required this.rows,
+    required this.icon,
+    required this.onAdd,
+    this.enabled = true,
+    this.disabledHint,
+  });
+
+  final String title;
+  final String hint;
+  final String emptyLabel;
+  final String addLabel;
+  final List<FilaEditable> rows;
+  final IconData icon;
+  final VoidCallback onAdd;
+
+  /// En el alta, categorias y extras todavia no se pueden crear: no hay
+  /// maraton a la que colgarlas. [disabledHint] dice por que.
+  final bool enabled;
+  final String? disabledHint;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Rotulo(title: title, hint: hint),
+        const SizedBox(height: AppSpacing.md),
+        _Tarjeta(
+          children: [
+            if (rows.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    disabledHint ?? emptyLabel,
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
+                  ),
+                ),
+              ),
+            for (final (i, fila) in rows.indexed) ...[
+              if (i > 0) const AppDivider(),
+              StatRow(
+                icon: icon,
+                title: fila.title,
+                subtitle: fila.subtitle,
+                onTap: enabled ? fila.onEdit : null,
+                trailing: IconButton(
+                  onPressed: enabled ? fila.onDelete : null,
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                  color: c.textSecondary,
+                  tooltip: context.l10n.adminDelete,
+                ),
+              ),
+            ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: AppButton(
+                label: addLabel,
+                icon: Icons.add_rounded,
+                variant: AppButtonVariant.ghost,
+                size: AppButtonSize.sm,
+                onPressed: enabled ? onAdd : null,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// El dialogo de alta/edicion de una fila. Devuelve los valores en el mismo
+/// orden en que se le pidieron los campos, o `null` si se cancelo.
+class _DialogoDeCampos extends StatefulWidget {
+  const _DialogoDeCampos({required this.title, required this.campos});
+
+  final String title;
+  final List<CampoDeDialogo> campos;
+
+  @override
+  State<_DialogoDeCampos> createState() => _DialogoDeCamposState();
+}
+
+class _DialogoDeCamposState extends State<_DialogoDeCampos> {
+  late final _controles = [
+    for (final campo in widget.campos) TextEditingController(text: campo.value),
+  ];
+
+  /// Que campos se dejaron vacios siendo obligatorios. Solo se mira despues de
+  /// intentar aceptar: senalar en rojo algo que aun no se ha escrito es regana
+  /// antes de tiempo.
+  var _faltan = <int>{};
+
+  @override
+  void dispose() {
+    for (final control in _controles) {
+      control.dispose();
+    }
+    super.dispose();
+  }
+
+  void _aceptar() {
+    final faltan = {
+      for (final (i, campo) in widget.campos.indexed)
+        if (campo.obligatorio && _controles[i].text.trim().isEmpty) i,
+    };
+    if (faltan.isNotEmpty) {
+      setState(() => _faltan = faltan);
+      return;
+    }
+    Navigator.of(context).pop([for (final c in _controles) c.text.trim()]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (i, campo) in widget.campos.indexed) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: campo.label,
+                controller: _controles[i],
+                errorText: _faltan.contains(i) ? t.adminRequiredField : null,
+                keyboardType: campo.numeric
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(t.commonCancel),
+        ),
+        TextButton(onPressed: _aceptar, child: Text(t.commonSave)),
+      ],
     );
   }
 }

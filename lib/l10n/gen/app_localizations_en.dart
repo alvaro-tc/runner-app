@@ -1852,6 +1852,111 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only possible while it has no entrants. If it does, pull it from the catalogue instead.';
 
   @override
+  String get adminScheduleTitle => 'Schedule';
+
+  @override
+  String get adminScheduleHint => 'The race-day programme, as runners see it.';
+
+  @override
+  String get adminScheduleEmpty => 'No activities yet.';
+
+  @override
+  String get adminScheduleAdd => 'Add activity';
+
+  @override
+  String get adminScheduleTime => 'Time';
+
+  @override
+  String get adminScheduleName => 'Activity';
+
+  @override
+  String get adminScheduleDetail => 'Detail (optional)';
+
+  @override
+  String get adminIncludesTitle => 'What\'s included';
+
+  @override
+  String get adminIncludesHint =>
+      'What the entry gets you: tee, medal, hydration…';
+
+  @override
+  String get adminIncludesEmpty => 'Nothing listed yet.';
+
+  @override
+  String get adminIncludesAdd => 'Add';
+
+  @override
+  String get adminIncludesLabel => 'Includes';
+
+  @override
+  String get adminCategoriesTitle => 'Categories';
+
+  @override
+  String get adminCategoriesHint =>
+      'The surcharge is added on top of the base entry fee.';
+
+  @override
+  String get adminCategoriesEmpty =>
+      'No categories: everyone enters at the base price.';
+
+  @override
+  String get adminCategoryAdd => 'Add category';
+
+  @override
+  String get adminCategoryName => 'Name';
+
+  @override
+  String get adminCategorySurcharge => 'Surcharge (Bs)';
+
+  @override
+  String get adminCategoryFree => 'No surcharge';
+
+  @override
+  String get adminExtrasTitle => 'Add-ons';
+
+  @override
+  String get adminExtrasHint => 'What runners can buy alongside their entry.';
+
+  @override
+  String get adminExtrasEmpty => 'Nothing on sale yet.';
+
+  @override
+  String get adminExtraAdd => 'Add add-on';
+
+  @override
+  String get adminExtraName => 'Name';
+
+  @override
+  String get adminExtraPrice => 'Price (Bs)';
+
+  @override
+  String get adminExtraStock => 'Stock (empty = unlimited)';
+
+  @override
+  String adminExtraStockLeft(int count) {
+    return '$count left';
+  }
+
+  @override
+  String get adminAfterSave => 'Save the marathon first to add these';
+
+  @override
+  String get adminRequiredField => 'This field can\'t be empty.';
+
+  @override
+  String adminDeleteRowTitle(Object name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get adminDeleteCategoryBody =>
+      'Entries that used it keep their bib and payment; they\'re just left without a category.';
+
+  @override
+  String get adminDeleteExtraBody =>
+      'It stops being on sale. Anything already bought is kept.';
+
+  @override
   String get adminUsersTitle => 'Users';
 
   @override

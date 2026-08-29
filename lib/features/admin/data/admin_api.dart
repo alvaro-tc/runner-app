@@ -73,6 +73,51 @@ class AdminApi {
         return res.data as Map<String, dynamic>;
       });
 
+  // ─── Categorias y extras ─────────────────────────────────────────────────
+  //
+  // Son tablas propias, no campos de la maraton: se crean y se borran al
+  // momento con su propio endpoint, como el afiche. Meterlas en el boton de
+  // guardar obligaria a inventar ids en el movil para algo que solo el
+  // servidor puede numerar.
+
+  Future<void> createCategory(String marathonId, Map<String, dynamic> body) =>
+      apiCall(
+        () async => _dio.post<dynamic>(
+          '/admin/marathons/$marathonId/categories',
+          data: body,
+        ),
+      );
+
+  Future<void> updateCategory(String categoryId, Map<String, dynamic> body) =>
+      apiCall(
+        () async =>
+            _dio.put<dynamic>('/admin/categories/$categoryId', data: body),
+      );
+
+  /// Las inscripciones que la usaban no se borran: se quedan sin categoria,
+  /// con su dorsal y su pago intactos.
+  Future<void> deleteCategory(String categoryId) => apiCall(
+    () async => _dio.delete<dynamic>('/admin/categories/$categoryId'),
+  );
+
+  Future<void> createExtra(String marathonId, Map<String, dynamic> body) =>
+      apiCall(
+        () async => _dio.post<dynamic>(
+          '/admin/marathons/$marathonId/extras',
+          data: body,
+        ),
+      );
+
+  Future<void> updateExtra(String extraId, Map<String, dynamic> body) =>
+      apiCall(
+        () async => _dio.put<dynamic>('/admin/extras/$extraId', data: body),
+      );
+
+  /// Lo ya vendido no se pierde —vive copiado en cada inscripcion—: borrarlo
+  /// solo significa que deja de poder comprarse.
+  Future<void> deleteExtra(String extraId) =>
+      apiCall(() async => _dio.delete<dynamic>('/admin/extras/$extraId'));
+
   // ─── Largada en vivo ─────────────────────────────────────────────────────
 
   /// Da la largada. La hora la pone el servidor: si cada telefono arrancara
