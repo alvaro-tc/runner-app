@@ -324,7 +324,7 @@ en `docs/cuentas-de-prueba.md`.
 
 #nota[
   *Si el catálogo sale vacío o el login da `401`*, la base de producción está sin
-  sembrar. Se arregla en el VPS con `cd /srv/running-api && npm run db:seed`.
+  sembrar. Se arregla en el VPS con `cd /opt/running-api && npm run db:seed`.
   Mientras tanto puedes crear una cuenta desde la pantalla de registro de la
   propia app.
 ]

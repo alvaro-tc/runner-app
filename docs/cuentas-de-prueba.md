@@ -11,6 +11,16 @@ misma para todas.
 | `runner3@test.com` | `7788990SC` | `Test1234!` | `runner` | Vacía, en Santa Cruz |
 | `runner4@test.com` | `3322110CB` | `Test1234!` | `runner` | Vacía, en Cochabamba |
 | `runner5@test.com` | `9988776SU` | `Test1234!` | `runner` | Vacía, en Sucre |
+| `organizer@test.com` | `2000001LP` | `Test1234!` | `organizer` | Panel recortado en `/admin`: solo **Usuarios** y **Comprobantes QR** |
+| `organizer2@test.com` | `2000002CB` | `Test1234!` | `organizer` | Igual, en Cochabamba. Para probar dos organizadores a la vez |
+| `organizer3@test.com` | `2000003SC` | `Test1234!` | `organizer` | Igual, en Santa Cruz |
+
+El rol `organizer` es un admin recortado: administra cuentas de **corredor**
+(incluido resetear su contraseña) y valida comprobantes de pago QR. No puede
+crear ni editar maratones, publicarlas o deshabilitarlas, subir el QR de cobro,
+ni tocar cuentas de admin u otros organizadores —la API responde `403
+INSUFFICIENT_ROLE`—. El detalle está en `running-api/docs/api.md`, sección
+*Administración → Roles*.
 
 El campo de la pantalla de login acepta **cualquiera de los dos**: con `@` se
 trata como correo, sin `@` como CI. Es el mismo campo, así que se puede probar
@@ -38,8 +48,8 @@ método "Bank QR" aparece en el paso 3 sin tocar nada. El recorrido completo:
 2. Toca **Upload receipt** y elige cualquier imagen de la galería. El estado
    pasa a *Receipt under review*: **la inscripción sigue sin confirmar**, que es
    justo lo que hay que comprobar.
-3. Entra en `/admin` con `admin@test.com`, pestaña **Comprobantes QR**, y
-   aprueba. Ahí se emite el dorsal y se toma el cupo.
+3. Entra en `/admin` con `admin@test.com` —o con `organizer@test.com`, que para
+   esto sirve igual—, pestaña **Comprobantes QR**, y aprueba. Ahí se emite el dorsal y se toma el cupo.
 4. Rechaza en vez de aprobar para ver el otro camino: el cobro **sigue abierto**
    y la app deja subir otra imagen, con el motivo del rechazo a la vista.
 
@@ -138,7 +148,7 @@ base está vacía: falta sembrarla.
 Un solo comando en el VPS lo arregla:
 
 ```bash
-cd /srv/running-api && npm run db:seed
+cd /opt/running-api && npm run db:seed
 ```
 
 Mientras tanto la app abre y llega al login, pero no hay con qué entrar. Dos

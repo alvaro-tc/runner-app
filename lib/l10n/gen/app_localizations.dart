@@ -536,24 +536,6 @@ abstract class AppLocalizations {
   /// **'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.'**
   String get onboardingRaceBody;
 
-  /// No description provided for @homeCamTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Who we are'**
-  String get homeCamTitle;
-
-  /// No description provided for @homeCamSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'CAM · Women\'\'s Help Centre'**
-  String get homeCamSubtitle;
-
-  /// No description provided for @homeCamBody.
-  ///
-  /// In en, this message translates to:
-  /// **'The Women\'\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.'**
-  String get homeCamBody;
-
   /// No description provided for @homeUpcomingMarathon.
   ///
   /// In en, this message translates to:
@@ -2150,6 +2132,30 @@ abstract class AppLocalizations {
   /// **'Avg in last 7 days'**
   String get profileSleepSubtitle;
 
+  /// No description provided for @profileHydration.
+  ///
+  /// In en, this message translates to:
+  /// **'Hydration Habit'**
+  String get profileHydration;
+
+  /// No description provided for @profileHydrationLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get profileHydrationLow;
+
+  /// No description provided for @profileHydrationModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get profileHydrationModerate;
+
+  /// No description provided for @profileHydrationHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get profileHydrationHigh;
+
   /// No description provided for @profileInjuryNone.
   ///
   /// In en, this message translates to:
@@ -2197,6 +2203,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Longest Run'**
   String get profileLongestRun;
+
+  /// No description provided for @profilePrimaryShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Shoes'**
+  String get profilePrimaryShoes;
 
   /// No description provided for @themeLight.
   ///
@@ -2372,48 +2384,6 @@ abstract class AppLocalizations {
   /// **'Miles'**
   String get settingsMiles;
 
-  /// No description provided for @settingsPrivacyPolicy.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy policy'**
-  String get settingsPrivacyPolicy;
-
-  /// No description provided for @settingsPrivacyPolicySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'What data we collect and why'**
-  String get settingsPrivacyPolicySubtitle;
-
-  /// No description provided for @legalLinkFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not open the link. Visit cam-run.tumype.com in your browser.'**
-  String get legalLinkFailed;
-
-  /// No description provided for @authReadPrivacyPolicy.
-  ///
-  /// In en, this message translates to:
-  /// **'Read the privacy policy'**
-  String get authReadPrivacyPolicy;
-
-  /// No description provided for @deleteAccountWebTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Prefer to request it from the web?'**
-  String get deleteAccountWebTitle;
-
-  /// No description provided for @deleteAccountWebBody.
-  ///
-  /// In en, this message translates to:
-  /// **'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.'**
-  String get deleteAccountWebBody;
-
-  /// No description provided for @deleteAccountWebOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Open the request page'**
-  String get deleteAccountWebOpen;
-
   /// No description provided for @settingsHelp.
   ///
   /// In en, this message translates to:
@@ -2441,7 +2411,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsContactComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'Write to alvarocallet@gmail.com and we will answer within a day.'**
+  /// **'Write to support@camrun.app and we will answer within a day.'**
   String get settingsContactComingSoon;
 
   /// No description provided for @settingsVersion.
@@ -2876,60 +2846,6 @@ abstract class AppLocalizations {
   /// **'Take a photo'**
   String get registerProofTakePhoto;
 
-  /// No description provided for @registerCancelPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel payment'**
-  String get registerCancelPayment;
-
-  /// No description provided for @registerCancelPaymentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel this payment?'**
-  String get registerCancelPaymentTitle;
-
-  /// No description provided for @registerCancelPaymentBody.
-  ///
-  /// In en, this message translates to:
-  /// **'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.'**
-  String get registerCancelPaymentBody;
-
-  /// No description provided for @registerCancelPaymentKeep.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep paying'**
-  String get registerCancelPaymentKeep;
-
-  /// No description provided for @registerCancelPaymentConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Yes, cancel'**
-  String get registerCancelPaymentConfirm;
-
-  /// No description provided for @registerCancelPaymentDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Entry cancelled and payment closed.'**
-  String get registerCancelPaymentDone;
-
-  /// No description provided for @registerCancelPaymentFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'We could not cancel the payment. Please try again.'**
-  String get registerCancelPaymentFailed;
-
-  /// No description provided for @registerNoPaymentMethodTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This race does not take payments yet'**
-  String get registerNoPaymentMethodTitle;
-
-  /// No description provided for @registerNoPaymentMethodBody.
-  ///
-  /// In en, this message translates to:
-  /// **'The organiser has not set up their payment QR. Get in touch with them or try again later.'**
-  String get registerNoPaymentMethodBody;
-
   /// No description provided for @phoneSelectCountry.
   ///
   /// In en, this message translates to:
@@ -3338,35 +3254,47 @@ abstract class AppLocalizations {
   /// **'Close them when you stop taking entries.'**
   String get adminRegistrationsHint;
 
+  /// No description provided for @adminPaymentQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment QR'**
+  String get adminPaymentQr;
+
+  /// No description provided for @adminQrLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get adminQrLoaded;
+
+  /// No description provided for @adminQrMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR'**
+  String get adminQrMissing;
+
+  /// No description provided for @adminQrSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a QR this marathon cannot take QR payments'**
+  String get adminQrSubtitle;
+
+  /// No description provided for @adminQrAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the marathon first to upload the QR'**
+  String get adminQrAfterSave;
+
   /// No description provided for @adminQrInstructions.
   ///
   /// In en, this message translates to:
   /// **'Text shown next to the QR'**
   String get adminQrInstructions;
 
-  /// No description provided for @adminQrPayload.
+  /// No description provided for @adminQrUploaded.
   ///
   /// In en, this message translates to:
-  /// **'Payment QR text'**
-  String get adminQrPayload;
-
-  /// No description provided for @adminQrPayloadHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste the QR contents your banking app exports'**
-  String get adminQrPayloadHint;
-
-  /// No description provided for @adminQrPayloadHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Set: this race accepts QR payments.'**
-  String get adminQrPayloadHelp;
-
-  /// No description provided for @adminQrPayloadMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'Empty: this race does not accept QR payments yet.'**
-  String get adminQrPayloadMissing;
+  /// **'QR updated.'**
+  String get adminQrUploaded;
 
   /// No description provided for @adminSectionUpcoming.
   ///
@@ -3746,16 +3674,118 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get deleteAccountConfirmAction;
 
+  /// No description provided for @profileShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes'**
+  String get profileShoes;
+
+  /// No description provided for @profileShoesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The ones you put the miles on'**
+  String get profileShoesSubtitle;
+
   /// No description provided for @profileHealth.
   ///
   /// In en, this message translates to:
   /// **'Health'**
   String get profileHealth;
 
+  /// No description provided for @shoesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not added any shoes yet.'**
+  String get shoesEmpty;
+
+  /// No description provided for @shoesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the ones you run in and the app tells you when to replace them.'**
+  String get shoesEmptyBody;
+
+  /// No description provided for @shoesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add shoes'**
+  String get shoesAdd;
+
+  /// No description provided for @shoesBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get shoesBrand;
+
+  /// No description provided for @shoesBrandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nike, Asics, Saucony…'**
+  String get shoesBrandHint;
+
+  /// No description provided for @shoesModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get shoesModel;
+
+  /// No description provided for @shoesModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pegasus 41'**
+  String get shoesModelHint;
+
+  /// No description provided for @shoesRetireAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace them at (km)'**
+  String get shoesRetireAt;
+
+  /// No description provided for @shoesPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get shoesPrimary;
+
+  /// No description provided for @shoesRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire'**
+  String get shoesRetire;
+
+  /// No description provided for @shoesRetireTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire these shoes?'**
+  String get shoesRetireTitle;
+
+  /// No description provided for @shoesRetireBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They stop showing on your profile and their distance is not kept.'**
+  String get shoesRetireBody;
+
+  /// No description provided for @shoesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes added.'**
+  String get shoesAdded;
+
+  /// No description provided for @shoesRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes retired.'**
+  String get shoesRetired;
+
+  /// No description provided for @shoesWear.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String shoesWear(String done, String total);
+
   /// No description provided for @healthTitle.
   ///
   /// In en, this message translates to:
-  /// **'Injuries and sleep'**
+  /// **'Injuries, sleep and hydration'**
   String get healthTitle;
 
   /// No description provided for @healthInjuryZone.
@@ -3811,6 +3841,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter the area of the injury.'**
   String get validationInjuryZoneRequired;
+
+  /// No description provided for @homeCamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who we are'**
+  String get homeCamTitle;
+
+  /// No description provided for @homeCamSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CAM · Women\'\'s Help Centre'**
+  String get homeCamSubtitle;
+
+  /// No description provided for @homeCamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Women\'\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.'**
+  String get homeCamBody;
+
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsPrivacyPolicySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What data we collect and why'**
+  String get settingsPrivacyPolicySubtitle;
+
+  /// No description provided for @legalLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Visit cam-run.tumype.com in your browser.'**
+  String get legalLinkFailed;
+
+  /// No description provided for @authReadPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the privacy policy'**
+  String get authReadPrivacyPolicy;
+
+  /// No description provided for @deleteAccountWebTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer to request it from the web?'**
+  String get deleteAccountWebTitle;
+
+  /// No description provided for @deleteAccountWebBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.'**
+  String get deleteAccountWebBody;
+
+  /// No description provided for @deleteAccountWebOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the request page'**
+  String get deleteAccountWebOpen;
+
+  /// No description provided for @registerCancelPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel payment'**
+  String get registerCancelPayment;
+
+  /// No description provided for @registerCancelPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this payment?'**
+  String get registerCancelPaymentTitle;
+
+  /// No description provided for @registerCancelPaymentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.'**
+  String get registerCancelPaymentBody;
+
+  /// No description provided for @registerCancelPaymentKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep paying'**
+  String get registerCancelPaymentKeep;
+
+  /// No description provided for @registerCancelPaymentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get registerCancelPaymentConfirm;
+
+  /// No description provided for @registerCancelPaymentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry cancelled and payment closed.'**
+  String get registerCancelPaymentDone;
+
+  /// No description provided for @registerCancelPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not cancel the payment. Please try again.'**
+  String get registerCancelPaymentFailed;
+
+  /// No description provided for @registerNoPaymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This race does not take payments yet'**
+  String get registerNoPaymentMethodTitle;
+
+  /// No description provided for @registerNoPaymentMethodBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The organiser has not set up their payment QR. Get in touch with them or try again later.'**
+  String get registerNoPaymentMethodBody;
+
+  /// No description provided for @adminQrPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment QR text'**
+  String get adminQrPayload;
+
+  /// No description provided for @adminQrPayloadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the QR contents your banking app exports'**
+  String get adminQrPayloadHint;
+
+  /// No description provided for @adminQrPayloadHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set: this race accepts QR payments.'**
+  String get adminQrPayloadHelp;
+
+  /// No description provided for @adminQrPayloadMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty: this race does not accept QR payments yet.'**
+  String get adminQrPayloadMissing;
 }
 
 class _AppLocalizationsDelegate

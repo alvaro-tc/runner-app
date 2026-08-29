@@ -249,16 +249,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inscríbete en eventos desde la app y guarda tu dorsal, tu tiempo de meta y tus parciales en un mismo sitio.';
 
   @override
-  String get homeCamTitle => 'Quiénes somos';
-
-  @override
-  String get homeCamSubtitle => 'CAM · Centro de Ayuda a la Mujer';
-
-  @override
-  String get homeCamBody =>
-      'El Centro de Ayuda a la Mujer acompaña a mujeres en situación de violencia o vulnerabilidad con apoyo legal, psicológico y social. Cada carrera que corres con nosotras sostiene ese trabajo.';
-
-  @override
   String get homeUpcomingMarathon => 'Tu próximo maratón en';
 
   @override
@@ -1139,6 +1129,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSleepSubtitle => 'Media de los últimos 7 días';
 
   @override
+  String get profileHydration => 'Hábito de hidratación';
+
+  @override
+  String get profileHydrationLow => 'Baja';
+
+  @override
+  String get profileHydrationModerate => 'Moderada';
+
+  @override
+  String get profileHydrationHigh => 'Alta';
+
+  @override
   String get profileInjuryNone => 'Sin lesiones';
 
   @override
@@ -1163,6 +1165,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileLongestRun => 'Tirada más larga';
+
+  @override
+  String get profilePrimaryShoes => 'Zapatillas principales';
 
   @override
   String get themeLight => 'Claro';
@@ -1258,29 +1263,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsMiles => 'Millas';
 
   @override
-  String get settingsPrivacyPolicy => 'Política de privacidad';
-
-  @override
-  String get settingsPrivacyPolicySubtitle => 'Qué datos recogemos y para qué';
-
-  @override
-  String get legalLinkFailed =>
-      'No se pudo abrir el enlace. Entra a cam-run.tumype.com desde tu navegador.';
-
-  @override
-  String get authReadPrivacyPolicy => 'Leer la política de privacidad';
-
-  @override
-  String get deleteAccountWebTitle => '¿Prefieres pedirlo desde la web?';
-
-  @override
-  String get deleteAccountWebBody =>
-      'También puedes solicitar el borrado en cam-run.tumype.com/eliminar-cuenta.';
-
-  @override
-  String get deleteAccountWebOpen => 'Abrir la página de solicitud';
-
-  @override
   String get settingsHelp => 'Ayuda';
 
   @override
@@ -1295,7 +1277,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Escribe a alvarocallet@gmail.com y te respondemos en menos de un día.';
+      'Escribe a support@camrun.app y te respondemos en menos de un día.';
 
   @override
   String get settingsVersion => 'Versión';
@@ -1544,38 +1526,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registerProofTakePhoto => 'Tomar una foto';
 
   @override
-  String get registerCancelPayment => 'Cancelar el pago';
-
-  @override
-  String get registerCancelPaymentTitle => '¿Cancelar el pago?';
-
-  @override
-  String get registerCancelPaymentBody =>
-      'Se cierra este cobro y se anula tu inscripción. Si ya pagaste, el organizador te devolverá el dinero por el mismo medio. Para volver a inscribirte tendrás que empezar de nuevo.';
-
-  @override
-  String get registerCancelPaymentKeep => 'Seguir con el pago';
-
-  @override
-  String get registerCancelPaymentConfirm => 'Sí, cancelar';
-
-  @override
-  String get registerCancelPaymentDone =>
-      'Inscripción cancelada y cobro cerrado.';
-
-  @override
-  String get registerCancelPaymentFailed =>
-      'No pudimos cancelar el pago. Intentalo de nuevo.';
-
-  @override
-  String get registerNoPaymentMethodTitle =>
-      'Esta carrera todavía no acepta pagos';
-
-  @override
-  String get registerNoPaymentMethodBody =>
-      'El organizador aún no cargó su QR de cobro. Escribile o volvé a intentarlo más tarde.';
-
-  @override
   String get phoneSelectCountry => 'Elige un país';
 
   @override
@@ -1806,21 +1756,25 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ciérralas cuando no quieras aceptar más gente.';
 
   @override
+  String get adminPaymentQr => 'QR de cobro';
+
+  @override
+  String get adminQrLoaded => 'Cargado';
+
+  @override
+  String get adminQrMissing => 'Sin QR';
+
+  @override
+  String get adminQrSubtitle => 'Sin QR, la maratón no admite pago por QR';
+
+  @override
+  String get adminQrAfterSave => 'Guarda la maratón para poder subir el QR';
+
+  @override
   String get adminQrInstructions => 'Texto junto al QR';
 
   @override
-  String get adminQrPayload => 'Texto del QR de cobro';
-
-  @override
-  String get adminQrPayloadHint =>
-      'Pega el contenido del QR que exporta tu banca móvil';
-
-  @override
-  String get adminQrPayloadHelp => 'Cargado: esta carrera acepta pagos por QR.';
-
-  @override
-  String get adminQrPayloadMissing =>
-      'Vacío: esta carrera no acepta pagos por QR todavía.';
+  String get adminQrUploaded => 'QR actualizado.';
 
   @override
   String get adminSectionUpcoming => 'Próximas';
@@ -2025,10 +1979,65 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteAccountConfirmAction => 'Eliminar';
 
   @override
+  String get profileShoes => 'Zapatillas';
+
+  @override
+  String get profileShoesSubtitle => 'Las que sumas kilómetros';
+
+  @override
   String get profileHealth => 'Salud';
 
   @override
-  String get healthTitle => 'Lesiones y sueño';
+  String get shoesEmpty => 'Todavía no has añadido ninguna zapatilla.';
+
+  @override
+  String get shoesEmptyBody =>
+      'Añade las que usas y la app te avisa cuando toque cambiarlas.';
+
+  @override
+  String get shoesAdd => 'Añadir zapatillas';
+
+  @override
+  String get shoesBrand => 'Marca';
+
+  @override
+  String get shoesBrandHint => 'Nike, Asics, Saucony…';
+
+  @override
+  String get shoesModel => 'Modelo';
+
+  @override
+  String get shoesModelHint => 'Pegasus 41';
+
+  @override
+  String get shoesRetireAt => 'Cambiarlas a los (km)';
+
+  @override
+  String get shoesPrimary => 'Principales';
+
+  @override
+  String get shoesRetire => 'Retirar';
+
+  @override
+  String get shoesRetireTitle => '¿Retirar estas zapatillas?';
+
+  @override
+  String get shoesRetireBody =>
+      'Dejan de aparecer en tu perfil y sus kilómetros no se recuperan.';
+
+  @override
+  String get shoesAdded => 'Zapatillas añadidas.';
+
+  @override
+  String get shoesRetired => 'Zapatillas retiradas.';
+
+  @override
+  String shoesWear(String done, String total) {
+    return '$done de $total';
+  }
+
+  @override
+  String get healthTitle => 'Lesiones, sueño e hidratación';
 
   @override
   String get healthInjuryZone => 'Zona';
@@ -2056,4 +2065,83 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get validationInjuryZoneRequired => 'Escribe la zona de la lesión.';
+
+  @override
+  String get homeCamTitle => 'Quiénes somos';
+
+  @override
+  String get homeCamSubtitle => 'CAM · Centro de Ayuda a la Mujer';
+
+  @override
+  String get homeCamBody =>
+      'El Centro de Ayuda a la Mujer acompaña a mujeres en situación de violencia o vulnerabilidad con apoyo legal, psicológico y social. Cada carrera que corres con nosotras sostiene ese trabajo.';
+
+  @override
+  String get settingsPrivacyPolicy => 'Política de privacidad';
+
+  @override
+  String get settingsPrivacyPolicySubtitle => 'Qué datos recogemos y para qué';
+
+  @override
+  String get legalLinkFailed =>
+      'No se pudo abrir el enlace. Entra a cam-run.tumype.com desde tu navegador.';
+
+  @override
+  String get authReadPrivacyPolicy => 'Leer la política de privacidad';
+
+  @override
+  String get deleteAccountWebTitle => '¿Prefieres pedirlo desde la web?';
+
+  @override
+  String get deleteAccountWebBody =>
+      'También puedes solicitar el borrado en cam-run.tumype.com/eliminar-cuenta.';
+
+  @override
+  String get deleteAccountWebOpen => 'Abrir la página de solicitud';
+
+  @override
+  String get registerCancelPayment => 'Cancelar el pago';
+
+  @override
+  String get registerCancelPaymentTitle => '¿Cancelar el pago?';
+
+  @override
+  String get registerCancelPaymentBody =>
+      'Se cierra este cobro y se anula tu inscripción. Si ya pagaste, el organizador te devolverá el dinero por el mismo medio. Para volver a inscribirte tendrás que empezar de nuevo.';
+
+  @override
+  String get registerCancelPaymentKeep => 'Seguir con el pago';
+
+  @override
+  String get registerCancelPaymentConfirm => 'Sí, cancelar';
+
+  @override
+  String get registerCancelPaymentDone =>
+      'Inscripción cancelada y cobro cerrado.';
+
+  @override
+  String get registerCancelPaymentFailed =>
+      'No pudimos cancelar el pago. Inténtalo de nuevo.';
+
+  @override
+  String get registerNoPaymentMethodTitle =>
+      'Esta carrera todavía no acepta pagos';
+
+  @override
+  String get registerNoPaymentMethodBody =>
+      'El organizador aún no cargó su QR de cobro. Escríbele o vuelve a intentarlo más tarde.';
+
+  @override
+  String get adminQrPayload => 'Texto del QR de cobro';
+
+  @override
+  String get adminQrPayloadHint =>
+      'Pega el contenido del QR que exporta tu banca móvil';
+
+  @override
+  String get adminQrPayloadHelp => 'Cargado: esta carrera acepta pagos por QR.';
+
+  @override
+  String get adminQrPayloadMissing =>
+      'Vacío: esta carrera no acepta pagos por QR todavía.';
 }

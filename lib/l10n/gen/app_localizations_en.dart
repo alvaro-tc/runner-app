@@ -245,16 +245,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.';
 
   @override
-  String get homeCamTitle => 'Who we are';
-
-  @override
-  String get homeCamSubtitle => 'CAM · Women\'s Help Centre';
-
-  @override
-  String get homeCamBody =>
-      'The Women\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.';
-
-  @override
   String get homeUpcomingMarathon => 'Upcoming Marathon In';
 
   @override
@@ -1127,6 +1117,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSleepSubtitle => 'Avg in last 7 days';
 
   @override
+  String get profileHydration => 'Hydration Habit';
+
+  @override
+  String get profileHydrationLow => 'Low';
+
+  @override
+  String get profileHydrationModerate => 'Moderate';
+
+  @override
+  String get profileHydrationHigh => 'High';
+
+  @override
   String get profileInjuryNone => 'None reported';
 
   @override
@@ -1151,6 +1153,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileLongestRun => 'Longest Run';
+
+  @override
+  String get profilePrimaryShoes => 'Primary Shoes';
 
   @override
   String get themeLight => 'Light';
@@ -1245,29 +1250,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMiles => 'Miles';
 
   @override
-  String get settingsPrivacyPolicy => 'Privacy policy';
-
-  @override
-  String get settingsPrivacyPolicySubtitle => 'What data we collect and why';
-
-  @override
-  String get legalLinkFailed =>
-      'Could not open the link. Visit cam-run.tumype.com in your browser.';
-
-  @override
-  String get authReadPrivacyPolicy => 'Read the privacy policy';
-
-  @override
-  String get deleteAccountWebTitle => 'Prefer to request it from the web?';
-
-  @override
-  String get deleteAccountWebBody =>
-      'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.';
-
-  @override
-  String get deleteAccountWebOpen => 'Open the request page';
-
-  @override
   String get settingsHelp => 'Help';
 
   @override
@@ -1282,7 +1264,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsContactComingSoon =>
-      'Write to alvarocallet@gmail.com and we will answer within a day.';
+      'Write to support@camrun.app and we will answer within a day.';
 
   @override
   String get settingsVersion => 'Version';
@@ -1531,37 +1513,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerProofTakePhoto => 'Take a photo';
 
   @override
-  String get registerCancelPayment => 'Cancel payment';
-
-  @override
-  String get registerCancelPaymentTitle => 'Cancel this payment?';
-
-  @override
-  String get registerCancelPaymentBody =>
-      'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.';
-
-  @override
-  String get registerCancelPaymentKeep => 'Keep paying';
-
-  @override
-  String get registerCancelPaymentConfirm => 'Yes, cancel';
-
-  @override
-  String get registerCancelPaymentDone => 'Entry cancelled and payment closed.';
-
-  @override
-  String get registerCancelPaymentFailed =>
-      'We could not cancel the payment. Please try again.';
-
-  @override
-  String get registerNoPaymentMethodTitle =>
-      'This race does not take payments yet';
-
-  @override
-  String get registerNoPaymentMethodBody =>
-      'The organiser has not set up their payment QR. Get in touch with them or try again later.';
-
-  @override
   String get phoneSelectCountry => 'Select a country';
 
   @override
@@ -1792,21 +1743,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Close them when you stop taking entries.';
 
   @override
+  String get adminPaymentQr => 'Payment QR';
+
+  @override
+  String get adminQrLoaded => 'Uploaded';
+
+  @override
+  String get adminQrMissing => 'No QR';
+
+  @override
+  String get adminQrSubtitle =>
+      'Without a QR this marathon cannot take QR payments';
+
+  @override
+  String get adminQrAfterSave => 'Save the marathon first to upload the QR';
+
+  @override
   String get adminQrInstructions => 'Text shown next to the QR';
 
   @override
-  String get adminQrPayload => 'Payment QR text';
-
-  @override
-  String get adminQrPayloadHint =>
-      'Paste the QR contents your banking app exports';
-
-  @override
-  String get adminQrPayloadHelp => 'Set: this race accepts QR payments.';
-
-  @override
-  String get adminQrPayloadMissing =>
-      'Empty: this race does not accept QR payments yet.';
+  String get adminQrUploaded => 'QR updated.';
 
   @override
   String get adminSectionUpcoming => 'Upcoming';
@@ -2012,10 +1968,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountConfirmAction => 'Delete';
 
   @override
+  String get profileShoes => 'Shoes';
+
+  @override
+  String get profileShoesSubtitle => 'The ones you put the miles on';
+
+  @override
   String get profileHealth => 'Health';
 
   @override
-  String get healthTitle => 'Injuries and sleep';
+  String get shoesEmpty => 'You have not added any shoes yet.';
+
+  @override
+  String get shoesEmptyBody =>
+      'Add the ones you run in and the app tells you when to replace them.';
+
+  @override
+  String get shoesAdd => 'Add shoes';
+
+  @override
+  String get shoesBrand => 'Brand';
+
+  @override
+  String get shoesBrandHint => 'Nike, Asics, Saucony…';
+
+  @override
+  String get shoesModel => 'Model';
+
+  @override
+  String get shoesModelHint => 'Pegasus 41';
+
+  @override
+  String get shoesRetireAt => 'Replace them at (km)';
+
+  @override
+  String get shoesPrimary => 'Primary';
+
+  @override
+  String get shoesRetire => 'Retire';
+
+  @override
+  String get shoesRetireTitle => 'Retire these shoes?';
+
+  @override
+  String get shoesRetireBody =>
+      'They stop showing on your profile and their distance is not kept.';
+
+  @override
+  String get shoesAdded => 'Shoes added.';
+
+  @override
+  String get shoesRetired => 'Shoes retired.';
+
+  @override
+  String shoesWear(String done, String total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get healthTitle => 'Injuries, sleep and hydration';
 
   @override
   String get healthInjuryZone => 'Area';
@@ -2043,4 +2054,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationInjuryZoneRequired => 'Enter the area of the injury.';
+
+  @override
+  String get homeCamTitle => 'Who we are';
+
+  @override
+  String get homeCamSubtitle => 'CAM · Women\'s Help Centre';
+
+  @override
+  String get homeCamBody =>
+      'The Women\'s Help Centre supports women facing violence or vulnerability with legal, psychological and social care. Every race you run with us keeps that work going.';
+
+  @override
+  String get settingsPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get settingsPrivacyPolicySubtitle => 'What data we collect and why';
+
+  @override
+  String get legalLinkFailed =>
+      'Could not open the link. Visit cam-run.tumype.com in your browser.';
+
+  @override
+  String get authReadPrivacyPolicy => 'Read the privacy policy';
+
+  @override
+  String get deleteAccountWebTitle => 'Prefer to request it from the web?';
+
+  @override
+  String get deleteAccountWebBody =>
+      'You can also request deletion at cam-run.tumype.com/eliminar-cuenta.';
+
+  @override
+  String get deleteAccountWebOpen => 'Open the request page';
+
+  @override
+  String get registerCancelPayment => 'Cancel payment';
+
+  @override
+  String get registerCancelPaymentTitle => 'Cancel this payment?';
+
+  @override
+  String get registerCancelPaymentBody =>
+      'This closes the payment and cancels your entry. If you already paid, the organiser will refund you the same way you paid. Signing up again means starting over.';
+
+  @override
+  String get registerCancelPaymentKeep => 'Keep paying';
+
+  @override
+  String get registerCancelPaymentConfirm => 'Yes, cancel';
+
+  @override
+  String get registerCancelPaymentDone => 'Entry cancelled and payment closed.';
+
+  @override
+  String get registerCancelPaymentFailed =>
+      'We could not cancel the payment. Please try again.';
+
+  @override
+  String get registerNoPaymentMethodTitle =>
+      'This race does not take payments yet';
+
+  @override
+  String get registerNoPaymentMethodBody =>
+      'The organiser has not set up their payment QR. Get in touch with them or try again later.';
+
+  @override
+  String get adminQrPayload => 'Payment QR text';
+
+  @override
+  String get adminQrPayloadHint =>
+      'Paste the QR contents your banking app exports';
+
+  @override
+  String get adminQrPayloadHelp => 'Set: this race accepts QR payments.';
+
+  @override
+  String get adminQrPayloadMissing =>
+      'Empty: this race does not accept QR payments yet.';
 }
