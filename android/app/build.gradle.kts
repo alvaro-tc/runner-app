@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.camrun.camrun"
+    namespace = "com.tumype.camrun"
     // flutter_secure_storage pide API 37; el default de Flutter aun va por 36.
     compileSdk = 37
     ndkVersion = flutter.ndkVersion
@@ -23,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.camrun.camrun"
+        applicationId = "com.tumype.camrun"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // traccar_client_sdk pide API 24.

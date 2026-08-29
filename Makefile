@@ -1,4 +1,4 @@
-﻿.PHONY: run run-web run-local apk goldens fmt analyze test l10n i18n-guard
+.PHONY: run run-web run-local apk aab goldens fmt analyze test l10n i18n-guard
 
 # Contra el backend de produccion (cam-run.tumype.com).
 run:
@@ -18,6 +18,12 @@ run-local:
 # en un telefono real no conecta con nada.
 apk:
 	flutter build apk --release --dart-define-from-file=.env
+
+# El bundle firmado que se sube a Play Console. Mismo aviso que el APK sobre
+# el --dart-define-from-file, y ademas necesita android/key.properties: sin el
+# sale firmado con la clave de debug y Play lo rechaza.
+aab:
+	flutter build appbundle --release --dart-define-from-file=.env
 
 # Regenera las clases de traduccion desde los ARB (PU-203). Lo que salga en
 # lib/l10n/gen/ va al commit.
