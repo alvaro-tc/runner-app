@@ -39,7 +39,12 @@ class _RacesPageState extends ConsumerState<RacesPage> {
         bottom: false,
         child: RefreshIndicator(
           color: context.colors.primary,
-          onRefresh: () async => ref.invalidate(racesProvider),
+          onRefresh: () async {
+            ref
+              ..invalidate(racesProvider)
+              ..invalidate(upcomingMarathonsProvider);
+            await ref.read(upcomingMarathonsProvider.future);
+          },
           child: entries.when(
             loading: () => const _RacesSkeleton(),
             error: (error, _) => ListView(

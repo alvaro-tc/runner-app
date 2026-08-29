@@ -144,14 +144,15 @@ class RouteMapViewState extends State<RouteMapView> {
               : (_, punto) => widget.onTap!(punto.latitude, punto.longitude),
         ),
         children: [
-          // CARTO y no tile.openstreetmap.org: OSM bloquea las peticiones que
-          // salen de un navegador y en web se veian recuadros grises en vez
-          // del mapa. CARTO manda CORS y trae version oscura propia.
+          // Esri Canvas: gratis y sin clave, manda CORS —tile.openstreetmap.org
+          // bloquea a las apps— y tiene version clara y oscura con los nombres
+          // de las calles. CARTO se cayo de la lista: desde 2025 estampa un
+          // "API KEY REQUIRED" encima de cada tesela anonima.
           TileLayer(
             urlTemplate:
-                'https://basemaps.cartocdn.com/'
-                '${c.isDark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png',
-            retinaMode: RetinaMode.isHighDensity(context),
+                'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/'
+                'World_${c.isDark ? 'Dark' : 'Light'}_Gray_Base/MapServer/'
+                'tile/{z}/{y}/{x}',
             userAgentPackageName: 'com.camrun.app',
           ),
           // La guia primero: va por debajo del recorrido real.
@@ -176,6 +177,8 @@ class RouteMapViewState extends State<RouteMapView> {
               ],
             ),
           MarkerLayer(markers: _markers(points, c.isDark)),
+          // Esri pide credito visible por usar sus teselas.
+          const SimpleAttributionWidget(source: Text('Esri')),
         ],
       ),
     );

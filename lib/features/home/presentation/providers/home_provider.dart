@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
+import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,9 +90,14 @@ class HomeNotifier extends AsyncNotifier<HomeData> {
     result.fold((_) => unawaited(refresh()), (_) {});
   }
 
+  /// El carrusel de Home pinta el catalogo, que vive en otro provider sin
+  /// autoDispose: si no se invalida aqui, tirar para recargar deja las
+  /// carreras —y sus afiches— como estaban hasta cerrar sesion.
   Future<void> refresh() async {
-    ref.invalidateSelf();
-    await future;
+    ref
+      ..invalidateSelf()
+      ..invalidate(upcomingMarathonsProvider);
+    await (future, ref.read(upcomingMarathonsProvider.future)).wait;
   }
 }
 

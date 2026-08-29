@@ -42,8 +42,8 @@ probar directamente; si se quiere, con `bundletool build-apks --local-testing`.
 
 | Campo | Limite | Estado |
 |---|---|---|
-| Descripcion breve | 80 caracteres | ______ |
-| Descripcion completa | 4000 caracteres | ______ |
+| Descripcion breve | 80 caracteres | redactada en `play-store-descripcion.md` |
+| Descripcion completa | 4000 caracteres | redactada en `play-store-descripcion.md` |
 | Icono | 512x512 PNG, 32 bits | derivar del de la app (`android/app/src/main/res/mipmap-*`) |
 | Grafico destacado (feature graphic) | 1024x500 PNG/JPG | ______ |
 | Capturas de telefono | minimo 2, maximo 8, 16:9 o 9:16, lado corto ≥ 320 px | sugeridas: inicio, salida en vivo, historial, detalle de carrera, plan de entrenamiento |
