@@ -451,10 +451,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'La ubicación está bloqueada para CamRun. Actívala en los ajustes del sistema y vuelve.';
 
   @override
-  String get locationBackgroundDenied =>
-      'La ubicación en segundo plano está desactivada. La grabación sigue mientras CamRun esté en pantalla, pero puede pararse si cambias de app.';
-
-  @override
   String get locationServiceDisabled =>
       'La ubicación está desactivada en este dispositivo. Actívala para empezar una salida.';
 
@@ -553,16 +549,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setupAllowLocation => 'Permitir ubicación';
-
-  @override
-  String get setupBackgroundLocationTitle => 'Ubicación en segundo plano';
-
-  @override
-  String get setupBackgroundLocationBody =>
-      'Para seguir dibujando tu ruta con la pantalla apagada, CamRun necesita acceso a la ubicación mientras está en segundo plano. Solo lee tu posición mientras grabas una salida.';
-
-  @override
-  String get setupBackgroundLocationContinue => 'Continuar';
 
   @override
   String get setupStartRun => 'Empezar salida';

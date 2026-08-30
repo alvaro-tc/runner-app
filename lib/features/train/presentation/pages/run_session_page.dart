@@ -112,7 +112,9 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
 
     // Maraton oficial: la pantalla es una puerta cerrada. Ni atras, ni pausa,
     // ni descartar. El unico que la abre es el organizador, cortando la carrera.
-    final bloqueada = state.goal.isLiveMarathon;
+    // `isActive` de verdad: si la grabacion no llego a arrancar —permiso de
+    // ubicacion denegado— la pantalla no puede quedarse cerrada sin salida.
+    final bloqueada = state.goal.isLiveMarathon && state.isActive;
     if (bloqueada) {
       _escucharCorte(state.goal.marathonId!);
       // Mantiene vivo al que lleva las salas del socket mientras dure la
@@ -154,7 +156,24 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                     },
                   ),
                   if (bloqueada) _Restante(state: state),
-                  if (state.error != null) _ErrorBanner(outcome: state.error!),
+                  if (state.error != null)
+                    _ErrorBanner(
+                      outcome: state.error!,
+                      onOpenSettings: () => unawaited(
+                        ref
+                            .read(locationServiceProvider)
+                            .openSettings(
+                              locationSettings:
+                                  state.error ==
+                                  LocationPermissionOutcome.serviceDisabled,
+                            ),
+                      ),
+                      // Volver de Ajustes no reintenta solo: sin esto habria
+                      // que salir de la carrera para volver a arrancarla.
+                      onRetry: () => unawaited(
+                        ref.read(runSessionProvider.notifier).start(state.goal),
+                      ),
+                    ),
                   if (state.goal.laps != null) _LapCard(state: state),
                   const Spacer(),
                   Align(
@@ -296,10 +315,15 @@ class _Restante extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.outcome, this.onOpenSettings});
+  const _ErrorBanner({
+    required this.outcome,
+    this.onOpenSettings,
+    this.onRetry,
+  });
 
   final LocationPermissionOutcome outcome;
   final VoidCallback? onOpenSettings;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -323,11 +347,20 @@ class _ErrorBanner extends StatelessWidget {
                   outcome.message(context.l10n),
                   style: context.text.bodySm.copyWith(color: c.error),
                 ),
-                if (onOpenSettings != null)
-                  TextButton(
-                    onPressed: onOpenSettings,
-                    child: Text(context.l10n.commonSettings),
-                  ),
+                Row(
+                  children: [
+                    if (onRetry != null)
+                      TextButton(
+                        onPressed: onRetry,
+                        child: Text(context.l10n.commonRetry),
+                      ),
+                    if (onOpenSettings != null)
+                      TextButton(
+                        onPressed: onOpenSettings,
+                        child: Text(context.l10n.commonSettings),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),

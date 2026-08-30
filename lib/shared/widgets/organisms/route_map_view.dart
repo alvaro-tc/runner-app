@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
+import 'package:camrun/shared/map/tile_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 // latlong2 exports its own generic `Path<T>`, which shadows dart:ui's.
@@ -120,7 +122,7 @@ class RouteMapViewState extends State<RouteMapView> {
     final center = widget.follow != null
         ? LatLng(widget.follow!.lat, widget.follow!.lng)
         : encuadre.isEmpty
-        ? const LatLng(-6.2088, 106.8456)
+        ? LatLng(laPazCenter.lat, laPazCenter.lng)
         : encuadre[encuadre.length ~/ 2];
 
     return ColoredBox(
@@ -138,22 +140,17 @@ class RouteMapViewState extends State<RouteMapView> {
           onMapReady: () {
             _ready = true;
             if (widget.follow == null) _fitRoute();
+            _precache();
           },
           onTap: widget.onTap == null
               ? null
               : (_, punto) => widget.onTap!(punto.latitude, punto.longitude),
         ),
         children: [
-          // Esri Canvas: gratis y sin clave, manda CORS —tile.openstreetmap.org
-          // bloquea a las apps— y tiene version clara y oscura con los nombres
-          // de las calles. CARTO se cayo de la lista: desde 2025 estampa un
-          // "API KEY REQUIRED" encima de cada tesela anonima.
           TileLayer(
-            urlTemplate:
-                'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/'
-                'World_${c.isDark ? 'Dark' : 'Light'}_Gray_Base/MapServer/'
-                'tile/{z}/{y}/{x}',
+            urlTemplate: tileUrl('{z}', '{x}', '{y}', dark: c.isDark),
             userAgentPackageName: 'com.camrun.app',
+            tileProvider: CachedTileProvider(),
           ),
           // La guia primero: va por debajo del recorrido real.
           if (guide.length > 1)
@@ -181,6 +178,18 @@ class RouteMapViewState extends State<RouteMapView> {
           const SimpleAttributionWidget(source: Text('Esri')),
         ],
       ),
+    );
+  }
+
+  /// Baja de fondo el mapa que hara falta despues, ahora que hay red: el
+  /// recorrido oficial primero —es el del dia de la carrera, donde se llega sin
+  /// datos— y detras la ciudad.
+  void _precache() {
+    final dark = context.colors.isDark;
+    unawaited(
+      precacheRoute([
+        for (final p in widget.guideRoute) (lat: p.lat, lng: p.lng),
+      ], dark: dark).then((_) => precacheLaPaz(dark: dark)),
     );
   }
 

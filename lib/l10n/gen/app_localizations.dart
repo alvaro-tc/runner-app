@@ -914,12 +914,6 @@ abstract class AppLocalizations {
   /// **'Location is blocked for CamRun. Turn it on in system settings, then come back.'**
   String get locationDeniedForever;
 
-  /// No description provided for @locationBackgroundDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.'**
-  String get locationBackgroundDenied;
-
   /// No description provided for @locationServiceDisabled.
   ///
   /// In en, this message translates to:
@@ -1099,24 +1093,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow location'**
   String get setupAllowLocation;
-
-  /// No description provided for @setupBackgroundLocationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Location in the background'**
-  String get setupBackgroundLocationTitle;
-
-  /// No description provided for @setupBackgroundLocationBody.
-  ///
-  /// In en, this message translates to:
-  /// **'To keep drawing your route with the screen off, CamRun needs location access while it runs in the background. It only reads your position while a run is recording.'**
-  String get setupBackgroundLocationBody;
-
-  /// No description provided for @setupBackgroundLocationContinue.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get setupBackgroundLocationContinue;
 
   /// No description provided for @setupStartRun.
   ///

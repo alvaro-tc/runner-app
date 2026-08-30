@@ -136,7 +136,6 @@ extension LocationPermissionOutcomeL10n on LocationPermissionOutcome {
     LocationPermissionOutcome.granted => '',
     LocationPermissionOutcome.denied => t.locationDenied,
     LocationPermissionOutcome.deniedForever => t.locationDeniedForever,
-    LocationPermissionOutcome.backgroundDenied => t.locationBackgroundDenied,
     LocationPermissionOutcome.serviceDisabled => t.locationServiceDisabled,
   };
 }

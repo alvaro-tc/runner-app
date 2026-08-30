@@ -97,28 +97,10 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
     });
   }
 
-  Future<void> _start() async {
-    final t = context.l10n;
-    final accepted = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.setupBackgroundLocationTitle),
-        content: Text(t.setupBackgroundLocationBody),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(false),
-            child: Text(t.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => context.pop(true),
-            child: Text(t.setupBackgroundLocationContinue),
-          ),
-        ],
-      ),
-    );
-    if (accepted != true || !mounted) return;
+  void _start() {
+    // El permiso del sistema lo pide `start()`, justo al abrir el GPS.
     unawaited(ref.read(runSessionProvider.notifier).start(_buildGoal()));
-    if (context.mounted) unawaited(context.push(Routes.trainSession));
+    unawaited(context.push(Routes.trainSession));
   }
 
   @override
@@ -248,10 +230,7 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          AppButton(
-            label: t.setupStartRun,
-            onPressed: () => unawaited(_start()),
-          ),
+          AppButton(label: t.setupStartRun, onPressed: _start),
         ],
       ),
     );

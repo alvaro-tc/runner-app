@@ -30,10 +30,6 @@ class _FakeLocation implements LocationService {
       LocationPermissionOutcome.granted;
 
   @override
-  Future<LocationPermissionOutcome> ensureBackgroundPermission() async =>
-      LocationPermissionOutcome.granted;
-
-  @override
   Future<void> openSettings({bool locationSettings = false}) async {}
 
   @override

@@ -447,10 +447,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location is blocked for CamRun. Turn it on in system settings, then come back.';
 
   @override
-  String get locationBackgroundDenied =>
-      'Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.';
-
-  @override
   String get locationServiceDisabled =>
       'Location services are off on this device. Switch them on to start a run.';
 
@@ -548,16 +544,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupAllowLocation => 'Allow location';
-
-  @override
-  String get setupBackgroundLocationTitle => 'Location in the background';
-
-  @override
-  String get setupBackgroundLocationBody =>
-      'To keep drawing your route with the screen off, CamRun needs location access while it runs in the background. It only reads your position while a run is recording.';
-
-  @override
-  String get setupBackgroundLocationContinue => 'Continue';
 
   @override
   String get setupStartRun => 'Start run';

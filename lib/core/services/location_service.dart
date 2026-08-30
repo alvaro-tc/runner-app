@@ -5,6 +5,7 @@ import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Sin mensaje: la explicacion sale del ARB, via
 /// `LocationPermissionOutcomeL10n`.
@@ -12,19 +13,15 @@ enum LocationPermissionOutcome {
   granted,
   denied,
   deniedForever,
-  backgroundDenied,
   serviceDisabled;
 
   bool get isGranted => this == LocationPermissionOutcome.granted;
 }
 
 abstract interface class LocationService {
+  /// Se pide **en el momento de usar el GPS** —al arrancar la grabacion— y no
+  /// antes: un permiso que se pide sin una salida delante se deniega.
   Future<LocationPermissionOutcome> ensurePermission();
-
-  /// Sube el permiso a `always`, que es el que deja seguir grabando con la app
-  /// fuera de pantalla. Se pide **despues** de tener el basico y de que haya
-  /// una razon visible para pedirlo: al reves, el sistema lo entierra.
-  Future<LocationPermissionOutcome> ensureBackgroundPermission();
 
   /// Para el estado `deniedForever`, donde volver a preguntar ya no abre nada.
   Future<void> openSettings({bool locationSettings = false});
@@ -84,30 +81,27 @@ class GeolocatorLocationService implements LocationService {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    return switch (permission) {
+    final outcome = switch (permission) {
       LocationPermission.always ||
       LocationPermission.whileInUse => LocationPermissionOutcome.granted,
       LocationPermission.deniedForever =>
         LocationPermissionOutcome.deniedForever,
       _ => LocationPermissionOutcome.denied,
     };
+    if (outcome.isGranted) await _pedirNotificaciones();
+    return outcome;
   }
 
-  @override
-  Future<LocationPermissionOutcome> ensureBackgroundPermission() async {
-    final actual = await Geolocator.checkPermission();
-    if (actual == LocationPermission.always) {
-      return LocationPermissionOutcome.granted;
-    }
-    // En Android el sistema no deja pedir `always` en el mismo dialogo: la
-    // segunda peticion abre la pantalla de ajustes de la app.
-    final pedido = await Geolocator.requestPermission();
-    return switch (pedido) {
-      LocationPermission.always => LocationPermissionOutcome.granted,
-      LocationPermission.deniedForever =>
-        LocationPermissionOutcome.deniedForever,
-      _ => LocationPermissionOutcome.backgroundDenied,
-    };
+  /// Pide POST_NOTIFICATIONS, que en Android 13+ es lo que hace visible la
+  /// notificacion del servicio en primer plano: sin ella el sistema se lleva
+  /// por delante la grabacion en cuanto la salida se alarga fuera de pantalla.
+  ///
+  /// Va detras del permiso de ubicacion y no bloquea: denegarlo no impide
+  /// correr, solo hace la salida larga mas fragil.
+  Future<void> _pedirNotificaciones() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+    if (await Permission.notification.isGranted) return;
+    await Permission.notification.request();
   }
 
   @override
@@ -135,7 +129,7 @@ class GeolocatorLocationService implements LocationService {
 }
 
 /// Replays a pre-generated loop so a run can be exercised on a simulator, or
-/// anywhere without stepping outside. Enabled by default in debug builds.
+/// anywhere without stepping outside. Ver [useSimulatedLocationProvider].
 class SimulatedLocationService implements LocationService {
   SimulatedLocationService({this.speedUp = 20});
 
@@ -144,10 +138,6 @@ class SimulatedLocationService implements LocationService {
 
   @override
   Future<LocationPermissionOutcome> ensurePermission() async =>
-      LocationPermissionOutcome.granted;
-
-  @override
-  Future<LocationPermissionOutcome> ensureBackgroundPermission() async =>
       LocationPermissionOutcome.granted;
 
   @override
@@ -184,9 +174,13 @@ class SimulatedLocationService implements LocationService {
   }
 }
 
-/// Debug builds simulate by default; flip this override to test real GPS on a
-/// device without changing any call site.
-final useSimulatedLocationProvider = Provider<bool>((ref) => kDebugMode);
+/// GPS falso, para probar en un simulador o sin salir a la calle. Apagado
+/// tambien en debug: si no, probar una carrera reproduce una ruta inventada y
+/// el permiso real nunca se pide. Se enciende con
+/// `--dart-define=SIMULATE_GPS=true`.
+final useSimulatedLocationProvider = Provider<bool>(
+  (ref) => const bool.fromEnvironment('SIMULATE_GPS'),
+);
 
 final locationServiceProvider = Provider<LocationService>(
   (ref) => ref.watch(useSimulatedLocationProvider)

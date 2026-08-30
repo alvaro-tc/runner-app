@@ -242,11 +242,6 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       return;
     }
 
-    final background = await ref
-        .read(locationServiceProvider)
-        .ensureBackgroundPermission();
-    final backgroundWarning = background.isGranted ? null : background;
-
     state = RunSessionState(
       status: RunStatus.countdown,
       goal: goal,
@@ -256,7 +251,6 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       movingTime: Duration.zero,
       splits: const [],
       countdownValue: 3,
-      error: backgroundWarning,
     );
 
     for (var i = 3; i >= 1; i--) {

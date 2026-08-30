@@ -199,7 +199,6 @@
   "paymentMethodBankTransfer": "Bank transfer",
   "locationDenied": "Location permission was declined. Grant it to record your route.",
   "locationDeniedForever": "Location is blocked for CamRun. Turn it on in system settings, then come back.",
-  "locationBackgroundDenied": "Background location is off. Recording keeps working while CamRun is on screen, but may stop if you switch apps.",
   "locationServiceDisabled": "Location services are off on this device. Switch them on to start a run.",
   "trainNoRunsTitle": "No runs yet",
   "trainNoRunsMessage": "Your first one starts here. Pick a goal and head out.",
@@ -240,9 +239,6 @@
   "setupLocationGrantedBody": "CamRun can draw your route while you run.",
   "setupLocationRationale": "CamRun reads your position only while a run is recording, and stores the route on this device.",
   "setupAllowLocation": "Allow location",
-  "setupBackgroundLocationTitle": "Location in the background",
-  "setupBackgroundLocationBody": "To keep drawing your route with the screen off, CamRun needs location access while it runs in the background. It only reads your position while a run is recording.",
-  "setupBackgroundLocationContinue": "Continue",
   "setupStartRun": "Start run",
   "goalDistanceTitle": "{distance} goal",
   "@goalDistanceTitle": {

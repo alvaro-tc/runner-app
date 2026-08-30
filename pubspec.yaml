@@ -1,7 +1,7 @@
 name: camrun
 description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.12.2
@@ -29,10 +29,17 @@ dependencies:
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   geolocator: ^14.0.3
+  # Solo para POST_NOTIFICATIONS: en Android 13+ la notificacion del servicio en
+  # primer plano —la que mantiene viva la grabacion con la pantalla apagada— no
+  # se ve sin ese permiso, y geolocator no lo pide.
+  permission_handler: ^12.0.1
   # UI utilities
   intl: ^0.20.2
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
+  # Ya venia con cached_network_image; se declara para cachear en disco
+  # las teselas del mapa y que la ruta se siga viendo sin cobertura.
+  flutter_cache_manager: ^3.4.2
   # Comprobante de pago: la unica forma de coger una captura de la galeria o
   # hacer una foto. Temporal, igual que el cobro por QR manual que la usa.
   image_picker: ^1.2.0
