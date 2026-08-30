@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
@@ -28,9 +30,20 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   final _busqueda = TextEditingController();
   String _filtro = '';
 
-  /// null = todos. El rol no viaja al servidor: la lista ya viene entera y
-  /// filtrarla aqui evita una ida y vuelta por cada toque de chip.
+  /// null = todos. Viaja al servidor: la lista llega por paginas, y filtrar
+  /// aqui perdia a los admins y organizadores, que casi nunca caen en la
+  /// primera.
   String? _rol;
+
+  int _pagina = 1;
+  int _porPagina = adminPageSizes.first;
+
+  /// Cambiar filtro o tamano de pagina vuelve a la primera: la pagina 4 de otra
+  /// busqueda no existe, y quedarse en ella devuelve una lista vacia.
+  void _reiniciar(VoidCallback cambio) => setState(() {
+    cambio();
+    _pagina = 1;
+  });
 
   @override
   void dispose() {
@@ -41,7 +54,13 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   @override
   Widget build(BuildContext context) {
     final t = context.l10n;
-    final usuarios = ref.watch(adminUsersProvider(_filtro));
+    final consulta = (
+      busqueda: _filtro,
+      rol: _rol,
+      pagina: _pagina,
+      porPagina: _porPagina,
+    );
+    final usuarios = ref.watch(adminUsersProvider(consulta));
 
     return Scaffold(
       appBar: AppBar(title: Text(t.adminUsersTitle)),
@@ -65,7 +84,7 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
               controller: _busqueda,
               suffixIcon: Icons.search_rounded,
               textInputAction: TextInputAction.search,
-              onSubmitted: (v) => setState(() => _filtro = v.trim()),
+              onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
             ),
           ),
           SizedBox(
@@ -82,14 +101,23 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
                       rol == null ? t.adminRoleAll : roleLabel(t, rol),
                     ),
                     selected: _rol == rol,
-                    onSelected: (_) => setState(() => _rol = rol),
+                    onSelected: (_) => _reiniciar(() => _rol = rol),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                 ],
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          // Arriba y no al pie: abajo lo tapa el boton de nueva cuenta.
+          // Mientras recarga conserva el total anterior, para que los botones
+          // no parpadeen de activos a inactivos en cada salto de pagina.
+          _Paginador(
+            total: usuarios.value?.total,
+            pagina: _pagina,
+            porPagina: _porPagina,
+            onPagina: (p) => setState(() => _pagina = p),
+            onPorPagina: (n) => _reiniciar(() => _porPagina = n),
+          ),
           Expanded(
             child: usuarios.when(
               loading: () =>
@@ -98,15 +126,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
                 message: error is Failure
                     ? error.localized(t)
                     : t.adminLoadFailed,
-                onRetry: () => ref.invalidate(adminUsersProvider(_filtro)),
+                onRetry: () => ref.invalidate(adminUsersProvider(consulta)),
               ),
-              data: (todos) {
-                final lista = _rol == null
-                    ? todos
-                    : [
-                        for (final u in todos)
-                          if (u.role == _rol) u,
-                      ];
+              data: (pagina) {
+                final lista = pagina.usuarios;
                 return lista.isEmpty
                     ? EmptyState(
                         icon: Icons.person_search_outlined,
@@ -141,7 +164,83 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
       isScrollControlled: true,
       builder: (_) => _Ficha(user: user),
     );
-    if (cambio ?? false) ref.invalidate(adminUsersProvider(_filtro));
+    // La familia entera: cambiar el rol de alguien lo mueve de una lista a otra.
+    if (cambio ?? false) ref.invalidate(adminUsersProvider);
+  }
+}
+
+/// Rango, salto de pagina y cuantas filas trae cada una.
+///
+/// Se esconde mientras no hay total —la primera carga— y cuando no hay
+/// resultados: un paginador sobre una lista vacia solo estorba.
+class _Paginador extends StatelessWidget {
+  const _Paginador({
+    required this.total,
+    required this.pagina,
+    required this.porPagina,
+    required this.onPagina,
+    required this.onPorPagina,
+  });
+
+  final int? total;
+  final int pagina;
+  final int porPagina;
+  final ValueChanged<int> onPagina;
+  final ValueChanged<int> onPorPagina;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+    final cuantos = total;
+    if (cuantos == null || cuantos == 0) return const SizedBox.shrink();
+
+    final desde = (pagina - 1) * porPagina + 1;
+    final hasta = math.min(pagina * porPagina, cuantos);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenH,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Text(t.adminPerPage, style: context.text.labelSm),
+          const SizedBox(width: AppSpacing.xs),
+          DropdownButton<int>(
+            value: porPagina,
+            isDense: true,
+            underline: const SizedBox.shrink(),
+            style: context.text.bodySm.copyWith(
+              color: context.colors.textPrimary,
+            ),
+            items: [
+              for (final n in adminPageSizes)
+                DropdownMenuItem(value: n, child: Text('$n')),
+            ],
+            onChanged: (n) => n == null ? null : onPorPagina(n),
+          ),
+          const Spacer(),
+          Text(
+            t.adminPageRange(desde, hasta, cuantos),
+            style: context.text.labelSm.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          IconButton(
+            tooltip: t.adminPrevPage,
+            icon: const Icon(Icons.chevron_left_rounded),
+            onPressed: pagina > 1 ? () => onPagina(pagina - 1) : null,
+          ),
+          IconButton(
+            tooltip: t.adminNextPage,
+            icon: const Icon(Icons.chevron_right_rounded),
+            onPressed: hasta < cuantos ? () => onPagina(pagina + 1) : null,
+          ),
+        ],
+      ),
+    );
   }
 }
 

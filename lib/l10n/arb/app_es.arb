@@ -350,6 +350,8 @@
   "profileWeeklyMileage": "Kilómetros semanales",
   "profileLongestRun": "Tirada más larga",
   "profilePrimaryShoes": "Zapatillas principales",
+  "themeSetupTitle": "¿Cómo prefieres ver la app?",
+  "themeSetupSubtitle": "Elige el aspecto con el que quieres empezar. Puedes cambiarlo cuando quieras desde Perfil.",
   "themeLight": "Claro",
   "themeDark": "Oscuro",
   "themeSystem": "Sistema",
@@ -597,9 +599,20 @@
   "adminNewUser": "Nueva cuenta",
   "adminEditUser": "Editar cuenta",
   "adminSearch": "Buscar",
-  "adminSearchHint": "Nombre, correo o CI",
+  "adminSearchHint": "Nombre, correo, CI o celular",
   "adminNoUsersTitle": "Sin resultados",
-  "adminNoUsersBody": "Prueba con otro nombre, correo o cédula.",
+  "adminNoUsersBody": "Prueba con otro nombre, correo, cédula o celular.",
+  "adminPerPage": "Por página",
+  "adminPageRange": "{desde}–{hasta} de {total}",
+  "@adminPageRange": {
+    "placeholders": {
+      "desde": { "type": "int" },
+      "hasta": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "adminPrevPage": "Página anterior",
+  "adminNextPage": "Página siguiente",
   "adminRole": "Rol",
   "adminRoleAll": "Todos",
   "adminRoleAdmin": "Admin",

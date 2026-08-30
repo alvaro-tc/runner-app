@@ -132,17 +132,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned.fill(
-              child: RouteMapView(
-                key: _mapKey,
-                route: state.route,
-                // En carrera, el circuito oficial va debajo: es como se ve si
-                // uno se salio del recorrido.
-                guideRoute: state.goal.officialRoute,
-                follow: state.lastPoint,
-                showStartFinish: state.goal.isRace,
-              ),
-            ),
+            Positioned.fill(child: _RunMap(mapKey: _mapKey)),
             SafeArea(
               child: Column(
                 children: [
@@ -201,6 +191,34 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// El mapa, aparte del resto de la pantalla y mirando **solo al recorrido**.
+///
+/// El reloj cambia el estado una vez por segundo, y con el mapa dentro de ese
+/// mismo `build` cada tic reconstruia las teselas, la polilinea entera y los
+/// marcadores. De ahi los tirones. Aqui se redibuja cuando llega un punto
+/// nuevo, que es lo unico que mueve el mapa.
+class _RunMap extends ConsumerWidget {
+  const _RunMap({required this.mapKey});
+
+  final GlobalKey<RouteMapViewState> mapKey;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (route, goal) = ref.watch(
+      runSessionProvider.select((s) => (s.route, s.goal)),
+    );
+    return RouteMapView(
+      key: mapKey,
+      route: route,
+      // En carrera, el circuito oficial va debajo: es como se ve si uno se
+      // salio del recorrido.
+      guideRoute: goal.officialRoute,
+      follow: route.isEmpty ? null : route.last,
+      showStartFinish: goal.isRace,
     );
   }
 }

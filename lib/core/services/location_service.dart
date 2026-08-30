@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:camrun/core/utils/route_generator.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
@@ -34,11 +35,20 @@ class GeolocatorLocationService implements LocationService {
   GeolocatorLocationService({
     this.maxAccuracyM = 30,
     this.interval = const Duration(seconds: 1),
+    this.minMoveM = 6,
+    this.maxSpeedMs = 12,
   });
 
   /// Anything less accurate than this is noise and gets dropped.
   final int maxAccuracyM;
   final Duration interval;
+
+  /// Cuanto hay que haberse movido desde el ultimo punto valido para que el
+  /// siguiente cuente. Ver [_soloMovimiento].
+  final double minMoveM;
+
+  /// 43 km/h. Por encima no es una zancada, es un salto del sensor.
+  final double maxSpeedMs;
 
   /// Un punto por segundo mientras se corre. Sin `distanceFilter`: en pausa el
   /// stream se para entero, que ahorra mas que filtrar por distancia.
@@ -112,20 +122,59 @@ class GeolocatorLocationService implements LocationService {
   }
 
   @override
-  Stream<GeoPoint> track() =>
-      Geolocator.getPositionStream(locationSettings: _settings)
-          .where((p) => p.accuracy <= maxAccuracyM)
-          .map(
-            (p) => GeoPoint(
-              lat: p.latitude,
-              lng: p.longitude,
-              timestamp: p.timestamp,
-              altitude: p.altitude,
-              accuracy: p.accuracy,
-              speed: p.speed,
-              heading: p.heading,
-            ),
-          );
+  Stream<GeoPoint> track() => soloMovimiento(
+    minMoveM: minMoveM,
+    maxSpeedMs: maxSpeedMs,
+    Geolocator.getPositionStream(locationSettings: _settings)
+        .where((p) => p.accuracy <= maxAccuracyM)
+        .map(
+          (p) => GeoPoint(
+            lat: p.latitude,
+            lng: p.longitude,
+            timestamp: p.timestamp,
+            altitude: p.altitude,
+            accuracy: p.accuracy,
+            speed: p.speed,
+            heading: p.heading,
+          ),
+        ),
+  );
+}
+
+/// Deja pasar solo los puntos que son movimiento de verdad.
+///
+/// Parado en un semaforo el GPS sigue emitiendo, y cada lectura cae unos
+/// metros al lado de la anterior: sin este filtro esos metros se suman como
+/// distancia recorrida, el ritmo sale de la nada y el recorrido del mapa es
+/// un garabato encima del semaforo.
+///
+/// La referencia es el ultimo punto **aceptado**, no el anterior: comparar
+/// con el anterior deja pasar el ruido acumulado. El umbral sube con el error
+/// declarado por el sensor, que es lo que dice cuanto puede haberse movido
+/// solo.
+Stream<GeoPoint> soloMovimiento(
+  Stream<GeoPoint> origen, {
+  double minMoveM = 6,
+  double maxSpeedMs = 12,
+}) async* {
+  GeoPoint? ancla;
+  await for (final p in origen) {
+    final anterior = ancla;
+    if (anterior == null) {
+      ancla = p;
+      yield p;
+      continue;
+    }
+    final segundos =
+        p.timestamp.difference(anterior.timestamp).inMilliseconds / 1000;
+    // Repetido o fuera de orden: no aporta nada y descuadra el ritmo.
+    if (segundos <= 0) continue;
+    final metros = anterior.distanceTo(p);
+    if (metros > maxSpeedMs * segundos) continue;
+    if (metros < math.max(minMoveM, p.accuracy)) continue;
+    ancla = p;
+    yield p;
+  }
 }
 
 /// Replays a pre-generated loop so a run can be exercised on a simulator, or

@@ -2198,6 +2198,18 @@ abstract class AppLocalizations {
   /// **'Primary Shoes'**
   String get profilePrimaryShoes;
 
+  /// No description provided for @themeSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want the app to look?'**
+  String get themeSetupTitle;
+
+  /// No description provided for @themeSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the look you want to start with. You can change it any time from Profile.'**
+  String get themeSetupSubtitle;
+
   /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
@@ -3665,7 +3677,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Name, email or ID'**
+  /// **'Name, email, ID or phone'**
   String get adminSearchHint;
 
   /// No description provided for @adminNoUsersTitle.
@@ -3677,8 +3689,32 @@ abstract class AppLocalizations {
   /// No description provided for @adminNoUsersBody.
   ///
   /// In en, this message translates to:
-  /// **'Try another name, email or ID number.'**
+  /// **'Try another name, email, ID number or phone.'**
   String get adminNoUsersBody;
+
+  /// No description provided for @adminPerPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Per page'**
+  String get adminPerPage;
+
+  /// No description provided for @adminPageRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{desde}–{hasta} of {total}'**
+  String adminPageRange(int desde, int hasta, int total);
+
+  /// No description provided for @adminPrevPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get adminPrevPage;
+
+  /// No description provided for @adminNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get adminNextPage;
 
   /// No description provided for @adminRole.
   ///

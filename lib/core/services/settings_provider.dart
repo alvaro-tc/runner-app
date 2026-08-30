@@ -42,12 +42,17 @@ class AppSettings {
     required this.themeMode,
     required this.language,
     required this.unit,
+    required this.themeChosen,
     required this.onboardingSeen,
   });
 
   final ThemeMode themeMode;
   final AppLanguage language;
   final DistanceUnit unit;
+
+  /// `false` solo en la primera arrancada: nadie ha elegido tema todavia y el
+  /// guard manda a la pantalla que lo pregunta.
+  final bool themeChosen;
   final bool onboardingSeen;
 
   Appearance get appearance =>
@@ -57,11 +62,13 @@ class AppSettings {
     ThemeMode? themeMode,
     AppLanguage? language,
     DistanceUnit? unit,
+    bool? themeChosen,
     bool? onboardingSeen,
   }) => AppSettings(
     themeMode: themeMode ?? this.themeMode,
     language: language ?? this.language,
     unit: unit ?? this.unit,
+    themeChosen: themeChosen ?? this.themeChosen,
     onboardingSeen: onboardingSeen ?? this.onboardingSeen,
   );
 }
@@ -91,6 +98,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
         (u) => u.name == prefs.getString(_kUnit),
         orElse: () => DistanceUnit.km,
       ),
+      themeChosen: prefs.getString(_kTheme) != null,
       // Los slides son parte del arranque, no un tramite que se firma una vez:
       // se ven en cada sesion nueva. Por eso el flag vive solo en memoria.
       onboardingSeen: false,
@@ -98,7 +106,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    state = state.copyWith(themeMode: mode);
+    state = state.copyWith(themeMode: mode, themeChosen: true);
     await ref.read(sharedPreferencesProvider).setString(_kTheme, mode.name);
   }
 
@@ -123,6 +131,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       themeMode: next.themeMode,
       language: next.language,
       unit: next.unit,
+      themeChosen: true,
     );
     final prefs = ref.read(sharedPreferencesProvider);
     await Future.wait([

@@ -141,6 +141,10 @@ class EnvelopeInterceptor extends Interceptor {
       final ts = meta is Map ? meta['timestamp'] as String? : null;
       final serverTime = ts == null ? null : DateTime.tryParse(ts);
       if (serverTime != null) _clock.sync(serverTime.toUtc());
+      // El sobre se abre, pero el `meta` no se tira: los listados paginados
+      // traen ahi el total, y sin esto no habria de donde sacarlo sin volver a
+      // exponer el sobre entero a las capas de arriba.
+      if (meta is Map) response.extra['meta'] = meta;
       response.data = body['data'];
     }
     handler.next(response);

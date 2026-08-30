@@ -321,6 +321,23 @@ class AdminUser {
   final int registrations;
 }
 
+/// Lo que el panel pide al listar usuarios. Todo viaja al servidor: la lista
+/// llega por paginas, asi que filtrar o cortar en el cliente esconderia a quien
+/// no cayera en la primera.
+typedef AdminUsersQuery = ({
+  String busqueda,
+  String? rol,
+  int pagina,
+  int porPagina,
+});
+
+/// Una pagina de usuarios y cuantos hay en total con ese filtro, que es lo que
+/// deja saber si hay pagina siguiente.
+typedef AdminUsersPage = ({List<AdminUser> usuarios, int total});
+
+/// Los tamanos de pagina que ofrece el selector.
+const adminPageSizes = <int>[20, 50, 100];
+
 /// Los roles que el panel sabe asignar. En el mismo orden en que se ofrecen.
 const adminRoles = <String>['admin', 'organizer', 'runner'];
 

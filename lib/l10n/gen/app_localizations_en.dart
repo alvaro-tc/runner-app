@@ -1151,6 +1151,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePrimaryShoes => 'Primary Shoes';
 
   @override
+  String get themeSetupTitle => 'How do you want the app to look?';
+
+  @override
+  String get themeSetupSubtitle =>
+      'Pick the look you want to start with. You can change it any time from Profile.';
+
+  @override
   String get themeLight => 'Light';
 
   @override
@@ -1962,13 +1969,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminSearch => 'Search';
 
   @override
-  String get adminSearchHint => 'Name, email or ID';
+  String get adminSearchHint => 'Name, email, ID or phone';
 
   @override
   String get adminNoUsersTitle => 'No results';
 
   @override
-  String get adminNoUsersBody => 'Try another name, email or ID number.';
+  String get adminNoUsersBody => 'Try another name, email, ID number or phone.';
+
+  @override
+  String get adminPerPage => 'Per page';
+
+  @override
+  String adminPageRange(int desde, int hasta, int total) {
+    return '$desde–$hasta of $total';
+  }
+
+  @override
+  String get adminPrevPage => 'Previous page';
+
+  @override
+  String get adminNextPage => 'Next page';
 
   @override
   String get adminRole => 'Role';

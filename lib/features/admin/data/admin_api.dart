@@ -141,15 +141,34 @@ class AdminApi {
 
   // ─── Usuarios ────────────────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> users({String? search}) => apiCall(
-    () async {
-      final res = await _dio.get<dynamic>(
-        '/admin/users',
-        queryParameters: {if (search != null && search.isNotEmpty) 'q': search},
-      );
-      return (res.data as List).cast<Map<String, dynamic>>();
-    },
-  );
+  /// Una pagina de usuarios, con el total que cumple el filtro.
+  ///
+  /// El rol, la busqueda y la pagina van al servidor: la lista no viene entera
+  /// —son 20 por defecto—, asi que filtrar o cortar aqui dejaria fuera a quien
+  /// no entre en la primera pagina. La busqueda cubre nombre, correo, CI y el
+  /// celular que la persona dejo al inscribirse.
+  Future<({List<Map<String, dynamic>> filas, int total})> users({
+    String? search,
+    String? role,
+    int page = 1,
+    int pageSize = 20,
+  }) => apiCall(() async {
+    final res = await _dio.get<dynamic>(
+      '/admin/users',
+      queryParameters: {
+        if (search != null && search.isNotEmpty) 'q': search,
+        'role': ?role,
+        'page': page,
+        'pageSize': pageSize,
+      },
+    );
+    final filas = (res.data as List).cast<Map<String, dynamic>>();
+    final meta = res.extra['meta'];
+    // Sin `meta.total` no se puede pintar el rango; que haya una pagina llena
+    // es lo unico que se sabe, y eso es lo que se dice.
+    final total = meta is Map ? (meta['total'] as num?)?.toInt() : null;
+    return (filas: filas, total: total ?? filas.length);
+  });
 
   Future<Map<String, dynamic>> createUser(Map<String, dynamic> body) =>
       apiCall(() async {

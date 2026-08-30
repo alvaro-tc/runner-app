@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
@@ -6,6 +8,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/train/presentation/providers/history_provider.dart';
+import 'package:camrun/features/train/presentation/providers/run_session_provider.dart';
 import 'package:camrun/features/train/presentation/widgets/training_history_tile.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -219,7 +222,17 @@ class _QuickStart extends ConsumerWidget {
                     variant: AppButtonVariant.ghost,
                     size: AppButtonSize.md,
                     onBrand: true,
-                    onPressed: () => context.push(Routes.trainSession),
+                    // Arrancar la sesion es lo que pide el permiso de
+                    // ubicacion y abre el GPS: empujando solo la pantalla se
+                    // llegaba a una salida que no grababa nada.
+                    onPressed: () {
+                      unawaited(
+                        ref
+                            .read(runSessionProvider.notifier)
+                            .start(RunGoal.free),
+                      );
+                      unawaited(context.push(Routes.trainSession));
+                    },
                   ),
                 ),
               ],

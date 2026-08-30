@@ -140,12 +140,25 @@ class RunSessionState {
   /// al pintarlo. Ver `LocationPermissionOutcomeL10n`.
   final LocationPermissionOutcome? error;
 
+  /// La cuenta atras cuenta como activa: si no, salir de la pantalla durante
+  /// el 3-2-1 no descarta nada y la grabacion arranca sola, sin pantalla, con
+  /// el GPS abierto hasta que se cierre la app.
   bool get isActive =>
-      status == RunStatus.running || status == RunStatus.paused;
+      status == RunStatus.running ||
+      status == RunStatus.paused ||
+      status == RunStatus.countdown;
 
-  Duration get avgPace => distanceKm < 0.01
-      ? Duration.zero
-      : Duration(seconds: (elapsed.inSeconds / distanceKm).round());
+  /// Ritmo medio sobre el tiempo **en movimiento**, y solo a partir de 100 m.
+  ///
+  /// Antes de eso el numero no existe: cien metros de margen de error del GPS
+  /// dividido por unos segundos da ritmos de 30 min/km que no corrio nadie.
+  /// `Duration.zero` se pinta como `--:--`.
+  Duration get avgPace {
+    final base = movingTime.inSeconds > 0 ? movingTime : elapsed;
+    return distanceKm < 0.1 || base.inSeconds == 0
+        ? Duration.zero
+        : Duration(seconds: (base.inSeconds / distanceKm).round());
+  }
 
   double get avgSpeedKmh =>
       elapsed.inSeconds == 0 ? 0 : distanceKm / (elapsed.inSeconds / 3600);
@@ -216,8 +229,9 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   Duration _pausedTotal = Duration.zero;
   DateTime? _pausedAt;
 
-  /// Auto-pause trips after 20 s under 0.5 m/s.
-  DateTime? _slowSince;
+  /// Suma de los huecos entre puntos aceptados: el tiempo que el telefono
+  /// estuvo moviendose de verdad. Ver [_onPoint].
+  Duration _moving = Duration.zero;
 
   @override
   RunSessionState build() {
@@ -262,6 +276,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     _startedAt = DateTime.now();
     _pausedTotal = Duration.zero;
     _pausedAt = null;
+    _moving = Duration.zero;
     state = state.copyWith(status: RunStatus.running, countdownValue: 0);
 
     final tracking = ref.read(trackingServiceProvider);
@@ -288,7 +303,8 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   void _tick() {
     if (state.status != RunStatus.running || _startedAt == null) return;
     final elapsed = DateTime.now().difference(_startedAt!) - _pausedTotal;
-    state = state.copyWith(elapsed: elapsed, movingTime: elapsed);
+    // `movingTime` no sale del reloj: lo llevan los puntos del GPS.
+    state = state.copyWith(elapsed: elapsed, movingTime: _moving);
   }
 
   void _onPoint(GeoPoint point) {
@@ -296,20 +312,18 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
 
     final route = [...state.route, point];
     var distance = state.distanceKm;
-    var pace = state.currentPace;
 
     if (state.route.isNotEmpty) {
       final previous = state.route.last;
-      final metres = previous.distanceTo(point);
-      final seconds = point.timestamp.difference(previous.timestamp).inSeconds;
-      distance += metres / 1000;
-
+      final seconds =
+          point.timestamp.difference(previous.timestamp).inMilliseconds / 1000;
+      distance += previous.distanceTo(point) / 1000;
+      // Un hueco largo es el sensor sin senal —un tunel, el bolsillo—, no una
+      // zancada de dos minutos: cuenta como 30 s y no infla el ritmo medio.
       if (seconds > 0) {
-        final speed = metres / seconds;
-        pace = speed < 0.1
-            ? Duration.zero
-            : Duration(seconds: (1000 / speed).round());
-        _checkAutoPause(speed);
+        _moving += Duration(
+          milliseconds: (seconds.clamp(0, 30) * 1000).round(),
+        );
       }
     }
 
@@ -317,22 +331,41 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     state = state.copyWith(
       route: route,
       distanceKm: distance,
-      currentPace: pace,
+      movingTime: _moving,
+      currentPace: _ritmoReciente(route),
       splits: splits,
       lastKmPace: splits.isEmpty ? Duration.zero : splits.last.pace,
     );
   }
 
-  void _checkAutoPause(double speedMs) {
-    if (speedMs >= 0.5) {
-      _slowSince = null;
-      return;
+  /// Ritmo de los ultimos 30 s, no el del ultimo par de puntos.
+  ///
+  /// Dos lecturas seguidas del GPS se separan por metros que el sensor tiene de
+  /// error, asi que el ritmo instantaneo salta entre 2:00 y 20:00 sin que nadie
+  /// cambie el paso. Una ventana corta es lo que hace que el numero se pueda
+  /// leer corriendo. Devuelve cero —`--:--`— mientras no haya recorrido
+  /// suficiente para que el ritmo signifique algo.
+  static const _ventanaRitmo = Duration(seconds: 30);
+
+  Duration _ritmoReciente(List<GeoPoint> route) {
+    if (route.length < 2) return Duration.zero;
+    final desde = route.last.timestamp.subtract(_ventanaRitmo);
+    var inicio = route.length - 1;
+    while (inicio > 0 && route[inicio - 1].timestamp.isAfter(desde)) {
+      inicio--;
     }
-    _slowSince ??= DateTime.now();
-    if (DateTime.now().difference(_slowSince!) >= const Duration(seconds: 20)) {
-      _slowSince = null;
-      pause();
+
+    var metros = 0.0;
+    for (var i = inicio + 1; i < route.length; i++) {
+      metros += route[i - 1].distanceTo(route[i]);
     }
+    final segundos =
+        route.last.timestamp
+            .difference(route[inicio].timestamp)
+            .inMilliseconds /
+        1000;
+    if (metros < 10 || segundos <= 0) return Duration.zero;
+    return Duration(seconds: (segundos * 1000 / metros).round());
   }
 
   void pause() {
@@ -375,7 +408,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       finishedAt: started.add(elapsed),
       distanceKm: state.distanceKm,
       elapsed: elapsed,
-      movingTime: state.movingTime,
+      movingTime: _moving == Duration.zero ? elapsed : _moving,
       avgPacePerKm: state.avgPace,
       elevationGainM: state.elevationGainM,
       avgSpeedKmh: state.avgSpeedKmh,
@@ -399,6 +432,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   Future<void> discard() async {
     _teardown();
     _startedAt = null;
+    _moving = Duration.zero;
     state = const RunSessionState.initial();
     await ref.read(trackingServiceProvider).discard();
   }

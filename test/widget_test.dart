@@ -2,12 +2,31 @@ import 'package:camrun/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:camrun/features/auth/presentation/pages/welcome_page.dart';
 import 'package:camrun/features/home/presentation/pages/home_page.dart';
 import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:camrun/features/onboarding/presentation/pages/theme_setup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
 
 void main() {
+  testWidgets('sin tema elegido la primera pantalla es el selector', (
+    tester,
+  ) async {
+    await pumpApp(tester, themePicked: false);
+    await tester.pump();
+    expect(find.byType(ThemeSetupPage), findsOneWidget);
+
+    await tester.tap(find.text('Oscuro'));
+    await tester.pump();
+    await tester.tap(find.text('Continuar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OnboardingPage), findsOneWidget);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('settings.themeMode'), ThemeMode.dark.name);
+  });
+
   testWidgets('a first launch lands on onboarding', (tester) async {
     await pumpApp(tester);
     await tester.pump();

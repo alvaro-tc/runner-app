@@ -327,11 +327,7 @@ class _HomeSkeleton extends StatelessWidget {
         SizedBox(height: AppSpacing.xxl + AppSpacing.base),
         Skeleton(width: 220, height: 24),
         SizedBox(height: AppSpacing.lg),
-        Skeleton(
-          width: double.infinity,
-          height: 110,
-          radius: AppRadius.xl,
-        ),
+        Skeleton(width: double.infinity, height: 110, radius: AppRadius.xl),
       ],
     );
   }

@@ -114,13 +114,24 @@ final adminMarathonProvider = FutureProvider.family<AdminMarathon, String>((
   return AdminMarathon.fromJson(fila);
 });
 
-final adminUsersProvider = FutureProvider.family<List<AdminUser>, String>((
-  ref,
-  busqueda,
-) async {
-  final filas = await ref.watch(adminApiProvider).users(search: busqueda);
-  return [for (final fila in filas) AdminUser.fromJson(fila)];
-});
+/// Una pagina de usuarios. Busqueda, rol y paginacion se resuelven en el
+/// servidor: la lista viene por partes y filtrarla aqui dejaba fuera a los
+/// admins y organizadores, que son pocos y de los primeros creados.
+final adminUsersProvider =
+    FutureProvider.family<AdminUsersPage, AdminUsersQuery>((ref, filtro) async {
+      final pagina = await ref
+          .watch(adminApiProvider)
+          .users(
+            search: filtro.busqueda,
+            role: filtro.rol,
+            page: filtro.pagina,
+            pageSize: filtro.porPagina,
+          );
+      return (
+        usuarios: [for (final fila in pagina.filas) AdminUser.fromJson(fila)],
+        total: pagina.total,
+      );
+    });
 
 /// Cual maraton mira el mapa de Home. La elige el selector de arriba; se queda
 /// puesta al navegar a otra pestana y volver.

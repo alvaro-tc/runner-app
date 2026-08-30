@@ -1,5 +1,7 @@
 /// Route paths and names in one place — no string literals in the widgets.
 abstract final class Routes {
+  /// Solo en la primera arrancada: elegir tema claro/oscuro/sistema.
+  static const themeSetup = '/theme-setup';
   static const onboarding = '/onboarding';
   static const welcome = '/welcome';
   static const signIn = '/sign-in';

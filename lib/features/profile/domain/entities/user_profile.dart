@@ -111,6 +111,7 @@ class UserProfile {
   final RunningHighlights highlights;
   final List<Injury> injuries;
   final SleepStats sleep;
+
   /// Cedula de identidad de la cuenta. `null` en cuentas dadas de alta solo
   /// con correo. Cuando esta, es la que va en cualquier inscripcion: no se
   /// pide otra.

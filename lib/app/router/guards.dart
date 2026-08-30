@@ -18,7 +18,15 @@ String? appGuard(Ref ref, GoRouterState state) {
   final location = state.matchedLocation;
   if (location.startsWith('/dev')) return null;
 
-  final onboardingSeen = ref.read(settingsProvider).onboardingSeen;
+  final settings = ref.read(settingsProvider);
+
+  // Primera arrancada: nadie ha elegido tema todavia. Se pregunta antes que
+  // nada para que los slides ya se pinten con el tema que el usuario quiere.
+  if (!settings.themeChosen) {
+    return location == Routes.themeSetup ? null : Routes.themeSetup;
+  }
+
+  final onboardingSeen = settings.onboardingSeen;
   final auth = ref.read(authProvider);
   final signedIn = auth.signedIn;
 

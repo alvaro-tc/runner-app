@@ -90,10 +90,16 @@ Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   Map<String, Object> prefs = const {},
   bool signedIn = false,
+  // Sin tema guardado el guard manda al selector de la primera arrancada, asi
+  // que por defecto los tests arrancan como si ya se hubiera elegido.
+  bool themePicked = true,
   bool syncAppearance = false,
   Future<ResponseBody> Function(RequestOptions)? api,
 }) async {
-  SharedPreferences.setMockInitialValues(prefs);
+  SharedPreferences.setMockInitialValues({
+    if (themePicked) 'settings.themeMode': ThemeMode.system.name,
+    ...prefs,
+  });
   final instance = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
