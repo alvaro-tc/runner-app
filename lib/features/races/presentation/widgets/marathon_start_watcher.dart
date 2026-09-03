@@ -63,6 +63,7 @@ class _MarathonStartWatcherState extends ConsumerState<MarathonStartWatcher> {
             RunGoal.marathon(
               marathonId: viva.entry.marathon.id,
               registrationId: viva.entry.id,
+              bib: viva.entry.bibNumber,
               title: viva.entry.marathon.name,
               distanceKm: viva.entry.marathon.distanceKm,
               officialRoute: recorrido,

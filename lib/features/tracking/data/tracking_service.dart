@@ -155,6 +155,17 @@ class TrackingService {
       try {
         await _api.finish(sesion.sessionId, feeling: feeling, notes: notes);
       } on Failure catch (e) {
+        // El servidor pudo cerrarla el: en la maraton oficial cierra la carrera
+        // en cuanto el GPS dice que el corredor cruzo la meta, porque el
+        // telefono puede estar en un bolsillo o sin bateria. Reintentar eso
+        // seria pelearse con la outbox por algo que ya esta hecho.
+        if (e is ApiFailure && e.code == ApiErrorCode.sessionNotActive) {
+          developer.log('sesion ya cerrada en el servidor', name: 'tracking');
+          _sesion = null;
+          await _clearActiveRun();
+          unawaited(_sync.drain());
+          return;
+        }
         // El cierre no puede perderse por un corte de red: a la outbox, que lo
         // reintenta con la misma clave hasta que entre.
         developer.log('cierre encolado: $e', name: 'tracking');

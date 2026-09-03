@@ -120,6 +120,28 @@ class AdminApi {
 
   // ─── Largada en vivo ─────────────────────────────────────────────────────
 
+  /// Pone la maraton "en preparacion": los inscritos dejan de poder usar la app
+  /// y solo ven el aviso. [message] es opcional —sin el la app pinta su texto
+  /// por defecto— y llamarlo otra vez solo con el mensaje lo corrige sin tocar
+  /// el estado.
+  Future<Map<String, dynamic>> prepareMarathon(String id, {String? message}) =>
+      apiCall(() async {
+        final res = await _dio.post<dynamic>(
+          '/admin/marathons/$id/prepare',
+          data: {'message': message},
+        );
+        return res.data as Map<String, dynamic>;
+      });
+
+  /// La marcha atras: los inscritos recuperan la app. El texto se conserva.
+  Future<Map<String, dynamic>> cancelPreparation(String id) =>
+      apiCall(() async {
+        final res = await _dio.post<dynamic>(
+          '/admin/marathons/$id/cancel-preparation',
+        );
+        return res.data as Map<String, dynamic>;
+      });
+
   /// Da la largada. La hora la pone el servidor: si cada telefono arrancara
   /// con su reloj, dos corredores del mismo peloton tendrian tiempos distintos.
   Future<Map<String, dynamic>> startMarathon(String id) => apiCall(() async {
@@ -138,6 +160,74 @@ class AdminApi {
     final res = await _dio.get<dynamic>('/admin/marathons/$id/live');
     return res.data as Map<String, dynamic>;
   });
+
+  // ─── Tickets (cobros) ────────────────────────────────────────────────────
+
+  /// Una pagina de cobros, con el total que cumple el filtro.
+  ///
+  /// Es la misma forma que [users] y por la misma razon: la lista llega por
+  /// partes, asi que la maraton, el estado y la pagina se resuelven en el
+  /// servidor.
+  Future<({List<Map<String, dynamic>> filas, int total})> payments({
+    String? marathonId,
+    String? status,
+    int page = 1,
+    int pageSize = 20,
+  }) => apiCall(() async {
+    final res = await _dio.get<dynamic>(
+      '/admin/payments',
+      queryParameters: {
+        'marathonId': ?marathonId,
+        'status': ?status,
+        'page': page,
+        'pageSize': pageSize,
+      },
+    );
+    final filas = (res.data as List).cast<Map<String, dynamic>>();
+    final meta = res.extra['meta'];
+    final total = meta is Map ? (meta['total'] as num?)?.toInt() : null;
+    return (filas: filas, total: total ?? filas.length);
+  });
+
+  /// Da el comprobante por bueno. Acredita el cobro, toma el cupo y emite el
+  /// dorsal por el mismo camino que un pago normal: no hay una segunda forma
+  /// de acreditar dinero.
+  Future<void> approveProof(String proofId, {String? note}) => apiCall(
+    () async => _dio.post<dynamic>(
+      '/admin/payment-proofs/$proofId/approve',
+      data: {'note': ?note},
+    ),
+  );
+
+  /// Rechaza el comprobante. El cobro **sigue abierto**: lo normal es una
+  /// captura equivocada, y cerrarlo obligaria a rehacer la inscripcion entera
+  /// por una foto. El motivo lo lee el corredor, asi que es obligatorio.
+  Future<void> rejectProof(String proofId, String note) => apiCall(
+    () async => _dio.post<dynamic>(
+      '/admin/payment-proofs/$proofId/reject',
+      data: {'note': note},
+    ),
+  );
+
+  /// Da por cobrada una transferencia que no trae comprobante.
+  Future<void> confirmTransfer(String paymentId, {String? reference}) =>
+      apiCall(
+        () async => _dio.post<dynamic>(
+          '/admin/payments/$paymentId/confirm-transfer',
+          data: {'reference': ?reference},
+        ),
+      );
+
+  /// Devuelve el dinero de un cobro y **anula la inscripcion**: el cupo vuelve
+  /// al pozo y el stock de los adicionales tambien. Fuera de tarjeta no hay
+  /// proveedor que mueva el dinero —lo devuelve una persona por el mismo canal
+  /// por el que entro—; lo que esto deja es el asiento de quien lo ordeno.
+  Future<void> refundPayment(String paymentId, String reason) => apiCall(
+    () async => _dio.post<dynamic>(
+      '/admin/payments/$paymentId/refund',
+      data: {'reason': reason},
+    ),
+  );
 
   // ─── Usuarios ────────────────────────────────────────────────────────────
 

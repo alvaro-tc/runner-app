@@ -59,7 +59,12 @@ String? appGuard(Ref ref, GoRouterState state) {
   // viven fuera de los shells y no pertenecen a ninguno de los dos lados.
   if (location.startsWith('${Routes.profile}/')) return null;
 
-  final enPanel = location.startsWith(Routes.admin);
-  if (auth.isAdmin) return enPanel ? null : Routes.admin;
-  return enPanel ? Routes.home : null;
+  // Tres destinos y no dos: el organizador tiene su propio arbol, con el mapa
+  // sin los botones de largada y con la cola de cobros. Cada rol se queda en
+  // el suyo — un organizador que escriba /admin no puede cortar una carrera.
+  final enAdmin = location.startsWith(Routes.admin);
+  final enOrganizador = location.startsWith(Routes.organizer);
+  if (auth.isAdmin) return enAdmin ? null : Routes.admin;
+  if (auth.isOrganizer) return enOrganizador ? null : Routes.organizer;
+  return enAdmin || enOrganizador ? Routes.home : null;
 }

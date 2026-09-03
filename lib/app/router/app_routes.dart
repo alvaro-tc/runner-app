@@ -43,6 +43,15 @@ abstract final class Routes {
   static const adminUsers = '/admin/users';
   static const adminProfile = '/admin/profile';
 
+  /// El panel del organizador: un admin recortado. Ve las carreras y el mapa
+  /// en vivo pero no los da la largada; a cambio valida los cobros. Arbol
+  /// propio y no un `/admin` con botones escondidos: esconder es una decision
+  /// por pantalla, y la que se olvide deja el boton puesto.
+  static const organizer = '/organizer';
+  static const organizerTickets = '/organizer/tickets';
+  static const organizerUsers = '/organizer/users';
+  static const organizerProfile = '/organizer/profile';
+
   static const showcase = '/dev/showcase';
 
   static String marathonDetailOf(String id) => '/home/marathon/$id';

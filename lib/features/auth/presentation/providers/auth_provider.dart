@@ -44,6 +44,14 @@ class AuthState {
 
   /// Le toca el panel y no la app de corredor.
   bool get isAdmin => role == 'admin';
+
+  /// Le toca el panel del organizador: las mismas carreras que ve el admin
+  /// pero sin los botones que las mueven, mas los cobros y los corredores.
+  bool get isOrganizer => role == 'organizer';
+
+  /// Gestiona en vez de correr. Los dos paneles comparten el mismo sitio en el
+  /// router: quien gestiona no tiene plan de entrenamiento que abrir.
+  bool get isStaff => isAdmin || isOrganizer;
 }
 
 /// Whether a session exists. The router redirect watches this.

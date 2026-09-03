@@ -5,6 +5,7 @@ import 'package:camrun/features/admin/presentation/pages/admin_home_page.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_marathon_edit_page.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_marathons_page.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_users_page.dart';
+import 'package:camrun/features/admin/presentation/pages/organizer_tickets_page.dart';
 import 'package:camrun/features/auth/presentation/pages/change_password_page.dart';
 import 'package:camrun/features/auth/presentation/pages/delete_account_page.dart';
 import 'package:camrun/features/auth/presentation/pages/forgot_password_page.dart';
@@ -26,7 +27,7 @@ import 'package:camrun/features/profile/presentation/pages/profile_settings_page
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_start_page.dart';
 import 'package:camrun/features/races/presentation/pages/races_page.dart';
-import 'package:camrun/features/races/presentation/widgets/marathon_start_watcher.dart';
+import 'package:camrun/features/races/presentation/widgets/marathon_gate.dart';
 import 'package:camrun/features/train/presentation/pages/run_session_page.dart';
 import 'package:camrun/features/train/presentation/pages/run_summary_page.dart';
 import 'package:camrun/features/train/presentation/pages/train_page.dart';
@@ -125,7 +126,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // meterlo como quinta pestana del otro obligaria a esconderla a mano en
       // cada pantalla.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) => AppShell(shell: shell, admin: true),
+        builder: (context, state, shell) =>
+            AppShell(shell: shell, role: AppShellRole.admin),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -177,11 +179,57 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // El panel del organizador: el mismo mapa que el del admin en solo
+      // lectura, su cola de cobros y la lista de corredores. Arbol propio y no
+      // un `/admin` con botones escondidos — el guard decide una vez, en un
+      // sitio, en vez de que cada pantalla se acuerde de esconder lo suyo.
       StatefulShellRoute.indexedStack(
-        // El vigia envuelve la app del corredor entera: la largada puede pillar
-        // a alguien en cualquier pestana y el aviso tiene que llegarle igual.
         builder: (context, state, shell) =>
-            MarathonStartWatcher(child: AppShell(shell: shell)),
+            AppShell(shell: shell, role: AppShellRole.organizer),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.organizer,
+                builder: (context, state) =>
+                    const AdminHomePage(readOnly: true),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.organizerTickets,
+                builder: (context, state) => const OrganizerTicketsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.organizerUsers,
+                builder: (context, state) =>
+                    const AdminUsersPage(runnersOnly: true),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.organizerProfile,
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      StatefulShellRoute.indexedStack(
+        // La puerta envuelve la app del corredor entera: el estado de la
+        // maraton puede cambiar con el corredor en cualquier pestana, y lo que
+        // hace es quitarle la app —aviso de preparacion, o sus estadisticas
+        // despues de llegar— hasta que la carrera termine.
+        builder: (context, state, shell) =>
+            MarathonGateView(child: AppShell(shell: shell)),
         branches: [
           StatefulShellBranch(
             routes: [

@@ -5,6 +5,7 @@ import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -133,6 +134,27 @@ final adminUsersProvider =
       );
     });
 
+/// Una pagina de tickets. Mismo reparto que los usuarios: el filtro y la
+/// pagina los resuelve el servidor.
+final adminTicketsProvider =
+    FutureProvider.family<AdminTicketsPage, AdminTicketsQuery>((
+      ref,
+      filtro,
+    ) async {
+      final pagina = await ref
+          .watch(adminApiProvider)
+          .payments(
+            marathonId: filtro.marathonId,
+            status: filtro.estado,
+            page: filtro.pagina,
+            pageSize: filtro.porPagina,
+          );
+      return (
+        tickets: [for (final fila in pagina.filas) AdminTicket.fromJson(fila)],
+        total: pagina.total,
+      );
+    });
+
 /// Cual maraton mira el mapa de Home. La elige el selector de arriba; se queda
 /// puesta al navegar a otra pestana y volver.
 class SelectedMarathonNotifier extends Notifier<String?> {
@@ -152,6 +174,9 @@ final selectedMarathonProvider =
 class LiveBoard {
   const LiveBoard({
     this.runners = const {},
+    this.finishedBibs = const {},
+    this.preparingAt,
+    this.preparingMessage,
     this.startedAt,
     this.finishedAt,
     this.loading = true,
@@ -162,20 +187,41 @@ class LiveBoard {
   /// carrera de cuatro horas para pintar siempre solo el ultimo punto.
   final Map<String, LivePosition> runners;
 
+  /// Dorsales que ya cruzaron la meta, segun el GPS. El mapa los pinta
+  /// distinto: siguen en la lista pero ya no estan corriendo.
+  final Set<String> finishedBibs;
+
+  final DateTime? preparingAt;
+  final String? preparingMessage;
+
   final DateTime? startedAt;
   final DateTime? finishedAt;
   final bool loading;
 
   bool get running => startedAt != null && finishedAt == null;
 
+  /// El mismo orden que en el servidor: lo ultimo que paso manda.
+  MarathonPhase get phase {
+    if (finishedAt != null) return MarathonPhase.finished;
+    if (startedAt != null) return MarathonPhase.inProgress;
+    if (preparingAt != null) return MarathonPhase.preparing;
+    return MarathonPhase.notStarted;
+  }
+
   LiveBoard copyWith({
     Map<String, LivePosition>? runners,
+    Set<String>? finishedBibs,
+    DateTime? preparingAt,
+    String? preparingMessage,
     DateTime? startedAt,
     DateTime? finishedAt,
     bool? loading,
     bool clearFinished = false,
   }) => LiveBoard(
     runners: runners ?? this.runners,
+    finishedBibs: finishedBibs ?? this.finishedBibs,
+    preparingAt: preparingAt ?? this.preparingAt,
+    preparingMessage: preparingMessage ?? this.preparingMessage,
     startedAt: startedAt ?? this.startedAt,
     finishedAt: clearFinished ? null : (finishedAt ?? this.finishedAt),
     loading: loading ?? this.loading,
@@ -199,6 +245,7 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
 
     final posiciones = socket.positions.listen(_onPosicion);
     final estados = socket.states.listen(_onEstado);
+    final llegadas = socket.finishes.listen(_onLlegada);
 
     // La baja de la sala llega despues del primer await; si la pantalla se
     // cerro antes, hay que soltarla igual o quedaria mirando para siempre.
@@ -219,6 +266,7 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
       salir?.call();
       unawaited(posiciones.cancel());
       unawaited(estados.cancel());
+      unawaited(llegadas.cancel());
     });
 
     unawaited(_cargarFoto(marathonId));
@@ -235,6 +283,9 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
       }
       state = LiveBoard(
         runners: corredores,
+        finishedBibs: state.finishedBibs,
+        preparingAt: DateTime.tryParse(json['preparingAt'] as String? ?? ''),
+        preparingMessage: json['preparingMessage'] as String?,
         startedAt: DateTime.tryParse(json['startedAt'] as String? ?? ''),
         finishedAt: DateTime.tryParse(json['finishedAt'] as String? ?? ''),
         loading: false,
@@ -252,15 +303,27 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
 
   void _onEstado(MarathonLiveState estado) {
     if (estado.marathonId != marathonId) return;
+    final corto = estado.finishedAt != null;
     state = LiveBoard(
       // Al cortar la carrera el mapa se vacia: seguir pintando la ultima
       // posicion conocida de cada uno seria mostrar gente corriendo que ya no
       // corre.
-      runners: estado.finishedAt != null ? const {} : state.runners,
+      runners: corto ? const {} : state.runners,
+      finishedBibs: corto ? const {} : state.finishedBibs,
+      preparingAt: estado.preparingAt,
+      preparingMessage: estado.preparingMessage,
       startedAt: estado.startedAt,
       finishedAt: estado.finishedAt,
       loading: false,
     );
+  }
+
+  /// Alguien cruzo la meta. Se queda en el mapa —el organizador quiere ver
+  /// donde esta cada uno, tambien los que ya llegaron— pero marcado.
+  void _onLlegada(RunnerFinish llegada) {
+    final bib = llegada.bib;
+    if (bib == null || bib.isEmpty) return;
+    state = state.copyWith(finishedBibs: {...state.finishedBibs, bib});
   }
 }
 

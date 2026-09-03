@@ -1,10 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
+import 'package:camrun/features/admin/presentation/widgets/admin_paginator.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
@@ -20,7 +19,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// tres listas obligarian a saber de antemano en cual buscar a alguien cuyo rol
 /// justamente se quiere cambiar.
 class AdminUsersPage extends ConsumerStatefulWidget {
-  const AdminUsersPage({super.key});
+  const AdminUsersPage({this.runnersOnly = false, super.key});
+
+  /// La lista del organizador: solo corredores, y sin poder repartir roles.
+  ///
+  /// El filtro de verdad lo pone el **servidor**, que a un organizador le
+  /// devuelve corredores pida lo que pida. Esto solo quita los controles que
+  /// no harian nada: unos chips de rol que no cambian la lista son una
+  /// pantalla que miente.
+  final bool runnersOnly;
 
   @override
   ConsumerState<AdminUsersPage> createState() => _AdminUsersPageState();
@@ -63,7 +70,11 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
     final usuarios = ref.watch(adminUsersProvider(consulta));
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.adminUsersTitle)),
+      appBar: AppBar(
+        title: Text(
+          widget.runnersOnly ? t.organizerRunnersTitle : t.adminUsersTitle,
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _abrirFicha(context, null),
         icon: const Icon(Icons.person_add_alt_rounded),
@@ -87,31 +98,34 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
               onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
             ),
           ),
-          SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenH,
-              ),
-              children: [
-                for (final rol in <String?>[null, ...adminRoles]) ...[
-                  ChoiceChip(
-                    label: Text(
-                      rol == null ? t.adminRoleAll : roleLabel(t, rol),
+          if (widget.runnersOnly)
+            const SizedBox.shrink()
+          else
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenH,
+                ),
+                children: [
+                  for (final rol in <String?>[null, ...adminRoles]) ...[
+                    ChoiceChip(
+                      label: Text(
+                        rol == null ? t.adminRoleAll : roleLabel(t, rol),
+                      ),
+                      selected: _rol == rol,
+                      onSelected: (_) => _reiniciar(() => _rol = rol),
                     ),
-                    selected: _rol == rol,
-                    onSelected: (_) => _reiniciar(() => _rol = rol),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
           // Arriba y no al pie: abajo lo tapa el boton de nueva cuenta.
           // Mientras recarga conserva el total anterior, para que los botones
           // no parpadeen de activos a inactivos en cada salto de pagina.
-          _Paginador(
+          AdminPaginator(
             total: usuarios.value?.total,
             pagina: _pagina,
             porPagina: _porPagina,
@@ -162,85 +176,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
     final cambio = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _Ficha(user: user),
+      builder: (_) => _Ficha(user: user, runnersOnly: widget.runnersOnly),
     );
     // La familia entera: cambiar el rol de alguien lo mueve de una lista a otra.
     if (cambio ?? false) ref.invalidate(adminUsersProvider);
-  }
-}
-
-/// Rango, salto de pagina y cuantas filas trae cada una.
-///
-/// Se esconde mientras no hay total —la primera carga— y cuando no hay
-/// resultados: un paginador sobre una lista vacia solo estorba.
-class _Paginador extends StatelessWidget {
-  const _Paginador({
-    required this.total,
-    required this.pagina,
-    required this.porPagina,
-    required this.onPagina,
-    required this.onPorPagina,
-  });
-
-  final int? total;
-  final int pagina;
-  final int porPagina;
-  final ValueChanged<int> onPagina;
-  final ValueChanged<int> onPorPagina;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.l10n;
-    final cuantos = total;
-    if (cuantos == null || cuantos == 0) return const SizedBox.shrink();
-
-    final desde = (pagina - 1) * porPagina + 1;
-    final hasta = math.min(pagina * porPagina, cuantos);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        AppSpacing.sm,
-        AppSpacing.sm,
-        AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Text(t.adminPerPage, style: context.text.labelSm),
-          const SizedBox(width: AppSpacing.xs),
-          DropdownButton<int>(
-            value: porPagina,
-            isDense: true,
-            underline: const SizedBox.shrink(),
-            style: context.text.bodySm.copyWith(
-              color: context.colors.textPrimary,
-            ),
-            items: [
-              for (final n in adminPageSizes)
-                DropdownMenuItem(value: n, child: Text('$n')),
-            ],
-            onChanged: (n) => n == null ? null : onPorPagina(n),
-          ),
-          const Spacer(),
-          Text(
-            t.adminPageRange(desde, hasta, cuantos),
-            style: context.text.labelSm.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          IconButton(
-            tooltip: t.adminPrevPage,
-            icon: const Icon(Icons.chevron_left_rounded),
-            onPressed: pagina > 1 ? () => onPagina(pagina - 1) : null,
-          ),
-          IconButton(
-            tooltip: t.adminNextPage,
-            icon: const Icon(Icons.chevron_right_rounded),
-            onPressed: hasta < cuantos ? () => onPagina(pagina + 1) : null,
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -294,9 +233,13 @@ class _Fila extends StatelessWidget {
 /// Alta y edicion de una cuenta. En hoja y no en pantalla completa: son cuatro
 /// campos y se abre desde una lista a la que se vuelve enseguida.
 class _Ficha extends ConsumerStatefulWidget {
-  const _Ficha({required this.user});
+  const _Ficha({required this.user, this.runnersOnly = false});
 
   final AdminUser? user;
+
+  /// Sin selector de rol: el servidor le niega al organizador crear o ascender
+  /// a nadie que no sea corredor, asi que ofrecerlo solo produce un error.
+  final bool runnersOnly;
 
   @override
   ConsumerState<_Ficha> createState() => _FichaState();
@@ -438,17 +381,19 @@ class _FichaState extends ConsumerState<_Ficha> {
             controller: _password,
             isPassword: true,
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(t.adminRole, style: context.text.labelSm),
-          const SizedBox(height: AppSpacing.xs),
-          SegmentedButton<String>(
-            segments: [
-              for (final rol in adminRoles)
-                ButtonSegment(value: rol, label: Text(roleLabel(t, rol))),
-            ],
-            selected: {_rol},
-            onSelectionChanged: (s) => setState(() => _rol = s.first),
-          ),
+          if (!widget.runnersOnly) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(t.adminRole, style: context.text.labelSm),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<String>(
+              segments: [
+                for (final rol in adminRoles)
+                  ButtonSegment(value: rol, label: Text(roleLabel(t, rol))),
+              ],
+              selected: {_rol},
+              onSelectionChanged: (s) => setState(() => _rol = s.first),
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(_error!, style: context.text.bodySm.copyWith(color: c.error)),

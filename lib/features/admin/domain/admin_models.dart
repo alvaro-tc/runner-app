@@ -1,3 +1,4 @@
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:meta/meta.dart';
 
@@ -34,6 +35,8 @@ class AdminMarathon {
     this.includes = const [],
     this.categories = const [],
     this.extras = const [],
+    this.preparingAt,
+    this.preparingMessage,
     this.liveStartedAt,
     this.liveFinishedAt,
   });
@@ -78,6 +81,8 @@ class AdminMarathon {
       for (final fila in json['extras'] as List? ?? const [])
         if (fila is Map) AdminExtra.fromJson(fila),
     ],
+    preparingAt: DateTime.tryParse(json['preparingAt'] as String? ?? ''),
+    preparingMessage: json['preparingMessage'] as String?,
     liveStartedAt: DateTime.tryParse(json['liveStartedAt'] as String? ?? ''),
     liveFinishedAt: DateTime.tryParse(json['liveFinishedAt'] as String? ?? ''),
   );
@@ -123,14 +128,31 @@ class AdminMarathon {
   final List<AdminCategory> categories;
   final List<AdminExtra> extras;
 
+  /// Cuando el admin la puso "en preparacion". Desde ese instante los
+  /// inscritos tienen la app bloqueada en el aviso. Ver [MarathonPhase].
+  final DateTime? preparingAt;
+
+  /// El aviso que ven mientras esperan. Null = el texto por defecto de la app.
+  final String? preparingMessage;
+
   /// Cuando el admin dio la largada de verdad, no la hora programada.
   final DateTime? liveStartedAt;
   final DateTime? liveFinishedAt;
 
   double get distanceKm => distanceMeters / 1000;
 
+  /// El mismo orden que en el servidor: lo ultimo que paso manda.
+  MarathonPhase get phase {
+    if (liveFinishedAt != null) return MarathonPhase.finished;
+    if (liveStartedAt != null) return MarathonPhase.inProgress;
+    if (preparingAt != null) return MarathonPhase.preparing;
+    return MarathonPhase.notStarted;
+  }
+
   /// Se esta corriendo ahora mismo.
   bool get running => liveStartedAt != null && liveFinishedAt == null;
+
+  bool get preparing => phase == MarathonPhase.preparing;
 
   bool get finished => liveFinishedAt != null;
 
@@ -172,6 +194,8 @@ class AdminMarathon {
         includes: includes,
         categories: categories,
         extras: extras,
+        preparingAt: preparingAt,
+        preparingMessage: preparingMessage,
         liveStartedAt: liveStartedAt,
         liveFinishedAt: liveFinishedAt,
       );
@@ -349,3 +373,162 @@ String normalizeRole(String? raw) => switch (raw?.trim().toLowerCase()) {
   'organizer' || 'organizador' => 'organizer',
   _ => 'runner',
 };
+
+/// Un ticket: el cobro de una inscripcion, con su comprobante y con quien lo
+/// dio por bueno.
+///
+/// Una sola entidad para los dos metodos que se validan a mano —transferencia
+/// y QR— porque el organizador no trabaja por metodo sino por cola: el metodo
+/// es una columna mas, y dos modelos obligarian a pintar dos listas para
+/// responder la misma pregunta ("¿a quien le falta el visto?").
+@immutable
+class AdminTicket {
+  const AdminTicket({
+    required this.id,
+    required this.method,
+    required this.status,
+    required this.amountCents,
+    required this.marathon,
+    required this.runner,
+    this.currency = 'BOB',
+    this.createdAt,
+    this.paidAt,
+    this.registrationId = '',
+    this.registrationStatus = '',
+    this.bibNumber,
+    this.marathonId = '',
+    this.runnerEmail,
+    this.runnerCi,
+    this.runnerPhone,
+    this.proofId,
+    this.proofStatus,
+    this.proofImageUrl,
+    this.proofReference,
+    this.proofNote,
+    this.validatedBy,
+    this.validatedAt,
+    this.refundedBy,
+    this.refundedAt,
+    this.refundReason,
+  });
+
+  factory AdminTicket.fromJson(Map<String, dynamic> json) => AdminTicket(
+    id: json['id'] as String,
+    method: json['method'] as String? ?? '',
+    status: json['status'] as String? ?? 'pending',
+    amountCents: (json['amountCents'] as num?)?.toInt() ?? 0,
+    currency: json['currency'] as String? ?? 'BOB',
+    createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '')?.toLocal(),
+    paidAt: DateTime.tryParse(json['paidAt'] as String? ?? '')?.toLocal(),
+    registrationId: json['registrationId'] as String? ?? '',
+    registrationStatus: json['registrationStatus'] as String? ?? '',
+    bibNumber: json['bibNumber'] as String?,
+    marathonId: json['marathonId'] as String? ?? '',
+    marathon: json['marathon'] as String? ?? '',
+    runner: json['runner'] as String? ?? '',
+    runnerEmail: json['runnerEmail'] as String?,
+    runnerCi: json['runnerCi'] as String?,
+    runnerPhone: json['runnerPhone'] as String?,
+    proofId: json['proofId'] as String?,
+    proofStatus: json['proofStatus'] as String?,
+    proofImageUrl: json['proofImageUrl'] as String?,
+    proofReference: json['proofReference'] as String?,
+    proofNote: json['proofNote'] as String?,
+    validatedBy: json['validatedBy'] as String?,
+    validatedAt: DateTime.tryParse(
+      json['validatedAt'] as String? ?? '',
+    )?.toLocal(),
+    refundedBy: json['refundedBy'] as String?,
+    refundedAt: DateTime.tryParse(
+      json['refundedAt'] as String? ?? '',
+    )?.toLocal(),
+    refundReason: json['refundReason'] as String?,
+  );
+
+  final String id;
+
+  /// `qr_manual`, `bank_transfer`, `card`... Decide que boton aplica.
+  final String method;
+
+  /// `pending`, `paid`, `failed`, `refunded`.
+  final String status;
+
+  final int amountCents;
+  final String currency;
+  final DateTime? createdAt;
+  final DateTime? paidAt;
+
+  final String registrationId;
+  final String registrationStatus;
+  final String? bibNumber;
+  final String marathonId;
+  final String marathon;
+
+  final String runner;
+  final String? runnerEmail;
+  final String? runnerCi;
+  final String? runnerPhone;
+
+  /// El comprobante que espera revision. Null = no hay nada que aprobar por
+  /// esa via; si el cobro sigue pendiente, lo que aplica es confirmar la
+  /// transferencia.
+  final String? proofId;
+  final String? proofStatus;
+  final String? proofImageUrl;
+  final String? proofReference;
+  final String? proofNote;
+
+  /// **El dato de auditoria**: el nombre de quien lo dio por pagado. Null
+  /// mientras nadie lo haya validado.
+  final String? validatedBy;
+  final DateTime? validatedAt;
+
+  /// Quien ordeno la devolucion, y por que. Es el otro asiento de auditoria:
+  /// devolver anula la inscripcion de alguien, asi que la pregunta "quien
+  /// decidio esto" pesa igual que en la aprobacion.
+  final String? refundedBy;
+  final DateTime? refundedAt;
+  final String? refundReason;
+
+  bool get pending => status == 'pending';
+
+  bool get paid => status == 'paid';
+
+  bool get refunded => status == 'refunded';
+
+  /// Se le puede devolver el dinero: hay dinero que devolver.
+  ///
+  /// Devolver **anula la inscripcion**, no solo mueve plata, y por eso solo
+  /// aplica sobre un cobro cerrado en firme: un cobro pendiente no se devuelve,
+  /// se rechaza.
+  bool get canRefund => paid;
+
+  /// Hay una imagen que mirar antes de decidir.
+  bool get hasProof => (proofImageUrl ?? '').isNotEmpty;
+
+  /// Se puede aprobar o rechazar el comprobante que subio el corredor.
+  bool get canReviewProof => pending && proofId != null;
+
+  /// Se puede dar por cobrada la transferencia: no hay comprobante que revisar
+  /// pero el cobro sigue abierto y es de los que se cuadran a mano.
+  bool get canConfirmTransfer =>
+      pending &&
+      proofId == null &&
+      (method == 'bank_transfer' || method == 'qr_manual');
+}
+
+/// Lo que la pantalla de tickets pide al servidor. Igual que con los usuarios,
+/// todo viaja: la lista llega por paginas y filtrar aqui esconderia lo que no
+/// cayo en la primera.
+typedef AdminTicketsQuery = ({
+  String? marathonId,
+  String? estado,
+  int pagina,
+  int porPagina,
+});
+
+typedef AdminTicketsPage = ({List<AdminTicket> tickets, int total});
+
+/// Los estados por los que se filtra la cola. En el orden en que se ofrecen:
+/// lo que hay que hacer primero.
+const adminPaymentStatuses = <String>['pending', 'paid', 'failed', 'refunded'];

@@ -1639,6 +1639,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminAlreadyFinished => 'This marathon has already finished';
 
   @override
+  String get adminPrepare => 'Put in preparation';
+
+  @override
+  String get adminPrepareCancel => 'Cancel preparation';
+
+  @override
+  String get adminPrepareConfirmTitle => 'Put the race in preparation?';
+
+  @override
+  String adminPrepareConfirmBody(String name) {
+    return 'Everyone entered in “$name” will be locked out of the app and will only see your notice until you start the race.';
+  }
+
+  @override
+  String get adminPrepareMessageLabel => 'Notice for entrants';
+
+  @override
+  String get adminPrepareMessageHint =>
+      'Leave it empty to use the default notice';
+
+  @override
+  String get adminPrepareCancelConfirmTitle => 'Cancel the preparation?';
+
+  @override
+  String adminPrepareCancelConfirmBody(String name) {
+    return 'Entrants in “$name” get the app back. Your notice is kept for next time.';
+  }
+
+  @override
+  String get adminPreparingNotice =>
+      'In preparation: entrants can only see the notice';
+
+  @override
+  String get marathonPreparingTitle => 'Your race is about to start';
+
+  @override
+  String get marathonPreparingDefault =>
+      'The organizer is getting everything ready. Head to the start line and keep the app open — it will open your race screen by itself the moment the race starts.';
+
+  @override
+  String get marathonPreparingHint =>
+      'The rest of the app comes back once the race is over.';
+
+  @override
+  String get marathonPreparingBib => 'Your bib';
+
+  @override
+  String get raceFinishedLockedTitle => 'You finished';
+
+  @override
   String get adminMarathonsTitle => 'Marathons';
 
   @override
@@ -2239,4 +2289,159 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminQrUnreadable =>
       'No QR could be read from that image. Try a sharper photo.';
+
+  @override
+  String get organizerNavTickets => 'Payments';
+
+  @override
+  String get organizerNavRunners => 'Runners';
+
+  @override
+  String get organizerRunnersTitle => 'Runners';
+
+  @override
+  String get organizerStateRunning => 'The race is under way.';
+
+  @override
+  String get organizerStateNotStarted => 'It has not started yet.';
+
+  @override
+  String get organizerCannotStart =>
+      'Only an admin can start or stop the race.';
+
+  @override
+  String get organizerTicketsTitle => 'Payments';
+
+  @override
+  String get organizerMarathon => 'Marathon';
+
+  @override
+  String get organizerAllMarathons => 'All marathons';
+
+  @override
+  String get organizerNoTicketsTitle => 'Nothing to review';
+
+  @override
+  String get organizerNoTicketsBody => 'No payments match that filter.';
+
+  @override
+  String get organizerStatusPending => 'Pending';
+
+  @override
+  String get organizerStatusPaid => 'Paid';
+
+  @override
+  String get organizerStatusFailed => 'Failed';
+
+  @override
+  String get organizerStatusRefunded => 'Refunded';
+
+  @override
+  String get organizerMethodQr => 'QR';
+
+  @override
+  String get organizerMethodTransfer => 'Bank transfer';
+
+  @override
+  String get organizerMethodCard => 'Card';
+
+  @override
+  String get organizerMethodOther => 'Other';
+
+  @override
+  String get organizerAmount => 'Amount';
+
+  @override
+  String get organizerMethod => 'Method';
+
+  @override
+  String get organizerCi => 'ID number';
+
+  @override
+  String get organizerPhone => 'Phone';
+
+  @override
+  String get organizerBib => 'Bib';
+
+  @override
+  String get organizerReference => 'Transaction no.';
+
+  @override
+  String get organizerNote => 'Note';
+
+  @override
+  String get organizerAudit => 'Approved by';
+
+  @override
+  String get organizerNotValidated => 'Not validated';
+
+  @override
+  String get organizerProofNone => 'The runner did not upload a receipt.';
+
+  @override
+  String get organizerProofUnavailable =>
+      'The receipt image could not be loaded.';
+
+  @override
+  String get organizerApprove => 'Mark as paid';
+
+  @override
+  String get organizerApproveTitle => 'Mark this payment as received?';
+
+  @override
+  String get organizerReject => 'Reject';
+
+  @override
+  String get organizerRejectTitle => 'Reject the receipt?';
+
+  @override
+  String get organizerRejectBody =>
+      'The payment stays open: the runner can upload another image.';
+
+  @override
+  String get organizerRejectHint => 'Reason (the runner reads it)';
+
+  @override
+  String get organizerRejectRequired => 'Write why you are rejecting it.';
+
+  @override
+  String get organizerAlreadySettled => 'This payment is already settled.';
+
+  @override
+  String organizerValidatedBy(String name) {
+    return 'Approved by $name';
+  }
+
+  @override
+  String organizerApproveBody(String runner, String amount) {
+    return 'This credits the payment of $amount from $runner, takes their slot and issues their bib. It cannot be undone.';
+  }
+
+  @override
+  String get organizerRefund => 'Refund';
+
+  @override
+  String get organizerRefundTitle => 'Refund this payment?';
+
+  @override
+  String get organizerRefundHint => 'Reason (kept for the audit trail)';
+
+  @override
+  String get organizerRefundRequired => 'Write why you are refunding it.';
+
+  @override
+  String get organizerRefundedLabel => 'Refunded by';
+
+  @override
+  String get organizerRefundReason => 'Refund reason';
+
+  @override
+  String organizerRefundBody(String runner, String amount) {
+    return 'This voids the entry of $runner and frees their slot. Except on card, you have to send the money ($amount) back yourself through the same channel it came in. It cannot be undone.';
+  }
+
+  @override
+  String organizerRefundedBy(String name) {
+    return 'Refunded by $name';
+  }
 }

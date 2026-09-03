@@ -22,9 +22,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class RaceDetailPage extends ConsumerWidget {
-  const RaceDetailPage({required this.entryId, super.key});
+  const RaceDetailPage({required this.entryId, this.locked = false, super.key});
 
   final String entryId;
+
+  /// Sin salida. Es lo que ve quien ya cruzo la meta mientras la maraton sigue
+  /// en marcha: la pantalla es la app entera, asi que un boton de atras no
+  /// llevaria a ningun sitio. Ver `MarathonGateView`.
+  final bool locked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,16 +38,20 @@ class RaceDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: AppIconButton(
-            icon: Icons.arrow_back_rounded,
-            semanticsLabel: t.commonBack,
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go(Routes.races),
-          ),
-        ),
-        title: Text(t.raceDetailTitle),
+        automaticallyImplyLeading: false,
+        leading: locked
+            ? null
+            : Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: AppIconButton(
+                  icon: Icons.arrow_back_rounded,
+                  semanticsLabel: t.commonBack,
+                  onPressed: () => context.canPop()
+                      ? context.pop()
+                      : context.go(Routes.races),
+                ),
+              ),
+        title: Text(locked ? t.raceFinishedLockedTitle : t.raceDetailTitle),
       ),
       body: entry.when(
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),

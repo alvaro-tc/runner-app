@@ -29,6 +29,28 @@ enum RegistrationStatus {
   bool get acceptsEntries => this == open || this == closingSoon;
 }
 
+/// En que punto de su dia esta una maraton.
+///
+/// Se deriva de las tres fechas, igual que en el servidor: guardar ademas un
+/// campo con el estado seria un segundo sitio que puede discrepar del primero.
+/// Sin etiqueta: el texto sale del ARB.
+enum MarathonPhase {
+  /// Todavia no paso nada. Es el estado de casi todas, casi siempre.
+  notStarted,
+
+  /// El organizador cerro el kiosko: los inscritos solo ven el aviso.
+  preparing,
+
+  /// Se esta corriendo.
+  inProgress,
+
+  /// El organizador corto la carrera.
+  finished;
+
+  /// Si un inscrito en esta maraton tiene la app bloqueada.
+  bool get locksEntrants => this == preparing || this == inProgress;
+}
+
 @immutable
 class Marathon {
   const Marathon({
@@ -53,6 +75,8 @@ class Marathon {
     this.extras = const [],
     this.paymentQrPayload,
     this.paymentQrInstructions,
+    this.preparingAt,
+    this.preparingMessage,
     this.liveStartedAt,
     this.liveFinishedAt,
   });
@@ -89,6 +113,14 @@ class Marathon {
 
   final String? paymentQrInstructions;
 
+  /// Cuando el organizador puso la carrera "en preparacion". Ver
+  /// [MarathonPhase.preparing].
+  final DateTime? preparingAt;
+
+  /// El aviso que el organizador escribio para esa espera. `null` = la app
+  /// pone el suyo, traducido al idioma del corredor.
+  final String? preparingMessage;
+
   /// Cuando el organizador dio la largada de verdad, no la hora programada.
   /// `null` = todavia no arranco. Es lo que pone en marcha la pantalla de
   /// carrera del inscrito.
@@ -97,6 +129,15 @@ class Marathon {
 
   /// Se esta corriendo ahora mismo.
   bool get isLive => liveStartedAt != null && liveFinishedAt == null;
+
+  /// El orden de las comprobaciones es el orden real del dia: una vez cortada
+  /// ya da igual que estuviera corriendo.
+  MarathonPhase get phase {
+    if (liveFinishedAt != null) return MarathonPhase.finished;
+    if (liveStartedAt != null) return MarathonPhase.inProgress;
+    if (preparingAt != null) return MarathonPhase.preparing;
+    return MarathonPhase.notStarted;
+  }
 
   bool get acceptsQrPayment => paymentQrPayload?.isNotEmpty ?? false;
 

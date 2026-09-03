@@ -32,6 +32,7 @@ class RunSessionPage extends ConsumerStatefulWidget {
 class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   final _mapKey = GlobalKey<RouteMapViewState>();
   StreamSubscription<MarathonLiveState>? _corte;
+  StreamSubscription<RunnerFinish>? _llegada;
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   @override
   void dispose() {
     unawaited(_corte?.cancel());
+    unawaited(_llegada?.cancel());
     unawaited(WakelockPlus.disable());
     super.dispose();
   }
@@ -79,16 +81,30 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     return false;
   }
 
-  /// La maraton se corto desde el panel: se cierra la grabacion y se sale al
-  /// resumen, como cualquier carrera terminada.
+  /// Se cierra la grabacion sola por dos motivos, y los dos llegan por socket.
+  ///
+  /// **El corte del organizador**, que termina la carrera de todo el mundo a la
+  /// vez. Y **la llegada de esta persona**: quien cruza la meta acaba su
+  /// carrera aunque la maraton siga —cada uno tarda lo suyo—, y quien decide
+  /// que cruzo es el servidor, comparando su GPS con el trazado oficial. El
+  /// telefono no lo decide por su cuenta: en una ida y vuelta la distancia
+  /// recorrida y la cercania a la meta mienten las dos.
   ///
   /// El aviso llega por el socket y no por el provider de carreras: aquel dice
-  /// exactamente "esta maraton termino" mientras que el otro puede quedarse en
-  /// `null` un instante por una recarga de la lista, y eso cortaria la carrera
-  /// de alguien que sigue corriendo.
-  void _escucharCorte(String marathonId) {
-    _corte ??= ref.read(liveSocketProvider).states.listen((estado) {
+  /// exactamente que paso, mientras que el otro puede quedarse en `null` un
+  /// instante por una recarga de la lista, y eso cortaria la carrera de alguien
+  /// que sigue corriendo.
+  void _escucharCorte(String marathonId, String? bib) {
+    final socket = ref.read(liveSocketProvider);
+
+    _corte ??= socket.states.listen((estado) {
       if (estado.marathonId != marathonId || estado.finishedAt == null) return;
+      if (ref.read(runSessionProvider).isActive) unawaited(_finish());
+    });
+
+    if (bib == null || bib.isEmpty) return;
+    _llegada ??= socket.finishes.listen((llegada) {
+      if (llegada.bib != bib) return;
       if (ref.read(runSessionProvider).isActive) unawaited(_finish());
     });
   }
@@ -116,7 +132,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     // ubicacion denegado— la pantalla no puede quedarse cerrada sin salida.
     final bloqueada = state.goal.isLiveMarathon && state.isActive;
     if (bloqueada) {
-      _escucharCorte(state.goal.marathonId!);
+      _escucharCorte(state.goal.marathonId!, state.goal.bib);
       // Mantiene vivo al que lleva las salas del socket mientras dure la
       // carrera: sin nadie mirandolo, se cerraria la sala por la que llega el
       // corte y la pantalla se quedaria bloqueada para siempre.

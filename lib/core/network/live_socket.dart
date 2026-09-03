@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camrun/core/network/api_config.dart';
 import 'package:camrun/core/storage/token_storage.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
@@ -37,11 +38,13 @@ class LivePosition {
   String get key => bib ?? '?';
 }
 
-/// Largada y corte de una maraton, tal como llegan por el socket.
+/// Preparacion, largada y corte de una maraton, tal como llegan por el socket.
 @immutable
 class MarathonLiveState {
   const MarathonLiveState({
     required this.marathonId,
+    this.preparingAt,
+    this.preparingMessage,
     this.startedAt,
     this.finishedAt,
   });
@@ -49,16 +52,55 @@ class MarathonLiveState {
   factory MarathonLiveState.fromJson(Map<String, dynamic> json) =>
       MarathonLiveState(
         marathonId: json['marathonId'] as String,
+        preparingAt: DateTime.tryParse(json['preparingAt'] as String? ?? ''),
+        preparingMessage: json['preparingMessage'] as String?,
         startedAt: DateTime.tryParse(json['startedAt'] as String? ?? ''),
         finishedAt: DateTime.tryParse(json['finishedAt'] as String? ?? ''),
       );
 
   final String marathonId;
+  final DateTime? preparingAt;
+
+  /// El aviso del organizador. `null` = la app pone el texto por defecto.
+  final String? preparingMessage;
+
   final DateTime? startedAt;
   final DateTime? finishedAt;
 
   /// Se esta corriendo ahora mismo.
   bool get running => startedAt != null && finishedAt == null;
+
+  /// El mismo orden que en el servidor: lo ultimo que paso manda.
+  MarathonPhase get phase {
+    if (finishedAt != null) return MarathonPhase.finished;
+    if (startedAt != null) return MarathonPhase.inProgress;
+    if (preparingAt != null) return MarathonPhase.preparing;
+    return MarathonPhase.notStarted;
+  }
+}
+
+/// Que alguien cruzo la meta.
+///
+/// Solo el dorsal, como las posiciones: el servidor no manda quien es. Al
+/// corredor le sirve igual —se reconoce por el suyo— y al panel tambien, que es
+/// lo unico que pinta.
+@immutable
+class RunnerFinish {
+  const RunnerFinish({
+    required this.bib,
+    required this.distanceMeters,
+    required this.at,
+  });
+
+  factory RunnerFinish.fromJson(Map<String, dynamic> json) => RunnerFinish(
+    bib: json['bib'] as String?,
+    distanceMeters: (json['distanceMeters'] as num?)?.toDouble() ?? 0,
+    at: DateTime.tryParse(json['t'] as String? ?? '') ?? DateTime.now(),
+  );
+
+  final String? bib;
+  final double distanceMeters;
+  final DateTime at;
 }
 
 /// Cliente del namespace `/live` del backend.
@@ -81,9 +123,14 @@ class LiveSocket {
 
   final _posiciones = StreamController<LivePosition>.broadcast();
   final _estados = StreamController<MarathonLiveState>.broadcast();
+  final _llegadas = StreamController<RunnerFinish>.broadcast();
 
   Stream<LivePosition> get positions => _posiciones.stream;
   Stream<MarathonLiveState> get states => _estados.stream;
+
+  /// Quien va cruzando la meta. Lo decide el servidor mirando el GPS contra el
+  /// trazado oficial, no el propio telefono.
+  Stream<RunnerFinish> get finishes => _llegadas.stream;
 
   /// Empieza a mirar una maraton. Devuelve la baja: llamarla es lo que la
   /// deja de mirar.
@@ -114,6 +161,7 @@ class LiveSocket {
     _salas.clear();
     await _posiciones.close();
     await _estados.close();
+    await _llegadas.close();
   }
 
   Future<io.Socket> _conectar() async {
@@ -136,6 +184,11 @@ class LiveSocket {
       ..on('runner:position', (data) {
         if (data is Map) {
           _posiciones.add(LivePosition.fromJson(data.cast<String, dynamic>()));
+        }
+      })
+      ..on('runner:finish', (data) {
+        if (data is Map) {
+          _llegadas.add(RunnerFinish.fromJson(data.cast<String, dynamic>()));
         }
       })
       ..on('marathon:state', (data) {

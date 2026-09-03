@@ -1,8 +1,10 @@
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -19,7 +21,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// una: sin selector habria que adivinar cual, y adivinar mal el dia de la
 /// carrera es quedarse mirando un mapa vacio.
 class AdminHomePage extends ConsumerWidget {
-  const AdminHomePage({super.key});
+  const AdminHomePage({this.readOnly = false, super.key});
+
+  /// El puesto de mando del organizador: el mismo mapa y el mismo selector,
+  /// sin los botones que mueven la carrera. Es una bandera y no una pantalla
+  /// aparte porque lo unico que cambia es la barra de abajo, y una copia se
+  /// quedaria sin los arreglos que reciba esta.
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,16 +48,17 @@ class AdminHomePage extends ConsumerWidget {
                 title: t.adminNoMarathonsTitle,
                 message: t.adminNoMarathonsBody,
               )
-            : _Tablero(marathons: lista),
+            : _Tablero(marathons: lista, readOnly: readOnly),
       ),
     );
   }
 }
 
 class _Tablero extends ConsumerWidget {
-  const _Tablero({required this.marathons});
+  const _Tablero({required this.marathons, this.readOnly = false});
 
   final List<AdminMarathon> marathons;
+  final bool readOnly;
 
   /// La que el selector deja elegida. Por defecto, la que se esta corriendo:
   /// el dia de la carrera es lo unico que se quiere ver al abrir la app.
@@ -79,7 +88,10 @@ class _Tablero extends ConsumerWidget {
         Expanded(
           child: _Mapa(route: detalle.value?.route ?? const [], board: tablero),
         ),
-        _Controles(marathon: detalle.value ?? maraton, board: tablero),
+        if (readOnly)
+          _Estado(marathon: detalle.value ?? maraton, board: tablero)
+        else
+          _Controles(marathon: detalle.value ?? maraton, board: tablero),
       ],
     );
   }
@@ -114,7 +126,7 @@ class _Selector extends ConsumerWidget {
                       value: m.id,
                       child: Row(
                         children: [
-                          if (m.running)
+                          if (m.running || m.preparing)
                             Padding(
                               padding: const EdgeInsets.only(
                                 right: AppSpacing.sm,
@@ -122,7 +134,7 @@ class _Selector extends ConsumerWidget {
                               child: Icon(
                                 Icons.circle,
                                 size: 10,
-                                color: c.success,
+                                color: m.running ? c.success : c.warning,
                               ),
                             ),
                           Expanded(
@@ -171,7 +183,13 @@ class _Mapa extends StatelessWidget {
                   lat: corredor.lat,
                   lng: corredor.lng,
                   size: 34,
-                  child: _Dorsal(bib: corredor.bib),
+                  child: _Dorsal(
+                    bib: corredor.bib,
+                    // Ya cruzo la meta: sigue en el mapa —el organizador
+                    // quiere ver donde esta todo el mundo— pero deja de
+                    // contar como gente en carrera.
+                    finished: board.finishedBibs.contains(corredor.key),
+                  ),
                 ),
             ],
           ),
@@ -181,7 +199,10 @@ class _Mapa extends StatelessWidget {
           left: AppSpacing.screenH,
           child: _Contador(
             board: board,
-            label: t.adminRunnersOnCourse(board.runners.length),
+            label: t.adminRunnersOnCourse(
+              board.runners.length - board.finishedBibs.length,
+            ),
+            finished: board.finishedBibs.length,
           ),
         ),
         if (board.loading)
@@ -205,9 +226,12 @@ class _Mapa extends StatelessWidget {
 /// La chinche de un corredor. Solo el dorsal: es lo unico que manda el
 /// servidor, y es lo unico que hace falta para gritarle a alguien por radio.
 class _Dorsal extends StatelessWidget {
-  const _Dorsal({required this.bib});
+  const _Dorsal({required this.bib, this.finished = false});
 
   final String? bib;
+
+  /// Ya llego a meta. Ver `LiveBoard.finishedBibs`.
+  final bool finished;
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +240,7 @@ class _Dorsal extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: c.primary,
+        color: finished ? c.success : c.primary,
         border: Border.all(color: c.surface, width: 2),
       ),
       child: Text(
@@ -232,10 +256,18 @@ class _Dorsal extends StatelessWidget {
 }
 
 class _Contador extends StatelessWidget {
-  const _Contador({required this.board, required this.label});
+  const _Contador({
+    required this.board,
+    required this.label,
+    this.finished = 0,
+  });
 
   final LiveBoard board;
   final String label;
+
+  /// Cuantos ya cruzaron la meta. Cero = no se pinta: en una carrera que
+  /// acaba de largar el numero solo ocupa sitio.
+  final int finished;
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +292,96 @@ class _Contador extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(label, style: context.text.labelSm),
+          if (finished > 0) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Icon(Icons.sports_score_rounded, size: 14, color: c.success),
+            const SizedBox(width: AppSpacing.xxs),
+            Text(
+              '$finished',
+              style: context.text.labelSm.copyWith(color: c.success),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// El pie de solo lectura: en que fase esta la carrera, sin botones.
+///
+/// No es un `_Controles` con los botones apagados. Un boton gris invita a
+/// pulsarlo y a preguntar por que no funciona; el organizador no puede dar la
+/// largada y punto, asi que lo que ve es el estado, que es lo que si necesita.
+class _Estado extends StatelessWidget {
+  const _Estado({required this.marathon, required this.board});
+
+  final AdminMarathon marathon;
+  final LiveBoard board;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+
+    // Manda el socket: la maraton se cargo hace rato y puede haber arrancado
+    // desde el telefono del admin mientras tanto.
+    final fase = board.loading ? marathon.phase : board.phase;
+    final (texto, icono, color) = switch (fase) {
+      MarathonPhase.finished => (
+        t.adminAlreadyFinished,
+        Icons.sports_score_rounded,
+        c.textSecondary,
+      ),
+      MarathonPhase.inProgress => (
+        t.organizerStateRunning,
+        Icons.play_circle_outline_rounded,
+        c.success,
+      ),
+      MarathonPhase.preparing => (
+        t.adminPreparingNotice,
+        Icons.hourglass_top_rounded,
+        c.warning,
+      ),
+      MarathonPhase.notStarted => (
+        t.organizerStateNotStarted,
+        Icons.schedule_rounded,
+        c.textSecondary,
+      ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.screenH),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.border)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icono, size: 18, color: color),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    texto,
+                    textAlign: TextAlign.center,
+                    style: context.text.bodySm.copyWith(color: color),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              t.organizerCannotStart,
+              textAlign: TextAlign.center,
+              style: context.text.labelSm.copyWith(color: c.textSecondary),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -287,6 +408,99 @@ class _ControlesState extends ConsumerState<_Controles> {
 
   bool get _terminada =>
       widget.board.finishedAt != null || widget.marathon.finished;
+
+  /// Igual que [_corriendo]: manda el socket, que es lo ultimo que se supo.
+  bool get _preparando =>
+      !_corriendo &&
+      !_terminada &&
+      (widget.board.preparingAt != null || widget.marathon.preparing);
+
+  String? get _mensaje =>
+      widget.board.preparingMessage ?? widget.marathon.preparingMessage;
+
+  /// Pone o quita la preparacion. Al ponerla se pregunta por el aviso: es el
+  /// unico texto que van a leer los inscritos durante la espera, y escribirlo
+  /// en ese momento —con el arco delante— sale mejor que dejarlo redactado la
+  /// semana pasada.
+  Future<void> _preparar({required bool activar}) async {
+    final t = context.l10n;
+
+    if (!activar) {
+      final confirmado = await _confirmar(
+        titulo: t.adminPrepareCancelConfirmTitle,
+        cuerpo: t.adminPrepareCancelConfirmBody(widget.marathon.name),
+        accion: t.adminPrepareCancel,
+      );
+      if (confirmado != true || !mounted) return;
+      await _enviar((api) => api.cancelPreparation(widget.marathon.id));
+      return;
+    }
+
+    final mensaje = await showDialog<String>(
+      context: context,
+      builder: (dialogo) => _DialogoDeAviso(
+        inicial: _mensaje ?? '',
+        marathonName: widget.marathon.name,
+      ),
+    );
+    if (mensaje == null || !mounted) return;
+
+    await _enviar(
+      (api) => api.prepareMarathon(
+        widget.marathon.id,
+        // Vacio es "sin aviso propio": la app pinta su texto por defecto, en
+        // el idioma de cada corredor, que es mejor que un hueco en blanco.
+        message: mensaje.trim().isEmpty ? null : mensaje.trim(),
+      ),
+    );
+  }
+
+  Future<bool?> _confirmar({
+    required String titulo,
+    required String cuerpo,
+    required String accion,
+  }) {
+    final t = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogo) => AlertDialog(
+        title: Text(titulo),
+        content: Text(cuerpo),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(false),
+            child: Text(t.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(true),
+            child: Text(accion),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Manda la orden y refresca. Un solo sitio que sepa apagar el boton y
+  /// contar el fallo: las cuatro acciones del panel fallan igual.
+  Future<void> _enviar(Future<void> Function(AdminApi) accion) async {
+    setState(() => _enviando = true);
+    try {
+      await accion(ref.read(adminApiProvider));
+      // La lista lleva el estado en vivo de cada carrera y acaba de quedar
+      // vieja; el tablero se entera solo, por el socket.
+      ref
+        ..invalidate(adminMarathonsProvider)
+        ..invalidate(adminMarathonProvider(widget.marathon.id));
+    } on Failure catch (f) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(f.localized(context.l10n))));
+      }
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
+  }
 
   Future<void> _pulsar({required bool largar}) async {
     final t = context.l10n;
@@ -315,28 +529,11 @@ class _ControlesState extends ConsumerState<_Controles> {
     );
     if (confirmado != true || !mounted) return;
 
-    setState(() => _enviando = true);
-    final api = ref.read(adminApiProvider);
-    try {
-      if (largar) {
-        await api.startMarathon(widget.marathon.id);
-      } else {
-        await api.finishMarathon(widget.marathon.id);
-      }
-      // La lista lleva el estado en vivo de cada carrera y acaba de quedar
-      // vieja; el tablero se entera solo, por el socket.
-      ref
-        ..invalidate(adminMarathonsProvider)
-        ..invalidate(adminMarathonProvider(widget.marathon.id));
-    } on Failure catch (f) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(f.localized(context.l10n))));
-      }
-    } finally {
-      if (mounted) setState(() => _enviando = false);
-    }
+    await _enviar(
+      (api) => largar
+          ? api.startMarathon(widget.marathon.id)
+          : api.finishMarathon(widget.marathon.id),
+    );
   }
 
   @override
@@ -368,33 +565,134 @@ class _ControlesState extends ConsumerState<_Controles> {
                   ),
                 ],
               )
-            : Row(
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: AppButton(
-                      label: t.adminStart,
-                      icon: Icons.flag_rounded,
-                      isLoading: _enviando && !_corriendo,
-                      onPressed: _corriendo || _enviando
+                  // La preparacion va arriba y sola: es el paso previo a la
+                  // largada y es el que apaga la app de todos los inscritos.
+                  // Compartir fila con "largar" invita a pulsar el que no era.
+                  if (!_corriendo) ...[
+                    if (_preparando)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Text(
+                          t.adminPreparingNotice,
+                          textAlign: TextAlign.center,
+                          style: context.text.bodySm.copyWith(color: c.warning),
+                        ),
+                      ),
+                    AppButton(
+                      label: _preparando
+                          ? t.adminPrepareCancel
+                          : t.adminPrepare,
+                      icon: _preparando
+                          ? Icons.lock_open_rounded
+                          : Icons.hourglass_top_rounded,
+                      variant: AppButtonVariant.secondary,
+                      isLoading: _enviando,
+                      onPressed: _enviando
                           ? null
-                          : () => _pulsar(largar: true),
+                          : () => _preparar(activar: !_preparando),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: AppButton(
-                      label: t.adminFinish,
-                      icon: Icons.stop_rounded,
-                      variant: AppButtonVariant.danger,
-                      isLoading: _enviando && _corriendo,
-                      onPressed: !_corriendo || _enviando
-                          ? null
-                          : () => _pulsar(largar: false),
-                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          label: t.adminStart,
+                          icon: Icons.flag_rounded,
+                          isLoading: _enviando && !_corriendo,
+                          onPressed: _corriendo || _enviando
+                              ? null
+                              : () => _pulsar(largar: true),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: AppButton(
+                          label: t.adminFinish,
+                          icon: Icons.stop_rounded,
+                          variant: AppButtonVariant.danger,
+                          isLoading: _enviando && _corriendo,
+                          onPressed: !_corriendo || _enviando
+                              ? null
+                              : () => _pulsar(largar: false),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
       ),
+    );
+  }
+}
+
+/// El aviso que van a leer los inscritos mientras esperan la largada.
+///
+/// Se pregunta al **poner** la preparacion y no en la ficha de la carrera: es
+/// el momento en que el organizador sabe que decir —"el arco esta en la plaza",
+/// "salimos con veinte minutos de retraso"— y es la ultima pantalla que esa
+/// gente va a ver hasta que suene el disparo. Dejarlo vacio es una respuesta
+/// valida: la app pone su texto por defecto en el idioma de cada corredor.
+class _DialogoDeAviso extends StatefulWidget {
+  const _DialogoDeAviso({required this.inicial, required this.marathonName});
+
+  final String inicial;
+  final String marathonName;
+
+  @override
+  State<_DialogoDeAviso> createState() => _DialogoDeAvisoState();
+}
+
+class _DialogoDeAvisoState extends State<_DialogoDeAviso> {
+  late final _texto = TextEditingController(text: widget.inicial);
+
+  @override
+  void dispose() {
+    _texto.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+
+    return AlertDialog(
+      title: Text(t.adminPrepareConfirmTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t.adminPrepareConfirmBody(widget.marathonName),
+            style: context.text.bodySm,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _texto,
+            maxLines: 4,
+            maxLength: 500,
+            textInputAction: TextInputAction.newline,
+            decoration: InputDecoration(
+              labelText: t.adminPrepareMessageLabel,
+              hintText: t.adminPrepareMessageHint,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(t.commonCancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_texto.text),
+          child: Text(t.adminPrepare),
+        ),
+      ],
     );
   }
 }

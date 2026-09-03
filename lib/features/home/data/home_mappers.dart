@@ -53,6 +53,8 @@ Marathon marathonFrom(
       for (final linea in j['includes'] as List? ?? const []) '$linea',
     ],
     routePreview: _recorrido(j['routeGeoJson']),
+    preparingAt: _fechaOpcional(j['preparingAt']),
+    preparingMessage: j['preparingMessage'] as String?,
     liveStartedAt: _fechaOpcional(j['liveStartedAt']),
     liveFinishedAt: _fechaOpcional(j['liveFinishedAt']),
     predictedFinishMin: banda?.$1,

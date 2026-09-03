@@ -3062,6 +3062,90 @@ abstract class AppLocalizations {
   /// **'This marathon has already finished'**
   String get adminAlreadyFinished;
 
+  /// No description provided for @adminPrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Put in preparation'**
+  String get adminPrepare;
+
+  /// No description provided for @adminPrepareCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel preparation'**
+  String get adminPrepareCancel;
+
+  /// No description provided for @adminPrepareConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the race in preparation?'**
+  String get adminPrepareConfirmTitle;
+
+  /// No description provided for @adminPrepareConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone entered in “{name}” will be locked out of the app and will only see your notice until you start the race.'**
+  String adminPrepareConfirmBody(String name);
+
+  /// No description provided for @adminPrepareMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice for entrants'**
+  String get adminPrepareMessageLabel;
+
+  /// No description provided for @adminPrepareMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it empty to use the default notice'**
+  String get adminPrepareMessageHint;
+
+  /// No description provided for @adminPrepareCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the preparation?'**
+  String get adminPrepareCancelConfirmTitle;
+
+  /// No description provided for @adminPrepareCancelConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Entrants in “{name}” get the app back. Your notice is kept for next time.'**
+  String adminPrepareCancelConfirmBody(String name);
+
+  /// No description provided for @adminPreparingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'In preparation: entrants can only see the notice'**
+  String get adminPreparingNotice;
+
+  /// No description provided for @marathonPreparingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your race is about to start'**
+  String get marathonPreparingTitle;
+
+  /// No description provided for @marathonPreparingDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'The organizer is getting everything ready. Head to the start line and keep the app open — it will open your race screen by itself the moment the race starts.'**
+  String get marathonPreparingDefault;
+
+  /// No description provided for @marathonPreparingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The rest of the app comes back once the race is over.'**
+  String get marathonPreparingHint;
+
+  /// No description provided for @marathonPreparingBib.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bib'**
+  String get marathonPreparingBib;
+
+  /// No description provided for @raceFinishedLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished'**
+  String get raceFinishedLockedTitle;
+
   /// No description provided for @adminMarathonsTitle.
   ///
   /// In en, this message translates to:
@@ -4171,6 +4255,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No QR could be read from that image. Try a sharper photo.'**
   String get adminQrUnreadable;
+
+  /// No description provided for @organizerNavTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get organizerNavTickets;
+
+  /// No description provided for @organizerNavRunners.
+  ///
+  /// In en, this message translates to:
+  /// **'Runners'**
+  String get organizerNavRunners;
+
+  /// No description provided for @organizerRunnersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runners'**
+  String get organizerRunnersTitle;
+
+  /// No description provided for @organizerStateRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'The race is under way.'**
+  String get organizerStateRunning;
+
+  /// No description provided for @organizerStateNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'It has not started yet.'**
+  String get organizerStateNotStarted;
+
+  /// No description provided for @organizerCannotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an admin can start or stop the race.'**
+  String get organizerCannotStart;
+
+  /// No description provided for @organizerTicketsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get organizerTicketsTitle;
+
+  /// No description provided for @organizerMarathon.
+  ///
+  /// In en, this message translates to:
+  /// **'Marathon'**
+  String get organizerMarathon;
+
+  /// No description provided for @organizerAllMarathons.
+  ///
+  /// In en, this message translates to:
+  /// **'All marathons'**
+  String get organizerAllMarathons;
+
+  /// No description provided for @organizerNoTicketsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to review'**
+  String get organizerNoTicketsTitle;
+
+  /// No description provided for @organizerNoTicketsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments match that filter.'**
+  String get organizerNoTicketsBody;
+
+  /// No description provided for @organizerStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get organizerStatusPending;
+
+  /// No description provided for @organizerStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get organizerStatusPaid;
+
+  /// No description provided for @organizerStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get organizerStatusFailed;
+
+  /// No description provided for @organizerStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get organizerStatusRefunded;
+
+  /// No description provided for @organizerMethodQr.
+  ///
+  /// In en, this message translates to:
+  /// **'QR'**
+  String get organizerMethodQr;
+
+  /// No description provided for @organizerMethodTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank transfer'**
+  String get organizerMethodTransfer;
+
+  /// No description provided for @organizerMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get organizerMethodCard;
+
+  /// No description provided for @organizerMethodOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get organizerMethodOther;
+
+  /// No description provided for @organizerAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get organizerAmount;
+
+  /// No description provided for @organizerMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get organizerMethod;
+
+  /// No description provided for @organizerCi.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number'**
+  String get organizerCi;
+
+  /// No description provided for @organizerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get organizerPhone;
+
+  /// No description provided for @organizerBib.
+  ///
+  /// In en, this message translates to:
+  /// **'Bib'**
+  String get organizerBib;
+
+  /// No description provided for @organizerReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction no.'**
+  String get organizerReference;
+
+  /// No description provided for @organizerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get organizerNote;
+
+  /// No description provided for @organizerAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by'**
+  String get organizerAudit;
+
+  /// No description provided for @organizerNotValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not validated'**
+  String get organizerNotValidated;
+
+  /// No description provided for @organizerProofNone.
+  ///
+  /// In en, this message translates to:
+  /// **'The runner did not upload a receipt.'**
+  String get organizerProofNone;
+
+  /// No description provided for @organizerProofUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt image could not be loaded.'**
+  String get organizerProofUnavailable;
+
+  /// No description provided for @organizerApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get organizerApprove;
+
+  /// No description provided for @organizerApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this payment as received?'**
+  String get organizerApproveTitle;
+
+  /// No description provided for @organizerReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get organizerReject;
+
+  /// No description provided for @organizerRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject the receipt?'**
+  String get organizerRejectTitle;
+
+  /// No description provided for @organizerRejectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment stays open: the runner can upload another image.'**
+  String get organizerRejectBody;
+
+  /// No description provided for @organizerRejectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (the runner reads it)'**
+  String get organizerRejectHint;
+
+  /// No description provided for @organizerRejectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Write why you are rejecting it.'**
+  String get organizerRejectRequired;
+
+  /// No description provided for @organizerAlreadySettled.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment is already settled.'**
+  String get organizerAlreadySettled;
+
+  /// No description provided for @organizerValidatedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by {name}'**
+  String organizerValidatedBy(String name);
+
+  /// No description provided for @organizerApproveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This credits the payment of {amount} from {runner}, takes their slot and issues their bib. It cannot be undone.'**
+  String organizerApproveBody(String runner, String amount);
+
+  /// No description provided for @organizerRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get organizerRefund;
+
+  /// No description provided for @organizerRefundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund this payment?'**
+  String get organizerRefundTitle;
+
+  /// No description provided for @organizerRefundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (kept for the audit trail)'**
+  String get organizerRefundHint;
+
+  /// No description provided for @organizerRefundRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Write why you are refunding it.'**
+  String get organizerRefundRequired;
+
+  /// No description provided for @organizerRefundedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded by'**
+  String get organizerRefundedLabel;
+
+  /// No description provided for @organizerRefundReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund reason'**
+  String get organizerRefundReason;
+
+  /// No description provided for @organizerRefundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This voids the entry of {runner} and frees their slot. Except on card, you have to send the money ({amount}) back yourself through the same channel it came in. It cannot be undone.'**
+  String organizerRefundBody(String runner, String amount);
+
+  /// No description provided for @organizerRefundedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded by {name}'**
+  String organizerRefundedBy(String name);
 }
 
 class _AppLocalizationsDelegate

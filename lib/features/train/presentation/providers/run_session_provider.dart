@@ -20,6 +20,7 @@ class RunGoal {
     this.sessionId,
     this.registrationId,
     this.marathonId,
+    this.bib,
     this.officialRoute = const [],
     this.laps,
     this.lapPace,
@@ -58,11 +59,13 @@ class RunGoal {
     required String registrationId,
     required String title,
     required double distanceKm,
+    String? bib,
     List<GeoPoint> officialRoute = const [],
   }) => RunGoal(
     type: RunGoalType.race,
     marathonId: marathonId,
     registrationId: registrationId,
+    bib: bib,
     title: title,
     distanceKm: distanceKm,
     officialRoute: officialRoute,
@@ -78,6 +81,11 @@ class RunGoal {
 
   /// Solo en maraton oficial. Ver [RunGoal.marathon].
   final String? marathonId;
+
+  /// El dorsal de esta persona. Es como se reconoce en el aviso de llegada que
+  /// manda el servidor, que viaja por la sala de la maraton y solo lleva
+  /// dorsales — nunca nombres ni ids.
+  final String? bib;
 
   /// El trazado oficial, para dibujarlo debajo del recorrido real y que el
   /// corredor vea si se salio.
