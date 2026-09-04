@@ -2,6 +2,8 @@ import 'package:camrun/features/races/presentation/pages/marathon_preparing_page
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
 import 'package:camrun/features/races/presentation/providers/live_marathon_provider.dart';
 import 'package:camrun/features/races/presentation/widgets/marathon_start_watcher.dart';
+import 'package:camrun/features/races/presentation/widgets/pre_race_beacon.dart';
+import 'package:camrun/features/races/presentation/widgets/races_autorefresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,22 +26,31 @@ class MarathonGateView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final puerta = ref.watch(marathonGateProvider);
 
-    return switch (puerta) {
-      GatePreparing(:final entry, :final message) => MarathonPreparingPage(
-        entry: entry,
-        message: message,
+    // El sondeo vive aqui porque aqui esta montada la app del corredor entera:
+    // el pago que un administrador acaba de validar y la carrera que el
+    // organizador acaba de preparar tienen que aparecer solos, este el corredor
+    // donde este —y tambien mientras mira el aviso de preparacion, que es como
+    // se entera de la largada si el socket no llego—.
+    return RacesAutoRefresh(
+      child: PreRaceBeacon(
+        child: switch (puerta) {
+          GatePreparing(:final entry, :final message) => MarathonPreparingPage(
+            entry: entry,
+            message: message,
+          ),
+          // Ya llego. La pantalla de la carrera corrida es exactamente lo que hay
+          // que ensenarle —su tiempo, sus parciales, su recorrido—, asi que se
+          // reusa entera; lo unico que cambia es que de aqui no se sale.
+          GateFinished(:final entry) => RaceDetailPage(
+            entryId: entry.id,
+            locked: true,
+          ),
+          // Corriendo o sin nada que bloquear, la app es la app. El vigia se queda
+          // detras en los dos casos: es quien abre la pantalla de carrera cuando el
+          // organizador da la largada.
+          GateRunning() || GateOpen() => MarathonStartWatcher(child: child),
+        },
       ),
-      // Ya llego. La pantalla de la carrera corrida es exactamente lo que hay
-      // que ensenarle —su tiempo, sus parciales, su recorrido—, asi que se
-      // reusa entera; lo unico que cambia es que de aqui no se sale.
-      GateFinished(:final entry) => RaceDetailPage(
-        entryId: entry.id,
-        locked: true,
-      ),
-      // Corriendo o sin nada que bloquear, la app es la app. El vigia se queda
-      // detras en los dos casos: es quien abre la pantalla de carrera cuando el
-      // organizador da la largada.
-      GateRunning() || GateOpen() => MarathonStartWatcher(child: child),
-    };
+    );
   }
 }

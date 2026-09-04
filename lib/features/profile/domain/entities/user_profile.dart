@@ -95,6 +95,7 @@ class UserProfile {
     required this.injuries,
     required this.sleep,
     this.ci,
+    this.phone,
     this.bibNumber = '0666',
   });
 
@@ -116,6 +117,10 @@ class UserProfile {
   /// con correo. Cuando esta, es la que va en cualquier inscripcion: no se
   /// pide otra.
   final String? ci;
+
+  /// Celular de contacto. Lo deja la primera inscripcion y prellena las
+  /// siguientes.
+  final String? phone;
   final String bibNumber;
 
   /// La ficha enseña las zonas en una linea.
@@ -140,6 +145,8 @@ class UserProfile {
     Gender? gender,
     double? weightKg,
     double? heightCm,
+    String? ci,
+    String? phone,
   }) => UserProfile(
     id: id,
     fullName: fullName ?? this.fullName,
@@ -154,7 +161,8 @@ class UserProfile {
     highlights: highlights,
     injuries: injuries,
     sleep: sleep,
-    ci: ci,
+    ci: ci ?? this.ci,
+    phone: phone ?? this.phone,
     bibNumber: bibNumber,
   );
 }

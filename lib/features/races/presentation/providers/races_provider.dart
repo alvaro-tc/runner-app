@@ -55,15 +55,19 @@ final racesSummaryProvider = FutureProvider<RaceTotals>((ref) async {
 /// pago se valida. Se piden aparte para que quien subio su captura la siga
 /// viendo, y para no dejarle empezar una segunda inscripcion a la misma
 /// maraton mientras tanto.
-final awaitingValidationProvider = FutureProvider<List<Registration>>((
-  ref,
-) async {
-  // Cuelga de la lista: refrescar "mis carreras" —o inscribirse, o cancelar—
-  // tiene que refrescar tambien lo que esta esperando validacion.
-  ref.watch(racesProvider);
-  return (await ref.watch(raceRepositoryProvider).awaitingValidation())
-      .unwrap();
-});
+final awaitingValidationProvider = FutureProvider<List<Registration>>(
+  (ref) async {
+    // Cuelga de la lista: refrescar "mis carreras" —o inscribirse, o cancelar—
+    // tiene que refrescar tambien lo que esta esperando validacion.
+    ref.watch(racesProvider);
+    return (await ref.watch(raceRepositoryProvider).awaitingValidation())
+        .unwrap();
+  },
+  // Sin reintento propio: la lista de la que cuelga se vuelve a pedir sola cada
+  // pocos segundos y arrastra esta, asi que el reintento de riverpod solo
+  // anadiria una segunda peticion con su propio reloj.
+  retry: (_, _) => null,
+);
 
 /// El detalle **se pide aparte**: la lista no trae recorrido, parciales ni
 /// pagos, y buscarla en la lista dejaria la pantalla de una carrera corrida

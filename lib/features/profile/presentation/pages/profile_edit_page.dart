@@ -11,6 +11,7 @@ import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/molecules/phone_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,8 @@ class ProfileEditPage extends ConsumerStatefulWidget {
 class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   final _name = TextEditingController();
   final _email = TextEditingController();
+  final _ci = TextEditingController();
+  final _phone = TextEditingController();
   final _city = TextEditingController();
   final _country = TextEditingController();
   final _weight = TextEditingController();
@@ -43,6 +46,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   void dispose() {
     _name.dispose();
     _email.dispose();
+    _ci.dispose();
+    _phone.dispose();
     _city.dispose();
     _country.dispose();
     _weight.dispose();
@@ -54,6 +59,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     _loaded = true;
     _name.text = p.fullName;
     _email.text = p.email;
+    _ci.text = p.ci ?? '';
+    _phone.text = p.phone ?? '';
     _city.text = p.city;
     _country.text = p.country;
     // Un perfil recien creado no tiene peso ni altura: el campo sale vacio,
@@ -108,6 +115,9 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         )
         ..['email'] = Validators.email(t, _email.text)
         ..['city'] = Validators.required(_city.text, t.validationCityRequired)
+        // La CI es opcional —hay cuentas creadas solo con correo— pero si se
+        // escribe tiene que pasar la misma regla que aplica el servidor.
+        ..['ci'] = _ci.text.trim().isEmpty ? null : Validators.ci(t, _ci.text)
         // Peso y altura son opcionales: se validan solo si hay algo escrito.
         ..['weight'] = _weight.text.trim().isEmpty
             ? null
@@ -135,6 +145,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             email: _email.text.trim(),
             city: _city.text.trim(),
             country: _country.text.trim(),
+            ci: _ci.text.trim(),
+            phone: _phone.text.trim(),
             birthDate: _birthDate,
             gender: _gender,
             weightKg: _numero(_weight.text),
@@ -290,6 +302,23 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   controller: _email,
                   errorText: _errors['email'],
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => _touch(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
+                  label: t.registerIdNumber,
+                  controller: _ci,
+                  hint: t.registerIdNumberHint,
+                  errorText: _errors['ci'],
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => _touch(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PhoneField(
+                  label: t.registerPhone,
+                  controller: _phone,
+                  hint: '70000000',
                   textInputAction: TextInputAction.next,
                   onChanged: (_) => _touch(),
                 ),

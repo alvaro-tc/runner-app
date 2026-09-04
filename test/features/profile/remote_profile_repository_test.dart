@@ -17,6 +17,7 @@ import '../../core/fake_http.dart';
 final _userJson = <String, dynamic>{
   'id': 'user-1',
   'email': 'pandu@camrun.app',
+  'ci': '1234567LP',
   'name': 'Pandu Updated',
   'role': 'runner',
   'profile': {
@@ -28,6 +29,7 @@ final _userJson = <String, dynamic>{
     'weightGrams': 68000,
     'heightCm': 174,
     'defaultBibNumber': '0666',
+    'phone': '+591 70000000',
   },
 };
 
@@ -110,6 +112,28 @@ void main() {
       expect(body['birthDate'], contains('1994-04-17'));
     },
   );
+
+  test('el CI y el celular se leen y viajan en el PATCH', () async {
+    RequestOptions? patch;
+    final dio = _dio((request) async {
+      if (request.method == 'PATCH') patch = request;
+      return _server(request);
+    });
+    final repository = RemoteProfileRepository(ProfileApi(dio), db);
+
+    final profile = (await repository.fetch()).unwrap();
+    expect(profile.ci, '1234567LP');
+    expect(profile.phone, '+591 70000000');
+
+    await repository.save(
+      profile.copyWith(ci: '7654321', phone: '+591 71111111'),
+    );
+    final body = patch!.data is String
+        ? jsonDecode(patch!.data as String) as Map<String, dynamic>
+        : (patch!.data as Map).cast<String, dynamic>();
+    expect(body['ci'], '7654321');
+    expect(body['phone'], '+591 71111111');
+  });
 
   test('guardar el formulario no borra highlights ni salud', () async {
     final dio = _dio(_server);

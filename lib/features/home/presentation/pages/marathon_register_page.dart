@@ -83,6 +83,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   bool? _knowsCam;
   bool? _acceptsDonorCall;
 
+  /// El celular y el correo del perfil ya se volcaron en los campos. Una sola
+  /// vez: repetirlo en cada build pisaria lo que el usuario este escribiendo.
+  bool _prefilled = false;
+
   @override
   void dispose() {
     _page.dispose();
@@ -134,6 +138,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       _ => false,
     };
 
+    // El servidor engancha CI, celular y correo a la cuenta al guardar el paso
+    // 1: se relee el perfil para que la proxima inscripcion los traiga puestos.
+    if (ok && _step == 0) ref.invalidate(profileProvider);
+
     if (ok && mounted) _goTo(_step + 1);
   }
 
@@ -142,6 +150,13 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   String _docIdDe(UserProfile? profile) {
     final ci = profile?.ci?.trim() ?? '';
     return ci.isNotEmpty ? ci : _docId.text.trim();
+  }
+
+  /// El correo de la cuenta manda, igual que el CI: solo se teclea uno cuando
+  /// el perfil no tiene ninguno, y entonces se queda vinculado a la cuenta.
+  String _emailDe(UserProfile? profile) {
+    final email = profile?.email.trim() ?? '';
+    return email.isNotEmpty ? email : _email.text.trim();
   }
 
   RegistrationPersonalData _datosPersonales(UserProfile? profile) =>
@@ -155,7 +170,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         // es solo para que el tipo cierre.
         knowsCam: _knowsCam ?? false,
         acceptsDonorCall: _acceptsDonorCall ?? false,
-        email: _email.text.trim().isEmpty ? null : _email.text.trim(),
+        email: _emailDe(profile).isEmpty ? null : _emailDe(profile),
         emergencyContactName: _emergencyName.text.trim(),
         emergencyContactPhone: _emergencyPhone.text.trim(),
         shirtSize: _shirtSize,
@@ -346,6 +361,14 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   Widget _detailsStep(UserProfile? profile) {
     final c = context.colors;
     final t = context.l10n;
+
+    // Lo que la cuenta ya sabe entra en los campos antes de pintarlos: el
+    // corredor no vuelve a teclear su celular en cada maraton.
+    if (!_prefilled && profile != null) {
+      _prefilled = true;
+      _phone.text = profile.phone?.trim() ?? '';
+    }
+
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenH),
       children: [
@@ -385,6 +408,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           ),
         const SizedBox(height: AppSpacing.lg),
         PhoneField(
+          // El perfil puede llegar despues del primer pintado: la clave hace
+          // que el campo se rearme con el numero ya cargado en vez de quedarse
+          // vacio para siempre.
+          key: ValueKey(profile?.phone ?? ''),
           label: t.registerPhone,
           controller: _phone,
           hint: '70000000',
@@ -393,13 +420,16 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(
-          label: t.authEmailOptionalLabel,
-          controller: _email,
-          hint: t.registerEmailHint,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-        ),
+        if ((profile?.email.trim() ?? '').isNotEmpty)
+          _ReadOnlyField(label: t.authEmailLabel, value: profile!.email.trim())
+        else
+          AppTextField(
+            label: t.authEmailOptionalLabel,
+            controller: _email,
+            hint: t.registerEmailHint,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+          ),
         const SizedBox(height: AppSpacing.xl),
         Text(t.registerCamTitle, style: context.text.titleMd),
         const SizedBox(height: AppSpacing.sm),

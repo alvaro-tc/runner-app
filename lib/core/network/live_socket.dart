@@ -124,6 +124,7 @@ class LiveSocket {
   final _posiciones = StreamController<LivePosition>.broadcast();
   final _estados = StreamController<MarathonLiveState>.broadcast();
   final _llegadas = StreamController<RunnerFinish>.broadcast();
+  final _inscripciones = StreamController<void>.broadcast();
 
   Stream<LivePosition> get positions => _posiciones.stream;
   Stream<MarathonLiveState> get states => _estados.stream;
@@ -131,6 +132,25 @@ class LiveSocket {
   /// Quien va cruzando la meta. Lo decide el servidor mirando el GPS contra el
   /// trazado oficial, no el propio telefono.
   Stream<RunnerFinish> get finishes => _llegadas.stream;
+
+  /// Algo cambio en una inscripcion de este corredor: el administrador valido
+  /// su pago, le asignaron dorsal, se la cancelaron.
+  ///
+  /// **Sin datos a proposito.** El aviso solo dice "reelee tus carreras": la
+  /// lista la sirve la API, que es la fuente, y copiar aqui el estado nuevo
+  /// seria un segundo sitio donde equivocarse.
+  ///
+  /// Llega por la sala personal del corredor, en la que el servidor lo mete al
+  /// abrir el socket: antes de que el pago se valide esa persona no esta
+  /// inscrita en ninguna maraton y no hay sala de la que colgar el aviso.
+  Stream<void> get registrations => _inscripciones.stream;
+
+  /// Abre la conexion sin mirar ninguna maraton.
+  ///
+  /// Hace falta para los avisos de la sala personal: quien espera a que le
+  /// validen el pago todavia no tiene ninguna sala de maraton que pedir, y sin
+  /// conexion no se entera de nada hasta el siguiente sondeo.
+  Future<void> ensureConnected() => _conectar();
 
   /// Empieza a mirar una maraton. Devuelve la baja: llamarla es lo que la
   /// deja de mirar.
@@ -162,6 +182,7 @@ class LiveSocket {
     await _posiciones.close();
     await _estados.close();
     await _llegadas.close();
+    await _inscripciones.close();
   }
 
   Future<io.Socket> _conectar() async {
@@ -191,6 +212,7 @@ class LiveSocket {
           _llegadas.add(RunnerFinish.fromJson(data.cast<String, dynamic>()));
         }
       })
+      ..on('registration:state', (_) => _inscripciones.add(null))
       ..on('marathon:state', (data) {
         if (data is Map) {
           _estados.add(

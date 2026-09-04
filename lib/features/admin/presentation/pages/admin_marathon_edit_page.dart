@@ -505,6 +505,10 @@ class _FormularioState extends ConsumerState<_Formulario> {
                   route: const [],
                   guideRoute: _ruta,
                   interactive: false,
+                  // Previsualizacion de gestion: el trazado solo. Quien edita
+                  // la carrera ya sabe donde es, y las teselas aqui solo son
+                  // una descarga y un rato en gris.
+                  tiles: false,
                 ),
               ),
             ),

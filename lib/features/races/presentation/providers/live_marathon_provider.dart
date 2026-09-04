@@ -97,14 +97,39 @@ class MarathonGateNotifier extends Notifier<MarathonGate> {
   @override
   MarathonGate build() {
     final socket = ref.watch(liveSocketProvider);
-    final carreras = ref.watch(racesProvider).value ?? const <RaceEntry>[];
 
     final suscripcion = socket.states.listen((estado) {
       _avisos[estado.marathonId] = estado;
-      state = _resolver(ref.read(racesProvider).value ?? const []);
+      state = _calcular(socket);
     });
 
     final llegadas = socket.finishes.listen(_onLlegada);
+
+    // `listen` y no `watch`: la lista se vuelve a pedir sola cada pocos
+    // segundos —ver `racesAutoRefreshProvider`— y con `watch` cada refresco
+    // reconstruiria esto entero, que significa soltar y volver a pedir todas
+    // las salas del socket. Asi el refresco solo recalcula la puerta, que es
+    // lo unico que cambia: es tambien lo que hace que un pago validado o una
+    // largada se vean sin salir de la app cuando el socket no llego.
+    ref
+      ..listen(racesProvider, (_, _) => state = _calcular(socket))
+      ..onDispose(() {
+        unawaited(suscripcion.cancel());
+        unawaited(llegadas.cancel());
+        for (final baja in _bajas.values) {
+          baja();
+        }
+        _bajas.clear();
+      });
+
+    return _calcular(socket);
+  }
+
+  /// La puerta con lo que hay ahora mismo, y las salas al dia de paso: una
+  /// carrera que acaba de pasar a preparacion —o un pago que acaba de
+  /// validarse— estrena inscripcion viva y hay que empezar a escucharla.
+  MarathonGate _calcular(LiveSocket socket) {
+    final carreras = ref.read(racesProvider).value ?? const <RaceEntry>[];
 
     // Solo las carreras de **hoy**, y solo las de este usuario.
     //
@@ -112,25 +137,15 @@ class MarathonGateNotifier extends Notifier<MarathonGate> {
     // ella significaria tener a todo el mundo con una conexion viva durante
     // semanas para un aviso que llega un domingo por la manana. La ventana es
     // ancha en los dos sentidos a proposito —una largada se retrasa, y a veces
-    // se adelanta— y lo que se pierde por quedarse corto lo recogen igual las
-    // fechas la proxima vez que la app pida sus carreras.
+    // se adelanta— y lo que se pierde por quedarse corto lo recoge el sondeo
+    // de la lista.
     final ahora = DateTime.now();
-    final vivas = {
+    _sincronizarSalas(socket, {
       for (final entrada in carreras)
         if (entrada.isEnrolled &&
             (entrada.marathon.phase != MarathonPhase.notStarted ||
                 entrada.marathon.date.difference(ahora).abs() < _ventana))
           entrada.marathon.id,
-    };
-    _sincronizarSalas(socket, vivas);
-
-    ref.onDispose(() {
-      unawaited(suscripcion.cancel());
-      unawaited(llegadas.cancel());
-      for (final baja in _bajas.values) {
-        baja();
-      }
-      _bajas.clear();
     });
 
     return _resolver(carreras);

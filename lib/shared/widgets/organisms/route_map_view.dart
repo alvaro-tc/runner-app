@@ -10,6 +10,42 @@ import 'package:flutter_map/flutter_map.dart';
 // latlong2 exports its own generic `Path<T>`, which shadows dart:ui's.
 import 'package:latlong2/latlong.dart' hide Path;
 
+/// Hasta donde llega la teselas de Esri. Mas alla devuelve una imagen gris con
+/// el cartel "Map data not yet available", asi que el mapa no las pide.
+const _maxNativeZoom = 16;
+
+/// Corre un trazado [metros] a la derecha de su sentido de marcha.
+///
+/// Es lo que hace visible una ida y vuelta: el tramo de vuelta avanza al reves,
+/// asi que su "derecha" cae al otro lado y las dos pasadas quedan como dos
+/// lineas paralelas en vez de una sola.
+@visibleForTesting
+List<LatLng> apartarTrazado(List<LatLng> pts, double metros) {
+  if (pts.length < 2) return pts;
+  const metrosPorGrado = 111320.0;
+  final salida = <LatLng>[];
+  for (var i = 0; i < pts.length; i++) {
+    final a = pts[i == 0 ? 0 : i - 1];
+    final b = pts[i == pts.length - 1 ? i : i + 1];
+    final cosLat = math.cos(pts[i].latitude * math.pi / 180);
+    var este = (b.longitude - a.longitude) * cosLat;
+    var norte = b.latitude - a.latitude;
+    final largo = math.sqrt(este * este + norte * norte);
+    if (largo == 0 || cosLat == 0) {
+      salida.add(pts[i]);
+      continue;
+    }
+    este /= largo;
+    norte /= largo;
+    final d = metros / metrosPorGrado;
+    // Normal a la derecha del avance: (este, norte) girado -90 es (norte, -este).
+    salida.add(
+      LatLng(pts[i].latitude - este * d, pts[i].longitude + norte * d / cosLat),
+    );
+  }
+  return salida;
+}
+
 /// Una chinche suelta sobre el mapa.
 @immutable
 class MapPin {
@@ -39,6 +75,7 @@ class RouteMapView extends StatefulWidget {
     this.userMarker,
     this.pins = const [],
     this.onTap,
+    this.tiles = true,
     super.key,
   });
 
@@ -69,6 +106,11 @@ class RouteMapView extends StatefulWidget {
   /// Un toque sobre el mapa, con la coordenada. Solo el editor de recorrido lo
   /// usa; sin el, el mapa no reacciona a los toques.
   final void Function(double lat, double lng)? onTap;
+
+  /// Con `false` no se bajan teselas: solo el trazado sobre el fondo del tema.
+  /// Es lo que quieren las vistas de gestion —previsualizar un recorrido que ya
+  /// se sabe donde esta— y ahorra la descarga y el gris de la tesela que tarda.
+  final bool tiles;
 
   @override
   State<RouteMapView> createState() => RouteMapViewState();
@@ -118,6 +160,10 @@ class RouteMapViewState extends State<RouteMapView> {
     final c = context.colors;
     final points = [for (final p in widget.route) LatLng(p.lat, p.lng)];
     final guide = [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+    // Corrido unos metros a la derecha del sentido de marcha: una ida y vuelta
+    // pasa dos veces por la misma calle, y sin separarlas se dibujan una encima
+    // de otra como una sola raya.
+    final guideDibujo = apartarTrazado(guide, 9);
     final encuadre = points.isEmpty ? guide : points;
     final center = widget.follow != null
         ? LatLng(widget.follow!.lat, widget.follow!.lng)
@@ -132,6 +178,12 @@ class RouteMapViewState extends State<RouteMapView> {
         options: MapOptions(
           initialCenter: center,
           initialZoom: widget.follow != null ? 16 : 14,
+          // Esri no tiene teselas mas alla del 16: pasado ahi devuelve una
+          // imagen que dice "Map data not yet available". Se deja acercar dos
+          // pasos mas, que el mapa resuelve ampliando la ultima tesela real
+          // (`maxNativeZoom`), y de ahi no se pasa.
+          maxZoom: _maxNativeZoom + 2,
+          minZoom: 3,
           interactionOptions: InteractionOptions(
             flags: widget.interactive
                 ? InteractiveFlag.all & ~InteractiveFlag.rotate
@@ -147,19 +199,24 @@ class RouteMapViewState extends State<RouteMapView> {
               : (_, punto) => widget.onTap!(punto.latitude, punto.longitude),
         ),
         children: [
-          TileLayer(
-            urlTemplate: tileUrl('{z}', '{x}', '{y}', dark: c.isDark),
-            userAgentPackageName: 'com.camrun.app',
-            tileProvider: CachedTileProvider(),
-          ),
+          if (widget.tiles)
+            TileLayer(
+              urlTemplate: tileUrl('{z}', '{x}', '{y}', dark: c.isDark),
+              userAgentPackageName: 'com.camrun.app',
+              tileProvider: CachedTileProvider(),
+              maxNativeZoom: _maxNativeZoom,
+            ),
           // La guia primero: va por debajo del recorrido real.
           if (guide.length > 1)
             PolylineLayer(
               polylines: [
+                // Ribete claro: separa el circuito del fondo del mapa, que en
+                // ciudad ya viene lleno de lineas grises.
+                Polyline(points: guideDibujo, strokeWidth: 10, color: c.surface),
                 Polyline(
-                  points: guide,
-                  strokeWidth: 5,
-                  color: c.textSecondary.withValues(alpha: 0.45),
+                  points: guideDibujo,
+                  strokeWidth: 6,
+                  color: c.accentBlue,
                 ),
               ],
             ),
@@ -173,9 +230,9 @@ class RouteMapViewState extends State<RouteMapView> {
                 ),
               ],
             ),
-          MarkerLayer(markers: _markers(points, c.isDark)),
+          MarkerLayer(markers: _markers(points, guideDibujo, c.isDark)),
           // Esri pide credito visible por usar sus teselas.
-          const SimpleAttributionWidget(source: Text('Esri')),
+          if (widget.tiles) const SimpleAttributionWidget(source: Text('Esri')),
         ],
       ),
     );
@@ -193,20 +250,31 @@ class RouteMapViewState extends State<RouteMapView> {
     );
   }
 
-  List<Marker> _markers(List<LatLng> points, bool isDark) {
+  List<Marker> _markers(
+    List<LatLng> points,
+    List<LatLng> guide,
+    bool isDark,
+  ) {
     final c = context.colors;
     final markers = <Marker>[];
 
     // Con guia, la largada y la meta son las del circuito oficial: son puntos
     // fijos de la carrera, no los extremos de lo que se lleve corrido.
-    final banderas = widget.guideRoute.isEmpty
-        ? points
-        : [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+    final banderas = guide.isEmpty ? points : guide;
 
     if (widget.showStartFinish && banderas.length > 1) {
       markers
         ..add(_flag(banderas.first, Icons.flag_rounded, c.success))
         ..add(_flag(banderas.last, Icons.sports_score_rounded, c.error));
+    }
+
+    // Flechas cada tramo del circuito: dicen hacia donde se corre, que es lo
+    // unico que distingue la ida de la vuelta cuando van por la misma avenida.
+    if (guide.length > 8) {
+      final paso = math.max(1, guide.length ~/ 8);
+      for (var i = paso; i < guide.length - 1; i += paso) {
+        markers.add(_flecha(guide[i], guide[i - 1], guide[i + 1], c.accentBlue));
+      }
     }
 
     final every = widget.markerEveryKm;
@@ -245,6 +313,23 @@ class RouteMapViewState extends State<RouteMapView> {
       );
     }
     return markers;
+  }
+
+  Marker _flecha(LatLng at, LatLng desde, LatLng hasta, Color color) {
+    final cosLat = math.cos(at.latitude * math.pi / 180);
+    final rumbo = math.atan2(
+      (hasta.longitude - desde.longitude) * cosLat,
+      hasta.latitude - desde.latitude,
+    );
+    return Marker(
+      point: at,
+      width: 18,
+      height: 18,
+      child: Transform.rotate(
+        angle: rumbo,
+        child: Icon(Icons.navigation_rounded, size: 16, color: color),
+      ),
+    );
   }
 
   Marker _flag(LatLng at, IconData icon, Color color) => Marker(

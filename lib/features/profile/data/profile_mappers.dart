@@ -86,6 +86,7 @@ UserProfile profileFromApi(Map<String, dynamic> json) {
       ),
     ),
     ci: (source['ci'] as String?)?.trim(),
+    phone: (source['phone'] as String?)?.trim(),
     bibNumber:
         (source['defaultBibNumber'] ?? source['bibNumber']) as String? ??
         '0666',
@@ -136,4 +137,8 @@ Map<String, Object?> profilePatch(UserProfile profile) => {
   // Enteros: el servidor los valida con `@IsInt()`, un 72.5 seria un 400.
   if (profile.weightKg > 0) 'weightGrams': (profile.weightKg * 1000).round(),
   if (profile.heightCm > 0) 'heightCm': profile.heightCm.round(),
+  // La CI es credencial de acceso: se manda solo cuando el usuario escribio
+  // una, nunca vacia, que el servidor rechazaria.
+  if ((profile.ci ?? '').isNotEmpty) 'ci': profile.ci,
+  if ((profile.phone ?? '').isNotEmpty) 'phone': profile.phone,
 };
