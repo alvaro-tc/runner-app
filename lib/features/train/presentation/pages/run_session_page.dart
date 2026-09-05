@@ -110,15 +110,25 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   }
 
   Future<void> _finish() async {
+    final goal = ref.read(runSessionProvider).goal;
     final run = await ref.read(runSessionProvider.notifier).finish();
     if (!mounted) return;
+    // Se guarda tambien en local, maraton incluida: si no hubo red, esto es lo
+    // unico que queda de la carrera hasta que la cola suba.
     final error = await ref.read(historyProvider.notifier).save(run);
     if (!mounted) return;
-    if (error != null) {
+    if (error != null && !goal.isLiveMarathon) {
       context.showSnack(error.localized(context.l10n));
       return;
     }
-    context.pushReplacement(Routes.trainSummaryOf(run.id));
+    // Quien acaba una maraton oficial no termina en el resumen de un
+    // entrenamiento: termina en su carrera, con su dorsal, su tiempo y sus
+    // parciales, que es lo que el servidor consolida al cerrarla.
+    context.pushReplacement(
+      goal.isLiveMarathon
+          ? Routes.raceDetailOf(goal.registrationId!)
+          : Routes.trainSummaryOf(run.id),
+    );
   }
 
   @override

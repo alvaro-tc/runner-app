@@ -323,6 +323,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         title: Text(context.l10n.registerTitle),
       ),
       body: marathon.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: () => const Center(child: Skeleton(width: 200, height: 20)),
         error: (error, _) => ErrorStateView(
           message: error.localized(context.l10n),

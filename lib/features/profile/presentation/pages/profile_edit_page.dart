@@ -255,6 +255,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
           title: Text(t.editProfileTitle),
         ),
         body: profile.when(
+          // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+          skipLoadingOnReload: true,
           loading: () => const Center(child: Skeleton(width: 180, height: 20)),
           error: (error, _) => Center(child: Text(error.localized(t))),
           data: (data) {

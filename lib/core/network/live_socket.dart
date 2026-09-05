@@ -191,12 +191,20 @@ class LiveSocket {
 
     // El token va en `auth` del handshake y no en la query: la query acaba en
     // los logs del proxy inverso.
-    final token = await _storage.readAccessToken();
+    //
+    // Y se lee en **cada** handshake, no una sola vez: el access token dura 15
+    // minutos y este socket sigue abierto 12 horas. Con un `auth` fijo, la
+    // primera reconexion despues de que caduque —cambiar de wifi a datos, salir
+    // del tunel, el servidor reiniciando— manda un token muerto, el gateway
+    // echa al cliente, y una desconexion pedida por el servidor no se
+    // reintenta: el corredor se queda sin tiempo real el resto del dia.
     final socket = io.io(
       _urlDelNamespace(),
       io.OptionBuilder()
           .setTransports(['websocket'])
-          .setAuth({'token': token ?? ''})
+          .setAuthFn(
+            (cb) async => cb({'token': await _storage.readAccessToken() ?? ''}),
+          )
           .enableReconnection()
           .build(),
     );
@@ -219,6 +227,22 @@ class LiveSocket {
             MarathonLiveState.fromJson(data.cast<String, dynamic>()),
           );
         }
+      })
+      // Un socket que no conecta falla en silencio: el sondeo de 20 s tapa el
+      // sintoma y nadie se entera de que el tiempo real lleva semanas caido.
+      ..onConnectError(
+        (e) =>
+            debugPrint('[LiveSocket] no conecta con ${_urlDelNamespace()}: $e'),
+      )
+      // Cuando echa el servidor —token caducado, gateway reiniciando— el
+      // cliente no reintenta solo: `ondisconnect` mata las suscripciones de
+      // reconexion. Sin esto, un rechazo deja el socket muerto hasta que
+      // alguien cierre y vuelva a abrir la app.
+      ..onDisconnect((motivo) {
+        if (motivo != 'io server disconnect') return;
+        Timer(const Duration(seconds: 5), () {
+          if (identical(_socket, socket)) socket.connect();
+        });
       })
       // Al reconectar el servidor no recuerda las salas: hay que volver a
       // pedirlas o el mapa se queda mudo justo despues de recuperar la senal,

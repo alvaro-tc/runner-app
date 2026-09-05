@@ -32,6 +32,13 @@ antes de la largada y no pueden acabar en el entrenamiento; la respuesta dice
 `accepted: 0`. Un dispositivo que no es ninguna de las dos cosas sigue dando
 `SESSION_NOT_ACTIVE`.
 
+El `id` es el `uniqueId` que la app genera y guarda, y la fila `Device` que lo
+traduce a una persona se escribe **al iniciar sesion** (y en cada refresco), no
+al grabar el primer entrenamiento: quien se instala la app para su primera
+maraton nunca grabo ninguno, y sin esa fila su posicion en la salida se
+rechazaba con `SESSION_NOT_ACTIVE`. El dueño se reescribe en cada login, que es
+lo que hace que el movil de pruebas no siga resolviendo a la cuenta anterior.
+
 La resolucion dispositivo → maraton se cachea un minuto, positivos y negativos:
 OsmAnd manda un punto por peticion y sin cache seria una consulta por segundo y
 por corredor. Cuando arranca la sesion de verdad, `publicar()` borra el estado

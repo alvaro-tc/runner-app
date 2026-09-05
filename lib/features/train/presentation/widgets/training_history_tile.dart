@@ -83,6 +83,8 @@ class TrainingHistoryTile extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       sync.when(
+                        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+                        skipLoadingOnReload: true,
                         loading: () => const SizedBox.shrink(),
                         error: (_, _) => const SizedBox.shrink(),
                         data: (info) => _SyncStatus(

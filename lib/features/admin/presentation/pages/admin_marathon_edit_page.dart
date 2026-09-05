@@ -57,6 +57,8 @@ class AdminMarathonEditPage extends ConsumerWidget {
 
     final maraton = ref.watch(adminMarathonProvider(id));
     return maraton.when(
+      // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+      skipLoadingOnReload: true,
       // Al refrescar tras subir una imagen se sigue pintando el formulario con
       // lo anterior: cambiarlo por el esqueleto lo desmontaria y se perderia lo
       // que hubiera escrito sin guardar.

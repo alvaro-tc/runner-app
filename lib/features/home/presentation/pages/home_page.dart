@@ -30,6 +30,8 @@ class HomePage extends ConsumerWidget {
           color: context.colors.primary,
           onRefresh: () => ref.read(homeProvider.notifier).refresh(),
           child: home.when(
+            // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+            skipLoadingOnReload: true,
             loading: () => const _HomeSkeleton(),
             error: (error, _) => ListView(
               physics: const AlwaysScrollableScrollPhysics(),

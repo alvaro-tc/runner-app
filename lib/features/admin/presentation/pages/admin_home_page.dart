@@ -37,6 +37,8 @@ class AdminHomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(t.adminLiveTitle)),
       body: maratones.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => ErrorStateView(
           message: error is Failure ? error.localized(t) : t.adminLoadFailed,
@@ -60,8 +62,11 @@ class _Tablero extends ConsumerWidget {
   final List<AdminMarathon> marathons;
   final bool readOnly;
 
-  /// La que el selector deja elegida. Por defecto, la que se esta corriendo:
-  /// el dia de la carrera es lo unico que se quiere ver al abrir la app.
+  /// La que el selector deja elegida. Por defecto, la que se esta corriendo o
+  /// preparando: el dia de la carrera es lo unico que se quiere ver al abrir la
+  /// app, y en preparacion es justo cuando el mapa decide si se larga o se
+  /// espera. Sin la preparacion aqui, el panel abria en otra maraton cualquiera
+  /// —la primera de la lista— y el corral entero parecia vacio.
   AdminMarathon _elegida(String? id) {
     if (id != null) {
       for (final m in marathons) {
@@ -70,6 +75,9 @@ class _Tablero extends ConsumerWidget {
     }
     for (final m in marathons) {
       if (m.running) return m;
+    }
+    for (final m in marathons) {
+      if (m.preparing) return m;
     }
     return marathons.first;
   }

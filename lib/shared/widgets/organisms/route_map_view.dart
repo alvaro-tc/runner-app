@@ -212,7 +212,11 @@ class RouteMapViewState extends State<RouteMapView> {
               polylines: [
                 // Ribete claro: separa el circuito del fondo del mapa, que en
                 // ciudad ya viene lleno de lineas grises.
-                Polyline(points: guideDibujo, strokeWidth: 10, color: c.surface),
+                Polyline(
+                  points: guideDibujo,
+                  strokeWidth: 10,
+                  color: c.surface,
+                ),
                 Polyline(
                   points: guideDibujo,
                   strokeWidth: 6,
@@ -250,11 +254,7 @@ class RouteMapViewState extends State<RouteMapView> {
     );
   }
 
-  List<Marker> _markers(
-    List<LatLng> points,
-    List<LatLng> guide,
-    bool isDark,
-  ) {
+  List<Marker> _markers(List<LatLng> points, List<LatLng> guide, bool isDark) {
     final c = context.colors;
     final markers = <Marker>[];
 
@@ -273,7 +273,9 @@ class RouteMapViewState extends State<RouteMapView> {
     if (guide.length > 8) {
       final paso = math.max(1, guide.length ~/ 8);
       for (var i = paso; i < guide.length - 1; i += paso) {
-        markers.add(_flecha(guide[i], guide[i - 1], guide[i + 1], c.accentBlue));
+        markers.add(
+          _flecha(guide[i], guide[i - 1], guide[i + 1], c.accentBlue),
+        );
       }
     }
 

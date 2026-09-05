@@ -429,7 +429,11 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
         RunGoalType.distance ||
         RunGoalType.free => SessionType.easy,
       },
-      title: _titleFor(started),
+      // Una carrera se llama como la carrera. 'Carrera de la tarde' es un
+      // entrenamiento, y es justo lo que el corredor no acaba de hacer.
+      title: state.goal.isRace && state.goal.title.isNotEmpty
+          ? state.goal.title
+          : _titleFor(started),
       calories: state.calories,
       clientUuid: clientUuid,
     );

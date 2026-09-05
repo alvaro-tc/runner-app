@@ -25,6 +25,8 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       body: profile.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => SafeArea(
           child: ErrorStateView(

@@ -53,6 +53,8 @@ class RaceStartPage extends ConsumerWidget {
         title: Text(t.raceDayTitle),
       ),
       body: carrera.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: () => const Center(child: Skeleton(width: 180, height: 20)),
         error: (error, _) => ErrorStateView(
           message: error is Failure ? error.localized(t) : t.raceDayNotLoaded,

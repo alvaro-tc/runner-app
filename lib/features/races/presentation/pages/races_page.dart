@@ -46,6 +46,8 @@ class _RacesPageState extends ConsumerState<RacesPage> {
             await ref.read(upcomingMarathonsProvider.future);
           },
           child: entries.when(
+            // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+            skipLoadingOnReload: true,
             loading: () => const _RacesSkeleton(),
             error: (error, _) => ListView(
               physics: const AlwaysScrollableScrollPhysics(),

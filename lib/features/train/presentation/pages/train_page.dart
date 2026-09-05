@@ -43,6 +43,8 @@ class TrainPage extends ConsumerWidget {
               const SliverToBoxAdapter(child: _WeeklySummaryBlock()),
               const SliverToBoxAdapter(child: _Filters()),
               ...history.when(
+                // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+                skipLoadingOnReload: true,
                 loading: () => [
                   const SliverToBoxAdapter(child: _HistorySkeleton()),
                 ],

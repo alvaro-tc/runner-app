@@ -35,6 +35,8 @@ class HealthPage extends ConsumerWidget {
         title: Text(t.profileHealth),
       ),
       body: profile.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: () => const Padding(
           padding: EdgeInsets.all(AppSpacing.screenH),
           child: Column(

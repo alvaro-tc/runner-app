@@ -39,6 +39,8 @@ class AdminMarathonsPage extends ConsumerWidget {
         label: Text(t.adminNewMarathon),
       ),
       body: maratones.when(
+        // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+        skipLoadingOnReload: true,
         loading: _Cargando.new,
         error: (error, _) => ErrorStateView(
           message: error is Failure ? error.localized(t) : t.adminLoadFailed,

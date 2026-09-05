@@ -1,7 +1,11 @@
 import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
+import 'package:camrun/features/races/presentation/widgets/pre_race_beacon.dart';
+import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// La sala de espera de una maraton que esta a punto de largar.
 ///
@@ -10,7 +14,7 @@ import 'package:flutter/material.dart';
 /// momento lo unico que el corredor necesita saber esta escrito aqui. Dejar la
 /// app viva por debajo significaria que alguien cambia su categoria, cancela su
 /// inscripcion o arranca un entrenamiento con el arco montado delante.
-class MarathonPreparingPage extends StatelessWidget {
+class MarathonPreparingPage extends ConsumerWidget {
   const MarathonPreparingPage({required this.entry, this.message, super.key});
 
   final RaceEntry entry;
@@ -20,10 +24,11 @@ class MarathonPreparingPage extends StatelessWidget {
   final String? message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.l10n;
     final aviso = message?.trim();
+    final permiso = ref.watch(preRaceBeaconProvider);
 
     return Scaffold(
       backgroundColor: c.surface,
@@ -65,6 +70,13 @@ class MarathonPreparingPage extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 _Dorsal(bib: entry.bibNumber),
+                // Sin ubicacion este corredor no aparece en el mapa del
+                // organizador, que es quien decide con ese mapa si larga o
+                // espera. Es lo unico accionable de esta pantalla.
+                if (permiso != null && !permiso.isGranted) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _SinUbicacion(outcome: permiso),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   t.marathonPreparingHint,
@@ -75,6 +87,51 @@ class MarathonPreparingPage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// El aviso de que falta el permiso, con las dos salidas: volver a pedirlo y,
+/// cuando el sistema ya no pregunta, abrir los ajustes.
+class _SinUbicacion extends ConsumerWidget {
+  const _SinUbicacion({required this.outcome});
+
+  final LocationPermissionOutcome outcome;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final faro = ref.read(preRaceBeaconProvider.notifier);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: c.errorBg,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.location_off_rounded, color: c.error),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            outcome.message(context.l10n),
+            textAlign: TextAlign.center,
+            style: context.text.bodySm.copyWith(color: c.error),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () => faro.encender(forzar: true),
+                child: Text(context.l10n.commonRetry),
+              ),
+              TextButton(
+                onPressed: faro.abrirAjustes,
+                child: Text(context.l10n.commonSettings),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

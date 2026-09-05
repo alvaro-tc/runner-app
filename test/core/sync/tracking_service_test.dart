@@ -75,6 +75,9 @@ class _FakeUploader implements LiveUploader {
 
   @override
   Future<void> stop() async => stops++;
+
+  @override
+  Future<void> ping() async {}
 }
 
 Dio _dio(Future<ResponseBody> Function(RequestOptions) handler) =>
@@ -334,6 +337,112 @@ void main() {
 
     expect(traccar.starts, 0);
     expect((await db.duePositions(futuro())).length, 1);
+  });
+
+  // Las tres formas de quedarse fuera del mapa del organizador y terminar la
+  // maraton como un entrenamiento suelto. Todas empiezan igual: la sesion
+  // remota no se abre.
+
+  test('una sesion vieja no deja a la carrera sin sesion', () async {
+    final abiertas = <String>[];
+    final cerradas = <String>[];
+    var bloquea = true;
+    final service = armar((o) async {
+      if (o.path.endsWith('/finish')) {
+        cerradas.add(o.path);
+        return envelope({'ok': true});
+      }
+      if (bloquea) {
+        bloquea = false;
+        return errorBody(
+          'SESSION_ALREADY_ACTIVE',
+          status: 409,
+          details: [
+            {'sessionId': 'sesion-zombi'},
+          ],
+        );
+      }
+      abiertas.add((o.data as Map<String, dynamic>)['clientUuid'] as String);
+      return _sesionAbierta();
+    });
+
+    expect(await service.start(registrationId: 'insc-1'), isNotNull);
+    expect(cerradas.single, '/workouts/sessions/sesion-zombi/finish');
+    expect(abiertas.length, 1);
+    expect(service.sessionId, 'sesion-1');
+  });
+
+  test('un entrenamiento no cierra la sesion de nadie', () async {
+    final cerradas = <String>[];
+    final service = armar((o) async {
+      if (o.path.endsWith('/finish')) {
+        cerradas.add(o.path);
+        return envelope({'ok': true});
+      }
+      return errorBody(
+        'SESSION_ALREADY_ACTIVE',
+        status: 409,
+        details: [
+          {'sessionId': 'sesion-zombi'},
+        ],
+      );
+    });
+
+    expect(await service.start(), isNull);
+    expect(cerradas, isEmpty);
+  });
+
+  test(
+    'la carrera se retoma con su uuid cuando la app volvio a abrirse',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final uuids = <String>[];
+      Future<ResponseBody> handler(RequestOptions o) async {
+        if (o.path.endsWith('/workouts/sessions')) {
+          uuids.add((o.data as Map<String, dynamic>)['clientUuid'] as String);
+        }
+        return _sesionAbierta();
+      }
+
+      final primera = armar(handler, preferences: preferences);
+      await primera.start(registrationId: 'insc-1');
+      await primera.dispose();
+
+      // La app murio a mitad de carrera: nadie llamo a stop, y los metadatos
+      // siguen en disco.
+      final segunda = armar(handler, preferences: preferences);
+      await segunda.start(registrationId: 'insc-1');
+
+      expect(uuids.length, 2);
+      expect(
+        uuids[0],
+        uuids[1],
+        reason: 'el servidor devuelve la misma sesion',
+      );
+    },
+  );
+
+  test('la carrera reintenta abrir sesion en cada lote', () async {
+    final traccar = _FakeUploader();
+    var caida = true;
+    final service = armar((o) async {
+      if (o.path.endsWith('/workouts/sessions') && caida) {
+        caida = false;
+        throw DioException.connectionError(requestOptions: o, reason: 'nada');
+      }
+      return _sesionAbierta();
+    }, uploader: traccar);
+
+    expect(await service.start(registrationId: 'insc-1', live: true), isNull);
+    gps.emit(_punto(1));
+    await asentar();
+    await service.flush();
+    expect(service.sessionId, 'sesion-1');
+    expect(traccar.starts, 1, reason: 'y ya sale en el mapa del organizador');
+    // Y no queda borrador de entrenamiento: subirlo seria la misma maraton
+    // otra vez, esta vez como salida suelta.
+    expect(await db.dueWorkouts(futuro()), isEmpty);
   });
 
   test('el cierre sin red va a la outbox con su clave', () async {

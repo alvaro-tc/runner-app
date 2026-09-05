@@ -134,6 +134,8 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
           ),
           Expanded(
             child: usuarios.when(
+              // Un refresco de fondo no vacia una pantalla que ya tiene datos.
+              skipLoadingOnReload: true,
               loading: () =>
                   const Center(child: Skeleton(width: 180, height: 20)),
               error: (error, _) => ErrorStateView(

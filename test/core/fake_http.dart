@@ -37,7 +37,11 @@ ResponseBody envelope(Object data, {int status = 200}) => jsonBody({
   },
 }, status);
 
-ResponseBody errorBody(String code, {int status = 400}) => jsonBody({
-  'error': {'code': code, 'message': 'texto humano', 'details': <Object?>[]},
+ResponseBody errorBody(
+  String code, {
+  int status = 400,
+  List<Object?> details = const [],
+}) => jsonBody({
+  'error': {'code': code, 'message': 'texto humano', 'details': details},
   'meta': {'requestId': 'req-1'},
 }, status);
