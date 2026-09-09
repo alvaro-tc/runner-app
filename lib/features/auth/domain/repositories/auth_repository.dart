@@ -14,13 +14,19 @@ abstract interface class AuthRepository {
 
   /// Hace falta **email o CI**, no los dos.
   Future<Result<AuthUser>> signUp({
-    required String fullName,
     required String password,
+    String? fullName,
     String? email,
     String? ci,
     DateTime? birthDate,
     String? gender,
   });
+
+  /// Entra —o se da de alta, que para Google es lo mismo— con la cuenta de
+  /// Google que elija el usuario en el dialogo del sistema.
+  ///
+  /// `null` cuando cierra el dialogo sin elegir: cancelar no es un fallo.
+  Future<Result<AuthUser?>> signInWithGoogle();
 
   /// El usuario de la sesion guardada. Se pide al arrancar: `mustChangePassword`
   /// puede haber cambiado desde el ultimo login y no vive en el dispositivo.
@@ -38,5 +44,8 @@ abstract interface class AuthRepository {
   /// Borra la cuenta en el servidor y deja el dispositivo como recien
   /// instalado. Irreversible: pide la contrasena para confirmar que es el
   /// dueno quien lo pide.
-  Future<Result<void>> deleteAccount(String password);
+  ///
+  /// [password] va en `null` en las cuentas de Google, que no tienen: el
+  /// servidor solo la exige a quien tiene una.
+  Future<Result<void>> deleteAccount(String? password);
 }

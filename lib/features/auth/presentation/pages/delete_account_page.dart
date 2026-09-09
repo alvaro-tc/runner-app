@@ -34,15 +34,17 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit({required bool conPassword}) async {
     final t = context.l10n;
-    setState(
-      () => _error = Validators.required(
-        _password.text,
-        t.validationCurrentPasswordRequired,
-      ),
-    );
-    if (_error != null) return;
+    if (conPassword) {
+      setState(
+        () => _error = Validators.required(
+          _password.text,
+          t.validationCurrentPasswordRequired,
+        ),
+      );
+      if (_error != null) return;
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -69,7 +71,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     setState(() => _loading = true);
     final failure = await ref
         .read(authProvider.notifier)
-        .deleteAccount(_password.text);
+        .deleteAccount(conPassword ? _password.text : null);
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -82,6 +84,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.l10n;
+    final conPassword = ref.watch(authProvider).hasPassword;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,24 +108,38 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
           const SizedBox(height: AppSpacing.lg),
           Text(t.deleteAccountWhatGoes, style: context.text.bodyMd),
           const SizedBox(height: AppSpacing.xl),
-          AppTextField(
-            label: t.deleteAccountPasswordLabel,
-            controller: _password,
-            hint: t.deleteAccountPasswordHint,
-            errorText: _error,
-            isPassword: true,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-            onChanged: (_) {
-              if (_error != null) setState(() => _error = null);
-            },
-          ),
+          // Las cuentas de Google no tienen contrasena que confirmar: el
+          // dialogo sigue estando, que es lo que hace irreversible al boton.
+          if (conPassword)
+            AppTextField(
+              label: t.deleteAccountPasswordLabel,
+              controller: _password,
+              hint: t.deleteAccountPasswordHint,
+              errorText: _error,
+              isPassword: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(conPassword: true),
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
+            )
+          else ...[
+            Text(
+              t.deleteAccountNoPassword,
+              style: context.text.bodySm.copyWith(color: c.textSecondary),
+            ),
+            if (_error != null)
+              Text(
+                _error!,
+                style: context.text.bodySm.copyWith(color: c.error),
+              ),
+          ],
           const SizedBox(height: AppSpacing.xl),
           AppButton(
             label: t.deleteAccountSubmit,
             variant: AppButtonVariant.danger,
             isLoading: _loading,
-            onPressed: _submit,
+            onPressed: () => _submit(conPassword: conPassword),
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(t.deleteAccountWebTitle, style: context.text.headingMd),

@@ -19,8 +19,8 @@ class AuthApi {
   /// corredores que no tienen; la CI es lo que despues cruza un pago hecho en
   /// la web con esta misma cuenta.
   Future<AuthSession> register({
-    required String name,
     required String password,
+    String? name,
     String? email,
     String? ci,
     DateTime? birthDate,
@@ -29,7 +29,7 @@ class AuthApi {
     final res = await _dio.post<dynamic>(
       '/auth/register',
       data: {
-        'name': name,
+        if (name != null && name.isNotEmpty) 'name': name,
         'password': password,
         if (email != null && email.isNotEmpty) 'email': email,
         if (ci != null && ci.isNotEmpty) 'ci': ci,
@@ -54,6 +54,17 @@ class AuthApi {
         'password': password,
         ...await _device(),
       },
+    );
+    return AuthSession.fromJson(res.data as Map<String, dynamic>);
+  });
+
+  /// Login con Google. El servidor verifica el [idToken] contra Google y, si
+  /// el correo esta verificado y no tiene cuenta, la crea: para la app entrar y
+  /// registrarse con Google son la misma llamada.
+  Future<AuthSession> google(String idToken) => apiCall(() async {
+    final res = await _dio.post<dynamic>(
+      '/auth/google',
+      data: {'idToken': idToken, ...await _device()},
     );
     return AuthSession.fromJson(res.data as Map<String, dynamic>);
   });
@@ -110,7 +121,18 @@ class AuthApi {
 
   /// Borra la cuenta y todo lo del usuario en el servidor. Pide la contrasena
   /// otra vez porque es irreversible y el telefono puede estar en otras manos.
-  Future<void> deleteAccount(String password) => apiCall(
-    () async => _dio.delete<dynamic>('/auth/me', data: {'password': password}),
+  ///
+  /// La cuenta vive en `/auth` pero el borrado esta en `/users/me/data`: lo que
+  /// se borra no es la credencial sino todos los datos del usuario, y el
+  /// servidor lo trata como tal —cancela las inscripciones futuras antes de
+  /// borrar en cascada—.
+  ///
+  /// Se manda vacia cuando la cuenta entro con Google y no tiene contrasena
+  /// (`hasPassword: false`): el servidor la exige solo a quien tiene una.
+  Future<void> deleteAccount(String? password) => apiCall(
+    () async => _dio.delete<dynamic>(
+      '/users/me/data',
+      data: {if (password != null && password.isNotEmpty) 'password': password},
+    ),
   );
 }

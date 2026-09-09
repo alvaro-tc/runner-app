@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authIdentifierLabel => 'Username or Email';
 
   @override
-  String get authEmailHint => 'pandu@camrun.app';
+  String get authEmailHint => 'you@example.com';
 
   @override
   String get authPasswordLabel => 'Password';
@@ -103,9 +103,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authNoAccount => 'Don\'t have an account?';
 
   @override
-  String authSocialComingSoon(String provider) {
-    return '$provider sign-in is coming soon. Use your email for now.';
-  }
+  String get authGoogleError =>
+      'We could not sign you in with Google. Try again.';
 
   @override
   String get authSignUpTitle => 'Create your\naccount.';
@@ -118,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authFullNameLabel => 'Full name';
 
   @override
-  String get authFullNameHint => 'Pandu Wirawan';
+  String get authFullNameHint => 'First and last name';
 
   @override
   String get authEmailLabel => 'Email';
@@ -947,22 +946,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerIdNumber => 'ID number';
 
   @override
-  String get registerIdNumberHint => 'Goes on your bib record';
+  String get registerIdNumberHint => 'Digits only, no dashes';
 
   @override
   String get registerPhone => 'Phone';
-
-  @override
-  String get registerEmergencyName => 'Emergency contact name';
-
-  @override
-  String get registerEmergencyNameHint => 'Who should we call?';
-
-  @override
-  String get registerEmergencyPhone => 'Emergency contact phone';
-
-  @override
-  String get registerShirtSize => 'Shirt size';
 
   @override
   String get registerCategoryAndExtras => 'Category & extras';
@@ -2110,6 +2097,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountPasswordLabel => 'Password';
+
+  @override
+  String get deleteAccountNoPassword =>
+      'Your account signs in with Google, so there is no password to confirm.';
 
   @override
   String get deleteAccountPasswordHint => 'Confirm it is you';

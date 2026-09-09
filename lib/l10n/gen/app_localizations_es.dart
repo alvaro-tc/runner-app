@@ -88,7 +88,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authIdentifierLabel => 'Usuario o correo';
 
   @override
-  String get authEmailHint => 'pandu@camrun.app';
+  String get authEmailHint => 'tucorreo@ejemplo.com';
 
   @override
   String get authPasswordLabel => 'Contraseña';
@@ -103,9 +103,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authNoAccount => '¿Todavía no tienes cuenta?';
 
   @override
-  String authSocialComingSoon(String provider) {
-    return 'El acceso con $provider llega pronto. Por ahora usa tu correo.';
-  }
+  String get authGoogleError =>
+      'No se pudo entrar con Google. Inténtalo de nuevo.';
 
   @override
   String get authSignUpTitle => 'Crea tu\ncuenta.';
@@ -118,7 +117,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authFullNameLabel => 'Nombre completo';
 
   @override
-  String get authFullNameHint => 'Pandu Wirawan';
+  String get authFullNameHint => 'Nombre y apellido';
 
   @override
   String get authEmailLabel => 'Correo electrónico';
@@ -955,22 +954,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registerIdNumber => 'Documento de identidad';
 
   @override
-  String get registerIdNumberHint => 'Va en el registro de tu dorsal';
+  String get registerIdNumberHint => 'Solo números, sin guiones ni extensión';
 
   @override
   String get registerPhone => 'Teléfono';
-
-  @override
-  String get registerEmergencyName => 'Contacto de emergencia';
-
-  @override
-  String get registerEmergencyNameHint => '¿A quién llamamos?';
-
-  @override
-  String get registerEmergencyPhone => 'Teléfono de emergencia';
-
-  @override
-  String get registerShirtSize => 'Talla de camiseta';
 
   @override
   String get registerCategoryAndExtras => 'Categoría y extras';
@@ -2125,6 +2112,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountPasswordLabel => 'Contraseña';
+
+  @override
+  String get deleteAccountNoPassword =>
+      'Tu cuenta entra con Google, así que no hay contraseña que confirmar.';
 
   @override
   String get deleteAccountPasswordHint => 'Confirma que eres tú';

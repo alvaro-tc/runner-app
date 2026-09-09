@@ -29,10 +29,17 @@ class AuthState {
     this.signedIn = false,
     this.mustChangePassword = false,
     this.role = '',
+    this.hasPassword = true,
   });
 
   final bool signedIn;
   final bool mustChangePassword;
+
+  /// `false` en las cuentas de Google que nunca pusieron contrasena: no hay
+  /// ninguna que pedir para borrar la cuenta. Se asume `true` mientras no se
+  /// sepa —pedirla de mas se corrige tecleando; de menos, el servidor rechaza
+  /// el borrado—.
+  final bool hasPassword;
 
   /// `admin`, `organizer` o `runner`. Vacio mientras no se sepa: con sesion
   /// recuperada del arranque el rol tarda una peticion en llegar, y asumir
@@ -86,9 +93,19 @@ class AuthNotifier extends Notifier<AuthState> {
     return _aplicar(result.fold((user) => user, (f) => f));
   }
 
+  /// Cancelar el dialogo de Google devuelve `null` igual que un login correcto:
+  /// no hay error que pintar, y de redirigir ya se encarga el router.
+  Future<Failure?> signInWithGoogle() async {
+    final result = await ref.read(authRepositoryProvider).signInWithGoogle();
+    return result.fold(
+      (user) => user == null ? null : _aplicar(user),
+      (f) => f,
+    );
+  }
+
   Future<Failure?> signUp({
-    required String name,
     required String password,
+    String? name,
     String? email,
     String? ci,
     DateTime? birthDate,
@@ -140,27 +157,23 @@ class AuthNotifier extends Notifier<AuthState> {
 
     _olvidarUsuario();
     final user = resultado as AuthUser;
-    state = AuthState(
-      signedIn: true,
-      mustChangePassword: user.mustChangePassword,
-      role: user.role,
-    );
+    state = _desde(user);
     return null;
   }
+
+  AuthState _desde(AuthUser user) => AuthState(
+    signedIn: true,
+    mustChangePassword: user.mustChangePassword,
+    role: user.role,
+    hasPassword: user.hasPassword,
+  );
 
   Future<void> _refrescarUsuario() async {
     final result = await ref.read(authRepositoryProvider).currentUser();
     // Un fallo de red al arrancar no puede echar a nadie ni encerrarlo en la
     // pantalla de cambio: se deja el estado como estaba y se reintentara en el
     // siguiente login.
-    result.fold(
-      (AuthUser user) => state = AuthState(
-        signedIn: true,
-        mustChangePassword: user.mustChangePassword,
-        role: user.role,
-      ),
-      (Failure _) {},
-    );
+    result.fold((AuthUser user) => state = _desde(user), (Failure _) {});
   }
 
   Future<void> signOut() async {
@@ -172,7 +185,7 @@ class AuthNotifier extends Notifier<AuthState> {
   /// Borrado de cuenta. Si el servidor lo confirma el repositorio ya dejo el
   /// dispositivo limpio, asi que aqui solo queda caer la sesion y dejar que el
   /// guard mande a Welcome.
-  Future<Failure?> deleteAccount(String password) async {
+  Future<Failure?> deleteAccount(String? password) async {
     final result = await ref
         .read(authRepositoryProvider)
         .deleteAccount(password);

@@ -30,6 +30,7 @@ String get apiBaseUrl {
 /// Rutas que no llevan `Authorization` y a las que un 401 no dispara refresh.
 const publicApiPaths = <String>[
   '/auth/login',
+  '/auth/google',
   '/auth/register',
   '/auth/refresh',
   '/auth/forgot-password',

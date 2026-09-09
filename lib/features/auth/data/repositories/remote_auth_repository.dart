@@ -1,6 +1,7 @@
 import 'package:camrun/core/db/app_database.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/services/google_sign_in_service.dart';
 import 'package:camrun/core/storage/token_storage.dart';
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/auth/data/datasources/auth_api.dart';
@@ -15,12 +16,14 @@ class RemoteAuthRepository implements AuthRepository {
     required this.session,
     required this.storage,
     required this.db,
+    required this.google,
   });
 
   final AuthApi api;
   final SessionController session;
   final TokenStorage storage;
   final AppDatabase db;
+  final GoogleSignInService google;
 
   @override
   Future<Result<AuthUser>> signIn({
@@ -32,8 +35,8 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<Result<AuthUser>> signUp({
-    required String fullName,
     required String password,
+    String? fullName,
     String? email,
     String? ci,
     DateTime? birthDate,
@@ -50,6 +53,15 @@ class RemoteAuthRepository implements AuthRepository {
       ),
     ),
   );
+
+  /// Cancelar el dialogo devuelve `null` sin tocar la sesion: no hay nada que
+  /// guardar ni nada que contarle al usuario, que ya sabe lo que hizo.
+  @override
+  Future<Result<AuthUser?>> signInWithGoogle() => guard(() async {
+    final idToken = await google.idToken();
+    if (idToken == null) return null;
+    return _entrar(() => api.google(idToken));
+  });
 
   @override
   Future<Result<AuthUser>> currentUser() => guard(api.me);
@@ -93,6 +105,9 @@ class RemoteAuthRepository implements AuthRepository {
     } on Failure catch (_) {
       // Sin red o token ya muerto: da igual, lo local se borra igual.
     }
+    // Sin esto la proxima vez Google entra sola con la cuenta anterior, sin
+    // dar opcion a elegir otra.
+    await google.signOut();
     await session.clear();
     await db.wipe();
   });
@@ -101,7 +116,7 @@ class RemoteAuthRepository implements AuthRepository {
   /// al reves —limpiar y que la peticion falle— dejaria la cuenta viva y al
   /// usuario convencido de que ya no existe.
   @override
-  Future<Result<void>> deleteAccount(String password) => guard(() async {
+  Future<Result<void>> deleteAccount(String? password) => guard(() async {
     await api.deleteAccount(password);
     await session.clear();
     await db.wipe();

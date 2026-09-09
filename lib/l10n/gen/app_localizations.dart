@@ -257,7 +257,7 @@ abstract class AppLocalizations {
   /// No description provided for @authEmailHint.
   ///
   /// In en, this message translates to:
-  /// **'pandu@camrun.app'**
+  /// **'you@example.com'**
   String get authEmailHint;
 
   /// No description provided for @authPasswordLabel.
@@ -284,11 +284,11 @@ abstract class AppLocalizations {
   /// **'Don\'\'t have an account?'**
   String get authNoAccount;
 
-  /// Snackbar shown when tapping a social sign-in button.
+  /// Shown when the Google sign-in flow fails for a reason other than the user cancelling it.
   ///
   /// In en, this message translates to:
-  /// **'{provider} sign-in is coming soon. Use your email for now.'**
-  String authSocialComingSoon(String provider);
+  /// **'We could not sign you in with Google. Try again.'**
+  String get authGoogleError;
 
   /// No description provided for @authSignUpTitle.
   ///
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @authFullNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Pandu Wirawan'**
+  /// **'First and last name'**
   String get authFullNameHint;
 
   /// No description provided for @authEmailLabel.
@@ -1823,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @registerIdNumberHint.
   ///
   /// In en, this message translates to:
-  /// **'Goes on your bib record'**
+  /// **'Digits only, no dashes'**
   String get registerIdNumberHint;
 
   /// No description provided for @registerPhone.
@@ -1831,30 +1831,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone'**
   String get registerPhone;
-
-  /// No description provided for @registerEmergencyName.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency contact name'**
-  String get registerEmergencyName;
-
-  /// No description provided for @registerEmergencyNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Who should we call?'**
-  String get registerEmergencyNameHint;
-
-  /// No description provided for @registerEmergencyPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency contact phone'**
-  String get registerEmergencyPhone;
-
-  /// No description provided for @registerShirtSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Shirt size'**
-  String get registerShirtSize;
 
   /// No description provided for @registerCategoryAndExtras.
   ///
@@ -3925,6 +3901,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get deleteAccountPasswordLabel;
+
+  /// No description provided for @deleteAccountNoPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account signs in with Google, so there is no password to confirm.'**
+  String get deleteAccountNoPassword;
 
   /// No description provided for @deleteAccountPasswordHint.
   ///

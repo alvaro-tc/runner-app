@@ -23,6 +23,11 @@ abstract class AuthUser with _$AuthUser {
     /// deja pasar de la pantalla de cambio.
     @Default(false) bool mustChangePassword,
 
+    /// `false` en las cuentas que entraron con Google y nunca pusieron una.
+    /// Sin contrasena no hay nada que confirmar al borrar la cuenta, ni nada
+    /// que cambiar en la pantalla de cambio.
+    @Default(true) bool hasPassword,
+
     /// `null` = todavia no vio los slides. Vive en el backend ademas de en
     /// local, asi que sobrevive a una reinstalacion.
     DateTime? onboardingSeenAt,

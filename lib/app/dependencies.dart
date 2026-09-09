@@ -1,4 +1,5 @@
 import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/google_sign_in_service.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/features/auth/data/repositories/remote_auth_repository.dart';
 import 'package:camrun/features/auth/domain/repositories/auth_repository.dart';
@@ -25,7 +26,12 @@ final authRepositoryProvider = Provider<AuthRepository>(
     session: ref.watch(sessionControllerProvider),
     storage: ref.watch(tokenStorageProvider),
     db: ref.watch(appDatabaseProvider),
+    google: ref.watch(googleSignInServiceProvider),
   ),
+);
+
+final googleSignInServiceProvider = Provider<GoogleSignInService>(
+  (ref) => GoogleSignInService(),
 );
 
 final homeApiProvider = Provider<HomeApi>(

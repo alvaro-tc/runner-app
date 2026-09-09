@@ -1,13 +1,10 @@
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
-import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:camrun/features/profile/domain/entities/user_profile.dart';
-import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
@@ -23,25 +20,17 @@ class SignUpPage extends ConsumerStatefulWidget {
 }
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
-  final _name = TextEditingController();
-  final _ci = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _confirm = TextEditingController();
 
   final _errors = <String, String?>{};
-  DateTime? _birthDate;
-  Gender? _gender;
   bool _acceptedTerms = false;
   bool _loading = false;
 
   @override
   void dispose() {
-    _name.dispose();
-    _ci.dispose();
     _email.dispose();
     _password.dispose();
-    _confirm.dispose();
     super.dispose();
   }
 
@@ -49,23 +38,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final t = context.l10n;
     setState(() {
       _errors
-        ..['name'] = Validators.required(
-          _name.text,
-          t.validationFullNameRequired,
-        )
-        ..['ci'] = Validators.ci(t, _ci.text)
-        // El correo es opcional: solo se valida si escribio algo. Exigirlo
-        // dejaria fuera a quien no tiene, que es justo a quien hay que dejar
-        // inscribirse.
-        ..['email'] = _email.text.trim().isEmpty
-            ? null
-            : Validators.email(t, _email.text)
-        ..['password'] = Validators.password(t, _password.text)
-        ..['confirm'] = Validators.confirmPassword(
-          t,
-          _confirm.text,
-          _password.text,
-        );
+        ..['email'] = Validators.email(t, _email.text)
+        ..['password'] = Validators.password(t, _password.text);
     });
     if (_errors.values.any((e) => e != null)) return;
     if (!_acceptedTerms) {
@@ -74,16 +48,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     }
 
     setState(() => _loading = true);
+    // El resto del perfil (nombre, CI, fecha, genero) se completa despues en
+    // editar perfil: pedirlo aqui solo hace abandonar el registro.
     final failure = await ref
         .read(authProvider.notifier)
-        .signUp(
-          name: _name.text.trim(),
-          password: _password.text,
-          email: _email.text.trim().isEmpty ? null : _email.text.trim(),
-          ci: _ci.text.trim(),
-          birthDate: _birthDate,
-          gender: _gender?.name,
-        );
+        .signUp(password: _password.text, email: _email.text.trim());
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -96,18 +65,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   void _clear(String key) {
     if (_errors[key] != null) setState(() => _errors[key] = null);
-  }
-
-  Future<void> _pickBirthDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? DateTime(1995),
-      firstDate: DateTime(1930),
-      lastDate: DateTime.now(),
-      helpText: context.l10n.registerDateOfBirth,
-    );
-    if (picked == null) return;
-    setState(() => _birthDate = picked);
   }
 
   @override
@@ -124,76 +81,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         ),
         const SizedBox(height: AppSpacing.xxl),
         AppTextField(
-          label: t.authFullNameLabel,
-          controller: _name,
-          hint: t.authFullNameHint,
-          errorText: _errors['name'],
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.name],
-          onChanged: (_) => _clear('name'),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        // La CI es la credencial que vale en las dos puntas: con ella entras a
-        // la app y con ella la web reconoce un pago tuyo hecho fuera de aqui.
-        AppTextField(
-          label: t.authIdLabel,
-          controller: _ci,
-          hint: t.authIdHint,
-          errorText: _errors['ci'],
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.username],
-          onChanged: (_) => _clear('ci'),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(t.registerDateOfBirth, style: context.text.labelSm),
-        const SizedBox(height: AppSpacing.sm),
-        InkWell(
-          onTap: _pickBirthDate,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: Container(
-            height: AppSizes.controlHeight,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: c.border, width: 1.5),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _birthDate == null
-                        ? t.editPickADate
-                        : Fmt.fullDate(_birthDate!),
-                    style: context.text.bodyMd,
-                  ),
-                ),
-                Icon(
-                  Icons.calendar_today_rounded,
-                  size: 18,
-                  color: c.textSecondary,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(t.registerGender, style: context.text.labelSm),
-        const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            for (final gender in Gender.values)
-              AppChip(
-                label: gender.label(t),
-                selected: _gender == gender,
-                onTap: () => setState(() => _gender = gender),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppTextField(
-          label: t.authEmailOptionalLabel,
+          label: t.authEmailLabel,
           controller: _email,
           hint: t.authEmailHint,
           errorText: _errors['email'],
@@ -202,11 +90,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           autofillHints: const [AutofillHints.email],
           onChanged: (_) => _clear('email'),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          t.authEmailOptionalHelp,
-          style: context.text.bodySm.copyWith(color: c.textSecondary),
-        ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
           label: t.authPasswordLabel,
@@ -214,20 +97,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           hint: t.authPasswordHint,
           errorText: _errors['password'],
           isPassword: true,
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.newPassword],
-          onChanged: (_) => _clear('password'),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppTextField(
-          label: t.authConfirmPasswordLabel,
-          controller: _confirm,
-          hint: t.authConfirmPasswordHint,
-          errorText: _errors['confirm'],
-          isPassword: true,
           textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.newPassword],
           onSubmitted: (_) => _submit(),
-          onChanged: (_) => _clear('confirm'),
+          onChanged: (_) => _clear('password'),
         ),
         const SizedBox(height: AppSpacing.base),
         Row(

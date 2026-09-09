@@ -49,8 +49,6 @@ class MarathonRegisterPage extends ConsumerStatefulWidget {
 }
 
 class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
-  static const _shirtSizes = ['XS', 'S', 'M', 'L', 'XL'];
-
   /// Tarjeta que el proveedor simulado aprueba. Va precargada porque este
   /// checkout es de prueba y escribir dieciseis digitos a mano en cada pasada
   /// no prueba nada que no pruebe esto.
@@ -60,15 +58,12 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   final _docId = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
-  final _emergencyName = TextEditingController();
-  final _emergencyPhone = TextEditingController();
   final _cardNumber = TextEditingController(text: _tarjetaDeEjemplo);
   final _cardHolder = TextEditingController();
   final _cardExpiry = TextEditingController(text: '12/30');
   final _cardCvv = TextEditingController(text: '123');
 
   int _step = 0;
-  String _shirtSize = 'M';
   String? _categoryId;
   final _selectedExtras = <String>{};
   // Hoy solo se cobra por QR: ver `RacePaymentMethod.offered`. No se elige
@@ -93,8 +88,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     _docId.dispose();
     _phone.dispose();
     _email.dispose();
-    _emergencyName.dispose();
-    _emergencyPhone.dispose();
     _cardNumber.dispose();
     _cardHolder.dispose();
     _cardExpiry.dispose();
@@ -171,9 +164,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         knowsCam: _knowsCam ?? false,
         acceptsDonorCall: _acceptsDonorCall ?? false,
         email: _emailDe(profile).isEmpty ? null : _emailDe(profile),
-        emergencyContactName: _emergencyName.text.trim(),
-        emergencyContactPhone: _emergencyPhone.text.trim(),
-        shirtSize: _shirtSize,
       );
 
   Future<void> _pay(Marathon marathon) async {
@@ -386,12 +376,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           value: profile?.fullName ?? '—',
         ),
         _ReadOnlyField(
-          label: t.registerDateOfBirth,
-          value: profile?.birthDate == null
-              ? '—'
-              : Fmt.fullDate(profile!.birthDate!),
-        ),
-        _ReadOnlyField(
           label: t.registerGender,
           value: profile?.gender.label(t) ?? '—',
         ),
@@ -445,34 +429,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           question: t.registerCamDonorQuestion,
           value: _acceptsDonorCall,
           onChanged: (v) => setState(() => _acceptsDonorCall = v),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        AppTextField(
-          label: t.registerEmergencyName,
-          controller: _emergencyName,
-          hint: t.registerEmergencyNameHint,
-          textInputAction: TextInputAction.next,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppTextField(
-          label: t.registerEmergencyPhone,
-          controller: _emergencyPhone,
-          hint: '+591 70000001',
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(t.registerShirtSize, style: context.text.labelSm),
-        const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.sm,
-          children: [
-            for (final size in _shirtSizes)
-              AppChip(
-                label: size,
-                selected: _shirtSize == size,
-                onTap: () => setState(() => _shirtSize = size),
-              ),
-          ],
         ),
       ],
     );

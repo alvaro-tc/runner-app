@@ -32,25 +32,19 @@
   "authSignInWelcomeBack": "Welcome back",
   "authSignInMissed": "You''ve been missed!",
   "authIdentifierLabel": "Username or Email",
-  "authEmailHint": "pandu@camrun.app",
+  "authEmailHint": "you@example.com",
   "authPasswordLabel": "Password",
   "authPasswordHint": "At least 8 characters",
   "authForgotPassword": "Forgot password?",
   "authNoAccount": "Don''t have an account?",
-  "authSocialComingSoon": "{provider} sign-in is coming soon. Use your email for now.",
-  "@authSocialComingSoon": {
-    "description": "Snackbar shown when tapping a social sign-in button.",
-    "placeholders": {
-      "provider": {
-        "type": "String",
-        "example": "Google"
-      }
-    }
+  "authGoogleError": "We could not sign you in with Google. Try again.",
+  "@authGoogleError": {
+    "description": "Shown when the Google sign-in flow fails for a reason other than the user cancelling it."
   },
   "authSignUpTitle": "Create your\naccount.",
   "authSignUpSubtitle": "Two minutes now, and every run you take from here is counted.",
   "authFullNameLabel": "Full name",
-  "authFullNameHint": "Pandu Wirawan",
+  "authFullNameHint": "First and last name",
   "authEmailLabel": "Email",
   "authConfirmPasswordLabel": "Confirm password",
   "authConfirmPasswordHint": "Type it once more",
@@ -452,12 +446,8 @@
   "registerDateOfBirth": "Date of birth",
   "registerGender": "Gender",
   "registerIdNumber": "ID number",
-  "registerIdNumberHint": "Goes on your bib record",
+  "registerIdNumberHint": "Digits only, no dashes",
   "registerPhone": "Phone",
-  "registerEmergencyName": "Emergency contact name",
-  "registerEmergencyNameHint": "Who should we call?",
-  "registerEmergencyPhone": "Emergency contact phone",
-  "registerShirtSize": "Shirt size",
   "registerCategoryAndExtras": "Category & extras",
   "registerSingleDistance": "This event runs a single distance: {distance}.",
   "@registerSingleDistance": {
@@ -977,6 +967,7 @@
   "deleteAccountBody": "Deleting your account removes it from CamRun and cannot be undone. There is no way to get it back afterwards.",
   "deleteAccountWhatGoes": "You will lose your profile, your runs and their routes, your training plan and your race registrations. Payments already made stay in the accounting records of the race organiser, with no account attached to them.",
   "deleteAccountPasswordLabel": "Password",
+  "deleteAccountNoPassword": "Your account signs in with Google, so there is no password to confirm.",
   "deleteAccountPasswordHint": "Confirm it is you",
   "deleteAccountSubmit": "Delete my account",
   "deleteAccountConfirmTitle": "Delete it for good?",
