@@ -6,6 +6,7 @@ sube**, aunque el `versionName` no cambie.
 
 | versionName | versionCode | Fecha | Notas |
 |---|---|---|---|
+| 1.0.6 | 7 | 2026-09-21 | Vista por vueltas |
 | 1.0.5 | 6 | 2026-09-08 | Fix bug al iniciar maraton, Google Sign-In |
 | 1.0.4 | 5 | 2026-09-04 | Tiempo real (live tracking, beacon pre-carrera) |
 | 1.0.3 | 4 | 2026-09-03 | Rol de organizador |
