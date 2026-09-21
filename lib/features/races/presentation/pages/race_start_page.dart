@@ -77,7 +77,12 @@ class _Body extends ConsumerWidget {
   /// servidor trate los puntos como carrera —mapa en vivo, resultado oficial— y
   /// no como un entrenamiento suelto. El servidor la rechaza si la inscripcion
   /// no esta confirmada, asi que el boton solo aparece cuando lo esta.
-  void _start(BuildContext context, WidgetRef ref, List<GeoPoint> recorrido) {
+  void _start(
+    BuildContext context,
+    WidgetRef ref,
+    List<GeoPoint> recorrido,
+    int vueltas,
+  ) {
     ref
         .read(runSessionProvider.notifier)
         .start(
@@ -86,6 +91,7 @@ class _Body extends ConsumerWidget {
             title: entry.marathon.name,
             distanceKm: entry.marathon.distanceKm,
             officialRoute: recorrido,
+            circuitLaps: vueltas,
           ),
         );
     context.push(Routes.trainSession);
@@ -147,6 +153,16 @@ class _Body extends ConsumerWidget {
               label: Fmt.distance(entry.marathon.distanceKm),
               icon: Icons.straighten_rounded,
             ),
+            if (entry.marathon.laps > 1)
+              AppBadge(
+                label: t.raceCircuitLaps(
+                  Fmt.distance(
+                    entry.marathon.distanceKm / entry.marathon.laps,
+                  ),
+                  '${entry.marathon.laps}',
+                ),
+                icon: Icons.loop_rounded,
+              ),
             if (!faltan.isNegative) CountdownPill(remaining: faltan),
           ],
         ),
@@ -185,7 +201,12 @@ class _Body extends ConsumerWidget {
           AppButton(
             label: t.raceDayStart,
             icon: Icons.play_arrow_rounded,
-            onPressed: () => _start(context, ref, recorrido),
+            onPressed: () => _start(
+              context,
+              ref,
+              recorrido,
+              maraton.value?.laps ?? entry.marathon.laps,
+            ),
           )
         else
           Text(

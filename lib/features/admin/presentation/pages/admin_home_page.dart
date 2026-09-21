@@ -94,7 +94,11 @@ class _Tablero extends ConsumerWidget {
       children: [
         _Selector(marathons: marathons, current: maraton),
         Expanded(
-          child: _Mapa(route: detalle.value?.route ?? const [], board: tablero),
+          child: _Mapa(
+            route: detalle.value?.route ?? const [],
+            board: tablero,
+            laps: detalle.value?.laps ?? maraton.laps,
+          ),
         ),
         if (readOnly)
           _Estado(marathon: detalle.value ?? maraton, board: tablero)
@@ -168,10 +172,19 @@ class _Selector extends ConsumerWidget {
 }
 
 class _Mapa extends StatelessWidget {
-  const _Mapa({required this.route, required this.board});
+  const _Mapa({required this.route, required this.board, this.laps = 1});
 
   final List<GeoPoint> route;
   final LiveBoard board;
+
+  /// Vueltas al circuito. Con una sola —lo normal— el mapa no habla de
+  /// vueltas: el trazado dibujado es la carrera entera.
+  final int laps;
+
+  /// La vuelta mas alta que va alguien. Es "por donde va la carrera", que es
+  /// lo que mira el organizador; la media no la mira nadie.
+  int get _vueltaDeCabeza =>
+      board.runners.values.fold(1, (mayor, p) => p.lap > mayor ? p.lap : mayor);
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +224,12 @@ class _Mapa extends StatelessWidget {
               board.runners.length - board.finishedBibs.length,
             ),
             finished: board.finishedBibs.length,
+            // En un circuito todo el pelotón se pinta encima del mismo
+            // trazado: sin la vuelta de cabeza, el mapa no dice por donde va
+            // la carrera. Con una sola vuelta no hay nada que contar.
+            lap: laps > 1
+                ? t.adminLeadingLap('$_vueltaDeCabeza', '$laps')
+                : null,
           ),
         ),
         if (board.loading)
@@ -268,10 +287,14 @@ class _Contador extends StatelessWidget {
     required this.board,
     required this.label,
     this.finished = 0,
+    this.lap,
   });
 
   final LiveBoard board;
   final String label;
+
+  /// Por que vuelta va la cabeza de carrera. Null = la carrera no da vueltas.
+  final String? lap;
 
   /// Cuantos ya cruzaron la meta. Cero = no se pinta: en una carrera que
   /// acaba de largar el numero solo ocupa sitio.
@@ -300,6 +323,15 @@ class _Contador extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(label, style: context.text.labelSm),
+          if (lap != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Icon(Icons.loop_rounded, size: 14, color: c.textSecondary),
+            const SizedBox(width: AppSpacing.xxs),
+            Text(
+              lap!,
+              style: context.text.labelSm.copyWith(color: c.textSecondary),
+            ),
+          ],
           if (finished > 0) ...[
             const SizedBox(width: AppSpacing.sm),
             Icon(Icons.sports_score_rounded, size: 14, color: c.success),

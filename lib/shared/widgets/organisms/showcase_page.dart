@@ -14,6 +14,7 @@ import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 /// Debug-only catalogue of every atom and molecule, in both themes. This is the
@@ -257,21 +258,16 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SocialAuthButton(
-                    icon: Icons.g_mobiledata_rounded,
-                    provider: 'Google',
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: AppSpacing.base),
-                  SocialAuthButton(
-                    icon: Icons.facebook_rounded,
-                    provider: 'Facebook',
-                    onPressed: () {},
-                  ),
-                ],
+              SocialAuthButton(
+                icon: SvgPicture.asset('assets/icons/google.svg'),
+                provider: 'Google',
+                onPressed: () {},
+              ),
+              const SizedBox(height: AppSpacing.base),
+              SocialAuthButton(
+                icon: const Icon(Icons.facebook_rounded, size: 20),
+                provider: 'Facebook',
+                onPressed: () {},
               ),
             ],
           ),

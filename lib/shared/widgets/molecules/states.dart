@@ -95,33 +95,58 @@ class SocialAuthButton extends StatelessWidget {
     required this.icon,
     required this.provider,
     required this.onPressed,
+    this.isLoading = false,
     super.key,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String provider;
   final VoidCallback onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final label = context.l10n.stateSocialContinueWith(provider);
     return Semantics(
       button: true,
-      label: context.l10n.stateSocialContinueWith(provider),
+      label: label,
       child: Material(
         color: c.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         child: InkWell(
-          onTap: onPressed,
+          onTap: isLoading ? null : onPressed,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Container(
-            width: AppSizes.controlHeight,
             height: AppSizes.controlHeight,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: c.border, width: 1.5),
             ),
-            child: Icon(icon, size: 22, color: c.textPrimary),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: c.textSecondary,
+                        )
+                      : icon,
+                ),
+                const SizedBox(width: AppSpacing.base),
+                Text(
+                  label,
+                  style: context.text.bodyMd.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: c.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

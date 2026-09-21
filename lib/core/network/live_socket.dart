@@ -16,6 +16,7 @@ class LivePosition {
     required this.lng,
     required this.distanceMeters,
     required this.at,
+    this.lap = 1,
   });
 
   factory LivePosition.fromJson(Map<String, dynamic> json) => LivePosition(
@@ -23,6 +24,7 @@ class LivePosition {
     lat: (json['lat'] as num).toDouble(),
     lng: (json['lng'] as num).toDouble(),
     distanceMeters: (json['distanceMeters'] as num?)?.toDouble() ?? 0,
+    lap: (json['lap'] as num?)?.toInt() ?? 1,
     at: DateTime.tryParse(json['t'] as String? ?? '') ?? DateTime.now(),
   );
 
@@ -30,6 +32,12 @@ class LivePosition {
   final double lat;
   final double lng;
   final double distanceMeters;
+
+  /// Vuelta que va corriendo, empezando en 1. En una carrera de una sola
+  /// vuelta es siempre 1 y no dice nada; en un circuito es lo unico que
+  /// distingue al que va primero del que lleva una vuelta menos.
+  final int lap;
+
   final DateTime at;
 
   /// Con quien se agrupa en el mapa. Sin dorsal no hay forma de distinguir dos

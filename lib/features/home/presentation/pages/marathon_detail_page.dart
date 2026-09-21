@@ -118,6 +118,17 @@ class _Content extends StatelessWidget {
                     label: Fmt.distance(marathon.distanceKm),
                     icon: Icons.straighten_rounded,
                   ),
+                  // En un circuito el mapa de abajo dibuja una sola vuelta:
+                  // decirlo aqui, junto a la distancia total, es lo que evita
+                  // que parezca que el trazado se quedo corto.
+                  if (marathon.laps > 1)
+                    AppBadge(
+                      label: context.l10n.raceCircuitLaps(
+                        Fmt.distance(marathon.distanceKm / marathon.laps),
+                        '${marathon.laps}',
+                      ),
+                      icon: Icons.loop_rounded,
+                    ),
                   AppBadge(
                     label: Fmt.fullDate(marathon.date),
                     icon: Icons.event_rounded,

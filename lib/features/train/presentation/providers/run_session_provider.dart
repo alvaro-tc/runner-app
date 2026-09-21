@@ -22,6 +22,7 @@ class RunGoal {
     this.marathonId,
     this.bib,
     this.officialRoute = const [],
+    this.circuitLaps = 1,
     this.laps,
     this.lapPace,
     this.title = '',
@@ -39,12 +40,14 @@ class RunGoal {
     required String title,
     required double distanceKm,
     List<GeoPoint> officialRoute = const [],
+    int circuitLaps = 1,
   }) => RunGoal(
     type: RunGoalType.race,
     registrationId: registrationId,
     title: title,
     distanceKm: distanceKm,
     officialRoute: officialRoute,
+    circuitLaps: circuitLaps,
   );
 
   /// La maraton oficial, la que arranca el organizador desde el panel.
@@ -61,6 +64,7 @@ class RunGoal {
     required double distanceKm,
     String? bib,
     List<GeoPoint> officialRoute = const [],
+    int circuitLaps = 1,
   }) => RunGoal(
     type: RunGoalType.race,
     marathonId: marathonId,
@@ -69,6 +73,7 @@ class RunGoal {
     title: title,
     distanceKm: distanceKm,
     officialRoute: officialRoute,
+    circuitLaps: circuitLaps,
   );
 
   final RunGoalType type;
@@ -91,6 +96,13 @@ class RunGoal {
   /// corredor vea si se salio.
   final List<GeoPoint> officialRoute;
 
+  /// Vueltas al circuito de la carrera. 1 = punto a punto o ida y vuelta.
+  ///
+  /// [distanceKm] es el **total**, vueltas incluidas: una vuelta mide
+  /// `distanceKm / circuitLaps`. Nada que ver con [laps], que son los
+  /// intervalos de un entrenamiento.
+  final int circuitLaps;
+
   /// Interval sessions show a lap tracker at the top of the map.
   final int? laps;
   final Duration? lapPace;
@@ -100,6 +112,13 @@ class RunGoal {
 
   /// Maraton oficial en marcha: la pantalla no se puede abandonar.
   bool get isLiveMarathon => marathonId != null;
+
+  /// Se corre dando vueltas al mismo trazado.
+  bool get isCircuit => circuitLaps > 1;
+
+  /// Lo que mide una vuelta. `null` en carreras sin distancia conocida.
+  double? get lapDistanceKm =>
+      distanceKm == null ? null : distanceKm! / circuitLaps;
 }
 
 enum RunGoalType { free, planSession, distance, time, race }
@@ -191,6 +210,29 @@ class RunSessionState {
   };
 
   int get completedLaps => splits.length;
+
+  /// Vuelta en curso segun el GPS del telefono, de 1 a `circuitLaps`.
+  ///
+  /// Es una **estimacion**: la distancia del movil siempre sobra un poco —el
+  /// sensor zigzaguea— asi que puede adelantarse unas decenas de metros al
+  /// cierre real. La buena la manda el servidor, que compara el recorrido con
+  /// el trazado oficial; esta es la que se pinta mientras aquella no llega o
+  /// cuando no hay cobertura.
+  int get lapByDistance {
+    final vuelta = goal.lapDistanceKm;
+    if (vuelta == null || vuelta <= 0) return 1;
+    return (distanceKm ~/ vuelta + 1).clamp(1, goal.circuitLaps);
+  }
+
+  /// Cuanto se lleva de la vuelta en curso, 0..1.
+  double get lapProgress {
+    final vuelta = goal.lapDistanceKm;
+    if (vuelta == null || vuelta <= 0) return 0;
+    return ((distanceKm - (lapByDistance - 1) * vuelta) / vuelta).clamp(
+      0.0,
+      1.0,
+    );
+  }
 
   RunSessionState copyWith({
     RunStatus? status,

@@ -23,6 +23,7 @@ class AdminMarathon {
     required this.published,
     required this.registrationsOpen,
     required this.registrations,
+    this.laps = 1,
     this.slug = '',
     this.description,
     this.currency = 'BOB',
@@ -52,6 +53,7 @@ class AdminMarathon {
         DateTime.tryParse(json['startsAt'] as String? ?? '')?.toLocal() ??
         DateTime.now(),
     distanceMeters: (json['distanceMeters'] as num?)?.toInt() ?? 0,
+    laps: (json['laps'] as num?)?.toInt() ?? 1,
     capacity: (json['capacity'] as num?)?.toInt() ?? 0,
     slotsTaken: (json['slotsTaken'] as num?)?.toInt() ?? 0,
     priceCents: (json['priceCents'] as num?)?.toInt() ?? 0,
@@ -94,7 +96,15 @@ class AdminMarathon {
   final String country;
   final String? description;
   final DateTime startsAt;
+
+  /// Lo que corre el inscrito de punta a punta. En un circuito es el
+  /// resultado de repetir el trazado: ver [laps].
   final int distanceMeters;
+
+  /// Vueltas al circuito. 1 = el trazado se hace una vez, que es lo normal.
+  /// Mayor que 1 = el mapa dibuja **una** vuelta y se repite.
+  final int laps;
+
   final int capacity;
   final int slotsTaken;
   final int priceCents;
@@ -141,6 +151,15 @@ class AdminMarathon {
 
   double get distanceKm => distanceMeters / 1000;
 
+  /// Lo que mide una vuelta. El servidor guarda el total como producto exacto
+  /// de enteros, asi que dividir lo devuelve sin perder metros.
+  int get lapDistanceMeters => distanceMeters ~/ laps;
+
+  double get lapDistanceKm => lapDistanceMeters / 1000;
+
+  /// Da vueltas a un circuito, en vez de recorrer el trazado una sola vez.
+  bool get isCircuit => laps > 1;
+
   /// El mismo orden que en el servidor: lo ultimo que paso manda.
   MarathonPhase get phase {
     if (liveFinishedAt != null) return MarathonPhase.finished;
@@ -179,6 +198,7 @@ class AdminMarathon {
         description: description,
         startsAt: startsAt,
         distanceMeters: distanceMeters,
+        laps: laps,
         capacity: capacity,
         slotsTaken: slotsTaken,
         priceCents: priceCents,

@@ -69,6 +69,7 @@ class Marathon {
     required this.schedule,
     required this.included,
     required this.routePreview,
+    this.laps = 1,
     this.predictedFinishMin,
     this.predictedFinishMax,
     this.categories = const [],
@@ -87,7 +88,15 @@ class Marathon {
   final String city;
   final String country;
   final String heroImageUrl;
+
+  /// El total que se corre, vueltas incluidas.
   final double distanceKm;
+
+  /// Vueltas al circuito. 1 = [routePreview] es la carrera entera; mayor que 1
+  /// = el mapa dibuja **una** vuelta y hay que repetirla. Sin esto el corredor
+  /// ve un trazado de 2 km junto a una carrera de 10 y cree que el mapa miente.
+  final int laps;
+
   final Money entryFee;
   final int slotsTotal;
   final int slotsTaken;

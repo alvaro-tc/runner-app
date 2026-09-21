@@ -230,6 +230,8 @@ void main() {
     expect(container.read(runSessionProvider).status, RunStatus.idle);
   });
 
+  group('vueltas de un circuito', _vueltas);
+
   test('sin permiso de ubicacion no se abre ninguna sesion', () async {
     // El permiso se comprueba ANTES de tocar el GPS o la red: sin el, no se
     // abre sesion en el servidor ni se enciende el sensor.
@@ -250,6 +252,51 @@ void main() {
     expect(state.error, isNotNull);
     expect(llamadas, isEmpty);
     expect(gps.tracks, 0);
+  });
+}
+
+/// En que vuelta va el corredor segun la distancia del telefono.
+///
+/// Es la fuente de reserva de la pantalla de carrera —la buena la manda el
+/// servidor—, y es la que decide cuando suena el aviso de vuelta cerrada: un
+/// error aqui es una voz diciendo "vuelta 3" a mitad de la segunda.
+void _vueltas() {
+  RunSessionState enKm(double km, {int vueltas = 5, double total = 10}) =>
+      const RunSessionState.initial().copyWith(
+        goal: RunGoal.race(
+          registrationId: 'r-1',
+          title: 'Circuito',
+          distanceKm: total,
+          circuitLaps: vueltas,
+        ),
+        distanceKm: km,
+      );
+
+  test('la primera vuelta empieza en 1, no en 0', () {
+    expect(enKm(0).lapByDistance, 1);
+    expect(enKm(1.999).lapByDistance, 1);
+  });
+
+  test('cerrar una vuelta pasa a la siguiente', () {
+    expect(enKm(2).lapByDistance, 2);
+    expect(enKm(7.5).lapByDistance, 4);
+  });
+
+  test('pasarse de la distancia total no inventa una vuelta de mas', () {
+    // El GPS siempre suma de mas: sin el tope, los ultimos metros anunciarian
+    // una sexta vuelta en una carrera de cinco.
+    expect(enKm(10.4).lapByDistance, 5);
+  });
+
+  test('el avance es el de la vuelta en curso, no el de la carrera', () {
+    expect(enKm(3).lapProgress, closeTo(0.5, 0.001));
+    expect(enKm(4).lapProgress, closeTo(0, 0.001));
+  });
+
+  test('una carrera de una sola vuelta no tiene vueltas que contar', () {
+    final punto = enKm(7, vueltas: 1);
+    expect(punto.goal.isCircuit, isFalse);
+    expect(punto.lapByDistance, 1);
   });
 }
 

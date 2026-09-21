@@ -591,6 +591,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String runCircuitLapToGo(String distance) {
+    return '$distance to close this lap';
+  }
+
+  @override
+  String runCircuitLapDone(int lap) {
+    return 'Lap $lap done!';
+  }
+
+  @override
+  String runCircuitLapVoice(int lap, int total) {
+    return 'You completed lap $lap of $total';
+  }
+
+  @override
+  String get runCircuitLastLapVoice => 'Final lap. Give it everything';
+
+  @override
   String runLapSemantics(int done, int total) {
     return 'Lap $done of $total';
   }
@@ -763,6 +781,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get raceDetailTitle => 'My race';
+
+  @override
+  String raceCircuitLaps(Object lap, Object laps) {
+    return '$laps laps of $lap';
+  }
 
   @override
   String get raceDetailNotFound => 'We could not find that registration.';
@@ -1866,6 +1889,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminDistanceRequired => 'Enter the distance in kilometres.';
 
   @override
+  String get adminDistancePerLap => 'Distance per lap (km)';
+
+  @override
+  String get adminLaps => 'Laps';
+
+  @override
+  String get adminLapsRequired => 'Laps must be between 1 and 100.';
+
+  @override
+  String get adminLapsSingle =>
+      'A single lap: the course you marked is the whole race.';
+
+  @override
+  String adminLeadingLap(Object lap, Object laps) {
+    return 'Lap $lap/$laps';
+  }
+
+  @override
+  String adminCircuitTotal(Object lap, Object laps, Object total) {
+    return '$laps laps of $lap · $total total';
+  }
+
+  @override
   String get adminCreateMarathon => 'Create marathon';
 
   @override
@@ -2435,4 +2481,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String organizerRefundedBy(String name) {
     return 'Refunded by $name';
   }
+
+  @override
+  String get validationPhoneRequired => 'Enter your phone number.';
+
+  @override
+  String get registerAnswerBothQuestions => 'Answer both questions.';
+
+  @override
+  String get registerPickCategory => 'Pick a distance.';
+
+  @override
+  String get registerMissingFields => 'Some details are still missing.';
 }

@@ -279,6 +279,34 @@
       }
     }
   },
+  "runCircuitLapToGo": "{distance} to close this lap",
+  "@runCircuitLapToGo": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "runCircuitLapDone": "Lap {lap} done!",
+  "@runCircuitLapDone": {
+    "placeholders": {
+      "lap": {
+        "type": "int"
+      }
+    }
+  },
+  "runCircuitLapVoice": "You completed lap {lap} of {total}",
+  "@runCircuitLapVoice": {
+    "placeholders": {
+      "lap": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "runCircuitLastLapVoice": "Final lap. Give it everything",
   "runLapSemantics": "Lap {done} of {total}",
   "@runLapSemantics": {
     "placeholders": {
@@ -370,6 +398,7 @@
   "racesPendingValidation": "Pending validation",
   "racesPendingValidationBody": "Wait 1 or 2 days until an administrator validates your QR payment.",
   "raceDetailTitle": "My race",
+  "raceCircuitLaps": "{laps} laps of {lap}",
   "raceDetailNotFound": "We could not find that registration.",
   "raceCancelTitle": "Cancel this registration?",
   "raceCancelBody": "Your place at {marathon} is released and the entry fee is refunded to {method}. Re-entry depends on availability.",
@@ -879,6 +908,12 @@
   "adminImageRemove": "Remove",
   "adminDistance": "Distance (km)",
   "adminDistanceRequired": "Enter the distance in kilometres.",
+  "adminDistancePerLap": "Distance per lap (km)",
+  "adminLaps": "Laps",
+  "adminLapsRequired": "Laps must be between 1 and 100.",
+  "adminLapsSingle": "A single lap: the course you marked is the whole race.",
+  "adminLeadingLap": "Lap {lap}/{laps}",
+  "adminCircuitTotal": "{laps} laps of {lap} · {total} total",
   "adminCreateMarathon": "Create marathon",
   "adminMarathonSaved": "Marathon saved.",
   "adminMarathonCreated": "Marathon created. You can upload its photo and QR now.",
@@ -1084,5 +1119,9 @@
   "organizerRefundBody": "This voids the entry of {runner} and frees their slot. Except on card, you have to send the money ({amount}) back yourself through the same channel it came in. It cannot be undone.",
   "@organizerRefundBody": {"placeholders": {"runner": {"type": "String"}, "amount": {"type": "String"}}},
   "organizerRefundedBy": "Refunded by {name}",
-  "@organizerRefundedBy": {"placeholders": {"name": {"type": "String"}}}
+  "@organizerRefundedBy": {"placeholders": {"name": {"type": "String"}}},
+  "validationPhoneRequired": "Enter your phone number.",
+  "registerAnswerBothQuestions": "Answer both questions.",
+  "registerPickCategory": "Pick a distance.",
+  "registerMissingFields": "Some details are still missing."
 }

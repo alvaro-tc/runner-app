@@ -596,6 +596,24 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String runCircuitLapToGo(String distance) {
+    return '$distance para cerrar la vuelta';
+  }
+
+  @override
+  String runCircuitLapDone(int lap) {
+    return '¡Vuelta $lap completada!';
+  }
+
+  @override
+  String runCircuitLapVoice(int lap, int total) {
+    return 'Completaste la vuelta $lap de $total';
+  }
+
+  @override
+  String get runCircuitLastLapVoice => 'Última vuelta. A por todas';
+
+  @override
   String runLapSemantics(int done, int total) {
     return 'Vuelta $done de $total';
   }
@@ -769,6 +787,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get raceDetailTitle => 'Mi carrera';
+
+  @override
+  String raceCircuitLaps(Object lap, Object laps) {
+    return '$laps vueltas de $lap';
+  }
 
   @override
   String get raceDetailNotFound => 'No encontramos esa inscripción.';
@@ -1879,6 +1902,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminDistanceRequired => 'Indica la distancia en kilómetros.';
 
   @override
+  String get adminDistancePerLap => 'Distancia por vuelta (km)';
+
+  @override
+  String get adminLaps => 'Vueltas';
+
+  @override
+  String get adminLapsRequired => 'Las vueltas van de 1 a 100.';
+
+  @override
+  String get adminLapsSingle =>
+      'Una sola vuelta: el trazado marcado es la carrera entera.';
+
+  @override
+  String adminLeadingLap(Object lap, Object laps) {
+    return 'Vuelta $lap/$laps';
+  }
+
+  @override
+  String adminCircuitTotal(Object lap, Object laps, Object total) {
+    return '$laps vueltas de $lap · $total en total';
+  }
+
+  @override
   String get adminCreateMarathon => 'Crear maratón';
 
   @override
@@ -2452,4 +2498,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String organizerRefundedBy(String name) {
     return 'Devuelto por $name';
   }
+
+  @override
+  String get validationPhoneRequired => 'Escribe tu teléfono.';
+
+  @override
+  String get registerAnswerBothQuestions => 'Responde las dos preguntas.';
+
+  @override
+  String get registerPickCategory => 'Elige una distancia.';
+
+  @override
+  String get registerMissingFields => 'Faltan datos por completar.';
 }

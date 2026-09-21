@@ -7,6 +7,7 @@ import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/services/voice_service.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/races/presentation/providers/live_marathon_provider.dart';
 import 'package:camrun/features/train/presentation/providers/history_provider.dart';
@@ -18,6 +19,7 @@ import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/molecules/progress_widgets.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -33,6 +35,22 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   final _mapKey = GlobalKey<RouteMapViewState>();
   StreamSubscription<MarathonLiveState>? _corte;
   StreamSubscription<RunnerFinish>? _llegada;
+  StreamSubscription<LivePosition>? _posicion;
+
+  /// Vuelta en curso de un circuito, 1-based.
+  ///
+  /// **Monotona y con dos fuentes.** La buena es la del servidor, que mira el
+  /// recorrido contra el trazado oficial —igual que la llegada— y llega por el
+  /// socket con el dorsal de esta persona. La otra es la distancia del propio
+  /// GPS, que es lo unico que hay sin cobertura o en una carrera que no
+  /// retransmite. Nunca baja: una vuelta cerrada no se descierra, y asi el
+  /// aviso no se repite cuando las dos fuentes no coinciden al metro.
+  int _vuelta = 1;
+
+  /// La vuelta que se acaba de cerrar, mientras se ensena el cartel.
+  int? _cerrada;
+
+  Timer? _cartel;
 
   @override
   void initState() {
@@ -43,6 +61,8 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
 
   @override
   void dispose() {
+    _cartel?.cancel();
+    unawaited(_posicion?.cancel());
     unawaited(_corte?.cancel());
     unawaited(_llegada?.cancel());
     unawaited(WakelockPlus.disable());
@@ -109,6 +129,53 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     });
   }
 
+  /// La vuelta que dice el servidor, que es la que cuenta de verdad.
+  ///
+  /// Viaja en la posicion en vivo de esta persona —la misma que pinta el mapa
+  /// del organizador— y solo se puede reconocer por el dorsal: el servidor no
+  /// manda ni nombres ni ids por la sala.
+  void _escucharVueltas(String bib) {
+    _posicion ??= ref.read(liveSocketProvider).positions.listen((p) {
+      if (p.bib == bib) _verVuelta(p.lap);
+    });
+  }
+
+  /// Se esta corriendo la vuelta [nueva]. Si es una mas que la anterior, se
+  /// cerro una: eso se marca, se vibra y se dice en voz alta.
+  void _verVuelta(int nueva) {
+    final state = ref.read(runSessionProvider);
+    final total = state.goal.circuitLaps;
+    if (!state.goal.isCircuit || !state.isActive) return;
+    if (nueva <= _vuelta || nueva > total) return;
+
+    final cerrada = nueva - 1;
+    setState(() {
+      _vuelta = nueva;
+      _cerrada = cerrada;
+    });
+
+    // Corriendo no se mira la pantalla: la vibracion y la voz son el aviso, el
+    // cartel es la confirmacion para quien si la mira.
+    unawaited(HapticFeedback.heavyImpact());
+    final t = context.l10n;
+    unawaited(
+      ref
+          .read(voiceServiceProvider)
+          .say(
+            nueva == total
+                ? '${t.runCircuitLapVoice(cerrada, total)}. '
+                      '${t.runCircuitLastLapVoice}'
+                : t.runCircuitLapVoice(cerrada, total),
+            locale: Localizations.localeOf(context),
+          ),
+    );
+
+    _cartel?.cancel();
+    _cartel = Timer(const Duration(seconds: 8), () {
+      if (mounted) setState(() => _cerrada = null);
+    });
+  }
+
   Future<void> _finish() async {
     final goal = ref.read(runSessionProvider).goal;
     final run = await ref.read(runSessionProvider.notifier).finish();
@@ -141,6 +208,18 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     // `isActive` de verdad: si la grabacion no llego a arrancar —permiso de
     // ubicacion denegado— la pantalla no puede quedarse cerrada sin salida.
     final bloqueada = state.goal.isLiveMarathon && state.isActive;
+
+    // La distancia del telefono es la fuente de reserva: sirve sin cobertura y
+    // en una carrera que no retransmite. `_verVuelta` se queda con la mayor.
+    ref.listen(
+      runSessionProvider.select((s) => s.lapByDistance),
+      (_, vuelta) => _verVuelta(vuelta),
+    );
+    final bib = state.goal.bib;
+    if (state.goal.isCircuit && bib != null && bib.isNotEmpty) {
+      _escucharVueltas(bib);
+    }
+
     if (bloqueada) {
       _escucharCorte(state.goal.marathonId!, state.goal.bib);
       // Mantiene vivo al que lleva las salas del socket mientras dure la
@@ -172,6 +251,10 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
                     },
                   ),
                   if (bloqueada) _Restante(state: state),
+                  if (state.goal.isCircuit) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _Vueltas(state: state, vuelta: _vuelta, cerrada: _cerrada),
+                  ],
                   if (state.error != null)
                     _ErrorBanner(
                       outcome: state.error!,
@@ -352,6 +435,84 @@ class _Restante extends StatelessWidget {
                 ),
               ],
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Las vueltas del circuito, arriba del todo y sin arrastrar nada.
+///
+/// En una carrera por vueltas el mapa dibuja siempre el mismo trazado y la
+/// distancia total no dice por donde va uno: lo unico que situa al corredor es
+/// **en que vuelta esta**. Por eso vive junto al restante y no dentro de la
+/// hoja de estadisticas, que a mitad de carrera no la abre nadie.
+class _Vueltas extends StatelessWidget {
+  const _Vueltas({required this.state, required this.vuelta, this.cerrada});
+
+  final RunSessionState state;
+  final int vuelta;
+
+  /// Una vuelta recien cerrada, mientras dura el cartel.
+  final int? cerrada;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final total = state.goal.circuitLaps;
+    final porVuelta = state.goal.lapDistanceKm ?? 0;
+    final falta = porVuelta * (1 - state.lapProgress);
+    final celebrando = cerrada != null;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        // El cierre de vuelta se ve de un vistazo desde la mano: no es un
+        // texto mas, es la tarjeta entera cambiando de color.
+        color: celebrando ? c.primary : c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: celebrando ? c.primary : c.border),
+        boxShadow: c.floatingShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                celebrando ? Icons.check_circle_rounded : Icons.loop_rounded,
+                size: 18,
+                color: celebrando ? c.onPrimary : c.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  celebrando
+                      ? t.runCircuitLapDone(cerrada!)
+                      : t.runLapProgress(vuelta, total),
+                  style: context.text.bodySm.copyWith(
+                    color: celebrando ? c.onPrimary : c.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            celebrando
+                ? t.runLapProgress(vuelta, total)
+                : t.runCircuitLapToGo(Fmt.distance(falta)),
+            style: context.text.headingMd.copyWith(
+              color: celebrando ? c.onPrimary : null,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SegmentedProgressBar(
+            total: total,
+            completed: vuelta - 1,
+            currentProgress: state.lapProgress,
+          ),
         ],
       ),
     );

@@ -100,9 +100,13 @@ class _FormularioState extends ConsumerState<_Formulario> {
   late final _precio = TextEditingController(
     text: _m == null ? '' : (_m!.priceCents / 100).toStringAsFixed(2),
   );
+
+  /// Lo que mide **una vuelta**, no la carrera: en un circuito el trazado se
+  /// repite, y es el trazado lo que el organizador mide.
   late final _distancia = TextEditingController(
-    text: _m == null ? '' : _m!.distanceKm.toStringAsFixed(2),
+    text: _m == null ? '' : _m!.lapDistanceKm.toStringAsFixed(2),
   );
+  late final _vueltas = TextEditingController(text: '${_m?.laps ?? 1}');
   late final _qrTexto = TextEditingController(
     text: _m?.paymentQrInstructions ?? '',
   );
@@ -159,6 +163,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     _cupo.dispose();
     _precio.dispose();
     _distancia.dispose();
+    _vueltas.dispose();
     _qrTexto.dispose();
     super.dispose();
   }
@@ -173,8 +178,15 @@ class _FormularioState extends ConsumerState<_Formulario> {
     return metros / 1000;
   }
 
+  /// Metros de una vuelta. Es lo que espera la API en `distanceMeters`: el
+  /// total lo hace ella multiplicando por las vueltas.
   int get _metros =>
       ((double.tryParse(_distancia.text.trim()) ?? 0) * 1000).round();
+
+  int get _numeroDeVueltas => int.tryParse(_vueltas.text.trim()) ?? 0;
+
+  /// Lo que acabara corriendo el inscrito, para pintarlo debajo de los campos.
+  double get _totalKm => _metros * _numeroDeVueltas / 1000;
 
   Map<String, Object?> _instantanea() => {
     'name': _nombre.text.trim(),
@@ -184,6 +196,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     'capacity': int.tryParse(_cupo.text.trim()) ?? 0,
     'priceCents': ((double.tryParse(_precio.text.trim()) ?? 0) * 100).round(),
     'distanceMeters': _metros,
+    'laps': _numeroDeVueltas,
     'paymentQrPayload': _qrPayload ?? '',
     'paymentQrInstructions': _qrTexto.text.trim(),
     // Las listas se comparan por su JSON: es lo mismo que se va a mandar, y
@@ -390,6 +403,9 @@ class _FormularioState extends ConsumerState<_Formulario> {
       return t.adminCapacityRequired;
     }
     if (_metros < 1) return t.adminDistanceRequired;
+    if (_numeroDeVueltas < 1 || _numeroDeVueltas > 100) {
+      return t.adminLapsRequired;
+    }
     return null;
   }
 
@@ -600,10 +616,48 @@ class _FormularioState extends ConsumerState<_Formulario> {
         ],
       ),
       const SizedBox(height: AppSpacing.md),
-      AppTextField(
-        label: t.adminDistance,
-        controller: _distancia,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      // Distancia y vueltas juntas, y debajo lo que suman: son dos campos que
+      // solo se entienden como pareja. Con una vuelta —el caso normal— la
+      // leyenda lo dice en una linea y nadie tiene que pensar en circuitos.
+      Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: AppTextField(
+              label: _numeroDeVueltas > 1
+                  ? t.adminDistancePerLap
+                  : t.adminDistance,
+              controller: _distancia,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: AppTextField(
+              label: t.adminLaps,
+              controller: _vueltas,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      Text(
+        _numeroDeVueltas > 1
+            ? t.adminCircuitTotal(
+                Fmt.distance(_metros / 1000),
+                '$_numeroDeVueltas',
+                Fmt.distance(_totalKm),
+              )
+            : t.adminLapsSingle,
+        style: context.text.bodySm.copyWith(
+          color: context.colors.textSecondary,
+        ),
       ),
       const SizedBox(height: AppSpacing.base),
     ],

@@ -69,6 +69,10 @@ dependencies:
   # Seguimiento en vivo de la maraton oficial: servicio nativo, cola offline y
   # reintento ya resueltos. Solo se enciende durante la carrera.
   traccar_client_sdk: ^1.0.10
+  # Avisos por voz durante la carrera: cierre de vuelta. Es el TTS del sistema
+  # —el que ya habla el idioma del telefono—, no audios grabados: seria un
+  # asset por frase y por idioma.
+  flutter_tts: ^4.2.5
   # Login con Google. El idToken que devuelve lo verifica el backend en
   # /auth/google; la app no valida nada por su cuenta.
   google_sign_in: ^7.2.0

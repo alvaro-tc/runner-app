@@ -1166,6 +1166,30 @@ abstract class AppLocalizations {
   /// **'Next: {metres}m @ {pace} pace'**
   String runNextLap(int metres, String pace);
 
+  /// No description provided for @runCircuitLapToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} to close this lap'**
+  String runCircuitLapToGo(String distance);
+
+  /// No description provided for @runCircuitLapDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap {lap} done!'**
+  String runCircuitLapDone(int lap);
+
+  /// No description provided for @runCircuitLapVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed lap {lap} of {total}'**
+  String runCircuitLapVoice(int lap, int total);
+
+  /// No description provided for @runCircuitLastLapVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Final lap. Give it everything'**
+  String get runCircuitLastLapVoice;
+
   /// No description provided for @runLapSemantics.
   ///
   /// In en, this message translates to:
@@ -1483,6 +1507,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My race'**
   String get raceDetailTitle;
+
+  /// No description provided for @raceCircuitLaps.
+  ///
+  /// In en, this message translates to:
+  /// **'{laps} laps of {lap}'**
+  String raceCircuitLaps(Object lap, Object laps);
 
   /// No description provided for @raceDetailNotFound.
   ///
@@ -3476,6 +3506,42 @@ abstract class AppLocalizations {
   /// **'Enter the distance in kilometres.'**
   String get adminDistanceRequired;
 
+  /// No description provided for @adminDistancePerLap.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance per lap (km)'**
+  String get adminDistancePerLap;
+
+  /// No description provided for @adminLaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Laps'**
+  String get adminLaps;
+
+  /// No description provided for @adminLapsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Laps must be between 1 and 100.'**
+  String get adminLapsRequired;
+
+  /// No description provided for @adminLapsSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'A single lap: the course you marked is the whole race.'**
+  String get adminLapsSingle;
+
+  /// No description provided for @adminLeadingLap.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap {lap}/{laps}'**
+  String adminLeadingLap(Object lap, Object laps);
+
+  /// No description provided for @adminCircuitTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{laps} laps of {lap} · {total} total'**
+  String adminCircuitTotal(Object lap, Object laps, Object total);
+
   /// No description provided for @adminCreateMarathon.
   ///
   /// In en, this message translates to:
@@ -4525,6 +4591,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refunded by {name}'**
   String organizerRefundedBy(String name);
+
+  /// No description provided for @validationPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number.'**
+  String get validationPhoneRequired;
+
+  /// No description provided for @registerAnswerBothQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer both questions.'**
+  String get registerAnswerBothQuestions;
+
+  /// No description provided for @registerPickCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a distance.'**
+  String get registerPickCategory;
+
+  /// No description provided for @registerMissingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Some details are still missing.'**
+  String get registerMissingFields;
 }
 
 class _AppLocalizationsDelegate

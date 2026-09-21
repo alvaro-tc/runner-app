@@ -3,6 +3,7 @@ import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
 import 'package:camrun/features/profile/domain/entities/user_profile.dart';
@@ -55,6 +56,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   static const _tarjetaDeEjemplo = '4242 4242 4242 4242';
 
   final _page = PageController();
+  final _name = TextEditingController();
   final _docId = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
@@ -62,6 +64,15 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   final _cardHolder = TextEditingController();
   final _cardExpiry = TextEditingController(text: '12/30');
   final _cardCvv = TextEditingController(text: '123');
+
+  // Editable en la inscripcion: quien entro con Google suele traer un nombre
+  // y un genero que no son los suyos, y el dorsal se imprime con esto.
+  Gender _gender = Gender.unspecified;
+
+  /// Lo que falta o esta mal en el paso actual, por campo. Se llena al pulsar
+  /// continuar —no mientras se escribe— y cada campo borra el suyo al tocarlo:
+  /// pintar en rojo un campo que el usuario todavia no termino es ruido.
+  final _errors = <String, String?>{};
 
   int _step = 0;
   String? _categoryId;
@@ -85,6 +96,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   @override
   void dispose() {
     _page.dispose();
+    _name.dispose();
     _docId.dispose();
     _phone.dispose();
     _email.dispose();
@@ -117,11 +129,66 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     );
   }
 
+  /// Revisa el paso actual y deja escrito en [_errors] que falta.
+  ///
+  /// El boton de continuar ya no se apaga: apagado no dice *que* falta, y el
+  /// usuario se queda mirando la pantalla sin saber donde tocar.
+  bool _validar(Marathon marathon) {
+    final t = context.l10n;
+    setState(() {
+      _errors.clear();
+      switch (_step) {
+        case 0:
+          _errors
+            ..['name'] = Validators.required(
+              _name.text,
+              t.validationFullNameRequired,
+            )
+            ..['doc_id'] = Validators.ci(t, _docId.text)
+            ..['phone'] = Validators.required(
+              _telefonoLocal,
+              t.validationPhoneRequired,
+            )
+            ..['cam'] = _knowsCam == null || _acceptsDonorCall == null
+                ? t.registerAnswerBothQuestions
+                : null;
+        case 1:
+          _errors['category'] =
+              marathon.categories.isEmpty || _categoryId != null
+              ? null
+              : t.registerPickCategory;
+      }
+    });
+
+    final ok = _errors.values.every((e) => e == null);
+    if (!ok) context.showSnack(t.registerMissingFields);
+    return ok;
+  }
+
+  /// El numero sin el codigo de pais: `PhoneField` escribe "+591 " en cuanto se
+  /// monta, asi que un campo vacio no es una cadena vacia.
+  String get _telefonoLocal {
+    final texto = _phone.text.trim();
+    final espacio = texto.indexOf(' ');
+    return espacio < 0 ? texto : texto.substring(espacio + 1).trim();
+  }
+
+  /// Borra el error de un campo en cuanto se toca.
+  void _limpiar(String campo) {
+    if (_errors[campo] != null) setState(() => _errors[campo] = null);
+  }
+
   /// Guarda el paso actual contra la API y solo entonces avanza.
   ///
   /// Avanzar primero y guardar despues dejaria al usuario en la pantalla de
   /// pago con un borrador que el servidor no llego a aceptar.
   Future<void> _next(Marathon marathon, UserProfile? profile) async {
+    if (!_validar(marathon)) return;
+
+    // Lo que se corrija aqui es lo que vale: se guarda tambien en la cuenta
+    // para que la proxima inscripcion no vuelva a traer el dato equivocado.
+    if (_step == 0 && profile != null) await _guardarPerfil(profile);
+
     final ok = switch (_step) {
       0 => await _flow.submitPersonalData(_datosPersonales(profile)),
       1 => await _flow.submitCategoryAndExtras(
@@ -138,13 +205,6 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     if (ok && mounted) _goTo(_step + 1);
   }
 
-  /// El CI de la cuenta manda. Solo se escribe a mano cuando el perfil no lo
-  /// tiene: dejar teclear otro creaba inscripciones que no cruzan con el pago.
-  String _docIdDe(UserProfile? profile) {
-    final ci = profile?.ci?.trim() ?? '';
-    return ci.isNotEmpty ? ci : _docId.text.trim();
-  }
-
   /// El correo de la cuenta manda, igual que el CI: solo se teclea uno cuando
   /// el perfil no tiene ninguno, y entonces se queda vinculado a la cuenta.
   String _emailDe(UserProfile? profile) {
@@ -154,10 +214,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
   RegistrationPersonalData _datosPersonales(UserProfile? profile) =>
       RegistrationPersonalData(
-        fullName: profile?.fullName.trim().isNotEmpty ?? false
-            ? profile!.fullName
+        fullName: _name.text.trim().isNotEmpty
+            ? _name.text.trim()
             : context.l10n.registerDefaultRunnerName,
-        docId: _docIdDe(profile),
+        docId: _docId.text.trim(),
         phone: _phone.text.trim(),
         // El footer no deja llegar aqui sin las dos respuestas; el `?? false`
         // es solo para que el tipo cierre.
@@ -165,6 +225,24 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         acceptsDonorCall: _acceptsDonorCall ?? false,
         email: _emailDe(profile).isEmpty ? null : _emailDe(profile),
       );
+
+  /// Vuelca las correcciones del paso 1 sobre el perfil. Si el servidor las
+  /// rechaza no se corta la inscripcion: los datos igual viajan en el alta.
+  Future<void> _guardarPerfil(UserProfile profile) async {
+    final actualizado = profile.copyWith(
+      fullName: _name.text.trim(),
+      gender: _gender,
+      ci: _docId.text.trim(),
+      phone: _phone.text.trim(),
+    );
+    if (actualizado.fullName == profile.fullName &&
+        actualizado.gender == profile.gender &&
+        actualizado.ci == (profile.ci ?? '') &&
+        actualizado.phone == (profile.phone ?? '')) {
+      return;
+    }
+    await ref.read(profileProvider.notifier).save(actualizado);
+  }
 
   Future<void> _pay(Marathon marathon) async {
     final confirmada = await _flow.pay(
@@ -358,7 +436,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     // corredor no vuelve a teclear su celular en cada maraton.
     if (!_prefilled && profile != null) {
       _prefilled = true;
+      _name.text = profile.fullName.trim();
+      _docId.text = profile.ci?.trim() ?? '';
       _phone.text = profile.phone?.trim() ?? '';
+      _gender = profile.gender;
     }
 
     return ListView(
@@ -371,27 +452,37 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           style: context.text.bodySm.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _ReadOnlyField(
+        AppTextField(
           label: t.registerFullName,
-          value: profile?.fullName ?? '—',
+          controller: _name,
+          errorText: _errors['name'],
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => _limpiar('name'),
         ),
-        _ReadOnlyField(
-          label: t.registerGender,
-          value: profile?.gender.label(t) ?? '—',
-        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(t.registerGender, style: context.text.labelSm),
         const SizedBox(height: AppSpacing.sm),
-        if ((profile?.ci?.trim() ?? '').isNotEmpty)
-          _ReadOnlyField(label: t.registerIdNumber, value: profile!.ci!.trim())
-        else
-          AppTextField(
-            label: t.registerIdNumber,
-            controller: _docId,
-            hint: t.registerIdNumberHint,
-            textInputAction: TextInputAction.next,
-            // El boton de continuar depende de este campo: sin repintar, se
-            // quedaria gris con el documento ya escrito.
-            onChanged: (_) => setState(() {}),
-          ),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final gender in Gender.values)
+              AppChip(
+                label: gender.label(t),
+                selected: _gender == gender,
+                onTap: () => setState(() => _gender = gender),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          label: t.registerIdNumber,
+          controller: _docId,
+          hint: t.registerIdNumberHint,
+          errorText: _errors['doc_id'],
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => _limpiar('doc_id'),
+        ),
         const SizedBox(height: AppSpacing.lg),
         PhoneField(
           // El perfil puede llegar despues del primer pintado: la clave hace
@@ -401,9 +492,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
           label: t.registerPhone,
           controller: _phone,
           hint: '70000000',
+          errorText: _errors['phone'],
           textInputAction: TextInputAction.next,
-          // Igual que el documento: el botón de continuar depende de él.
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => _limpiar('phone'),
         ),
         const SizedBox(height: AppSpacing.lg),
         if ((profile?.email.trim() ?? '').isNotEmpty)
@@ -422,14 +513,24 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
         _YesNo(
           question: t.registerCamKnowsQuestion,
           value: _knowsCam,
-          onChanged: (v) => setState(() => _knowsCam = v),
+          onChanged: (v) => setState(() {
+            _knowsCam = v;
+            if (_acceptsDonorCall != null) _errors['cam'] = null;
+          }),
         ),
         const SizedBox(height: AppSpacing.md),
         _YesNo(
           question: t.registerCamDonorQuestion,
           value: _acceptsDonorCall,
-          onChanged: (v) => setState(() => _acceptsDonorCall = v),
+          onChanged: (v) => setState(() {
+            _acceptsDonorCall = v;
+            if (_knowsCam != null) _errors['cam'] = null;
+          }),
         ),
+        if (_errors['cam'] != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _FieldError(message: _errors['cam']!),
+        ],
       ],
     );
   }
@@ -443,6 +544,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       padding: const EdgeInsets.all(AppSpacing.screenH),
       children: [
         Text(t.registerCategoryAndExtras, style: context.text.headingMd),
+        if (_errors['category'] != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _FieldError(message: _errors['category']!),
+        ],
         const SizedBox(height: AppSpacing.lg),
         if (marathon.categories.isEmpty)
           Text(
@@ -461,7 +566,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                       category.surcharge.currency,
                     ),
               selected: _categoryId == category.id,
-              onTap: () => setState(() => _categoryId = category.id),
+              onTap: () => setState(() {
+                _categoryId = category.id;
+                _errors['category'] = null;
+              }),
             ),
         const SizedBox(height: AppSpacing.lg),
         Text(t.registerOptionalExtras, style: context.text.titleMd),
@@ -669,15 +777,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final t = context.l10n;
     final isLast = _step == 2;
     final total = flow.quote?.total;
-    final puedeAvanzar = switch (_step) {
-      0 =>
-        _docIdDe(profile).isNotEmpty &&
-            _phone.text.trim().isNotEmpty &&
-            _knowsCam != null &&
-            _acceptsDonorCall != null,
-      1 => marathon.categories.isEmpty || _categoryId != null,
-      _ => _acceptedTerms && !flow.isAwaitingPayment,
-    };
+    // Solo el pago apaga el boton: alli lo que falta es una casilla que se ve
+    // justo encima. En los pasos de datos el boton se pulsa siempre y es el
+    // formulario el que dice, campo por campo, que falta.
+    final puedeAvanzar =
+        _step != 2 || (_acceptedTerms && !flow.isAwaitingPayment);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -857,6 +961,20 @@ class _PendingPayment extends StatelessWidget {
 /// Sin valor inicial a propósito: una de las dos es un consentimiento para
 /// llamar por teléfono, y un "no" premarcado o un "sí" premarcado son las dos
 /// formas de responder por el usuario.
+/// Un error que no cuelga de ningun `AppTextField`: las preguntas del CAM y la
+/// eleccion de categoria.
+class _FieldError extends StatelessWidget {
+  const _FieldError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    message,
+    style: context.text.bodySm.copyWith(color: context.colors.error),
+  );
+}
+
 class _YesNo extends StatelessWidget {
   const _YesNo({
     required this.question,

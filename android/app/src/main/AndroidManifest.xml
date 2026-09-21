@@ -73,5 +73,10 @@
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
+        <!-- flutter_tts: en Android 11+ el motor de voz no se ve sin esto y
+             el aviso de vuelta cerrada no suena. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
     </queries>
 </manifest>

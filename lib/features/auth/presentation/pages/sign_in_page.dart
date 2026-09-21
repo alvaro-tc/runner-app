@@ -1,13 +1,12 @@
 import 'package:camrun/app/router/app_routes.dart';
-import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/features/auth/presentation/widgets/google_auth_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
-import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +25,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   String? _identifierError;
   String? _passwordError;
   bool _loading = false;
-  bool _googleLoading = false;
 
   @override
   void dispose() {
@@ -55,25 +53,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       return;
     }
     context.go(Routes.home);
-  }
-
-  /// El error de Google va en un snack y no en un campo: el boton no tiene
-  /// donde pintarlo. Cancelar el dialogo no devuelve fallo, y de entrar a Home
-  /// se encarga el guard del router en cuanto la sesion existe.
-  Future<void> _google() async {
-    if (_googleLoading) return;
-    setState(() => _googleLoading = true);
-    final failure = await ref.read(authProvider.notifier).signInWithGoogle();
-    if (!mounted) return;
-    setState(() => _googleLoading = false);
-
-    // Solo el backend manda mensajes que se le puedan ensenar a alguien; lo que
-    // venga del SDK de Google es texto para un log.
-    if (failure != null) {
-      context.showSnack(
-        failure is ApiFailure ? failure.message : context.l10n.authGoogleError,
-      );
-    }
   }
 
   @override
@@ -139,18 +118,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         const SizedBox(height: AppSpacing.sm),
         const AuthDivider(),
         const SizedBox(height: AppSpacing.lg),
-        Center(
-          child: SizedBox(
-            height: AppSizes.controlHeight,
-            child: _googleLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SocialAuthButton(
-                    icon: Icons.g_mobiledata_rounded,
-                    provider: 'Google',
-                    onPressed: _google,
-                  ),
-          ),
-        ),
+        const GoogleAuthButton(),
         const SizedBox(height: AppSpacing.xxl),
         Wrap(
           alignment: WrapAlignment.center,

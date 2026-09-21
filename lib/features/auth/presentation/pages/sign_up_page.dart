@@ -5,6 +5,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:camrun/features/auth/presentation/widgets/google_auth_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
@@ -131,6 +132,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           isLoading: _loading,
           onPressed: _submit,
         ),
+        const SizedBox(height: AppSpacing.lg),
+        const AuthDivider(),
+        const SizedBox(height: AppSpacing.lg),
+        const GoogleAuthButton(),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           alignment: WrapAlignment.center,
