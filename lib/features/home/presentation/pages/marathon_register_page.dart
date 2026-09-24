@@ -40,9 +40,17 @@ import 'package:qr_flutter/qr_flutter.dart';
 /// (4242…4242 aprueba, 4000…0002 rechaza, 4000…0069 dice vencida), asi que los
 /// tres caminos se pueden probar de verdad sin un banco detras.
 class MarathonRegisterPage extends ConsumerStatefulWidget {
-  const MarathonRegisterPage({required this.marathonId, super.key});
+  const MarathonRegisterPage({
+    required this.marathonId,
+    this.resumeRegistrationId,
+    super.key,
+  });
 
   final String marathonId;
+
+  /// Entra directo al paso de pago de esta inscripcion. Viene del aviso de
+  /// comprobante rechazado: lo que falta es subir otro, no rellenar de nuevo.
+  final String? resumeRegistrationId;
 
   @override
   ConsumerState<MarathonRegisterPage> createState() =>
@@ -115,9 +123,16 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     super.initState();
     // Descarta el borrador de otra maraton que hubiera quedado a medias en esta
     // misma pantalla. Con la misma maraton no toca nada: el flujo se retoma.
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _flow.openFor(widget.marathonId),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final retomar = widget.resumeRegistrationId;
+      if (retomar == null) return _flow.openFor(widget.marathonId);
+
+      final ok = await _flow.resume(widget.marathonId, retomar);
+      if (!ok || !mounted) return;
+      // Los terminos ya los acepto al pagar la primera vez.
+      _acceptedTerms = true;
+      _goTo(2);
+    });
   }
 
   void _goTo(int step) {

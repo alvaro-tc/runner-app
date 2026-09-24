@@ -101,6 +101,34 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
     state = RegistrationFlowState(marathonId: marathonId);
   }
 
+  /// Retoma una inscripcion ya en el paso de pago —la que tenia el comprobante
+  /// rechazado— cargando su ultimo cobro. Devuelve `true` si hay cobro al que
+  /// volver.
+  Future<bool> resume(String marathonId, String registrationId) async {
+    _sondeo?.cancel();
+    _claveDeCobro = null;
+    state = RegistrationFlowState(marathonId: marathonId, busy: true);
+
+    final resultado = await ref
+        .read(raceRepositoryProvider)
+        .resumePayment(registrationId);
+    return resultado.fold(
+      (r) {
+        state = RegistrationFlowState(
+          marathonId: marathonId,
+          registration: r.registration,
+          quote: r.registration.quote,
+          payment: r.payment,
+        );
+        return r.payment != null;
+      },
+      (Failure fallo) {
+        state = RegistrationFlowState(marathonId: marathonId, error: fallo);
+        return false;
+      },
+    );
+  }
+
   /// Paso 1. Si ya habia un borrador para esta maraton, el servidor lo devuelve
   /// en vez de abrir otro: el flujo se retoma donde se dejo.
   Future<bool> submitPersonalData(RegistrationPersonalData datos) {

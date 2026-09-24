@@ -6,7 +6,9 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
@@ -79,6 +81,11 @@ class _HomeBody extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
+        const Align(
+          alignment: Alignment.centerRight,
+          child: NotificationBell(style: AppIconButtonStyle.bordered),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
         if (marathons.isNotEmpty) ...[
           _UpcomingMarathons(marathons: marathons),

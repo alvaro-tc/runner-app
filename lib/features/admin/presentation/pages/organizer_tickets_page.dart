@@ -5,6 +5,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
 import 'package:camrun/features/admin/presentation/widgets/admin_paginator.dart';
+import 'package:camrun/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -25,7 +26,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Cada fila lleva **quien la valido**. Es el dato por el que existe esta
 /// pantalla: un cobro acreditado sin nombre detras no se puede auditar.
 class OrganizerTicketsPage extends ConsumerStatefulWidget {
-  const OrganizerTicketsPage({super.key});
+  const OrganizerTicketsPage({this.focusPaymentId, super.key});
+
+  /// El cobro que abrir en cuanto cargue: viene de tocar un aviso de pago.
+  final String? focusPaymentId;
 
   @override
   ConsumerState<OrganizerTicketsPage> createState() =>
@@ -33,6 +37,40 @@ class OrganizerTicketsPage extends ConsumerStatefulWidget {
 }
 
 class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
+  @override
+  void initState() {
+    super.initState();
+    _enfocar(widget.focusPaymentId);
+  }
+
+  @override
+  void didUpdateWidget(OrganizerTicketsPage old) {
+    super.didUpdateWidget(old);
+    // Es pestana: tocar otro aviso reusa este estado con otro id.
+    if (widget.focusPaymentId != old.focusPaymentId) {
+      _enfocar(widget.focusPaymentId);
+    }
+  }
+
+  /// Abre la ficha del cobro del aviso **pidiendolo por id**: da igual en que
+  /// pagina o filtro de la cola este. De paso se recarga la cola, que todavia
+  /// no trae el comprobante recien subido.
+  void _enfocar(String? paymentId) {
+    if (paymentId == null) return;
+    // Despues del frame: `didUpdateWidget` corre dentro de un build, y la hoja
+    // necesita un contexto ya montado.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      ref.invalidate(adminTicketsProvider);
+      try {
+        final ticket = await ref.refresh(adminTicketProvider(paymentId).future);
+        if (mounted) await _abrir(ticket);
+      } on Failure catch (f) {
+        if (mounted) context.showSnack(f.localized(context.l10n));
+      }
+    });
+  }
+
   /// null = todas. El servidor pagina, asi que el filtro viaja: cortar aqui
   /// dejaria fuera los cobros de la carrera buscada que no cayeran en la
   /// primera pagina.
@@ -65,7 +103,13 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
     final maratones = ref.watch(adminMarathonsProvider).value ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.organizerTicketsTitle)),
+      appBar: AppBar(
+        title: Text(t.organizerTicketsTitle),
+        actions: const [
+          NotificationBell(),
+          SizedBox(width: AppSpacing.sm),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

@@ -6,6 +6,8 @@ import 'package:camrun/features/auth/domain/repositories/auth_repository.dart';
 import 'package:camrun/features/home/data/datasources/home_api.dart';
 import 'package:camrun/features/home/data/repositories/remote_home_repositories.dart';
 import 'package:camrun/features/home/domain/repositories/home_repositories.dart';
+import 'package:camrun/features/notifications/data/remote_notification_repository.dart';
+import 'package:camrun/features/notifications/domain/notifications.dart';
 import 'package:camrun/features/profile/data/datasources/profile_api.dart';
 import 'package:camrun/features/profile/data/repositories/remote_profile_repository.dart';
 import 'package:camrun/features/profile/domain/repositories/profile_repository.dart';
@@ -65,6 +67,10 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
     ProfileApi(ref.watch(dioProvider)),
     ref.watch(appDatabaseProvider),
   ),
+);
+
+final notificationRepositoryProvider = Provider<NotificationRepository>(
+  (ref) => RemoteNotificationRepository(ref.watch(dioProvider)),
 );
 
 /// Backed by Hive, whose box has to be opened before the first frame — the

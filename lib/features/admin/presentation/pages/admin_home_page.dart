@@ -5,6 +5,7 @@ import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
+import 'package:camrun/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -35,7 +36,13 @@ class AdminHomePage extends ConsumerWidget {
     final maratones = ref.watch(adminMarathonsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.adminLiveTitle)),
+      appBar: AppBar(
+        title: Text(t.adminLiveTitle),
+        actions: const [
+          NotificationBell(),
+          SizedBox(width: AppSpacing.sm),
+        ],
+      ),
       body: maratones.when(
         // Un refresco de fondo no vacia una pantalla que ya tiene datos.
         skipLoadingOnReload: true,

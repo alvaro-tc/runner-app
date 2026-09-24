@@ -155,6 +155,12 @@ final adminTicketsProvider =
       );
     });
 
+/// Un ticket suelto: el que abre un aviso de pago.
+final adminTicketProvider = FutureProvider.family<AdminTicket, String>(
+  (ref, id) async =>
+      AdminTicket.fromJson(await ref.watch(adminApiProvider).payment(id)),
+);
+
 /// Cual maraton mira el mapa de Home. La elige el selector de arriba; se queda
 /// puesta al navegar a otra pestana y volver.
 class SelectedMarathonNotifier extends Notifier<String?> {

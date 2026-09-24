@@ -70,4 +70,9 @@ abstract interface class RaceRepository {
   });
 
   Future<Result<void>> cancel(String registrationId);
+
+  /// La inscripcion y su ultimo cobro, para volver al paso de pago desde un
+  /// aviso —el comprobante rechazado— sin rehacer los dos primeros pasos.
+  Future<Result<({Registration registration, PaymentInfo? payment})>>
+  resumePayment(String registrationId);
 }

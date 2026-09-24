@@ -2510,4 +2510,80 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get registerMissingFields => 'Faltan datos por completar.';
+
+  @override
+  String get notificationsTitle => 'Notificaciones';
+
+  @override
+  String notificationsOpen(int count) {
+    return 'Notificaciones, $count sin leer';
+  }
+
+  @override
+  String get notificationsMarkAllRead => 'Marcar todo leído';
+
+  @override
+  String get notificationsEmptyTitle => 'Sin notificaciones';
+
+  @override
+  String get notificationsEmptyBody =>
+      'Aquí verás los avisos de tus pagos e inscripciones.';
+
+  @override
+  String get notificationProofSubmittedTitle => 'Nuevo pago por validar';
+
+  @override
+  String notificationProofSubmittedBody(
+    String runner,
+    String amount,
+    String marathon,
+  ) {
+    return '$runner envió su comprobante de $amount para $marathon.';
+  }
+
+  @override
+  String get notificationPaymentApprovedTitle => '¡Pago validado!';
+
+  @override
+  String notificationPaymentApprovedBody(String marathon) {
+    return 'Un organizador confirmó tu pago para $marathon.';
+  }
+
+  @override
+  String get paymentApprovedDialogTitle => '¡Pago validado con éxito!';
+
+  @override
+  String paymentApprovedDialogBody(String marathon) {
+    return 'Un organizador revisó y validó tu pago. Ya estás inscrito en $marathon.';
+  }
+
+  @override
+  String paymentApprovedBib(String bib) {
+    return 'Tu dorsal: $bib';
+  }
+
+  @override
+  String get paymentApprovedViewRegistration => 'Ver mi inscripción';
+
+  @override
+  String get notificationPaymentRejectedTitle => 'Comprobante rechazado';
+
+  @override
+  String notificationPaymentRejectedBody(String marathon, String reason) {
+    return '$marathon: $reason';
+  }
+
+  @override
+  String get paymentRejectedDialogTitle => 'Tu comprobante fue rechazado';
+
+  @override
+  String paymentRejectedDialogBody(String marathon) {
+    return 'Un organizador revisó tu pago para $marathon y no pudo validarlo. Tu inscripción sigue abierta: sube un nuevo comprobante.';
+  }
+
+  @override
+  String get paymentRejectedReason => 'Motivo';
+
+  @override
+  String get paymentRejectedUploadAgain => 'Subir nuevo comprobante';
 }

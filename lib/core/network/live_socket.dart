@@ -133,6 +133,7 @@ class LiveSocket {
   final _estados = StreamController<MarathonLiveState>.broadcast();
   final _llegadas = StreamController<RunnerFinish>.broadcast();
   final _inscripciones = StreamController<void>.broadcast();
+  final _notificaciones = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<LivePosition> get positions => _posiciones.stream;
   Stream<MarathonLiveState> get states => _estados.stream;
@@ -152,6 +153,10 @@ class LiveSocket {
   /// abrir el socket: antes de que el pago se valide esa persona no esta
   /// inscrita en ninguna maraton y no hay sala de la que colgar el aviso.
   Stream<void> get registrations => _inscripciones.stream;
+
+  /// Una notificacion nueva en la bandeja de este usuario, entera: el servidor
+  /// ya la guardo, asi que no hay otra version con la que pueda discrepar.
+  Stream<Map<String, dynamic>> get notifications => _notificaciones.stream;
 
   /// Abre la conexion sin mirar ninguna maraton.
   ///
@@ -191,6 +196,7 @@ class LiveSocket {
     await _estados.close();
     await _llegadas.close();
     await _inscripciones.close();
+    await _notificaciones.close();
   }
 
   Future<io.Socket> _conectar() async {
@@ -229,6 +235,9 @@ class LiveSocket {
         }
       })
       ..on('registration:state', (_) => _inscripciones.add(null))
+      ..on('notification:new', (data) {
+        if (data is Map) _notificaciones.add(data.cast<String, dynamic>());
+      })
       ..on('marathon:state', (data) {
         if (data is Map) {
           _estados.add(

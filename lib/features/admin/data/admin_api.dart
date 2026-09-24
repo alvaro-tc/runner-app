@@ -189,6 +189,13 @@ class AdminApi {
     return (filas: filas, total: total ?? filas.length);
   });
 
+  /// Un ticket por id, con la misma forma que una fila de [payments]. Abre la
+  /// ficha desde un aviso sin buscar el cobro en la cola.
+  Future<Map<String, dynamic>> payment(String paymentId) => apiCall(() async {
+    final res = await _dio.get<dynamic>('/admin/payments/$paymentId');
+    return res.data as Map<String, dynamic>;
+  });
+
   /// Da el comprobante por bueno. Acredita el cobro, toma el cupo y emite el
   /// dorsal por el mismo camino que un pago normal: no hay una segunda forma
   /// de acreditar dinero.

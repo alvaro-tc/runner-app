@@ -134,6 +134,22 @@ class _FakeRaceRepository implements RaceRepository {
     canceladas.add(registrationId);
     return const Result.success(null);
   }
+
+  @override
+  Future<Result<({Registration registration, PaymentInfo? payment})>>
+  resumePayment(String registrationId) async => Result.success((
+    registration: _registro(RegistrationState.pendingPayment),
+    payment: _pago(
+      RacePaymentState.pending,
+      method: RacePaymentMethod.qrManual,
+      proof: const PaymentProof(
+        id: 'proof1',
+        state: ProofState.rejected,
+        imageUrl: 'https://api.test/uploads/p.webp',
+        note: 'Captura borrosa',
+      ),
+    ),
+  ));
 }
 
 void main() {
@@ -159,6 +175,21 @@ void main() {
     phone: '+591 70000000',
     knowsCam: true,
     acceptsDonorCall: false,
+  );
+
+  test(
+    'retomar desde un rechazo deja el cobro abierto con su motivo',
+    () async {
+      expect(await flow().resume('m1', 'reg1'), isTrue);
+
+      expect(estado().registration?.id, 'reg1');
+      expect(estado().isAwaitingPayment, isTrue);
+      expect(estado().payment?.proof?.state, ProofState.rejected);
+      expect(estado().payment?.proof?.note, 'Captura borrosa');
+      // La misma maraton despues no tira lo retomado.
+      flow().openFor('m1');
+      expect(estado().payment, isNotNull);
+    },
   );
 
   test('sin abrir una maraton, el paso 1 no hace nada', () async {

@@ -4615,6 +4615,124 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some details are still missing.'**
   String get registerMissingFields;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications, {count} unread'**
+  String notificationsOpen(int count);
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get notificationsEmptyTitle;
+
+  /// No description provided for @notificationsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates about your payments and registrations will show up here.'**
+  String get notificationsEmptyBody;
+
+  /// No description provided for @notificationProofSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New payment to review'**
+  String get notificationProofSubmittedTitle;
+
+  /// No description provided for @notificationProofSubmittedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{runner} sent a {amount} payment proof for {marathon}.'**
+  String notificationProofSubmittedBody(
+    String runner,
+    String amount,
+    String marathon,
+  );
+
+  /// No description provided for @notificationPaymentApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment approved!'**
+  String get notificationPaymentApprovedTitle;
+
+  /// No description provided for @notificationPaymentApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An organizer confirmed your payment for {marathon}.'**
+  String notificationPaymentApprovedBody(String marathon);
+
+  /// No description provided for @paymentApprovedDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successfully approved!'**
+  String get paymentApprovedDialogTitle;
+
+  /// No description provided for @paymentApprovedDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An organizer reviewed and approved your payment. You are registered for {marathon}.'**
+  String paymentApprovedDialogBody(String marathon);
+
+  /// No description provided for @paymentApprovedBib.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bib: {bib}'**
+  String paymentApprovedBib(String bib);
+
+  /// No description provided for @paymentApprovedViewRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'View my registration'**
+  String get paymentApprovedViewRegistration;
+
+  /// No description provided for @notificationPaymentRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment proof rejected'**
+  String get notificationPaymentRejectedTitle;
+
+  /// No description provided for @notificationPaymentRejectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{marathon}: {reason}'**
+  String notificationPaymentRejectedBody(String marathon, String reason);
+
+  /// No description provided for @paymentRejectedDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment proof was rejected'**
+  String get paymentRejectedDialogTitle;
+
+  /// No description provided for @paymentRejectedDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An organizer reviewed your payment for {marathon} and could not approve it. Your registration is still open: upload a new proof.'**
+  String paymentRejectedDialogBody(String marathon);
+
+  /// No description provided for @paymentRejectedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get paymentRejectedReason;
+
+  /// No description provided for @paymentRejectedUploadAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a new proof'**
+  String get paymentRejectedUploadAgain;
 }
 
 class _AppLocalizationsDelegate

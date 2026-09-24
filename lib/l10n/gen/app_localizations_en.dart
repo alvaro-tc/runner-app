@@ -2493,4 +2493,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registerMissingFields => 'Some details are still missing.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String notificationsOpen(int count) {
+    return 'Notifications, $count unread';
+  }
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all read';
+
+  @override
+  String get notificationsEmptyTitle => 'No notifications';
+
+  @override
+  String get notificationsEmptyBody =>
+      'Updates about your payments and registrations will show up here.';
+
+  @override
+  String get notificationProofSubmittedTitle => 'New payment to review';
+
+  @override
+  String notificationProofSubmittedBody(
+    String runner,
+    String amount,
+    String marathon,
+  ) {
+    return '$runner sent a $amount payment proof for $marathon.';
+  }
+
+  @override
+  String get notificationPaymentApprovedTitle => 'Payment approved!';
+
+  @override
+  String notificationPaymentApprovedBody(String marathon) {
+    return 'An organizer confirmed your payment for $marathon.';
+  }
+
+  @override
+  String get paymentApprovedDialogTitle => 'Payment successfully approved!';
+
+  @override
+  String paymentApprovedDialogBody(String marathon) {
+    return 'An organizer reviewed and approved your payment. You are registered for $marathon.';
+  }
+
+  @override
+  String paymentApprovedBib(String bib) {
+    return 'Your bib: $bib';
+  }
+
+  @override
+  String get paymentApprovedViewRegistration => 'View my registration';
+
+  @override
+  String get notificationPaymentRejectedTitle => 'Payment proof rejected';
+
+  @override
+  String notificationPaymentRejectedBody(String marathon, String reason) {
+    return '$marathon: $reason';
+  }
+
+  @override
+  String get paymentRejectedDialogTitle => 'Your payment proof was rejected';
+
+  @override
+  String paymentRejectedDialogBody(String marathon) {
+    return 'An organizer reviewed your payment for $marathon and could not approve it. Your registration is still open: upload a new proof.';
+  }
+
+  @override
+  String get paymentRejectedReason => 'Reason';
+
+  @override
+  String get paymentRejectedUploadAgain => 'Upload a new proof';
 }

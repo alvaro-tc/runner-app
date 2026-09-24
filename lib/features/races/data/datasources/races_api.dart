@@ -48,6 +48,13 @@ class RacesApi {
         return (res.data as List).cast<Map<String, dynamic>>();
       });
 
+  /// Una inscripcion mia por id, este en el estado que este.
+  Future<Map<String, dynamic>> registration(String registrationId) =>
+      apiCall(() async {
+        final res = await _dio.get<dynamic>('/registrations/$registrationId');
+        return res.data as Map<String, dynamic>;
+      });
+
   // ─── Inscripcion, en tres pasos ──────────────────────────────────────────
 
   /// Mis inscripciones, filtradas por estado (`pending_payment`, `draft`…).

@@ -16,6 +16,8 @@ import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/home/presentation/pages/home_page.dart';
 import 'package:camrun/features/home/presentation/pages/marathon_detail_page.dart';
 import 'package:camrun/features/home/presentation/pages/marathon_register_page.dart';
+import 'package:camrun/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:camrun/features/notifications/presentation/widgets/notifications_listener.dart';
 import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:camrun/features/onboarding/presentation/pages/theme_setup_page.dart';
 import 'package:camrun/features/profile/presentation/pages/appearance_page.dart';
@@ -116,6 +118,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.profileDeleteAccount,
         builder: (context, state) => const DeleteAccountPage(),
       ),
+      GoRoute(
+        path: Routes.notifications,
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: Routes.adminTickets,
+        builder: (context, state) => OrganizerTicketsPage(
+          focusPaymentId: state.uri.queryParameters[Routes.ticketsFocusParam],
+        ),
+      ),
       if (kDebugMode)
         GoRoute(
           path: Routes.showcase,
@@ -126,8 +138,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       // meterlo como quinta pestana del otro obligaria a esconderla a mano en
       // cada pantalla.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) =>
-            AppShell(shell: shell, role: AppShellRole.admin),
+        builder: (context, state, shell) => NotificationsListener(
+          child: AppShell(shell: shell, role: AppShellRole.admin),
+        ),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -184,8 +197,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       // un `/admin` con botones escondidos — el guard decide una vez, en un
       // sitio, en vez de que cada pantalla se acuerde de esconder lo suyo.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) =>
-            AppShell(shell: shell, role: AppShellRole.organizer),
+        builder: (context, state, shell) => NotificationsListener(
+          child: AppShell(shell: shell, role: AppShellRole.organizer),
+        ),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -200,7 +214,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.organizerTickets,
-                builder: (context, state) => const OrganizerTicketsPage(),
+                builder: (context, state) => OrganizerTicketsPage(
+                  focusPaymentId:
+                      state.uri.queryParameters[Routes.ticketsFocusParam],
+                ),
               ),
             ],
           ),
@@ -228,8 +245,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         // maraton puede cambiar con el corredor en cualquier pestana, y lo que
         // hace es quitarle la app —aviso de preparacion, o sus estadisticas
         // despues de llegar— hasta que la carrera termine.
-        builder: (context, state, shell) =>
-            MarathonGateView(child: AppShell(shell: shell)),
+        builder: (context, state, shell) => NotificationsListener(
+          child: MarathonGateView(child: AppShell(shell: shell)),
+        ),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -247,6 +265,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                         path: 'register',
                         builder: (context, state) => MarathonRegisterPage(
                           marathonId: state.pathParameters['id']!,
+                          resumeRegistrationId:
+                              state.uri.queryParameters[Routes.resumeParam],
                         ),
                       ),
                     ],

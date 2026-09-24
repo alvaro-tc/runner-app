@@ -58,6 +58,7 @@ String? appGuard(Ref ref, GoRouterState state) {
   // Las subpantallas de perfil —ajustes, idioma, apariencia— son de los dos:
   // viven fuera de los shells y no pertenecen a ninguno de los dos lados.
   if (location.startsWith('${Routes.profile}/')) return null;
+  if (location == Routes.notifications) return null;
 
   // Tres destinos y no dos: el organizador tiene su propio arbol, con el mapa
   // sin los botones de largada y con la cola de cobros. Cada rol se queda en

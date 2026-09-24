@@ -43,6 +43,10 @@ abstract final class Routes {
   static const adminUsers = '/admin/users';
   static const adminProfile = '/admin/profile';
 
+  /// La cola de cobros para el admin. No es pestana —la barra del admin ya
+  /// tiene cuatro—: se apila al tocar un aviso de pago.
+  static const adminTickets = '/admin/tickets';
+
   /// El panel del organizador: un admin recortado. Ve las carreras y el mapa
   /// en vivo pero no los da la largada; a cambio valida los cobros. Arbol
   /// propio y no un `/admin` con botones escondidos: esconder es una decision
@@ -52,13 +56,36 @@ abstract final class Routes {
   static const organizerUsers = '/organizer/users';
   static const organizerProfile = '/organizer/profile';
 
+  /// El registro de notificaciones. De los tres roles, fuera de los shells.
+  static const notifications = '/notifications';
+
   static const showcase = '/dev/showcase';
 
   static String marathonDetailOf(String id) => '/home/marathon/$id';
   static String marathonRegisterOf(String id) => '/home/marathon/$id/register';
+
+  /// El paso de pago de una inscripcion ya abierta. Lo lee el router con
+  /// [resumeParam].
+  static const resumeParam = 'resume';
+  static String marathonResumePaymentOf(
+    String marathonId,
+    String registrationId,
+  ) => Uri(
+    path: marathonRegisterOf(marathonId),
+    queryParameters: {resumeParam: registrationId},
+  ).toString();
+
   static String trainSummaryOf(String id) => '/train/summary/$id';
   static String trainHistoryOf(String id) => '/train/history/$id';
   static String raceDetailOf(String id) => '/races/$id';
   static String raceStartOf(String id) => '/races/$id/start';
   static String adminMarathonEditOf(String id) => '/admin/marathons/$id';
+
+  /// La cola de cobros abriendo la ficha de [paymentId]. El router lo lee con
+  /// [ticketsFocusParam].
+  static const ticketsFocusParam = 'payment';
+  static String ticketsFocused(String base, String? paymentId) => Uri(
+    path: base,
+    queryParameters: {ticketsFocusParam: ?paymentId},
+  ).toString();
 }

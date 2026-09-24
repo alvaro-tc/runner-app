@@ -137,4 +137,21 @@ class RemoteRaceRepository implements RaceRepository {
   @override
   Future<Result<void>> cancel(String registrationId) =>
       guard(() => _api.cancel(registrationId));
+
+  /// El cobro se relee por `/payments/:id` y no se toma de la lista: la lista
+  /// no trae el QR ni el comprobante, que es justo lo que pinta el paso 3.
+  @override
+  Future<Result<({Registration registration, PaymentInfo? payment})>>
+  resumePayment(String registrationId) => guard(() async {
+    final (registro, pagos) = await (
+      _api.registration(registrationId),
+      _api.paymentsOf(registrationId),
+    ).wait;
+    final ultimo = pagos.isEmpty ? null : pagos.first['id'] as String?;
+
+    return (
+      registration: registrationFrom(registro),
+      payment: ultimo == null ? null : paymentFrom(await _api.payment(ultimo)),
+    );
+  });
 }
