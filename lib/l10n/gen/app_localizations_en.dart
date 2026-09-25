@@ -1624,6 +1624,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminNoRunnersBody =>
+      'The map will update automatically when the first location arrives.';
+
+  @override
   String get adminStart => 'Start marathon';
 
   @override
@@ -2335,6 +2339,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get organizerRunnersTitle => 'Runners';
+
+  @override
+  String get organizerLiveTitle => 'Live race';
+
+  @override
+  String get organizerNoCurrentTitle => 'No marathon is currently running';
+
+  @override
+  String get organizerNoCurrentBody =>
+      'The race will appear here when an administrator starts it.';
+
+  @override
+  String get organizerCurrentMarathon => 'Running now';
+
+  @override
+  String organizerParticipantsOnCourse(int count) {
+    return 'Runners on course ($count)';
+  }
+
+  @override
+  String get organizerNoRunnersTitle => 'No runners on course yet';
+
+  @override
+  String get organizerNoRunnersBody =>
+      'The map and this list will update automatically when the first location arrives.';
+
+  @override
+  String get organizerRunnerDetailTitle => 'Runner details';
+
+  @override
+  String get organizerRunnerUnknown => 'Unidentified runner';
+
+  @override
+  String get organizerRunnerRunning => 'Racing';
+
+  @override
+  String get organizerRunnerFinished => 'Finished';
+
+  @override
+  String get organizerRunnerLocation => 'Current location';
+
+  @override
+  String get organizerRunnerDistance => 'Distance received';
+
+  @override
+  String get organizerRunnerLastUpdate => 'Last update';
+
+  @override
+  String get organizerRunnerLap => 'Lap';
+
+  @override
+  String get organizerRunnerContact => 'Contact';
+
+  @override
+  String organizerRunnerCoordinates(String lat, String lng) {
+    return '$lat, $lng';
+  }
 
   @override
   String get organizerStateRunning => 'The race is under way.';

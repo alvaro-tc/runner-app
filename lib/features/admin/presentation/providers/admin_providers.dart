@@ -175,6 +175,59 @@ final selectedMarathonProvider =
       SelectedMarathonNotifier.new,
     );
 
+/// Resuelve la maraton visible sin borrar la eleccion al cambiar de pestana.
+/// Si la elegida ya no existe, prioriza la carrera activa y luego la que esta
+/// en preparacion antes de caer en la primera del panel.
+AdminMarathon selectMarathonForLivePanel(
+  List<AdminMarathon> marathons,
+  String? selectedId,
+) {
+  if (selectedId != null) {
+    for (final marathon in marathons) {
+      if (marathon.id == selectedId) return marathon;
+    }
+  }
+  for (final marathon in marathons) {
+    if (marathon.running) return marathon;
+  }
+  for (final marathon in marathons) {
+    if (marathon.preparing) return marathon;
+  }
+  return marathons.first;
+}
+
+enum AdminLiveControl { start, finish, finished }
+
+/// Un solo control principal por fase: antes se inicia, durante se finaliza y
+/// despues solo queda el estado terminado.
+AdminLiveControl adminLiveControlFor(AdminMarathon marathon, LiveBoard board) {
+  if (board.finishedAt != null || marathon.finished) {
+    return AdminLiveControl.finished;
+  }
+  if (board.running || marathon.running) return AdminLiveControl.finish;
+  return AdminLiveControl.start;
+}
+
+/// Proyecta un estado confirmado por el servidor sobre el mapa actual.
+/// Finalizar elimina todos los marcadores de inmediato.
+LiveBoard liveBoardAfterServerState({
+  required LiveBoard current,
+  required String marathonId,
+  required MarathonLiveState next,
+}) {
+  if (next.marathonId != marathonId) return current;
+  final finished = next.finishedAt != null;
+  return LiveBoard(
+    runners: finished ? const {} : current.runners,
+    finishedBibs: finished ? const {} : current.finishedBibs,
+    preparingAt: next.preparingAt,
+    preparingMessage: next.preparingMessage,
+    startedAt: next.startedAt,
+    finishedAt: next.finishedAt,
+    loading: false,
+  );
+}
+
 /// Lo que pinta el mapa en vivo: quien va por donde, ahora mismo.
 @immutable
 class LiveBoard {
@@ -186,6 +239,7 @@ class LiveBoard {
     this.startedAt,
     this.finishedAt,
     this.loading = true,
+    this.failure,
   });
 
   /// Por dorsal: una posicion nueva del mismo corredor **reemplaza** a la
@@ -203,6 +257,7 @@ class LiveBoard {
   final DateTime? startedAt;
   final DateTime? finishedAt;
   final bool loading;
+  final Failure? failure;
 
   bool get running => startedAt != null && finishedAt == null;
 
@@ -223,6 +278,8 @@ class LiveBoard {
     DateTime? finishedAt,
     bool? loading,
     bool clearFinished = false,
+    Failure? failure,
+    bool clearFailure = false,
   }) => LiveBoard(
     runners: runners ?? this.runners,
     finishedBibs: finishedBibs ?? this.finishedBibs,
@@ -231,6 +288,7 @@ class LiveBoard {
     startedAt: startedAt ?? this.startedAt,
     finishedAt: clearFinished ? null : (finishedAt ?? this.finishedAt),
     loading: loading ?? this.loading,
+    failure: clearFailure ? null : (failure ?? this.failure),
   );
 }
 
@@ -296,31 +354,44 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
         finishedAt: DateTime.tryParse(json['finishedAt'] as String? ?? ''),
         loading: false,
       );
-    } catch (_) {
-      // Un fallo de red no puede dejar el mapa girando: se queda vacio y las
-      // posiciones que lleguen por el socket lo iran llenando igual.
-      state = state.copyWith(loading: false);
+    } catch (error) {
+      // El fallo queda visible y, sobre todo, se apaga `loading`: una red caida
+      // no puede dejar el mapa girando para siempre.
+      state = state.copyWith(
+        loading: false,
+        failure: error is Failure ? error : const UnexpectedFailure(),
+      );
     }
   }
 
+  Future<void> reload() async {
+    state = state.copyWith(loading: true, clearFailure: true);
+    await _cargarFoto(marathonId);
+  }
+
   void _onPosicion(LivePosition p) {
-    state = state.copyWith(runners: {...state.runners, p.key: p});
+    state = state.copyWith(
+      runners: {...state.runners, p.key: p},
+      clearFailure: true,
+    );
   }
 
   void _onEstado(MarathonLiveState estado) {
-    if (estado.marathonId != marathonId) return;
-    final corto = estado.finishedAt != null;
-    state = LiveBoard(
-      // Al cortar la carrera el mapa se vacia: seguir pintando la ultima
-      // posicion conocida de cada uno seria mostrar gente corriendo que ya no
-      // corre.
-      runners: corto ? const {} : state.runners,
-      finishedBibs: corto ? const {} : state.finishedBibs,
-      preparingAt: estado.preparingAt,
-      preparingMessage: estado.preparingMessage,
-      startedAt: estado.startedAt,
-      finishedAt: estado.finishedAt,
-      loading: false,
+    _applyState(estado);
+  }
+
+  /// Aplica la respuesta de iniciar/finalizar sin esperar a que el socket haga
+  /// eco de la orden en el mismo dispositivo. Las horas siguen siendo las del
+  /// servidor: este metodo solo refleja ese payload ya confirmado.
+  void applyServerState(Map<String, dynamic> json) {
+    _applyState(MarathonLiveState.fromJson(json));
+  }
+
+  void _applyState(MarathonLiveState estado) {
+    state = liveBoardAfterServerState(
+      current: state,
+      marathonId: marathonId,
+      next: estado,
     );
   }
 
@@ -333,7 +404,5 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
   }
 }
 
-final liveBoardProvider =
-    NotifierProvider.family<LiveBoardNotifier, LiveBoard, String>(
-      LiveBoardNotifier.new,
-    );
+final liveBoardProvider = NotifierProvider.autoDispose
+    .family<LiveBoardNotifier, LiveBoard, String>(LiveBoardNotifier.new);

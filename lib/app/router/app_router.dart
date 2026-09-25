@@ -20,6 +20,7 @@ import 'package:camrun/features/notifications/presentation/pages/notifications_p
 import 'package:camrun/features/notifications/presentation/widgets/notifications_listener.dart';
 import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:camrun/features/onboarding/presentation/pages/theme_setup_page.dart';
+import 'package:camrun/features/organizer/presentation/pages/organizer_home_page.dart';
 import 'package:camrun/features/profile/presentation/pages/appearance_page.dart';
 import 'package:camrun/features/profile/presentation/pages/health_page.dart';
 import 'package:camrun/features/profile/presentation/pages/language_page.dart';
@@ -205,8 +206,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.organizer,
-                builder: (context, state) =>
-                    const AdminHomePage(readOnly: true),
+                builder: (context, state) => const OrganizerHomePage(),
               ),
             ],
           ),

@@ -1637,6 +1637,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get adminNoRunnersBody =>
+      'El mapa se actualizará solo cuando llegue la primera ubicación.';
+
+  @override
   String get adminStart => 'Iniciar maratón';
 
   @override
@@ -2352,6 +2356,63 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get organizerRunnersTitle => 'Corredores';
+
+  @override
+  String get organizerLiveTitle => 'Carrera en vivo';
+
+  @override
+  String get organizerNoCurrentTitle => 'No hay una maratón en curso';
+
+  @override
+  String get organizerNoCurrentBody =>
+      'Cuando un administrador dé la largada, la carrera aparecerá aquí.';
+
+  @override
+  String get organizerCurrentMarathon => 'En curso ahora';
+
+  @override
+  String organizerParticipantsOnCourse(int count) {
+    return 'Corredores en pista ($count)';
+  }
+
+  @override
+  String get organizerNoRunnersTitle => 'Todavía no hay corredores en pista';
+
+  @override
+  String get organizerNoRunnersBody =>
+      'El mapa y esta lista se actualizarán solos cuando llegue la primera ubicación.';
+
+  @override
+  String get organizerRunnerDetailTitle => 'Detalle del corredor';
+
+  @override
+  String get organizerRunnerUnknown => 'Corredor sin identificar';
+
+  @override
+  String get organizerRunnerRunning => 'En carrera';
+
+  @override
+  String get organizerRunnerFinished => 'Finalizó';
+
+  @override
+  String get organizerRunnerLocation => 'Ubicación actual';
+
+  @override
+  String get organizerRunnerDistance => 'Distancia recibida';
+
+  @override
+  String get organizerRunnerLastUpdate => 'Última actualización';
+
+  @override
+  String get organizerRunnerLap => 'Vuelta';
+
+  @override
+  String get organizerRunnerContact => 'Contacto';
+
+  @override
+  String organizerRunnerCoordinates(String lat, String lng) {
+    return '$lat, $lng';
+  }
 
   @override
   String get organizerStateRunning => 'La carrera está en curso.';

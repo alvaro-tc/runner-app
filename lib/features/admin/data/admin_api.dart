@@ -161,6 +161,43 @@ class AdminApi {
     return res.data as Map<String, dynamic>;
   });
 
+  /// Inscritos confirmados de una carrera, recorridos pagina por pagina.
+  ///
+  /// El mapa recibe solo el dorsal para no publicar datos personales por el
+  /// socket. Esta lectura protegida es la que permite al organizador traducir
+  /// ese dorsal al nombre que necesita en su lista operativa.
+  Future<List<Map<String, dynamic>>> confirmedRegistrations(
+    String marathonId,
+  ) => apiCall(() async {
+    const limit = 100;
+    var page = 1;
+    var totalPages = 1;
+    final rows = <Map<String, dynamic>>[];
+
+    do {
+      final res = await _dio.get<dynamic>(
+        '/admin/registrations',
+        queryParameters: {
+          'marathonId': marathonId,
+          'status': 'confirmed',
+          'page': page,
+          'limit': limit,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      rows.addAll(
+        (body['data'] as List? ?? const []).cast<Map<String, dynamic>>(),
+      );
+      final meta = body['meta'];
+      totalPages = meta is Map
+          ? (meta['totalPages'] as num?)?.toInt() ?? page
+          : page;
+      page++;
+    } while (page <= totalPages);
+
+    return rows;
+  });
+
   // ─── Tickets (cobros) ────────────────────────────────────────────────────
 
   /// Una pagina de cobros, con el total que cumple el filtro.

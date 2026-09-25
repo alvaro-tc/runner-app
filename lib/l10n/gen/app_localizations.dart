@@ -3026,6 +3026,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No runners on course} =1{1 runner on course} other{{count} runners on course}}'**
   String adminRunnersOnCourse(int count);
 
+  /// No description provided for @adminNoRunnersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The map will update automatically when the first location arrives.'**
+  String get adminNoRunnersBody;
+
   /// No description provided for @adminStart.
   ///
   /// In en, this message translates to:
@@ -4321,6 +4327,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Runners'**
   String get organizerRunnersTitle;
+
+  /// No description provided for @organizerLiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live race'**
+  String get organizerLiveTitle;
+
+  /// No description provided for @organizerNoCurrentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No marathon is currently running'**
+  String get organizerNoCurrentTitle;
+
+  /// No description provided for @organizerNoCurrentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The race will appear here when an administrator starts it.'**
+  String get organizerNoCurrentBody;
+
+  /// No description provided for @organizerCurrentMarathon.
+  ///
+  /// In en, this message translates to:
+  /// **'Running now'**
+  String get organizerCurrentMarathon;
+
+  /// No description provided for @organizerParticipantsOnCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Runners on course ({count})'**
+  String organizerParticipantsOnCourse(int count);
+
+  /// No description provided for @organizerNoRunnersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No runners on course yet'**
+  String get organizerNoRunnersTitle;
+
+  /// No description provided for @organizerNoRunnersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The map and this list will update automatically when the first location arrives.'**
+  String get organizerNoRunnersBody;
+
+  /// No description provided for @organizerRunnerDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner details'**
+  String get organizerRunnerDetailTitle;
+
+  /// No description provided for @organizerRunnerUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unidentified runner'**
+  String get organizerRunnerUnknown;
+
+  /// No description provided for @organizerRunnerRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Racing'**
+  String get organizerRunnerRunning;
+
+  /// No description provided for @organizerRunnerFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get organizerRunnerFinished;
+
+  /// No description provided for @organizerRunnerLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Current location'**
+  String get organizerRunnerLocation;
+
+  /// No description provided for @organizerRunnerDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance received'**
+  String get organizerRunnerDistance;
+
+  /// No description provided for @organizerRunnerLastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update'**
+  String get organizerRunnerLastUpdate;
+
+  /// No description provided for @organizerRunnerLap.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap'**
+  String get organizerRunnerLap;
+
+  /// No description provided for @organizerRunnerContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get organizerRunnerContact;
+
+  /// No description provided for @organizerRunnerCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'{lat}, {lng}'**
+  String organizerRunnerCoordinates(String lat, String lng);
 
   /// No description provided for @organizerStateRunning.
   ///

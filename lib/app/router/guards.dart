@@ -65,7 +65,23 @@ String? appGuard(Ref ref, GoRouterState state) {
   // el suyo — un organizador que escriba /admin no puede cortar una carrera.
   final enAdmin = location.startsWith(Routes.admin);
   final enOrganizador = location.startsWith(Routes.organizer);
-  if (auth.isAdmin) return enAdmin ? null : Routes.admin;
-  if (auth.isOrganizer) return enOrganizador ? null : Routes.organizer;
-  return enAdmin || enOrganizador ? Routes.home : null;
+  return staffAreaRedirect(
+    role: auth.role,
+    inAdminArea: enAdmin,
+    inOrganizerArea: enOrganizador,
+  );
+}
+
+/// Frontera de permisos de los dos paneles, separada para poder probar también
+/// la navegación escrita a mano en la barra del navegador.
+String? staffAreaRedirect({
+  required String role,
+  required bool inAdminArea,
+  required bool inOrganizerArea,
+}) {
+  if (role == 'admin') return inAdminArea ? null : Routes.admin;
+  if (role == 'organizer') {
+    return inOrganizerArea ? null : Routes.organizer;
+  }
+  return inAdminArea || inOrganizerArea ? Routes.home : null;
 }
