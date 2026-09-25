@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/races/data/datasources/races_api.dart';
 import 'package:camrun/features/races/data/race_mappers.dart';
@@ -15,6 +17,10 @@ class RemoteRaceRepository implements RaceRepository {
   const RemoteRaceRepository(this._api);
 
   final RacesApi _api;
+
+  @override
+  Future<Result<Uint8List>> receipt(String registrationId) =>
+      guard(() => _api.receipt(registrationId));
 
   @override
   Future<Result<List<RaceEntry>>> fetchEntries() => guard(

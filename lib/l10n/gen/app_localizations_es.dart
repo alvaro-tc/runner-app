@@ -2590,4 +2590,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get paymentRejectedUploadAgain => 'Subir nuevo comprobante';
+
+  @override
+  String get raceReceiptTitle => 'Recibo de donación';
+
+  @override
+  String get raceReceiptFailed =>
+      'No se pudo abrir el recibo. Vuelve a intentarlo.';
+
+  @override
+  String get raceReceiptSave => 'Guardar o compartir';
+
+  @override
+  String get raceReceiptPrint => 'Imprimir';
+
+  @override
+  String get raceReceiptActionFailed =>
+      'No se pudo guardar o imprimir el recibo. Vuelve a intentarlo.';
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:camrun/core/error/failure.dart';
 import 'package:dio/dio.dart';
 
@@ -21,7 +23,15 @@ Failure mapDioError(DioException e) {
   final response = e.response;
   if (response == null) return const NetworkFailure();
 
-  final body = response.data;
+  var body = response.data;
+  // Una descarga recibe bytes también cuando la respuesta es un error JSON.
+  if (body is List<int>) {
+    try {
+      body = jsonDecode(utf8.decode(body));
+    } on FormatException {
+      body = null;
+    }
+  }
   final error = body is Map ? body['error'] : null;
   if (error is! Map) {
     // El servidor no respondio con el sobre: proxy caido, HTML de error, 502...

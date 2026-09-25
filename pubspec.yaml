@@ -80,6 +80,8 @@ dependencies:
   # timbre del sistema. Config por --dart-define, ver PushService.
   firebase_core: ^4.15.0
   firebase_messaging: ^16.7.0
+  # Visor, guardado/compartido e impresión del recibo PDF emitido por la API.
+  printing: ^5.15.1
 
 # traccar_client_sdk aplica kotlin-android, asi que el proyecto va con
 # android.builtInKotlin=false. image_picker_android >=0.8.13+17 movio su

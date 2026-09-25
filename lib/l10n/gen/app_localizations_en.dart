@@ -2573,4 +2573,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentRejectedUploadAgain => 'Upload a new proof';
+
+  @override
+  String get raceReceiptTitle => 'Donation receipt';
+
+  @override
+  String get raceReceiptFailed =>
+      'Could not open the receipt. Please try again.';
+
+  @override
+  String get raceReceiptSave => 'Save or share';
+
+  @override
+  String get raceReceiptPrint => 'Print';
+
+  @override
+  String get raceReceiptActionFailed =>
+      'Could not save or print the receipt. Please try again.';
 }

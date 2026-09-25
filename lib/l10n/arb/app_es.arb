@@ -813,5 +813,10 @@
   "paymentRejectedDialogBody": "Un organizador revisó tu pago para {marathon} y no pudo validarlo. Tu inscripción sigue abierta: sube un nuevo comprobante.",
   "@paymentRejectedDialogBody": {"placeholders": {"marathon": {"type": "String"}}},
   "paymentRejectedReason": "Motivo",
-  "paymentRejectedUploadAgain": "Subir nuevo comprobante"
+  "paymentRejectedUploadAgain": "Subir nuevo comprobante",
+  "raceReceiptTitle": "Recibo de donación",
+  "raceReceiptFailed": "No se pudo abrir el recibo. Vuelve a intentarlo.",
+  "raceReceiptSave": "Guardar o compartir",
+  "raceReceiptPrint": "Imprimir",
+  "raceReceiptActionFailed": "No se pudo guardar o imprimir el recibo. Vuelve a intentarlo."
 }

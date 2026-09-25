@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/features/races/domain/entities/registration.dart';
@@ -11,6 +13,9 @@ import 'package:camrun/features/races/domain/entities/registration.dart';
 /// guardarse el paso intermedio, que es justo lo que se pierde al cerrar la app.
 abstract interface class RaceRepository {
   Future<Result<List<RaceEntry>>> fetchEntries();
+
+  /// PDF emitido por el servidor para una inscripción propia y pagada.
+  Future<Result<Uint8List>> receipt(String registrationId);
 
   Future<Result<RaceEntry>> fetchById(String registrationId);
 

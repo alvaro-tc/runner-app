@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/api_client.dart';
 import 'package:camrun/core/utils/uuid.dart';
 import 'package:dio/dio.dart';
@@ -13,6 +16,22 @@ class RacesApi {
   RacesApi(this._dio);
 
   final Dio _dio;
+
+  Future<Uint8List> receipt(String registrationId) => apiCall(() async {
+    final response = await _dio.get<List<int>>(
+      '/races/$registrationId/receipt/pdf',
+      options: Options(
+        responseType: ResponseType.bytes,
+        headers: {'Accept': 'application/pdf'},
+      ),
+    );
+    final bytes = Uint8List.fromList(response.data ?? const []);
+    // No entregar una página HTML o un sobre de error al visor como si fuera PDF.
+    if (bytes.length < 5 || String.fromCharCodes(bytes.take(5)) != '%PDF-') {
+      throw const UnexpectedFailure();
+    }
+    return bytes;
+  });
 
   // ─── Mis carreras ────────────────────────────────────────────────────────
 
