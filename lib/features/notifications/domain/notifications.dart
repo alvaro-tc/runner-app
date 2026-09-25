@@ -91,4 +91,7 @@ abstract interface class NotificationRepository {
   Future<Result<void>> markRead(String id);
 
   Future<Result<void>> markAllRead();
+
+  /// Cuelga el token de FCM de este telefono en la cuenta con sesion.
+  Future<Result<void>> registerPushToken(String token);
 }

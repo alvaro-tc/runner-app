@@ -171,6 +171,7 @@ class AdminApi {
   Future<({List<Map<String, dynamic>> filas, int total})> payments({
     String? marathonId,
     String? status,
+    String? search,
     int page = 1,
     int pageSize = 20,
   }) => apiCall(() async {
@@ -179,6 +180,7 @@ class AdminApi {
       queryParameters: {
         'marathonId': ?marathonId,
         'status': ?status,
+        if (search != null && search.isNotEmpty) 'q': search,
         'page': page,
         'pageSize': pageSize,
       },

@@ -4346,6 +4346,12 @@ abstract class AppLocalizations {
   /// **'Payments'**
   String get organizerTicketsTitle;
 
+  /// No description provided for @organizerTicketsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, ID, bib or transaction number'**
+  String get organizerTicketsSearchHint;
+
   /// No description provided for @organizerMarathon.
   ///
   /// In en, this message translates to:

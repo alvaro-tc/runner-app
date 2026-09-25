@@ -543,6 +543,7 @@ class AdminTicket {
 typedef AdminTicketsQuery = ({
   String? marathonId,
   String? estado,
+  String busqueda,
   int pagina,
   int porPagina,
 });

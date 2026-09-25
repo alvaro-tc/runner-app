@@ -146,6 +146,7 @@ final adminTicketsProvider =
           .payments(
             marathonId: filtro.marathonId,
             status: filtro.estado,
+            search: filtro.busqueda,
             page: filtro.pagina,
             pageSize: filtro.porPagina,
           );

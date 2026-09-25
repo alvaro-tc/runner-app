@@ -738,6 +738,7 @@
   "organizerStateNotStarted": "Todavía no ha largado.",
   "organizerCannotStart": "Solo un administrador puede dar o cortar la largada.",
   "organizerTicketsTitle": "Cobros",
+  "organizerTicketsSearchHint": "Nombre, CI, dorsal o n.º de transacción",
   "organizerMarathon": "Maratón",
   "organizerAllMarathons": "Todas las maratones",
   "organizerNoTicketsTitle": "Nada por revisar",

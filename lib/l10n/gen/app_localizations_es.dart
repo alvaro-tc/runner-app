@@ -2367,6 +2367,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get organizerTicketsTitle => 'Cobros';
 
   @override
+  String get organizerTicketsSearchHint =>
+      'Nombre, CI, dorsal o n.º de transacción';
+
+  @override
   String get organizerMarathon => 'Maratón';
 
   @override

@@ -2350,6 +2350,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get organizerTicketsTitle => 'Payments';
 
   @override
+  String get organizerTicketsSearchHint =>
+      'Name, ID, bib or transaction number';
+
+  @override
   String get organizerMarathon => 'Marathon';
 
   @override

@@ -1,13 +1,15 @@
 import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/core/storage/token_storage.dart';
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/notifications/domain/notifications.dart';
 import 'package:dio/dio.dart';
 
-/// Habla con `/notifications`. Tres llamadas: no justifican un `Api` aparte.
+/// Habla con `/notifications`. Cuatro llamadas: no justifican un `Api` aparte.
 class RemoteNotificationRepository implements NotificationRepository {
-  const RemoteNotificationRepository(this._dio);
+  const RemoteNotificationRepository(this._dio, this._storage);
 
   final Dio _dio;
+  final TokenStorage _storage;
 
   @override
   Future<Result<NotificationInbox>> fetchInbox() => guard(
@@ -31,4 +33,14 @@ class RemoteNotificationRepository implements NotificationRepository {
   @override
   Future<Result<void>> markAllRead() =>
       guard(() => apiCall(() => _dio.post<dynamic>('/notifications/read-all')));
+
+  @override
+  Future<Result<void>> registerPushToken(String token) => guard(
+    () => apiCall(
+      () async => _dio.put<dynamic>(
+        '/notifications/push-token',
+        data: {'deviceId': await _storage.deviceId(), 'token': token},
+      ),
+    ),
+  );
 }

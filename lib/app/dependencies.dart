@@ -70,7 +70,10 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 );
 
 final notificationRepositoryProvider = Provider<NotificationRepository>(
-  (ref) => RemoteNotificationRepository(ref.watch(dioProvider)),
+  (ref) => RemoteNotificationRepository(
+    ref.watch(dioProvider),
+    ref.watch(tokenStorageProvider),
+  ),
 );
 
 /// Backed by Hive, whose box has to be opened before the first frame — the

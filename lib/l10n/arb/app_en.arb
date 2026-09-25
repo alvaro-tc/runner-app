@@ -1075,6 +1075,7 @@
   "organizerStateNotStarted": "It has not started yet.",
   "organizerCannotStart": "Only an admin can start or stop the race.",
   "organizerTicketsTitle": "Payments",
+  "organizerTicketsSearchHint": "Name, ID, bib or transaction number",
   "organizerMarathon": "Marathon",
   "organizerAllMarathons": "All marathons",
   "organizerNoTicketsTitle": "Nothing to review",
