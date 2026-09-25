@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/push_service.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
@@ -177,6 +178,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> signOut() async {
+    await ref.read(pushServiceProvider).forget();
     await ref.read(authRepositoryProvider).signOut();
     state = const AuthState();
     _olvidarUsuario();

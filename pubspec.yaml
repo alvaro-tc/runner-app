@@ -1,7 +1,7 @@
 name: camrun
 description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
-version: 1.0.6+7
+version: 1.0.7+8
 
 environment:
   sdk: ^3.12.2
@@ -76,6 +76,12 @@ dependencies:
   # Login con Google. El idToken que devuelve lo verifica el backend en
   # /auth/google; la app no valida nada por su cuenta.
   google_sign_in: ^7.2.0
+  # Push con la app cerrada. Con ella abierta avisa el socket; esto es solo el
+  # timbre del sistema. Config por --dart-define, ver PushService.
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  # Visor, guardado/compartido e impresión del recibo PDF emitido por la API.
+  printing: ^5.15.1
 
 # traccar_client_sdk aplica kotlin-android, asi que el proyecto va con
 # android.builtInKotlin=false. image_picker_android >=0.8.13+17 movio su

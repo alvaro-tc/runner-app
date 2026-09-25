@@ -80,6 +80,11 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
   /// no el historico.
   String? _estado = 'pending';
 
+  /// Viaja al servidor como el resto del filtro: nombre, CI, dorsal o el
+  /// numero de transaccion que se tiene delante en el extracto.
+  final _busqueda = TextEditingController();
+  String _filtro = '';
+
   int _pagina = 1;
   int _porPagina = adminPageSizes.first;
 
@@ -91,11 +96,18 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
   });
 
   @override
+  void dispose() {
+    _busqueda.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = context.l10n;
     final consulta = (
       marathonId: _maratonId,
       estado: _estado,
+      busqueda: _filtro,
       pagina: _pagina,
       porPagina: _porPagina,
     );
@@ -132,6 +144,22 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
                   ),
               ],
               onChanged: (id) => _reiniciar(() => _maratonId = id),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenH,
+              AppSpacing.sm,
+              AppSpacing.screenH,
+              0,
+            ),
+            child: AppTextField(
+              label: t.adminSearch,
+              hint: t.organizerTicketsSearchHint,
+              controller: _busqueda,
+              suffixIcon: Icons.search_rounded,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
             ),
           ),
           SizedBox(

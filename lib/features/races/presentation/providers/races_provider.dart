@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
@@ -81,3 +83,11 @@ final raceDetailProvider = FutureProvider.family<RaceEntry, String>((
   return (await ref.watch(raceRepositoryProvider).fetchById(registrationId))
       .unwrap();
 });
+
+/// AutoDispose evita conservar documentos personales al salir del visor.
+final raceReceiptProvider = FutureProvider.autoDispose
+    .family<Uint8List, String>(
+      (ref, id) async =>
+          (await ref.watch(raceRepositoryProvider).receipt(id)).unwrap(),
+      retry: (_, _) => null,
+    );

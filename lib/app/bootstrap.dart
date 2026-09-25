@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/preferences_provider.dart';
+import 'package:camrun/core/services/push_service.dart';
 import 'package:camrun/core/storage/token_storage.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
@@ -31,6 +32,7 @@ Future<void> bootstrap(Widget Function() builder) async {
   // `DateFormat('MMMM y')` en espanol lanza en el primer render.
   await initializeDateFormatting();
 
+  await PushService.init();
   await Hive.initFlutter();
   final prefs = await SharedPreferences.getInstance();
   final training = await HiveTrainingRepository.open();

@@ -4454,6 +4454,12 @@ abstract class AppLocalizations {
   /// **'Payments'**
   String get organizerTicketsTitle;
 
+  /// No description provided for @organizerTicketsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, ID, bib or transaction number'**
+  String get organizerTicketsSearchHint;
+
   /// No description provided for @organizerMarathon.
   ///
   /// In en, this message translates to:
@@ -4841,6 +4847,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload a new proof'**
   String get paymentRejectedUploadAgain;
+
+  /// No description provided for @raceReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Donation receipt'**
+  String get raceReceiptTitle;
+
+  /// No description provided for @raceReceiptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the receipt. Please try again.'**
+  String get raceReceiptFailed;
+
+  /// No description provided for @raceReceiptSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save or share'**
+  String get raceReceiptSave;
+
+  /// No description provided for @raceReceiptPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get raceReceiptPrint;
+
+  /// No description provided for @raceReceiptActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save or print the receipt. Please try again.'**
+  String get raceReceiptActionFailed;
 }
 
 class _AppLocalizationsDelegate

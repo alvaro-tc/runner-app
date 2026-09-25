@@ -1095,6 +1095,7 @@
   "organizerStateNotStarted": "It has not started yet.",
   "organizerCannotStart": "Only an admin can start or stop the race.",
   "organizerTicketsTitle": "Payments",
+  "organizerTicketsSearchHint": "Name, ID, bib or transaction number",
   "organizerMarathon": "Marathon",
   "organizerAllMarathons": "All marathons",
   "organizerNoTicketsTitle": "Nothing to review",
@@ -1169,5 +1170,10 @@
   "paymentRejectedDialogBody": "An organizer reviewed your payment for {marathon} and could not approve it. Your registration is still open: upload a new proof.",
   "@paymentRejectedDialogBody": {"placeholders": {"marathon": {"type": "String"}}},
   "paymentRejectedReason": "Reason",
-  "paymentRejectedUploadAgain": "Upload a new proof"
+  "paymentRejectedUploadAgain": "Upload a new proof",
+  "raceReceiptTitle": "Donation receipt",
+  "raceReceiptFailed": "Could not open the receipt. Please try again.",
+  "raceReceiptSave": "Save or share",
+  "raceReceiptPrint": "Print",
+  "raceReceiptActionFailed": "Could not save or print the receipt. Please try again."
 }

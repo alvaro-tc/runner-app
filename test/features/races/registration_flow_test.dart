@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/utils/result.dart';
@@ -14,6 +16,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// prueba contra HTTP en `race_repository_test.dart`.
 class _FakeRaceRepository implements RaceRepository {
   _FakeRaceRepository();
+
+  @override
+  Future<Result<Uint8List>> receipt(String registrationId) async =>
+      const Result.failure(NotFoundFailure());
 
   final List<String> claves = [];
   int cobros = 0;
