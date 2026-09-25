@@ -48,6 +48,49 @@ void main() {
       ? jsonDecode(req.data as String) as Map<String, dynamic>
       : (req.data as Map).cast<String, dynamic>();
 
+  group('receipt', () {
+    test('descarga los bytes originales por el cliente de la API', () async {
+      final bytes = utf8.encode('%PDF-1.7 ejemplo');
+      final repo = build((req) async {
+        expect(req.path, '/races/r1/receipt/pdf');
+        expect(req.responseType, ResponseType.bytes);
+        return ResponseBody.fromBytes(
+          bytes,
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/pdf'],
+          },
+        );
+      });
+      expect((await repo.receipt('r1')).unwrap(), bytes);
+    });
+
+    test(
+      'un pago pendiente conserva el código de error del servidor',
+      () async {
+        final repo = build(
+          (_) async => errorBody('RECEIPT_NOT_AVAILABLE', status: 409),
+        );
+        final result = await repo.receipt('r1');
+        result.fold((_) => fail('No debe entregar un recibo'), (error) {
+          expect(error, isA<ApiFailure>());
+          expect((error as ApiFailure).code, 'RECEIPT_NOT_AVAILABLE');
+        });
+      },
+    );
+
+    test('rechaza HTML recibido con estado 200 en lugar de PDF', () async {
+      final repo = build(
+        (_) async => ResponseBody.fromString('<html>proxy</html>', 200),
+      );
+      final result = await repo.receipt('r1');
+      result.fold(
+        (_) => fail('No debe entregar HTML'),
+        (error) => expect(error, isA<UnexpectedFailure>()),
+      );
+    });
+  });
+
   // ─── Mis carreras ────────────────────────────────────────────────────────
 
   group('fetchEntries', () {

@@ -1150,5 +1150,10 @@
   "paymentRejectedDialogBody": "An organizer reviewed your payment for {marathon} and could not approve it. Your registration is still open: upload a new proof.",
   "@paymentRejectedDialogBody": {"placeholders": {"marathon": {"type": "String"}}},
   "paymentRejectedReason": "Reason",
-  "paymentRejectedUploadAgain": "Upload a new proof"
+  "paymentRejectedUploadAgain": "Upload a new proof",
+  "raceReceiptTitle": "Donation receipt",
+  "raceReceiptFailed": "Could not open the receipt. Please try again.",
+  "raceReceiptSave": "Save or share",
+  "raceReceiptPrint": "Print",
+  "raceReceiptActionFailed": "Could not save or print the receipt. Please try again."
 }

@@ -27,6 +27,7 @@ import 'package:camrun/features/profile/presentation/pages/profile_edit_page.dar
 import 'package:camrun/features/profile/presentation/pages/profile_page.dart';
 import 'package:camrun/features/profile/presentation/pages/profile_settings_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
+import 'package:camrun/features/races/presentation/pages/race_receipt_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_start_page.dart';
 import 'package:camrun/features/races/presentation/pages/races_page.dart';
 import 'package:camrun/features/races/presentation/widgets/marathon_gate.dart';
@@ -321,6 +322,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) =>
                         RaceDetailPage(entryId: state.pathParameters['id']!),
                     routes: [
+                      GoRoute(
+                        path: 'receipt',
+                        parentNavigatorKey: _rootKey,
+                        builder: (context, state) => RaceReceiptPage(
+                          registrationId: state.pathParameters['id']!,
+                        ),
+                      ),
                       GoRoute(
                         path: 'start',
                         builder: (context, state) => RaceStartPage(

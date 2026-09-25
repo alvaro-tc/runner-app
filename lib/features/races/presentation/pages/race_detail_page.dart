@@ -198,12 +198,13 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        AppButton(
-          label: t.raceDownloadReceipt,
-          variant: AppButtonVariant.outline,
-          icon: Icons.receipt_long_outlined,
-          onPressed: () => context.showSnack(t.raceReceiptComingSoon),
-        ),
+        if (entry.paymentStatus == PaymentStatus.paid)
+          AppButton(
+            label: t.raceDownloadReceipt,
+            variant: AppButtonVariant.outline,
+            icon: Icons.receipt_long_outlined,
+            onPressed: () => context.push(Routes.raceReceiptOf(entry.id)),
+          ),
         if (result != null) ...[
           const SizedBox(height: AppSpacing.sm),
           AppButton(
