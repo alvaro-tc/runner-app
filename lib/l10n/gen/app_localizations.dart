@@ -1634,6 +1634,24 @@ abstract class AppLocalizations {
   /// **'Overall rank'**
   String get raceOverallRank;
 
+  /// No description provided for @racePodiumFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Podium · 1st place'**
+  String get racePodiumFirst;
+
+  /// No description provided for @racePodiumSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Podium · 2nd place'**
+  String get racePodiumSecond;
+
+  /// No description provided for @racePodiumThird.
+  ///
+  /// In en, this message translates to:
+  /// **'Podium · 3rd place'**
+  String get racePodiumThird;
+
   /// No description provided for @raceAgeGroupRank.
   ///
   /// In en, this message translates to:

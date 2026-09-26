@@ -851,6 +851,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get raceOverallRank => 'Overall rank';
 
   @override
+  String get racePodiumFirst => 'Podium · 1st place';
+
+  @override
+  String get racePodiumSecond => 'Podium · 2nd place';
+
+  @override
+  String get racePodiumThird => 'Podium · 3rd place';
+
+  @override
   String get raceAgeGroupRank => 'Age group rank';
 
   @override

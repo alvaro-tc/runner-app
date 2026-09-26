@@ -309,7 +309,12 @@ class _Body extends ConsumerWidget {
             MetricTile(
               icon: Icons.leaderboard_outlined,
               value: Fmt.rank(result.overallRank!, result.totalParticipants!),
-              label: t.raceOverallRank,
+              label: switch (result.overallRank) {
+                1 => t.racePodiumFirst,
+                2 => t.racePodiumSecond,
+                3 => t.racePodiumThird,
+                _ => t.raceOverallRank,
+              },
               compact: true,
             ),
           if (result.ageGroupRank != null)
