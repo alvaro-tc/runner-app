@@ -284,7 +284,11 @@ class _HighlightCard extends StatelessWidget {
                         label: context.l10n.profileWeeklyMileage,
                       ),
                     ),
-                    VerticalDivider(color: c.primary.withValues(alpha: 0.25)),
+                    VerticalDivider(
+                      width: AppSpacing.xl,
+                      thickness: 1,
+                      color: c.primary.withValues(alpha: 0.25),
+                    ),
                     Expanded(
                       child: _Highlight(
                         icon: Icons.landscape_outlined,

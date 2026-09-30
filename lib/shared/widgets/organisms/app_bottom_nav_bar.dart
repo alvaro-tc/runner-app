@@ -1,7 +1,9 @@
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Quien esta mirando la app. Decide las cuatro pestanas de abajo.
 ///
@@ -102,27 +104,30 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final items = _items(context.l10n, role);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surface,
-        border: Border(top: BorderSide(color: c.border)),
-        boxShadow: c.cardShadow,
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: [
-              for (var i = 0; i < items.length; i++)
-                Expanded(
-                  child: _NavItem(
-                    item: items[i],
-                    selected: i == currentIndex,
-                    onTap: () => onTap(i),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: systemUiStyleFor(c.surface),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border(top: BorderSide(color: c.border)),
+          boxShadow: c.cardShadow,
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: [
+                for (var i = 0; i < items.length; i++)
+                  Expanded(
+                    child: _NavItem(
+                      item: items[i],
+                      selected: i == currentIndex,
+                      onTap: () => onTap(i),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

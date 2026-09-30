@@ -6,6 +6,8 @@ import 'package:camrun/core/services/preferences_provider.dart';
 import 'package:camrun/core/services/push_service.dart';
 import 'package:camrun/core/storage/token_storage.dart';
 import 'package:camrun/core/sync/sync_providers.dart';
+import 'package:camrun/core/theme/app_colors.dart';
+import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/train/data/repositories/hive_training_repository.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +24,11 @@ Future<void> bootstrap(Widget Function() builder) async {
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
+    systemUiStyleFor(
+      WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+              Brightness.dark
+          ? DarkTokens.background
+          : LightTokens.background,
     ),
   );
 
