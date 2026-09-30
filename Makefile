@@ -1,4 +1,19 @@
-.PHONY: run run-web run-local apk aab goldens fmt analyze test l10n i18n-guard
+.PHONY: run run-web run-local google-ios run-ios ipa apk aab goldens fmt analyze test l10n i18n-guard
+
+IOS_ENV ?= .env
+IOS_DEVICE ?= iPhone
+IOS_API_BASE_URL ?= $(if $(filter .env.local,$(IOS_ENV)),http://127.0.0.1:3000/api/v1)
+
+# Un solo ID de iOS en IOS_ENV; el esquema de retorno se deriva automaticamente.
+google-ios:
+	dart tool/configure_google_ios.dart "$(IOS_ENV)"
+
+# IOS_DEVICE permite elegir el iPhone o simulador que se utilizara.
+run-ios: google-ios
+	flutter run -d "$(IOS_DEVICE)" --dart-define-from-file="$(IOS_ENV)" $(if $(IOS_API_BASE_URL),--dart-define="API_BASE_URL=$(IOS_API_BASE_URL)")
+
+ipa: google-ios
+	flutter build ipa --release --dart-define-from-file="$(IOS_ENV)" $(if $(IOS_API_BASE_URL),--dart-define="API_BASE_URL=$(IOS_API_BASE_URL)")
 
 # Contra el backend de produccion (cam-run.tumype.com).
 run:

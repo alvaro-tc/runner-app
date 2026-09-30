@@ -1,0 +1,6 @@
+// Ejecutar make google-ios despues de completar GOOGLE_IOS_CLIENT_ID en .env.
+// Los valores reales y el esquema de retorno se generan desde el mismo archivo.
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_IOS_REVERSED_CLIENT_ID =
+GOOGLE_SERVER_CLIENT_ID =
+#include? "GoogleSignIn.generated.xcconfig"
