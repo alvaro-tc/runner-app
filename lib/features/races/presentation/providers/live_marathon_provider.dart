@@ -185,7 +185,7 @@ class MarathonGateNotifier extends Notifier<MarathonGate> {
       // seguidas piden la misma sala dos veces y solo se suelta una.
       _bajas[id] = () {};
       unawaited(
-        socket.watch(id).then((baja) {
+        socket.watch(id, positions: false).then((baja) {
           if (_bajas.containsKey(id)) {
             _bajas[id] = baja;
           } else {

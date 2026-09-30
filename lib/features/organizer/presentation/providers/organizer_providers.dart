@@ -20,11 +20,8 @@ AdminMarathon? currentRunningMarathon(List<AdminMarathon> marathons) {
 
 /// Participantes confirmados por dorsal, para enriquecer las posiciones sin
 /// exponer nombres en el canal público del mapa.
-final organizerParticipantsProvider =
-    FutureProvider.family<Map<String, OrganizerParticipant>, String>((
-      ref,
-      marathonId,
-    ) async {
+final organizerParticipantsProvider = FutureProvider.autoDispose
+    .family<Map<String, OrganizerParticipant>, String>((ref, marathonId) async {
       final rows = await ref
           .watch(adminApiProvider)
           .confirmedRegistrations(marathonId);

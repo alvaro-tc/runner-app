@@ -406,6 +406,8 @@ class _Miniatura extends StatelessWidget {
             ? vacia
             : CachedNetworkImage(
                 imageUrl: url!,
+                memCacheWidth: (_lado * MediaQuery.devicePixelRatioOf(context))
+                    .ceil(),
                 fit: BoxFit.cover,
                 placeholder: (context, _) => vacia,
                 errorWidget: (context, _, _) => vacia,

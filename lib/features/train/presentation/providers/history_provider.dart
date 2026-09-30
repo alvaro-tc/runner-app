@@ -66,8 +66,8 @@ class TrainingSyncStatusInfo {
   final String? clientUuid;
 }
 
-final trainingSyncStatusProvider =
-    FutureProvider.family<TrainingSyncStatusInfo, String>((ref, runId) async {
+final trainingSyncStatusProvider = FutureProvider.autoDispose
+    .family<TrainingSyncStatusInfo, String>((ref, runId) async {
       ref.watch(syncRevisionProvider);
       final run = ref.watch(runProvider(runId));
       final clientUuid = run?.clientUuid;
@@ -97,7 +97,10 @@ final trainingSyncStatusProvider =
       );
     });
 
-final runProvider = Provider.family<TrainingRun?, String>((ref, id) {
+final runProvider = Provider.autoDispose.family<TrainingRun?, String>((
+  ref,
+  id,
+) {
   final runs = ref.watch(historyProvider).value ?? const [];
   for (final run in runs) {
     if (run.id == id) return run;

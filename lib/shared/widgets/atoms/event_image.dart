@@ -38,13 +38,22 @@ class EventImage extends StatelessWidget {
             webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
             errorBuilder: (context, _, _) => _placeholder(context),
           )
-        : CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: fit,
-            width: double.infinity,
-            height: double.infinity,
-            placeholder: (context, _) => _placeholder(context),
-            errorWidget: (context, _, _) => _placeholder(context),
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+              final decodeWidth = constraints.maxWidth.isFinite
+                  ? (constraints.maxWidth * pixelRatio).ceil().clamp(1, 4096)
+                  : null;
+              return CachedNetworkImage(
+                imageUrl: imageUrl,
+                memCacheWidth: decodeWidth,
+                fit: fit,
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (context, _) => _placeholder(context),
+                errorWidget: (context, _, _) => _placeholder(context),
+              );
+            },
           ),
   );
 

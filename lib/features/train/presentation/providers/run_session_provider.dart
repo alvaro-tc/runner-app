@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camrun/core/services/location_service.dart';
+import 'package:camrun/core/utils/append_only_list.dart';
 import 'package:camrun/core/utils/route_generator.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:camrun/features/tracking/tracking_providers.dart';
@@ -275,6 +276,7 @@ class RunSessionState {
 class RunSessionNotifier extends Notifier<RunSessionState> {
   StreamSubscription<GeoPoint>? _gps;
   Timer? _ticker;
+  bool _uiActive = true;
   DateTime? _startedAt;
   Duration _pausedTotal = Duration.zero;
   DateTime? _pausedAt;
@@ -282,6 +284,8 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   /// Suma de los huecos entre puntos aceptados: el tiempo que el telefono
   /// estuvo moviendose de verdad. Ver [_onPoint].
   Duration _moving = Duration.zero;
+  AppendOnlyList<GeoPoint> _route = AppendOnlyList.empty();
+  IncrementalSplits _splitAccumulator = IncrementalSplits();
 
   @override
   RunSessionState build() {
@@ -327,13 +331,15 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     _pausedTotal = Duration.zero;
     _pausedAt = null;
     _moving = Duration.zero;
+    _route = AppendOnlyList.empty();
+    _splitAccumulator = IncrementalSplits();
     state = state.copyWith(status: RunStatus.running, countdownValue: 0);
 
     final tracking = ref.read(trackingServiceProvider);
     // Escuchar ANTES de arrancar: el primer punto puede llegar en el mismo
     // microtask en que se abre el GPS, y perderlo se nota en el mapa.
     _gps = tracking.stream.listen(_onPoint);
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    _startTicker();
 
     // `start` no lanza si el servidor no contesta: devuelve `null` y graba en
     // local. Correr sin cobertura tiene que funcionar igual.
@@ -350,6 +356,24 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     );
   }
 
+  /// The recording continues in background; elapsed time comes from wall time.
+  void setUiActive(bool active) {
+    _uiActive = active;
+    _ticker?.cancel();
+    _ticker = null;
+    if (active && state.status == RunStatus.running) {
+      _tick();
+      _startTicker();
+    }
+  }
+
+  void _startTicker() {
+    _ticker?.cancel();
+    if (_uiActive) {
+      _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
+  }
+
   void _tick() {
     if (state.status != RunStatus.running || _startedAt == null) return;
     final elapsed = DateTime.now().difference(_startedAt!) - _pausedTotal;
@@ -360,14 +384,16 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   void _onPoint(GeoPoint point) {
     if (state.status != RunStatus.running) return;
 
-    final route = [...state.route, point];
+    final route = _route = _route.appended(point);
     var distance = state.distanceKm;
+    var segmentMeters = 0.0;
 
     if (state.route.isNotEmpty) {
       final previous = state.route.last;
       final seconds =
           point.timestamp.difference(previous.timestamp).inMilliseconds / 1000;
-      distance += previous.distanceTo(point) / 1000;
+      segmentMeters = previous.distanceTo(point);
+      distance += segmentMeters / 1000;
       // Un hueco largo es el sensor sin senal —un tunel, el bolsillo—, no una
       // zancada de dos minutos: cuenta como 30 s y no infla el ritmo medio.
       if (seconds > 0) {
@@ -377,7 +403,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       }
     }
 
-    final splits = RouteGenerator.splitsOf(route);
+    final splits = _splitAccumulator.add(point, segmentMeters: segmentMeters);
     state = state.copyWith(
       route: route,
       distanceKm: distance,
@@ -421,6 +447,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
   void pause() {
     if (state.status != RunStatus.running) return;
     _pausedAt = DateTime.now();
+    _ticker?.cancel();
     state = state.copyWith(status: RunStatus.paused);
     unawaited(ref.read(trackingServiceProvider).pause());
   }
@@ -432,6 +459,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
       _pausedAt = null;
     }
     state = state.copyWith(status: RunStatus.running);
+    _startTicker();
     unawaited(ref.read(trackingServiceProvider).resume());
   }
 
@@ -487,6 +515,8 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
     _teardown();
     _startedAt = null;
     _moving = Duration.zero;
+    _route = AppendOnlyList.empty();
+    _splitAccumulator = IncrementalSplits();
     state = const RunSessionState.initial();
     await ref.read(trackingServiceProvider).discard();
   }

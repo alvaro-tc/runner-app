@@ -124,10 +124,13 @@ class LiveSocket {
   final TokenStorage _storage;
 
   io.Socket? _socket;
+  int _personalWatchers = 0;
+  Timer? _reconnectTimer;
+  bool _disposed = false;
 
   /// Cuantas pantallas miran cada maraton. Salir de la sala al cerrar una
   /// pantalla dejaria ciega a otra que siguiera abierta detras.
-  final _salas = <String, int>{};
+  final _salas = <(String, bool), int>{};
 
   final _posiciones = StreamController<LivePosition>.broadcast();
   final _estados = StreamController<MarathonLiveState>.broadcast();
@@ -163,32 +166,64 @@ class LiveSocket {
   /// Hace falta para los avisos de la sala personal: quien espera a que le
   /// validen el pago todavia no tiene ninguna sala de maraton que pedir, y sin
   /// conexion no se entera de nada hasta el siguiente sondeo.
-  Future<void> ensureConnected() => _conectar();
+  Future<void> ensureConnected() async {
+    _conectar();
+  }
+
+  /// Keeps personal notifications connected only while a consumer needs them.
+  VoidCallback watchPersonal() {
+    _personalWatchers++;
+    unawaited(ensureConnected());
+    var released = false;
+    return () {
+      if (released) return;
+      released = true;
+      _personalWatchers--;
+      _closeIfIdle();
+    };
+  }
+
+  void _closeIfIdle() {
+    if (_personalWatchers > 0 || _salas.isNotEmpty) return;
+    _reconnectTimer?.cancel();
+    _socket?.dispose();
+    _socket = null;
+  }
 
   /// Empieza a mirar una maraton. Devuelve la baja: llamarla es lo que la
   /// deja de mirar.
-  Future<VoidCallback> watch(String marathonId) async {
-    final socket = await _conectar();
-    _salas.update(marathonId, (n) => n + 1, ifAbsent: () => 1);
-    if (_salas[marathonId] == 1) {
-      socket.emit('spectate', {'marathonId': marathonId});
+  Future<VoidCallback> watch(String marathonId, {bool positions = true}) async {
+    final room = (marathonId, positions);
+    final socket = _conectar();
+    _salas.update(room, (n) => n + 1, ifAbsent: () => 1);
+    if (_salas[room] == 1) {
+      socket.emit('spectate', {
+        'marathonId': marathonId,
+        'positions': positions,
+      });
     }
 
     var dado = false;
     return () {
       if (dado) return;
       dado = true;
-      final quedan = (_salas[marathonId] ?? 1) - 1;
+      final quedan = (_salas[room] ?? 1) - 1;
       if (quedan > 0) {
-        _salas[marathonId] = quedan;
+        _salas[room] = quedan;
         return;
       }
-      _salas.remove(marathonId);
-      _socket?.emit('leave', {'marathonId': marathonId});
+      _salas.remove(room);
+      _socket?.emit('leave', {
+        'marathonId': marathonId,
+        'positions': positions,
+      });
+      _closeIfIdle();
     };
   }
 
   Future<void> dispose() async {
+    _disposed = true;
+    _reconnectTimer?.cancel();
     _socket?.dispose();
     _socket = null;
     _salas.clear();
@@ -199,7 +234,8 @@ class LiveSocket {
     await _notificaciones.close();
   }
 
-  Future<io.Socket> _conectar() async {
+  io.Socket _conectar() {
+    if (_disposed) throw StateError('LiveSocket disposed');
     final actual = _socket;
     if (actual != null) return actual;
 
@@ -216,6 +252,8 @@ class LiveSocket {
       _urlDelNamespace(),
       io.OptionBuilder()
           .setTransports(['websocket'])
+          .enableForceNew()
+          .disableAutoConnect()
           .setAuthFn(
             (cb) async => cb({'token': await _storage.readAccessToken() ?? ''}),
           )
@@ -257,7 +295,8 @@ class LiveSocket {
       // alguien cierre y vuelva a abrir la app.
       ..onDisconnect((motivo) {
         if (motivo != 'io server disconnect') return;
-        Timer(const Duration(seconds: 5), () {
+        _reconnectTimer?.cancel();
+        _reconnectTimer = Timer(const Duration(seconds: 5), () {
           if (identical(_socket, socket)) socket.connect();
         });
       })
@@ -265,12 +304,13 @@ class LiveSocket {
       // pedirlas o el mapa se queda mudo justo despues de recuperar la senal,
       // que es cuando mas se mira.
       ..onConnect((_) {
-        for (final id in _salas.keys) {
-          socket.emit('spectate', {'marathonId': id});
+        for (final (id, positions) in _salas.keys) {
+          socket.emit('spectate', {'marathonId': id, 'positions': positions});
         }
       });
 
     _socket = socket;
+    socket.connect();
     return socket;
   }
 

@@ -33,6 +33,7 @@ class RunSessionPage extends ConsumerStatefulWidget {
 
 class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   final _mapKey = GlobalKey<RouteMapViewState>();
+  late final Widget _map = RepaintBoundary(child: _RunMap(mapKey: _mapKey));
   StreamSubscription<MarathonLiveState>? _corte;
   StreamSubscription<RunnerFinish>? _llegada;
   StreamSubscription<LivePosition>? _posicion;
@@ -51,22 +52,35 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   int? _cerrada;
 
   Timer? _cartel;
+  AppLifecycleListener? _lifecycle;
 
   @override
   void initState() {
     super.initState();
     // The screen must stay awake for the whole run.
-    unawaited(WakelockPlus.enable());
+    _lifecycle = AppLifecycleListener(onStateChange: _onLifecycle);
+    unawaited(
+      Future.microtask(() {
+        if (mounted) _onLifecycle(WidgetsBinding.instance.lifecycleState);
+      }),
+    );
   }
 
   @override
   void dispose() {
     _cartel?.cancel();
+    _lifecycle?.dispose();
     unawaited(_posicion?.cancel());
     unawaited(_corte?.cancel());
     unawaited(_llegada?.cancel());
     unawaited(WakelockPlus.disable());
     super.dispose();
+  }
+
+  void _onLifecycle(AppLifecycleState? state) {
+    final active = state == null || state == AppLifecycleState.resumed;
+    ref.read(runSessionProvider.notifier).setUiActive(active);
+    unawaited(WakelockPlus.toggle(enable: active));
   }
 
   Future<bool> _confirmDiscard() async {
@@ -237,7 +251,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned.fill(child: _RunMap(mapKey: _mapKey)),
+            Positioned.fill(child: _map),
             SafeArea(
               child: Column(
                 children: [

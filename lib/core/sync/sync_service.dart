@@ -66,6 +66,9 @@ class SyncService {
       final posiciones = await _drainPositions(ahora);
       final workouts = await _drainWorkouts(ahora);
       final outbox = await _drainOutbox(ahora);
+      if (workouts.$1 + workouts.$2 + outbox.$1 + outbox.$2 > 0) {
+        onChanged?.call();
+      }
       return (
         positionsSent: posiciones.$1,
         positionsDropped: posiciones.$2,
@@ -77,7 +80,6 @@ class SyncService {
       );
     } finally {
       _drenando = false;
-      onChanged?.call();
     }
   }
 

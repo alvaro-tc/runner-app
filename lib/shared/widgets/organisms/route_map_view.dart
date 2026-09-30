@@ -119,10 +119,44 @@ class RouteMapView extends StatefulWidget {
 class RouteMapViewState extends State<RouteMapView> {
   final MapController _controller = MapController();
   bool _ready = false;
+  List<LatLng> _points = const [];
+  List<LatLng> _guide = const [];
+  List<LatLng> _guideDrawing = const [];
+  final _tileProvider = CachedTileProvider();
+
+  @override
+  void initState() {
+    super.initState();
+    _cacheGeometry();
+  }
+
+  void _cacheGeometry() {
+    _points = [for (final p in widget.route) LatLng(p.lat, p.lng)];
+    _cacheGuide();
+  }
+
+  void _cacheGuide() {
+    _guide = [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+    _guideDrawing = apartarTrazado(_guide, 9);
+  }
+
+  @override
+  void dispose() {
+    _ready = false;
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(RouteMapView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.route, widget.route)) {
+      _points = [for (final p in widget.route) LatLng(p.lat, p.lng)];
+    }
+    if (!identical(oldWidget.guideRoute, widget.guideRoute)) {
+      _cacheGuide();
+      if (_ready) _precache();
+    }
     final f = widget.follow;
     if (_ready && f != null && f != oldWidget.follow) {
       _controller.move(LatLng(f.lat, f.lng), _controller.camera.zoom);
@@ -158,12 +192,12 @@ class RouteMapViewState extends State<RouteMapView> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final points = [for (final p in widget.route) LatLng(p.lat, p.lng)];
-    final guide = [for (final p in widget.guideRoute) LatLng(p.lat, p.lng)];
+    final points = _points;
+    final guide = _guide;
     // Corrido unos metros a la derecha del sentido de marcha: una ida y vuelta
     // pasa dos veces por la misma calle, y sin separarlas se dibujan una encima
     // de otra como una sola raya.
-    final guideDibujo = apartarTrazado(guide, 9);
+    final guideDibujo = _guideDrawing;
     final encuadre = points.isEmpty ? guide : points;
     final center = widget.follow != null
         ? LatLng(widget.follow!.lat, widget.follow!.lng)
@@ -203,7 +237,7 @@ class RouteMapViewState extends State<RouteMapView> {
             TileLayer(
               urlTemplate: tileUrl('{z}', '{x}', '{y}', dark: c.isDark),
               userAgentPackageName: 'com.camrun.app',
-              tileProvider: CachedTileProvider(),
+              tileProvider: _tileProvider,
               maxNativeZoom: _maxNativeZoom,
             ),
           // La guia primero: va por debajo del recorrido real.
@@ -246,11 +280,14 @@ class RouteMapViewState extends State<RouteMapView> {
   /// recorrido oficial primero —es el del dia de la carrera, donde se llega sin
   /// datos— y detras la ciudad.
   void _precache() {
+    if (!widget.tiles) return;
     final dark = context.colors.isDark;
     unawaited(
-      precacheRoute([
-        for (final p in widget.guideRoute) (lat: p.lat, lng: p.lng),
-      ], dark: dark).then((_) => precacheLaPaz(dark: dark)),
+      precacheRoute(
+        [for (final p in widget.guideRoute) (lat: p.lat, lng: p.lng)],
+        dark: dark,
+        shouldContinue: () => mounted && widget.tiles,
+      ),
     );
   }
 
@@ -456,5 +493,6 @@ class _TracePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TracePainter old) => old.route != route;
+  bool shouldRepaint(_TracePainter old) =>
+      old.route != route || old.gradient != gradient;
 }

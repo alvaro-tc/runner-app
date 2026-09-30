@@ -55,6 +55,9 @@ class TrackingService {
   String? _clientUuid;
   DateTime? _startedAt;
   bool _pausado = false;
+  bool _acceptPoints = false;
+  Future<void> _pendingWrites = Future.value();
+  Future<void>? _flushInFlight;
 
   /// Traccar se hizo cargo de subir: esta grabacion no encola ni un punto, o
   /// entrarian dos veces.
@@ -121,6 +124,7 @@ class TrackingService {
 
     _pausado = false;
     await _saveActiveRun();
+    _acceptPoints = true;
     _gps = _location.track().listen(_onPoint);
     _reloj = Timer.periodic(flushEvery, (_) => unawaited(flush()));
     return _sesion;
@@ -195,8 +199,8 @@ class TrackingService {
   Future<void> resume() async {
     if (!_pausado) return;
     _pausado = false;
+    if (_viaTraccar) _viaTraccar = await liveUploader?.start() ?? false;
     _gps = _location.track().listen(_onPoint);
-    if (_viaTraccar) await liveUploader?.start();
     await _avisar('resume');
   }
 
@@ -204,7 +208,7 @@ class TrackingService {
   /// desde los puntos que recibio; sin ella, el entrenamiento entero se encola
   /// para `/workouts/sync`.
   Future<void> stop({int? feeling, String? notes}) async {
-    _apagarSensores();
+    await _apagarSensores();
     await flush();
 
     final sesion = _sesion;
@@ -250,7 +254,7 @@ class TrackingService {
   /// Tira la grabacion. Lo local se borra tambien: guardar los puntos de algo
   /// que el usuario descarto es guardar su ubicacion sin motivo.
   Future<void> discard() async {
-    _apagarSensores();
+    await _apagarSensores();
 
     if (_sesion != null) {
       await _db.deletePositions(_grabado.map(_pointId));
@@ -263,7 +267,12 @@ class TrackingService {
 
   /// Manda lo pendiente ya, sin esperar al siguiente tic. La cola —y su
   /// backoff— la lleva [SyncService]: un solo sitio que sepa reintentar.
-  Future<void> flush() async {
+  Future<void> flush() => _flushInFlight ??= _flush().whenComplete(() {
+    _flushInFlight = null;
+  });
+
+  Future<void> _flush() async {
+    await _pendingWrites;
     // Una carrera sin sesion remota es un corredor invisible para el
     // organizador y un resultado oficial que se pierde, asi que se reintenta en
     // cada lote hasta que entre: un corte de red justo en la largada no puede
@@ -277,7 +286,10 @@ class TrackingService {
         await _db.deletePendingWorkout(_clientUuid!);
         await _saveActiveRun();
         await _encolar(_grabado);
-        _viaTraccar = _args!.live && (await liveUploader?.start() ?? false);
+        _viaTraccar =
+            _acceptPoints &&
+            _args!.live &&
+            (await liveUploader?.start() ?? false);
       }
     }
 
@@ -291,8 +303,8 @@ class TrackingService {
   }
 
   Future<void> dispose() async {
-    _reloj?.cancel();
-    await _gps?.cancel();
+    await _apagarSensores();
+    await _flushInFlight;
     await _puntos.close();
   }
 
@@ -327,23 +339,27 @@ class TrackingService {
 
   // ─── Interno ─────────────────────────────────────────────────────────────
 
-  void _apagarSensores() {
-    if (_viaTraccar) unawaited(liveUploader?.stop());
-    _viaTraccar = false;
+  Future<void> _apagarSensores() async {
+    _acceptPoints = false;
+    final viaTraccar = _viaTraccar;
     _reloj?.cancel();
     _reloj = null;
-    unawaited(_gps?.cancel());
+    await _gps?.cancel();
     _gps = null;
+    await _pendingWrites;
+    _viaTraccar = false;
+    if (viaTraccar) await liveUploader?.stop();
     _pausado = false;
   }
 
   Future<void> _onPoint(GeoPoint p) async {
-    if (_pausado) return;
+    if (_pausado || !_acceptPoints) return;
     _grabado.add(p);
     _puntos.add(p);
 
     // Primero la base, despues la red. Siempre en ese orden.
-    await _encolar([p]);
+    _pendingWrites = _pendingWrites.then((_) => _encolar([p]));
+    await _pendingWrites;
   }
 
   /// Deja los puntos listos para subir. Con Traccar subiendo no encola nada: el
@@ -380,7 +396,12 @@ class TrackingService {
     payload: {
       'clientUuid': _clientUuid,
       'startedAt': _startedAt!.toIso8601String(),
-      'endedAt': (ended ?? _grabado.last.timestamp.toUtc()).toIso8601String(),
+      'endedAt':
+          (ended ??
+                  (_grabado.isEmpty
+                      ? _startedAt!
+                      : _grabado.last.timestamp.toUtc()))
+              .toIso8601String(),
       'points': [for (final p in _grabado) _pointJson(p)],
     },
     startedAt: _startedAt!,

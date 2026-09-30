@@ -218,6 +218,10 @@ class AppAvatar extends StatelessWidget {
             // Las iniciales son el fondo: si la imagen no carga, se ven ellas.
             final String url when url.isNotEmpty => CachedNetworkImage(
               imageUrl: url,
+              memCacheWidth: (size * MediaQuery.devicePixelRatioOf(context))
+                  .ceil(),
+              memCacheHeight: (size * MediaQuery.devicePixelRatioOf(context))
+                  .ceil(),
               width: size,
               height: size,
               fit: BoxFit.cover,

@@ -56,6 +56,7 @@ class GeolocatorLocationService implements LocationService {
     if (kIsWeb) return const LocationSettings(accuracy: LocationAccuracy.high);
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
+        accuracy: LocationAccuracy.high,
         intervalDuration: interval,
         // Sin servicio en primer plano, Android mata el stream a los pocos
         // minutos de salir de pantalla y el entrenamiento se corta solo.
@@ -75,6 +76,7 @@ class GeolocatorLocationService implements LocationService {
       // `allowBackgroundLocationUpdates` y no pausar solo ya son el default de
       // geolocator; explicitarlos aqui es repetirlos.
       return AppleSettings(
+        accuracy: LocationAccuracy.high,
         activityType: ActivityType.fitness,
         showBackgroundLocationIndicator: true,
       );

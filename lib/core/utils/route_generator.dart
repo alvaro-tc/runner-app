@@ -2,6 +2,56 @@ import 'dart:math' as math;
 
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 
+/// Uses the same crossing interpolation as [RouteGenerator.splitsOf], but
+/// processes each segment once during a live run.
+class IncrementalSplits {
+  GeoPoint? _previous;
+  DateTime? _lastCrossing;
+  Duration? _previousDuration;
+  double _metres = 0;
+  List<KmSplit> _splits = const [];
+
+  List<KmSplit> add(GeoPoint point, {double? segmentMeters}) {
+    final previous = _previous;
+    _previous = point;
+    _lastCrossing ??= point.timestamp;
+    if (previous == null) return _splits;
+    final segment = segmentMeters ?? previous.distanceTo(point);
+    if (segment <= 0) return _splits;
+    final nextDistance = _metres + segment;
+    if (nextDistance >= (_splits.length + 1) * 1000) {
+      final updated = [..._splits];
+      while (nextDistance >= (updated.length + 1) * 1000) {
+        final ratio = ((updated.length + 1) * 1000 - _metres) / segment;
+        final crossing = previous.timestamp.add(
+          Duration(
+            milliseconds:
+                (point.timestamp.difference(previous.timestamp).inMilliseconds *
+                        ratio)
+                    .round(),
+          ),
+        );
+        final duration = crossing.difference(_lastCrossing!);
+        updated.add(
+          KmSplit(
+            km: updated.length + 1,
+            duration: duration,
+            pace: duration,
+            deltaToPrevious: _previousDuration == null
+                ? Duration.zero
+                : duration - _previousDuration!,
+          ),
+        );
+        _lastCrossing = crossing;
+        _previousDuration = duration;
+      }
+      _splits = List.unmodifiable(updated);
+    }
+    _metres = nextDistance;
+    return _splits;
+  }
+}
+
 /// Builds coherent synthetic GPS traces for the fake data layer: smooth closed
 /// loops rather than random noise, so the map and the split chart both look
 /// like a real run.

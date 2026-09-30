@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/foreground_poller.dart';
 import 'package:camrun/core/services/push_service.dart';
 import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/notifications/domain/notifications.dart';
@@ -38,24 +39,25 @@ class NotificationsListener extends ConsumerStatefulWidget {
 }
 
 class _NotificationsListenerState extends ConsumerState<NotificationsListener> {
-  Timer? _reloj;
-  AppLifecycleListener? _ciclo;
+  ForegroundPoller? _poller;
   StreamSubscription<void>? _avisos;
   final _push = <StreamSubscription<Object?>>[];
   bool _ventanaAbierta = false;
+  VoidCallback? _releasePersonal;
 
   @override
   void initState() {
     super.initState();
     final socket = ref.read(liveSocketProvider);
-    _reloj = Timer.periodic(_cadencia, (_) => _refrescar());
-    _ciclo = AppLifecycleListener(onResume: _refrescar);
+    _poller = ForegroundPoller(interval: _cadencia, onPoll: _refrescar);
     _avisos = socket.notifications.listen((_) => _refrescar());
 
     // El organizador necesita el socket siempre: los pagos le llegan sin que
     // este mirando ninguna maraton. Al corredor se lo abre `RacesAutoRefresh`
     // mientras espera validacion, que es cuando le puede llegar algo.
-    if (ref.read(authProvider).isStaff) unawaited(socket.ensureConnected());
+    if (ref.read(authProvider).isStaff) {
+      _releasePersonal = socket.watchPersonal();
+    }
 
     final push = ref.read(pushServiceProvider);
     _push.addAll([
@@ -74,8 +76,8 @@ class _NotificationsListenerState extends ConsumerState<NotificationsListener> {
 
   @override
   void dispose() {
-    _reloj?.cancel();
-    _ciclo?.dispose();
+    _releasePersonal?.call();
+    _poller?.dispose();
     unawaited(_avisos?.cancel());
     for (final s in _push) {
       unawaited(s.cancel());
@@ -83,7 +85,11 @@ class _NotificationsListenerState extends ConsumerState<NotificationsListener> {
     super.dispose();
   }
 
-  void _refrescar() => ref.invalidate(notificationsProvider);
+  void _refrescar() {
+    if (mounted && !ref.read(notificationsProvider).isLoading) {
+      ref.invalidate(notificationsProvider);
+    }
+  }
 
   Future<void> _engancharPush(PushService push) async {
     if (await push.launchedFromPush()) _abrirBandeja();

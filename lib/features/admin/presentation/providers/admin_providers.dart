@@ -107,19 +107,17 @@ List<AdminMarathon> ordenarParaElPanel(List<AdminMarathon> maratones) {
 }
 
 /// El detalle, que es lo unico que trae el trazado.
-final adminMarathonProvider = FutureProvider.family<AdminMarathon, String>((
-  ref,
-  id,
-) async {
-  final fila = await ref.watch(adminApiProvider).marathon(id);
-  return AdminMarathon.fromJson(fila);
-});
+final adminMarathonProvider = FutureProvider.autoDispose
+    .family<AdminMarathon, String>((ref, id) async {
+      final fila = await ref.watch(adminApiProvider).marathon(id);
+      return AdminMarathon.fromJson(fila);
+    });
 
 /// Una pagina de usuarios. Busqueda, rol y paginacion se resuelven en el
 /// servidor: la lista viene por partes y filtrarla aqui dejaba fuera a los
 /// admins y organizadores, que son pocos y de los primeros creados.
-final adminUsersProvider =
-    FutureProvider.family<AdminUsersPage, AdminUsersQuery>((ref, filtro) async {
+final adminUsersProvider = FutureProvider.autoDispose
+    .family<AdminUsersPage, AdminUsersQuery>((ref, filtro) async {
       final pagina = await ref
           .watch(adminApiProvider)
           .users(
@@ -136,11 +134,8 @@ final adminUsersProvider =
 
 /// Una pagina de tickets. Mismo reparto que los usuarios: el filtro y la
 /// pagina los resuelve el servidor.
-final adminTicketsProvider =
-    FutureProvider.family<AdminTicketsPage, AdminTicketsQuery>((
-      ref,
-      filtro,
-    ) async {
+final adminTicketsProvider = FutureProvider.autoDispose
+    .family<AdminTicketsPage, AdminTicketsQuery>((ref, filtro) async {
       final pagina = await ref
           .watch(adminApiProvider)
           .payments(
@@ -157,10 +152,11 @@ final adminTicketsProvider =
     });
 
 /// Un ticket suelto: el que abre un aviso de pago.
-final adminTicketProvider = FutureProvider.family<AdminTicket, String>(
-  (ref, id) async =>
-      AdminTicket.fromJson(await ref.watch(adminApiProvider).payment(id)),
-);
+final adminTicketProvider = FutureProvider.autoDispose
+    .family<AdminTicket, String>(
+      (ref, id) async =>
+          AdminTicket.fromJson(await ref.watch(adminApiProvider).payment(id)),
+    );
 
 /// Cual maraton mira el mapa de Home. La elige el selector de arriba; se queda
 /// puesta al navegar a otra pestana y volver.

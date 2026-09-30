@@ -86,6 +86,7 @@ Future<void> precacheLaPaz({required bool dark}) async {
 Future<void> precacheRoute(
   List<({double lat, double lng})> route, {
   required bool dark,
+  bool Function()? shouldContinue,
 }) async {
   if (route.isEmpty) return;
   final tiles = <(int, int, int)>{};
@@ -100,7 +101,7 @@ Future<void> precacheRoute(
       }
     }
   }
-  await _download(tiles, dark: dark);
+  await _download(tiles, dark: dark, shouldContinue: shouldContinue);
 }
 
 Set<(int, int, int)> _cityTiles() {
@@ -117,24 +118,41 @@ Set<(int, int, int)> _cityTiles() {
   return tiles;
 }
 
-/// De ocho en ocho: en fila seria eterno y todas a la vez ahogaria la conexion
-/// del movil justo mientras se corre.
-Future<void> _download(Set<(int, int, int)> tiles, {required bool dark}) async {
-  if (kIsWeb) return; // Sin disco donde guardarlas; el navegador ya cachea.
-  final pending = tiles.toList();
-  for (var i = 0; i < pending.length; i += 8) {
-    await Future.wait([
-      for (final (z, x, y) in pending.skip(i).take(8))
-        _one(tileUrl('$z', '$x', '$y', dark: dark)),
-    ]);
+/// Two workers per prefetch; visible tiles keep priority over offline warming.
+Future<void> _download(
+  Set<(int, int, int)> tiles, {
+  required bool dark,
+  bool Function()? shouldContinue,
+}) async {
+  if (kIsWeb) return;
+  final pending = tiles.iterator;
+  Future<void> worker() async {
+    while ((shouldContinue?.call() ?? true) &&
+        (WidgetsBinding.instance.lifecycleState == null ||
+            WidgetsBinding.instance.lifecycleState ==
+                AppLifecycleState.resumed) &&
+        pending.moveNext()) {
+      final (z, x, y) = pending.current;
+      await _one(tileUrl('$z', '$x', '$y', dark: dark));
+    }
   }
+
+  await Future.wait([worker(), worker()]);
 }
 
-Future<void> _one(String url) async {
+final _inFlight = <String, Future<void>>{};
+
+Future<void> _one(String url) => _inFlight.putIfAbsent(
+  url,
+  () => _downloadMissing(url).whenComplete(() => _inFlight.remove(url)),
+);
+
+Future<void> _downloadMissing(String url) async {
   try {
+    final cached = await tileCache.getFileFromCache(url);
+    if (cached != null && cached.validTill.isAfter(DateTime.now())) return;
     await tileCache.downloadFile(url);
   } on Object {
-    // Sin cobertura o con la tesela caida no pasa nada: se pedira sola cuando
-    // el mapa la necesite.
+    // The visible map retries on demand when connectivity returns.
   }
 }

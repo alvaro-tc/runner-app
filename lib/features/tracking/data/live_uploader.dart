@@ -38,10 +38,20 @@ class TraccarUploader implements LiveUploader {
 
   final TokenStorage _storage;
   final _sdk = TraccarClientSdk();
+  Future<void>? _configuration;
+  bool _pinging = false;
 
   /// Deja la configuracion puesta. Aparte de [start] porque [ping] tambien la
   /// necesita: `requestPosition` no sabe a donde subir sin ella.
-  Future<void> _configurar() async {
+  Future<void> _configurar() => _configuration ??= _configureOnce().catchError((
+    Object error,
+    StackTrace stack,
+  ) {
+    _configuration = null;
+    Error.throwWithStackTrace(error, stack);
+  });
+
+  Future<void> _configureOnce() async {
     // El mismo `deviceId` que la app registra al abrir sesion: es lo que el
     // backend usa para resolver `id` → dispositivo → sesion activa.
     final config = Config(
@@ -83,7 +93,7 @@ class TraccarUploader implements LiveUploader {
       // lo mata—, y decir que si ahi es peor que decir que no: `TrackingService`
       // deja de encolar sus puntos y el corredor desaparece del mapa durante
       // toda la carrera sin que nadie se entere.
-      return _sdk.isTracking();
+      return await _sdk.isTracking();
     } on Object catch (e) {
       // Sin plugin o sin permiso de fondo se corre igual, subiendo por lotes
       // como un entrenamiento normal: peor seguimiento en vivo, pero la carrera
@@ -95,11 +105,15 @@ class TraccarUploader implements LiveUploader {
 
   @override
   Future<void> ping() async {
+    if (_pinging) return;
+    _pinging = true;
     try {
       await _configurar();
       await _sdk.requestPosition();
     } on Object catch (e) {
       developer.log('traccar no dio un punto suelto: $e', name: 'tracking');
+    } finally {
+      _pinging = false;
     }
   }
 

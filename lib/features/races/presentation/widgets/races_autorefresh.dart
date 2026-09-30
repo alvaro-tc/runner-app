@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camrun/core/network/network_providers.dart';
+import 'package:camrun/core/services/foreground_poller.dart';
 import 'package:camrun/features/races/presentation/providers/races_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,17 +39,24 @@ class RacesAutoRefresh extends ConsumerStatefulWidget {
 }
 
 class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
-  Timer? _reloj;
-  AppLifecycleListener? _ciclo;
+  ForegroundPoller? _poller;
   StreamSubscription<void>? _avisos;
+  VoidCallback? _releasePersonal;
 
   @override
   void initState() {
     super.initState();
-    _reloj = Timer.periodic(_cadencia, (_) => _refrescar());
+    _poller = ForegroundPoller(interval: _cadencia, onPoll: _refrescar);
     // Volver del fondo no espera al siguiente tic: el telefono estuvo en el
     // bolsillo y lo que se perdio mientras tanto es justo lo que hay que ver.
-    _ciclo = AppLifecycleListener(onResume: _refrescar);
+    ref.listenManual(awaitingValidationProvider, (_, next) {
+      if (next.value?.isNotEmpty ?? false) {
+        _releasePersonal ??= ref.read(liveSocketProvider).watchPersonal();
+      } else if (next.hasValue) {
+        _releasePersonal?.call();
+        _releasePersonal = null;
+      }
+    }, fireImmediately: true);
     _avisos = ref
         .read(liveSocketProvider)
         .registrations
@@ -57,30 +65,18 @@ class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
 
   @override
   void dispose() {
-    _reloj?.cancel();
-    _ciclo?.dispose();
+    _releasePersonal?.call();
+    _poller?.dispose();
     unawaited(_avisos?.cancel());
     super.dispose();
   }
 
-  void _refrescar() => ref.invalidate(racesProvider);
+  void _refrescar() {
+    if (mounted && !ref.read(racesProvider).isLoading) {
+      ref.invalidate(racesProvider);
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
-    // La conexion se abre **solo mientras hay un pago esperando**: es la unica
-    // situacion en la que el corredor necesita el socket sin estar inscrito en
-    // ninguna maraton, y dura lo que tarda un administrador en mirarlo, no las
-    // semanas que hay hasta la carrera. Con la inscripcion ya confirmada el
-    // socket lo abre la puerta, por la sala de la maraton.
-    final esperando = ref.watch(awaitingValidationProvider).value;
-    if (esperando != null && esperando.isNotEmpty) {
-      unawaited(ref.read(liveSocketProvider).ensureConnected());
-    }
-
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }
-
-// ponytail: sondeo fijo. Si el servidor llega a mandar el pago validado por el
-// socket —`registration:state` en la sala del corredor—, esto se queda solo
-// como red de seguridad y la cadencia puede irse a minutos.

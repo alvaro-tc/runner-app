@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:camrun/core/services/foreground_poller.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/features/races/presentation/providers/live_marathon_provider.dart';
+import 'package:camrun/features/tracking/data/live_uploader.dart';
 import 'package:camrun/features/tracking/tracking_providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,24 +37,31 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
   /// esto, un telefono donde el servicio de fondo no arranca —o dice que
   /// arranco y no sube— no aparece nunca en el mapa del organizador, y en
   /// preparacion no hay sesion de carrera detras que lo recoja.
-  Timer? _latido;
+  ForegroundPoller? _latido;
+  LiveUploader? _uploader;
+  int _generation = 0;
 
   /// El permiso, o `null` mientras no haya nada que contar. Es lo que la sala
   /// de espera pinta para que el corredor sepa por que no sale en el mapa.
   @override
   LocationPermissionOutcome? build() {
-    ref.onDispose(pararLatido);
+    ref.onDispose(() {
+      pararLatido();
+      if (_encendido) unawaited(_uploader?.stop());
+    });
     return null;
   }
 
   Future<void> encender({bool forzar = false}) async {
     if (_encendido || (_pedido && !forzar)) return;
     _pedido = true;
+    final generation = _generation;
     final permiso = await ref.read(locationServiceProvider).ensurePermission();
+    if (!ref.mounted || generation != _generation) return;
     state = permiso;
     if (!permiso.isGranted || _encendido) return;
     _encendido = true;
-    final subidor = ref.read(liveUploaderProvider);
+    final subidor = _uploader = ref.read(liveUploaderProvider);
     if (subidor == null) return;
     // Se arranca Traccar **y** se piden puntos a mano, no lo uno o lo otro.
     // `isTracking` puede decir que si y no subir nada —permiso de fondo a
@@ -66,12 +75,13 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
     // El primero sin esperar al temporizador: es lo que dice "estoy aqui, con
     // la app abierta y el GPS encendido" en el instante en que se entra.
     unawaited(subidor.ping());
-    _latido = Timer.periodic(
-      // Diez segundos: el servidor publica como mucho una posicion cada 5 s por
-      // corredor, y esto es una red de seguridad con la pantalla encendida
-      // delante, no el seguimiento de la carrera.
-      const Duration(seconds: 10),
-      (_) => unawaited(subidor.ping()),
+    _latido = ForegroundPoller(
+      interval:
+          // Diez segundos: el servidor publica como mucho una posicion cada 5 s por
+          // corredor, y esto es una red de seguridad con la pantalla encendida
+          // delante, no el seguimiento de la carrera.
+          const Duration(seconds: 10),
+      onPoll: () => unawaited(subidor.ping()),
     );
   }
 
@@ -79,7 +89,8 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
   /// largada: de ahi en adelante sube la sesion de carrera, y un punto suelto
   /// mas entraria en el resultado oficial por otra puerta.
   void pararLatido() {
-    _latido?.cancel();
+    _generation++;
+    _latido?.dispose();
     _latido = null;
   }
 

@@ -168,10 +168,20 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
   final _controller = PageController(viewportFraction: 0.92);
   int _index = 0;
   Timer? _autoplay;
+  AppLifecycleListener? _lifecycle;
 
   @override
   void initState() {
     super.initState();
+    _lifecycle = AppLifecycleListener(
+      onResume: _restartAutoplay,
+      onInactive: () => _autoplay?.cancel(),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _restartAutoplay();
   }
 
@@ -179,7 +189,14 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
   /// no se mueva bajo el dedo de quien lo esta mirando.
   void _restartAutoplay() {
     _autoplay?.cancel();
-    if (widget.marathons.length < 2) return;
+    if (!mounted ||
+        widget.marathons.length < 2 ||
+        !TickerMode.valuesOf(context).enabled ||
+        (WidgetsBinding.instance.lifecycleState != null &&
+            WidgetsBinding.instance.lifecycleState !=
+                AppLifecycleState.resumed)) {
+      return;
+    }
     _autoplay = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted || !_controller.hasClients) return;
       _controller.animateToPage(
@@ -199,6 +216,7 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
   @override
   void dispose() {
     _autoplay?.cancel();
+    _lifecycle?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -213,7 +231,9 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
     // Se recalcula tambien aqui para que la pastilla no parpadee en cero
     // mientras llega el primer tic del reloj.
     final remaining =
-        ref.watch(countdownProvider(actual.date)).value ??
+        (TickerMode.valuesOf(context).enabled
+            ? ref.watch(countdownProvider(actual.date)).value
+            : null) ??
         actual.date.difference(ref.watch(nowProvider)());
 
     return Column(

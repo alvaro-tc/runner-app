@@ -4,7 +4,7 @@ import 'package:camrun/app/dependencies.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @immutable
@@ -108,15 +108,32 @@ final homeProvider = AsyncNotifierProvider<HomeNotifier, HomeData>(
 /// The wall clock, behind a provider so tests can freeze it.
 final nowProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-/// Ticks once a second so the countdown pill stays live. It is scoped to the
-/// provider, so it stops as soon as Home is disposed.
+/// Updates at the minute boundary displayed by the pill and on resume.
 final countdownProvider = StreamProvider.autoDispose.family<Duration, DateTime>(
-  (ref, target) async* {
+  (ref, target) {
     final now = ref.watch(nowProvider);
-    yield target.difference(now());
-    yield* Stream.periodic(
-      const Duration(seconds: 1),
-      (_) => target.difference(now()),
-    );
+    final controller = StreamController<Duration>();
+    Timer? timer;
+    void tick() {
+      timer?.cancel();
+      final lifecycle = WidgetsBinding.instance.lifecycleState;
+      if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+      final remaining = target.difference(now());
+      controller.add(remaining);
+      if (remaining.isNegative) return;
+      timer = Timer(
+        Duration(milliseconds: remaining.inMilliseconds % 60000 + 1),
+        tick,
+      );
+    }
+
+    final lifecycle = AppLifecycleListener(onStateChange: (_) => tick());
+    ref.onDispose(() {
+      timer?.cancel();
+      lifecycle.dispose();
+      unawaited(controller.close());
+    });
+    tick();
+    return controller.stream;
   },
 );

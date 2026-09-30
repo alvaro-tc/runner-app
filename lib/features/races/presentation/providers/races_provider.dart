@@ -47,7 +47,7 @@ final raceTotalsProvider = Provider<RaceTotals?>((ref) {
 
 final racesSummaryProvider = FutureProvider<RaceTotals>((ref) async {
   // Se recalcula cuando cambia la lista: inscribirse o cancelar mueve el total.
-  ref.watch(racesProvider);
+  ref.watch(racesProvider.select((state) => state.value));
   return (await ref.watch(raceRepositoryProvider).fetchTotals()).unwrap();
 });
 
@@ -61,7 +61,7 @@ final awaitingValidationProvider = FutureProvider<List<Registration>>(
   (ref) async {
     // Cuelga de la lista: refrescar "mis carreras" —o inscribirse, o cancelar—
     // tiene que refrescar tambien lo que esta esperando validacion.
-    ref.watch(racesProvider);
+    ref.watch(racesProvider.select((state) => state.value));
     return (await ref.watch(raceRepositoryProvider).awaitingValidation())
         .unwrap();
   },
@@ -74,15 +74,14 @@ final awaitingValidationProvider = FutureProvider<List<Registration>>(
 /// El detalle **se pide aparte**: la lista no trae recorrido, parciales ni
 /// pagos, y buscarla en la lista dejaria la pantalla de una carrera corrida
 /// sin mapa ni splits.
-final raceDetailProvider = FutureProvider.family<RaceEntry, String>((
-  ref,
-  registrationId,
-) async {
-  // Depende de la lista para que cancelar o inscribirse lo refresque tambien.
-  ref.watch(racesProvider);
-  return (await ref.watch(raceRepositoryProvider).fetchById(registrationId))
-      .unwrap();
-});
+final raceDetailProvider = FutureProvider.autoDispose.family<RaceEntry, String>(
+  (ref, registrationId) async {
+    // Depende de la lista para que cancelar o inscribirse lo refresque tambien.
+    ref.watch(racesProvider.select((state) => state.value));
+    return (await ref.watch(raceRepositoryProvider).fetchById(registrationId))
+        .unwrap();
+  },
+);
 
 /// AutoDispose evita conservar documentos personales al salir del visor.
 final raceReceiptProvider = FutureProvider.autoDispose
