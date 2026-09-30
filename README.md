@@ -92,6 +92,14 @@ de prueba: la app arranca, pero no hay con qué entrar.
 
 ## Comandos
 
+### Inicio de sesión con Google en iOS
+
+Completa `GOOGLE_IOS_CLIENT_ID` en `.env` con el cliente OAuth de tipo iOS
+registrado para `com.tumype.camrun`. Después ejecuta `make run-ios` o `make ipa`.
+Ambos generan la configuración nativa y el esquema de retorno automáticamente.
+La [guía de configuración](docs/google-sign-in-ios.md) incluye el entorno local,
+Xcode y la configuración del backend.
+
 ```bash
 make run              # movil contra produccion
 make run-web          # Chrome contra produccion, puerto 5000

@@ -2,6 +2,7 @@ import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
 import 'package:camrun/features/races/presentation/providers/races_provider.dart';
@@ -64,42 +65,65 @@ class _Content extends StatelessWidget {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        SliverAppBar(
-          expandedHeight: 280,
-          pinned: true,
-          leading: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: AppIconButton(
-              icon: Icons.arrow_back_rounded,
-              semanticsLabel: context.l10n.commonBack,
-              onPressed: () => context.pop(),
-            ),
-          ),
-          backgroundColor: c.background,
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              marathon.name,
-              style: context.text.titleMd,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            titlePadding: const EdgeInsets.symmetric(
-              horizontal: 56,
-              vertical: AppSpacing.base,
-            ),
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                Hero(
-                  tag: 'marathon-${marathon.id}',
-                  child: EventImage(imageUrl: marathon.heroImageUrl),
+        SliverLayoutBuilder(
+          builder: (context, constraints) {
+            final collapsed = constraints.scrollOffset >= 280 - kToolbarHeight;
+            return SliverAppBar(
+              systemOverlayStyle: systemUiStyleFor(
+                collapsed ? c.background : Colors.black,
+              ),
+              expandedHeight: 280,
+              pinned: true,
+              leading: Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: AppIconButton(
+                  icon: Icons.arrow_back_rounded,
+                  semanticsLabel: context.l10n.commonBack,
+                  onPressed: () => context.pop(),
                 ),
-                DecoratedBox(
-                  decoration: BoxDecoration(gradient: c.heroOverlay),
-                ),
-              ],
-            ),
-          ),
+              ),
+              backgroundColor: c.background,
+              flexibleSpace: Stack(
+                fit: StackFit.expand,
+                children: [
+                  FlexibleSpaceBar(
+                    title: Text(
+                      marathon.name,
+                      style: context.text.titleMd,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    titlePadding: const EdgeInsets.symmetric(
+                      horizontal: 56,
+                      vertical: AppSpacing.base,
+                    ),
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Hero(
+                          tag: 'marathon-${marathon.id}',
+                          child: EventImage(imageUrl: marathon.heroImageUrl),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(gradient: c.heroOverlay),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Photos can have any brightness. A scrim keeps the status area
+                  // readable until the header collapses onto the theme background.
+                  if (!collapsed)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: MediaQuery.paddingOf(context).top,
+                      child: const ColoredBox(color: Color(0x99000000)),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(

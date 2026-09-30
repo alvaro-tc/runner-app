@@ -1,5 +1,6 @@
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/theme/app_typography.dart';
+import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -43,6 +44,7 @@ abstract final class AppTheme {
       splashFactory: InkSparkle.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
+        systemOverlayStyle: systemUiStyleFor(p.background),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,

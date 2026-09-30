@@ -94,51 +94,61 @@ class StatRow extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accent.withValues(alpha: 0.12),
+        child: LayoutBuilder(
+          builder: (context, constraints) => Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accent.withValues(alpha: 0.12),
+                ),
+                child: Icon(icon, size: 19, color: accent),
               ),
-              child: Icon(icon, size: 19, color: accent),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: context.text.titleMd),
-                  if (subtitle != null)
-                    Text(
-                      subtitle!,
-                      style: context.text.bodySm.copyWith(
-                        color: c.textSecondary,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: context.text.titleMd),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: context.text.bodySm.copyWith(
+                          color: c.textSecondary,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-            if (value != null)
-              Flexible(
-                child: Text(
-                  value!,
-                  textAlign: TextAlign.right,
-                  style: context.text.bodyMd.copyWith(color: c.textSecondary),
+                  ],
                 ),
               ),
-            ?trailing,
-            if (onTap != null && trailing == null) ...[
-              const SizedBox(width: AppSpacing.xs),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: c.textSecondary,
-              ),
+              if (value != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth * 0.4,
+                  ),
+                  child: Text(
+                    value!,
+                    textAlign: TextAlign.end,
+                    style: context.text.bodyMd.copyWith(color: c.textSecondary),
+                  ),
+                ),
+              ],
+              if (trailing != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                trailing!,
+              ],
+              if (onTap != null && trailing == null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: c.textSecondary,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
