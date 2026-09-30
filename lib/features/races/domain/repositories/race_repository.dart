@@ -34,7 +34,7 @@ abstract interface class RaceRepository {
 
   // ─── Inscripcion ─────────────────────────────────────────────────────────
 
-  /// Paso 1. Devuelve el borrador que ya hubiera para esa maraton en vez de
+  /// Paso 1. Devuelve el borrador que ya hubiera para esa carrera en vez de
   /// abrir un segundo.
   Future<Result<Registration>> startRegistration({
     required String marathonId,

@@ -11,7 +11,7 @@ class AdminApi {
 
   final Dio _dio;
 
-  // ─── Maratones ───────────────────────────────────────────────────────────
+  // ─── Carreras ───────────────────────────────────────────────────────────
 
   Future<List<Map<String, dynamic>>> marathons() => apiCall(() async {
     final res = await _dio.get<dynamic>('/admin/marathons');
@@ -53,7 +53,7 @@ class AdminApi {
     await _dio.post<dynamic>('/admin/marathons/$id/$accion');
   });
 
-  /// Sube la foto de la maraton: el afiche que el corredor ve en el catalogo.
+  /// Sube la foto de la carrera: el afiche que el corredor ve en el catalogo.
   ///
   /// Es la unica imagen que se sube. El QR de cobro no: de su foto se saca el
   /// texto en el movil y viaja como un campo mas por [updateMarathon].
@@ -75,7 +75,7 @@ class AdminApi {
 
   // ─── Categorias y extras ─────────────────────────────────────────────────
   //
-  // Son tablas propias, no campos de la maraton: se crean y se borran al
+  // Son tablas propias, no campos de la carrera: se crean y se borran al
   // momento con su propio endpoint, como el afiche. Meterlas en el boton de
   // guardar obligaria a inventar ids en el movil para algo que solo el
   // servidor puede numerar.
@@ -120,7 +120,7 @@ class AdminApi {
 
   // ─── Largada en vivo ─────────────────────────────────────────────────────
 
-  /// Pone la maraton "en preparacion": los inscritos dejan de poder usar la app
+  /// Pone la carrera "en preparacion": los inscritos dejan de poder usar la app
   /// y solo ven el aviso. [message] es opcional —sin el la app pinta su texto
   /// por defecto— y llamarlo otra vez solo con el mensaje lo corrige sin tocar
   /// el estado.
@@ -203,7 +203,7 @@ class AdminApi {
   /// Una pagina de cobros, con el total que cumple el filtro.
   ///
   /// Es la misma forma que [users] y por la misma razon: la lista llega por
-  /// partes, asi que la maraton, el estado y la pagina se resuelven en el
+  /// partes, asi que la carrera, el estado y la pagina se resuelven en el
   /// servidor.
   Future<({List<Map<String, dynamic>> filas, int total})> payments({
     String? marathonId,

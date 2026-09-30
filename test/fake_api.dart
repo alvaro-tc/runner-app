@@ -11,9 +11,9 @@ import 'core/fake_http.dart';
 /// en La Paz y fallaria en Berlin.
 Future<ResponseBody> fakeBackend(RequestOptions req) async {
   final path = req.path;
-  // Antes que el detalle: `/marathons/upcoming` es una lista, no una maraton.
+  // Antes que el detalle: `/marathons/upcoming` es una lista, no una carrera.
   if (path.startsWith('/marathons/upcoming')) {
-    return envelope([_maraton, _otraMaraton]);
+    return envelope([_carrera, _otraCarrera]);
   }
   if (path.startsWith('/marathons/')) return envelope(marathonDetail);
   if (path.startsWith('/registrations/') && path.endsWith('/payments')) {
@@ -43,7 +43,7 @@ Future<ResponseBody> fakeBackend(RequestOptions req) async {
     '/users/me/shoes' => envelope(_zapatillas),
     '/users/me/preferences' => envelope(_preferencias),
     '/home/summary' => envelope(homeSummary),
-    '/marathons' => envelope([_maraton]),
+    '/marathons' => envelope([_carrera]),
     '/races/me' => envelope(misCarreras),
     '/races/me/summary' => envelope(racesSummary),
     _ => envelope(<String, Object?>{}),
@@ -106,10 +106,10 @@ const _preferencias = {
   'privacy': {'shareActivity': false},
 };
 
-const _maraton = {
+const _carrera = {
   'id': 'm1',
-  'slug': 'media-maraton-santa-cruz',
-  'name': 'Media Maraton Santa Cruz',
+  'slug': 'carrera-21k-santa-cruz',
+  'name': 'Carrera 21K Santa Cruz',
   'startsAt': '2026-09-12T10:00:00',
   'timezone': 'America/La_Paz',
   'city': 'Santa Cruz de la Sierra',
@@ -127,7 +127,7 @@ const _maraton = {
 
 /// El detalle tal como lo sirve `GET /marathons/:slug`.
 const marathonDetail = {
-  ..._maraton,
+  ..._carrera,
   'description': '21K planos por el segundo anillo.',
   'lat': -17.7833,
   'lng': -63.1821,
@@ -167,7 +167,7 @@ const marathonDetail = {
 
 /// La segunda del carrusel de Home. Basta con que sea otra: lo que se prueba
 /// es que el carrusel pagina, no sus datos.
-const _otraMaraton = {
+const _otraCarrera = {
   'id': 'm2',
   'slug': 'carrera-10k-cochabamba',
   'name': 'Carrera 10K Cochabamba',
@@ -186,12 +186,12 @@ const _otraMaraton = {
   'registrationClosesAt': null,
 };
 
-/// Lo que la lista de carreras necesita de la maraton: la API la manda
+/// Lo que la lista de carreras necesita de la carrera: la API la manda
 /// recortada, sin precio ni cupos.
-const _maratonDeCarrera = {
+const _carreraInscrita = {
   'id': 'm1',
-  'slug': 'media-maraton-santa-cruz',
-  'name': 'Media Maraton Santa Cruz',
+  'slug': 'carrera-21k-santa-cruz',
+  'name': 'Carrera 21K Santa Cruz',
   'city': 'Santa Cruz de la Sierra',
   'startsAt': '2026-09-12T10:00:00',
   'timezone': 'America/La_Paz',
@@ -200,10 +200,10 @@ const _maratonDeCarrera = {
   'kitPickup': null,
 };
 
-const _maratonCorrida = {
+const _carreraCorrida = {
   'id': 'm0',
-  'slug': 'maraton-la-paz-3600',
-  'name': 'Maraton La Paz 3600',
+  'slug': 'carrera-la-paz-3600',
+  'name': 'Carrera La Paz 3600',
   'city': 'La Paz',
   'startsAt': '2026-05-10T11:00:00',
   'timezone': 'America/La_Paz',
@@ -232,7 +232,7 @@ const _pago = {
 const misCarreras = [
   {
     'registrationId': 'r1',
-    'marathon': _maratonDeCarrera,
+    'marathon': _carreraInscrita,
     'bibNumber': 'MSC-0042',
     'categoryName': 'General',
     'status': 'upcoming',
@@ -242,7 +242,7 @@ const misCarreras = [
   },
   {
     'registrationId': 'r0',
-    'marathon': _maratonCorrida,
+    'marathon': _carreraCorrida,
     'bibNumber': 'MLP-0117',
     'categoryName': 'General',
     'status': 'completed',
@@ -307,7 +307,7 @@ const racesSummary = {
 /// de `pumpApp` (sabado 15).
 final homeSummary = {
   'featuredMarathon': {
-    ..._maraton,
+    ..._carrera,
     'registrationId': 'r1',
     'bibNumber': 'MSC-0042',
     'isRegistered': true,
@@ -321,10 +321,10 @@ final homeSummary = {
   },
   'plan': {
     'id': 'p1',
-    'name': 'Media maraton en 12 semanas',
+    'name': 'Carrera 21K en 12 semanas',
     'templateId': 't1',
     'marathonId': 'm1',
-    'marathonName': 'Media Maraton Santa Cruz',
+    'marathonName': 'Carrera 21K Santa Cruz',
     'totalWeeks': 12,
     'startDate': '2026-07-20',
     'endDate': '2026-10-11',

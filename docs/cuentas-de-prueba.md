@@ -16,12 +16,12 @@ misma para todas.
 | `organizer3@test.com` | `2000003SC` | `Test1234!` | `organizer` | Igual, en Santa Cruz |
 
 El rol `organizer` entra por su ruta propia, `/organizer`. Su inicio muestra la
-maratón en curso, el mapa en vivo y el detalle de los corredores en modo solo
+carrera en curso, el mapa en vivo y el detalle de los corredores en modo solo
 lectura. No puede iniciar ni finalizar la carrera y, si intenta escribir
 `/admin` a mano, la aplicación lo devuelve a `/organizer`. También conserva
 las herramientas permitidas para administrar cuentas de **corredor** (incluido
 resetear su contraseña) y validar comprobantes de pago QR. No puede crear ni
-editar maratones, publicarlas o deshabilitarlas, subir el QR de cobro, ni tocar
+editar carreras, publicarlas o deshabilitarlas, subir el QR de cobro, ni tocar
 cuentas de admin u otros organizadores —la API responde `403
 INSUFFICIENT_ROLE`—. El detalle está en `running-api/docs/api.md`, sección
 *Administración → Roles*.
@@ -44,10 +44,10 @@ Qué hay exactamente en `runner@test.com`:
 
 ## Probar el cobro por QR con verificación manual
 
-El seed carga un QR de cobro escaneable en **todas** las maratones, así que el
+El seed carga un QR de cobro escaneable en **todas** las carreras, así que el
 método "Bank QR" aparece en el paso 3 sin tocar nada. El recorrido completo:
 
-1. Con `runner@test.com`, inscríbete en una maratón y elige **Bank QR**.
+1. Con `runner@test.com`, inscríbete en una carrera y elige **Bank QR**.
    El cobro queda pendiente y la app pinta el QR y la glosa (`PU-XXXXXX`).
 2. Toca **Upload receipt** y elige cualquier imagen de la galería. El estado
    pasa a *Receipt under review*: **la inscripción sigue sin confirmar**, que es

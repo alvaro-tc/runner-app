@@ -46,7 +46,7 @@ Un entero que solo hace `+1` en cada **subida a Play**, sea al canal que sea
 | 1 | `1.0.0+1` | Primera subida, prueba interna |
 | 2 | `1.0.0+2` | Mismo contenido, se corrige el Data Safety y hay que re-subir el bundle |
 | 3 | `1.0.1+3` | Se arregla el crash al perder el GPS |
-| 4 | `1.1.0+4` | Entra el seguimiento en vivo de maratones |
+| 4 | `1.1.0+4` | Entra el seguimiento en vivo de carreras |
 | 5 | `1.1.1+5` | Textos en ingles que faltaban |
 | 6 | `2.0.0+6` | Rediseno de inicio e historial |
 

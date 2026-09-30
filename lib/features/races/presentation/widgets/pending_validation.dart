@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 /// Lo unico que hay que decirle a quien ya subio su comprobante: que espere.
 ///
-/// Es el mismo mensaje en "Mis carreras" y en la ficha de la maraton, y por eso
+/// Es el mismo mensaje en "Mis carreras" y en la ficha de la carrera, y por eso
 /// vive en un solo sitio: son la misma respuesta a la misma pregunta —"¿y ahora
 /// que?"— y contarla distinto en cada pantalla es lo que hace que el usuario
 /// crea que son dos cosas.

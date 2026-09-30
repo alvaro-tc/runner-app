@@ -1,10 +1,10 @@
 # CamRun
 
 App móvil de running en Flutter: plan de entrenamiento, seguimiento de carreras
-en vivo con GPS, historial persistente e inscripción a maratones.
+en vivo con GPS, historial persistente e inscripción a carreras.
 
 Los datos salen de [`running-api`](../running-api). Auth, Home y el catálogo de
-maratones ya hablan con el backend real; Train, Races y Profile siguen con
+carreras ya hablan con el backend real; Train, Races y Profile siguen con
 repositorios en memoria hasta sus fases (ver
 [ARCHITECTURE.md](ARCHITECTURE.md#9-sustituir-los-fakes-por-una-api-real)).
 
@@ -87,7 +87,7 @@ npm install && npx prisma migrate deploy && npm run db:seed
 npm run dev            # escucha en :3000
 ```
 
-y en otra terminal, `make run-local`. Sin `db:seed` no hay maratones ni cuentas
+y en otra terminal, `make run-local`. Sin `db:seed` no hay carreras ni cuentas
 de prueba: la app arranca, pero no hay con qué entrar.
 
 ## Comandos
@@ -108,7 +108,7 @@ flutter test --update-goldens   # regenerar capturas de referencia
 
 | Tab | Contenido |
 |---|---|
-| **Home** | Cuenta atrás del próximo maratón, tarjeta del evento, plan semanal con anillos de progreso y sesión del día |
+| **Home** | Cuenta atrás del próxima carrera, tarjeta del evento, plan semanal con anillos de progreso y sesión del día |
 | **Train** | Inicio rápido, resumen semanal con gráfico de barras, historial agrupado y filtrable |
 | **Races** | Totales calculados, inscripciones próximas y completadas con resultados |
 | **Profile** | Estadísticas, calzado, sueño, hidratación y ajustes |
@@ -116,7 +116,7 @@ flutter test --update-goldens   # regenerar capturas de referencia
 **Flujos completos**
 
 - Onboarding de 3 slides → welcome → sign in / sign up / recuperar contraseña.
-- Detalle de maratón e inscripción en 3 pasos (datos, categoría y extras, pago
+- Detalle de carrera e inscripción en 3 pasos (datos, categoría y extras, pago
   simulado) que genera un dorsal y aparece de inmediato en Races.
 - Sesión de running a pantalla completa: cuenta atrás 3-2-1, mapa que sigue tu
   posición, ritmo y splits en vivo, pausa, auto-pausa y finalización con

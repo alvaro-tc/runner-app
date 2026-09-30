@@ -74,7 +74,7 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
   /// null = todas. El servidor pagina, asi que el filtro viaja: cortar aqui
   /// dejaria fuera los cobros de la carrera buscada que no cayeran en la
   /// primera pagina.
-  String? _maratonId;
+  String? _carreraId;
 
   /// Arranca en `pending`: lo que se abre a hacer es lo que falta por validar,
   /// no el historico.
@@ -105,14 +105,14 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
   Widget build(BuildContext context) {
     final t = context.l10n;
     final consulta = (
-      marathonId: _maratonId,
+      marathonId: _carreraId,
       estado: _estado,
       busqueda: _filtro,
       pagina: _pagina,
       porPagina: _porPagina,
     );
     final tickets = ref.watch(adminTicketsProvider(consulta));
-    final maratones = ref.watch(adminMarathonsProvider).value ?? const [];
+    final carreras = ref.watch(adminMarathonsProvider).value ?? const [];
 
     return Scaffold(
       appBar: AppBar(
@@ -132,18 +132,18 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
               0,
             ),
             child: DropdownButtonFormField<String?>(
-              initialValue: _maratonId,
+              initialValue: _carreraId,
               isExpanded: true,
               decoration: InputDecoration(labelText: t.organizerMarathon),
               items: [
                 DropdownMenuItem(child: Text(t.organizerAllMarathons)),
-                for (final m in maratones)
+                for (final m in carreras)
                   DropdownMenuItem(
                     value: m.id,
                     child: Text(m.name, overflow: TextOverflow.ellipsis),
                   ),
               ],
-              onChanged: (id) => _reiniciar(() => _maratonId = id),
+              onChanged: (id) => _reiniciar(() => _carreraId = id),
             ),
           ),
           Padding(

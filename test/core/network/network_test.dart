@@ -71,7 +71,7 @@ void main() {
     test('el catalogo del corredor sigue siendo publico', () {
       expect(isPublicPath('/marathons'), isTrue);
       expect(isPublicPath('/marathons/upcoming'), isTrue);
-      expect(isPublicPath('/marathons/maraton-la-paz-3600'), isTrue);
+      expect(isPublicPath('/marathons/carrera-la-paz-3600'), isTrue);
       expect(isPublicPath('/marathons/abc/categories'), isTrue);
     });
 

@@ -35,18 +35,18 @@ void main() {
     });
 
     test('las unidades crudas se convierten una sola vez', () {
-      final maraton = resumen.featuredMarathon!;
-      expect(maraton.distanceKm, closeTo(21.097, 0.001));
-      expect(maraton.entryFee.amount, 180);
-      expect(maraton.entryFee.currency, 'BOB');
+      final carrera = resumen.featuredMarathon!;
+      expect(carrera.distanceKm, closeTo(21.097, 0.001));
+      expect(carrera.entryFee.amount, 180);
+      expect(carrera.entryFee.currency, 'BOB');
       expect(resumen.plan!.totalWeeks, 12);
     });
 
     test('el pronostico se abre en banda segun la confianza declarada', () {
-      final maraton = resumen.featuredMarathon!;
+      final carrera = resumen.featuredMarathon!;
       // 7020 s con confianza media: ±8 %.
-      expect(maraton.predictedFinishMin, const Duration(seconds: 6458));
-      expect(maraton.predictedFinishMax, const Duration(seconds: 7582));
+      expect(carrera.predictedFinishMin, const Duration(seconds: 6458));
+      expect(carrera.predictedFinishMax, const Duration(seconds: 7582));
     });
 
     test('sin prediccion no se inventa un rango', () {
@@ -63,9 +63,9 @@ void main() {
 
   test('el recorrido GeoJSON llega como lat/lng, no al reves', () async {
     final (repo, db) = _repo((_) async => envelope(marathonDetail));
-    final maraton = (await repo.fetchById('m1')).unwrap();
-    expect(maraton.routePreview.first.lat, closeTo(-17.7833, 0.0001));
-    expect(maraton.routePreview.first.lng, closeTo(-63.1821, 0.0001));
+    final carrera = (await repo.fetchById('m1')).unwrap();
+    expect(carrera.routePreview.first.lat, closeTo(-17.7833, 0.0001));
+    expect(carrera.routePreview.first.lng, closeTo(-63.1821, 0.0001));
     await db.close();
   });
 
@@ -83,7 +83,7 @@ void main() {
 
     expect((await marathons.fetchById('m1')).unwrap().name, isNotEmpty);
     caiga = true;
-    // La segunda llamada no llega al servidor y aun asi devuelve la maraton.
+    // La segunda llamada no llega al servidor y aun asi devuelve la carrera.
     expect((await marathons.fetchById('m1')).unwrap().id, 'm1');
 
     // Y sin nada en cache, el fallo sube: no hay nada que ensenar.

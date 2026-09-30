@@ -119,7 +119,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
   ///
   /// **El corte del organizador**, que termina la carrera de todo el mundo a la
   /// vez. Y **la llegada de esta persona**: quien cruza la meta acaba su
-  /// carrera aunque la maraton siga —cada uno tarda lo suyo—, y quien decide
+  /// carrera aunque la carrera siga —cada uno tarda lo suyo—, y quien decide
   /// que cruzo es el servidor, comparando su GPS con el trazado oficial. El
   /// telefono no lo decide por su cuenta: en una ida y vuelta la distancia
   /// recorrida y la cercania a la meta mienten las dos.
@@ -194,7 +194,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     final goal = ref.read(runSessionProvider).goal;
     final run = await ref.read(runSessionProvider.notifier).finish();
     if (!mounted) return;
-    // Se guarda tambien en local, maraton incluida: si no hubo red, esto es lo
+    // Se guarda tambien en local, carrera incluida: si no hubo red, esto es lo
     // unico que queda de la carrera hasta que la cola suba.
     final error = await ref.read(historyProvider.notifier).save(run);
     if (!mounted) return;
@@ -202,7 +202,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
       context.showSnack(error.localized(context.l10n));
       return;
     }
-    // Quien acaba una maraton oficial no termina en el resumen de un
+    // Quien acaba una carrera oficial no termina en el resumen de un
     // entrenamiento: termina en su carrera, con su dorsal, su tiempo y sus
     // parciales, que es lo que el servidor consolida al cerrarla.
     context.pushReplacement(
@@ -217,7 +217,7 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
     final state = ref.watch(runSessionProvider);
     final c = context.colors;
 
-    // Maraton oficial: la pantalla es una puerta cerrada. Ni atras, ni pausa,
+    // Carrera oficial: la pantalla es una puerta cerrada. Ni atras, ni pausa,
     // ni descartar. El unico que la abre es el organizador, cortando la carrera.
     // `isActive` de verdad: si la grabacion no llego a arrancar —permiso de
     // ubicacion denegado— la pantalla no puede quedarse cerrada sin salida.
@@ -351,7 +351,7 @@ class _TopBar extends StatelessWidget {
 
   final Future<void> Function() onBack;
 
-  /// Sin botones. No estan escondidos por estetica: en maraton oficial no hay
+  /// Sin botones. No estan escondidos por estetica: en carrera oficial no hay
   /// nada que puedan hacer, y un boton que no hace nada se pulsa igual.
   final bool locked;
 
@@ -392,7 +392,7 @@ class _TopBar extends StatelessWidget {
 
 /// Lo recorrido y lo que falta, en grande y arriba.
 ///
-/// Es lo unico que se mira corriendo una maraton, y por eso no vive dentro de
+/// Es lo unico que se mira corriendo una carrera, y por eso no vive dentro de
 /// la hoja de estadisticas: esa hay que arrastrarla, y a mitad de carrera no se
 /// arrastra nada.
 class _Restante extends StatelessWidget {
@@ -642,7 +642,7 @@ class _StatsSheet extends ConsumerWidget {
 
   final VoidCallback onFinish;
 
-  /// Sin pausa ni "terminar": en maraton oficial el final lo da el organizador.
+  /// Sin pausa ni "terminar": en carrera oficial el final lo da el organizador.
   final bool locked;
 
   @override

@@ -184,7 +184,7 @@ TrainingWeek weekFrom(Map<String, dynamic> j) {
 // ─── Home ──────────────────────────────────────────────────────────────────
 
 HomeSummary summaryFrom(Map<String, dynamic> j) {
-  final maraton = j['featuredMarathon'] as Map<String, dynamic>?;
+  final carrera = j['featuredMarathon'] as Map<String, dynamic>?;
   final plan = j['plan'] as Map<String, dynamic>?;
   final planWeek = j['planWeek'] as Map<String, dynamic>?;
   final sesiones = {
@@ -195,10 +195,10 @@ HomeSummary summaryFrom(Map<String, dynamic> j) {
   };
 
   return HomeSummary(
-    featuredMarathon: maraton == null
+    featuredMarathon: carrera == null
         ? null
         : marathonFrom(
-            maraton,
+            carrera,
             prediction: j['prediction'] as Map<String, dynamic>?,
           ),
     plan: plan == null ? null : planFrom(plan),

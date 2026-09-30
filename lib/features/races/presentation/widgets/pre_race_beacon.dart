@@ -8,7 +8,7 @@ import 'package:camrun/features/tracking/tracking_providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Empieza a mandar la posicion en cuanto el organizador pone la maraton "en
+/// Empieza a mandar la posicion en cuanto el organizador pone la carrera "en
 /// preparacion", sin esperar a la largada.
 ///
 /// **Por que antes de correr.** El organizador cierra el kiosko y a partir de
@@ -22,7 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Es el mismo camino, encendido antes.
 ///
 /// El servidor resuelve el dispositivo a la inscripcion del corredor en la
-/// maraton en preparacion y publica la posicion en su sala.
+/// carrera en preparacion y publica la posicion en su sala.
 class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
   /// Ya sube posiciones. Sin esto, cada aviso repetido del socket reencenderia
   /// Traccar.
@@ -125,7 +125,7 @@ class PreRaceBeacon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // `watch` y no `listen`: el corredor puede abrir la app con la maraton ya
+    // `watch` y no `listen`: el corredor puede abrir la app con la carrera ya
     // en preparacion —la dejo cerrada, o volvio de otra pantalla— y ahi no hay
     // ningun cambio de puerta que escuchar; con `listen` ese corredor no sale
     // nunca en el mapa del organizador. Encender y apagar son idempotentes, asi

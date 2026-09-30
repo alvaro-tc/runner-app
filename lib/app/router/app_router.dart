@@ -243,7 +243,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       StatefulShellRoute.indexedStack(
         // La puerta envuelve la app del corredor entera: el estado de la
-        // maraton puede cambiar con el corredor en cualquier pestana, y lo que
+        // carrera puede cambiar con el corredor en cualquier pestana, y lo que
         // hace es quitarle la app —aviso de preparacion, o sus estadisticas
         // despues de llegar— hasta que la carrera termine.
         builder: (context, state, shell) => NotificationsListener(

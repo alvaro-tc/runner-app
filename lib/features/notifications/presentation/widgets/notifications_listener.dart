@@ -53,7 +53,7 @@ class _NotificationsListenerState extends ConsumerState<NotificationsListener> {
     _avisos = socket.notifications.listen((_) => _refrescar());
 
     // El organizador necesita el socket siempre: los pagos le llegan sin que
-    // este mirando ninguna maraton. Al corredor se lo abre `RacesAutoRefresh`
+    // este mirando ninguna carrera. Al corredor se lo abre `RacesAutoRefresh`
     // mientras espera validacion, que es cuando le puede llegar algo.
     if (ref.read(authProvider).isStaff) {
       _releasePersonal = socket.watchPersonal();

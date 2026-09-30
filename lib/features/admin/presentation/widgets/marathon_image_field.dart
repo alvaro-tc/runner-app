@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 /// En que punto de la subida esta el hueco de la imagen.
 enum ImageSlotStatus { idle, uploading, failed }
 
-/// Un hueco de imagen de la maraton: el afiche o el QR de cobro.
+/// Un hueco de imagen de la carrera: el afiche o el QR de cobro.
 ///
 /// **Siempre pinta lo que hay en el servidor, nunca el archivo local.** Es la
 /// razon de ser del widget: mostrar la foto recien elegida desde el disco
@@ -17,7 +17,7 @@ enum ImageSlotStatus { idle, uploading, failed }
 /// solo lo demuestra la URL que devuelve el servidor.
 ///
 /// El widget no sube nada: avisa con [onPick] y se deja pintar segun [status].
-/// Quien sube es la pantalla, que es la que tiene el id de la maraton.
+/// Quien sube es la pantalla, que es la que tiene el id de la carrera.
 class MarathonImageField extends StatelessWidget {
   const MarathonImageField({
     required this.imageUrl,
@@ -53,7 +53,7 @@ class MarathonImageField extends StatelessWidget {
   /// 16/9 para el afiche, 1 para el QR.
   final double aspectRatio;
 
-  /// En el alta no hay donde poner la imagen: la maraton todavia no tiene id.
+  /// En el alta no hay donde poner la imagen: la carrera todavia no tiene id.
   final bool enabled;
   final String? disabledHint;
 

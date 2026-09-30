@@ -106,7 +106,7 @@ muestra km o millas, `5:30/km` o `Bs 150,00`.
 | Fechas | ISO-8601 en **UTC** | `2026-08-18T14:03:22.118Z` |
 | Coordenadas | GeoJSON, orden **`[lng, lat]`** | `[-68.1335, -16.4957]` |
 
-Nunca uses `float` para dinero. Cada maratón trae además su `timezone` IANA
+Nunca uses `float` para dinero. Cada carrera trae además su `timezone` IANA
 (`America/La_Paz` por defecto) para mostrar la hora local de la carrera.
 
 ### 2.3 Validación estricta
@@ -359,7 +359,7 @@ Detalles que importan:
 | `admin` | Todo |
 
 `organizer` es un admin recortado, para quien atiende ventanilla el día de la
-carrera. **No puede** crear/editar/publicar maratones, subir QR ni afiche, abrir
+carrera. **No puede** crear/editar/publicar carreras, subir QR ni afiche, abrir
 o cerrar inscripciones, dar la largada, tocar categorías, extras, recorridos,
 cargo por servicio ni resultados, confirmar transferencias bancarias, ni
 **administrar cuentas que no sean `runner`** (esa última línea es la que sostiene
@@ -382,13 +382,13 @@ crea `runner` y punto.
 
 ---
 
-## 5. Maratones
+## 5. Carreras
 
 > Swagger: tags **marathons**, **routes**, **admin**.
 
 ### 5.1 El catálogo es público
 
-No exige token. Una maratón publicada es información de difusión: se comparte por
+No exige token. Una carrera publicada es información de difusión: se comparte por
 WhatsApp, se abre desde un deep link antes de instalar la app y mañana la lee un
 front web. **Inscribirse sí exige token.**
 
@@ -409,7 +409,7 @@ largada, ISO, inclusivos), `status`, `limit` (1–50, 20 por defecto), `cursor`.
 
 ### 5.2 Qué se ve y qué no
 
-Solo se listan las maratones con `publishedAt` **no nulo y ya pasado**. Un
+Solo se listan las carreras con `publishedAt` **no nulo y ya pasado**. Un
 `publishedAt` futuro es un **embargo**: el organizador la deja cargada y la API
 la muestra sola a la hora acordada. Lo no publicado da **404** también por slug
 directo, así que adivinar la URL no adelanta nada.
@@ -452,12 +452,12 @@ circuitos homologados y cada edición vuelve a usar uno. Públicos
   `distanceMeters`, lo calcula sobre la geometría (haversine).
 - `POST /admin/marathons` con `routeId` **copia** a la carrera el trazado, la
   distancia y el punto de largada. Editar después el recorrido **no** toca las
-  maratones que ya salieron de él.
+  carreras que ya salieron de él.
 - La geometría es un `LineString` GeoJSON en orden **`[lng, lat]`**, simplificado
   con Douglas-Peucker y con tope de **2.000 vértices** (`?full=true` para el
-  crudo). Una maratón a 1 Hz son ~15.000 puntos que ningún mapa dibuja.
+  crudo). Una carrera a 1 Hz son ~15.000 puntos que ningún mapa dibuja.
 
-### 5.6 QR de cobro por maratón (temporal)
+### 5.6 QR de cobro por carrera (temporal)
 
 | Campo | Qué es |
 |---|---|
@@ -497,7 +497,7 @@ flujo, para retomarlo después de cerrar la app.
 
 ```jsonc
 POST /registrations
-{ "marathonId": "maraton-la-paz-3600",       // id o slug
+{ "marathonId": "carrera-la-paz-3600",       // id o slug
   "personalData": {
     "fullName": "Ana Quispe",                 // obligatorio
     "docId": "1234567LP",                     // obligatorio: cruza inscripción con cuenta
@@ -509,7 +509,7 @@ POST /registrations
     "bloodType": "O+", "shirtSize": "M" } }
 ```
 
-**Es idempotente por maratón:** si ya hay un borrador para esa carrera lo
+**Es idempotente por carrera:** si ya hay un borrador para esa carrera lo
 devuelve actualizado en vez de crear otro. Quien cierra la app en el paso 2 y
 vuelve mañana entra por el mismo sitio. Si perdiste el id,
 `GET /registrations?marathonId=<slug>` lo recupera. Si ya hay una inscripción
@@ -537,7 +537,7 @@ lo que evita que alguien quede cobrado y sin carrera:
    la categoría y los datos personales. **Nadie paga por una carrera cerrada.**
 2. **Se recalcula el precio.** No se confía en el total que vio el cliente.
 3. Se cobra contra el proveedor.
-4. Con el cobro aprobado, y dentro de una transacción con la fila de la maratón
+4. Con el cobro aprobado, y dentro de una transacción con la fila de la carrera
    bloqueada (`SELECT … FOR UPDATE`), se descuenta el stock, se asigna el dorsal
    y se incrementa `slotsTaken`.
 5. Si ese último paso falla —el último cupo se fue mientras se procesaba la
@@ -546,7 +546,7 @@ lo que evita que alguien quede cobrado y sin carrera:
 ### Dorsales
 
 Formato `MLP-0042`: tres letras derivadas del nombre + correlativo de cuatro
-dígitos, único por maratón. El correlativo cuenta los dorsales **ya emitidos,
+dígitos, único por carrera. El correlativo cuenta los dorsales **ya emitidos,
 incluidos los de inscripciones canceladas**, así que un número nunca se reutiliza.
 
 ### Precios: vivos mientras es borrador, congelados después
@@ -584,7 +584,7 @@ el catálogo: se calcula sobre datos públicos y **no reserva nada**.
 
 ```jsonc
 POST /pricing/quote
-{ "marathonId": "maraton-la-paz-3600", "categoryId": "cat_…",
+{ "marathonId": "carrera-la-paz-3600", "categoryId": "cat_…",
   "extras": [{ "extraId": "ext_…", "quantity": 2 }] }
 ```
 
@@ -700,7 +700,7 @@ Reglas que sorprenden y no deberían:
 - **El cobro caduca a las 48 h** (`PAYMENT_PROOF_TTL_HOURS`), resuelto por la
   siguiente lectura de `GET /payments/:id`, no por un cron. Es un vencimiento
   **blando**: el plazo es para el corredor, no para quien revisa.
-- `QR_NOT_CONFIGURED` si la maratón no tiene `paymentQrPayload`.
+- `QR_NOT_CONFIGURED` si la carrera no tiene `paymentQrPayload`.
 
 ### 7.3 QR automático (`qr`) — polling
 
@@ -1039,7 +1039,7 @@ en el backend.
 |---|---|---|---|
 | GET | `/training-plans/templates?goalDistance=&level=&weeks=` | no | Catálogo (no pagina) |
 | GET | `/training-plans/templates/:slug` | no | Detalle con todas las sesiones |
-| GET | `/training-plans/suggestions?marathonId=` | no | Plantillas que sirven para esa maratón |
+| GET | `/training-plans/suggestions?marathonId=` | no | Plantillas que sirven para esa carrera |
 | GET | `/training-plans/me` | sí | Plan activo + historial (`active: null` si no hay) |
 | GET | `/training-plans/me/current?week=` | sí | Una semana del plan activo (404 sin plan) |
 | POST | `/training-plans` | sí | Instanciar |
@@ -1051,13 +1051,13 @@ en el backend.
 
 Dos caminos para empezar: **A)** del catálogo (`{ templateId, startDate? }`; sin
 fecha arranca el lunes siguiente y cualquier fecha se **redondea hacia adelante**
-al lunes). **B)** con maratón objetivo (`{ templateId, marathonId }`; `startDate`
+al lunes). **B)** con carrera objetivo (`{ templateId, marathonId }`; `startDate`
 se ignora, la fecha sale de la carrera).
 
 - **`fits: false` no es "descartada"**: entra recortada. Solo desaparecen de la
   lista las que no entran ni recortando. Píntalas con advertencia, no las
   escondas.
-- Con maratón objetivo el plan se **ancla por el final** (la última semana es la
+- Con carrera objetivo el plan se **ancla por el final** (la última semana es la
   de la carrera). Al recortar se conservan la primera semana y **las dos últimas**
   (el tapering) y se van las de base; las semanas conservadas se **renumeran desde
   1**. Por debajo de 3 semanas: `PLAN_DOES_NOT_FIT`.
@@ -1160,7 +1160,7 @@ aparecen en `/api/docs` de producción. Verifica antes de usarlos.
 
 Reglas del panel que un cliente nuevo debe respetar:
 
-- Una maratón **nace como borrador** salvo que se mande `published: true`.
+- Una carrera **nace como borrador** salvo que se mande `published: true`.
   Publicarla sola la metería en el catálogo antes de que nadie la revise.
 - Obligatorios en el alta: `name`, `startsAt`, `city`, `distanceMeters`,
   `capacity`, `priceCents`. Sin `slug` se deriva del nombre y se desambigua con
@@ -1198,7 +1198,7 @@ Telegram, Facebook) y **salto a la app** con el esquema propio
 El salto va en un `<script>`, **nunca en un 302**: un redirect dejaría al bot sin
 metadatos y la previsualización saldría en blanco.
 
-De una maratón sale todo (es difusión); de un entrenamiento o un resultado sale
+De una carrera sale todo (es difusión); de un entrenamiento o un resultado sale
 lo mínimo y **nunca el nombre del corredor, su recorrido ni sus coordenadas** —
 la previsualización de WhatsApp la ve el grupo entero.
 

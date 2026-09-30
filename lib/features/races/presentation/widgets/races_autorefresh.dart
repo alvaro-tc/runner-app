@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/foreground_poller.dart';
+import 'package:camrun/features/home/presentation/providers/home_provider.dart';
+import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
 import 'package:camrun/features/races/presentation/providers/races_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Cada cuanto se vuelve a pedir "mis carreras" con la app delante.
 ///
 /// **Es la red, no el camino.** Lo inmediato lo trae el socket —el estado de la
-/// maraton por su sala, el pago validado por la sala personal del corredor—; el
+/// carrera por su sala, el pago validado por la sala personal del corredor—; el
 /// sondeo es para cuando ese aviso no llego: el telefono sin cobertura en el
 /// momento exacto, el socket reconectando, el servidor que todavia no manda ese
 /// evento. Por eso es corto: lo que hay al otro lado son decisiones de una
@@ -40,6 +42,7 @@ class RacesAutoRefresh extends ConsumerStatefulWidget {
 
 class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
   ForegroundPoller? _poller;
+  AppLifecycleListener? _ciclo;
   StreamSubscription<void>? _avisos;
   VoidCallback? _releasePersonal;
 
@@ -57,6 +60,7 @@ class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
         _releasePersonal = null;
       }
     }, fireImmediately: true);
+    _ciclo = AppLifecycleListener(onResume: _alVolver);
     _avisos = ref
         .read(liveSocketProvider)
         .registrations
@@ -67,6 +71,7 @@ class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
   void dispose() {
     _releasePersonal?.call();
     _poller?.dispose();
+    _ciclo?.dispose();
     unawaited(_avisos?.cancel());
     super.dispose();
   }
@@ -75,6 +80,18 @@ class _RacesAutoRefreshState extends ConsumerState<RacesAutoRefresh> {
     if (mounted && !ref.read(racesProvider).isLoading) {
       ref.invalidate(racesProvider);
     }
+  }
+
+  /// El catalogo —y con el los afiches— tambien vive en providers que no se
+  /// liberan: sin esto, una portada subida con la app del corredor en segundo
+  /// plano no aparecia hasta tirar para recargar o matar la app. Solo al volver
+  /// y no en cada tic: el catalogo lo cambia un organizador, no el reloj.
+  void _alVolver() {
+    _refrescar();
+    ref
+      ..invalidate(homeProvider)
+      ..invalidate(upcomingMarathonsProvider)
+      ..invalidate(marathonProvider);
   }
 
   @override

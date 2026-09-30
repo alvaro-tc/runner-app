@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeUpcomingMarathon.
   ///
   /// In en, this message translates to:
-  /// **'Upcoming Marathon In'**
+  /// **'Upcoming Race In'**
   String get homeUpcomingMarathon;
 
   /// No description provided for @homePlanTitleOf.
@@ -1457,13 +1457,13 @@ abstract class AppLocalizations {
   /// No description provided for @racesNoMarathonYet.
   ///
   /// In en, this message translates to:
-  /// **'No marathon finish recorded yet.'**
+  /// **'No race finish recorded yet.'**
   String get racesNoMarathonYet;
 
   /// No description provided for @racesBestMarathon.
   ///
   /// In en, this message translates to:
-  /// **'Best marathon: {time}'**
+  /// **'Best race: {time}'**
   String racesBestMarathon(String time);
 
   /// No description provided for @racesPaidAmount.
@@ -2735,13 +2735,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeUpcomingMarathons.
   ///
   /// In en, this message translates to:
-  /// **'Upcoming Marathons'**
+  /// **'Upcoming Races'**
   String get homeUpcomingMarathons;
 
   /// No description provided for @racesUpcomingMarathons.
   ///
   /// In en, this message translates to:
-  /// **'Upcoming marathons'**
+  /// **'Upcoming races'**
   String get racesUpcomingMarathons;
 
   /// No description provided for @registerEmailHint.
@@ -2993,7 +2993,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminNavMarathons.
   ///
   /// In en, this message translates to:
-  /// **'Marathons'**
+  /// **'Races'**
   String get adminNavMarathons;
 
   /// No description provided for @adminNavUsers.
@@ -3011,7 +3011,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminNoMarathonsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No marathons yet'**
+  /// **'No races yet'**
   String get adminNoMarathonsTitle;
 
   /// No description provided for @adminNoMarathonsBody.
@@ -3035,7 +3035,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminStart.
   ///
   /// In en, this message translates to:
-  /// **'Start marathon'**
+  /// **'Start race'**
   String get adminStart;
 
   /// No description provided for @adminFinish.
@@ -3071,7 +3071,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminAlreadyFinished.
   ///
   /// In en, this message translates to:
-  /// **'This marathon has already finished'**
+  /// **'This race has already finished'**
   String get adminAlreadyFinished;
 
   /// No description provided for @adminPrepare.
@@ -3161,19 +3161,19 @@ abstract class AppLocalizations {
   /// No description provided for @adminMarathonsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Marathons'**
+  /// **'Races'**
   String get adminMarathonsTitle;
 
   /// No description provided for @adminNewMarathon.
   ///
   /// In en, this message translates to:
-  /// **'New marathon'**
+  /// **'New race'**
   String get adminNewMarathon;
 
   /// No description provided for @adminEditMarathon.
   ///
   /// In en, this message translates to:
-  /// **'Edit marathon'**
+  /// **'Edit race'**
   String get adminEditMarathon;
 
   /// No description provided for @adminLive.
@@ -3257,7 +3257,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminNameRequired.
   ///
   /// In en, this message translates to:
-  /// **'Give the marathon a name.'**
+  /// **'Give the race a name.'**
   String get adminNameRequired;
 
   /// No description provided for @adminCityRequired.
@@ -3431,7 +3431,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminCoverTitle.
   ///
   /// In en, this message translates to:
-  /// **'Marathon photo'**
+  /// **'Race photo'**
   String get adminCoverTitle;
 
   /// No description provided for @adminCoverHint.
@@ -3449,7 +3449,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminCoverAfterSave.
   ///
   /// In en, this message translates to:
-  /// **'Save the marathon first to upload the photo'**
+  /// **'Save the race first to upload the photo'**
   String get adminCoverAfterSave;
 
   /// No description provided for @adminCoverUploaded.
@@ -3551,19 +3551,19 @@ abstract class AppLocalizations {
   /// No description provided for @adminCreateMarathon.
   ///
   /// In en, this message translates to:
-  /// **'Create marathon'**
+  /// **'Create race'**
   String get adminCreateMarathon;
 
   /// No description provided for @adminMarathonSaved.
   ///
   /// In en, this message translates to:
-  /// **'Marathon saved.'**
+  /// **'Race saved.'**
   String get adminMarathonSaved;
 
   /// No description provided for @adminMarathonCreated.
   ///
   /// In en, this message translates to:
-  /// **'Marathon created. You can upload its photo and QR now.'**
+  /// **'Race created. You can upload its photo and QR now.'**
   String get adminMarathonCreated;
 
   /// No description provided for @adminNothingChanged.
@@ -3581,7 +3581,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminDeleteMarathonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete this marathon?'**
+  /// **'Delete this race?'**
   String get adminDeleteMarathonTitle;
 
   /// No description provided for @adminDeleteMarathonBody.
@@ -3755,7 +3755,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminAfterSave.
   ///
   /// In en, this message translates to:
-  /// **'Save the marathon first to add these'**
+  /// **'Save the race first to add these'**
   String get adminAfterSave;
 
   /// No description provided for @adminRequiredField.
@@ -4463,13 +4463,13 @@ abstract class AppLocalizations {
   /// No description provided for @organizerMarathon.
   ///
   /// In en, this message translates to:
-  /// **'Marathon'**
+  /// **'Race'**
   String get organizerMarathon;
 
   /// No description provided for @organizerAllMarathons.
   ///
   /// In en, this message translates to:
-  /// **'All marathons'**
+  /// **'All races'**
   String get organizerAllMarathons;
 
   /// No description provided for @organizerNoTicketsTitle.
@@ -4747,6 +4747,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark all read'**
   String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get notificationsMarkRead;
+
+  /// No description provided for @notificationsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notificationsDelete;
+
+  /// No description provided for @notificationsDeleteRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete read'**
+  String get notificationsDeleteRead;
+
+  /// No description provided for @notificationsMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get notificationsMoreActions;
+
+  /// No description provided for @notificationsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notificationsFilterAll;
+
+  /// No description provided for @notificationsFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notificationsFilterUnread;
+
+  /// No description provided for @notificationsUnreadEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get notificationsUnreadEmptyTitle;
+
+  /// No description provided for @notificationsUnreadEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no unread notifications.'**
+  String get notificationsUnreadEmptyBody;
 
   /// No description provided for @notificationsEmptyTitle.
   ///

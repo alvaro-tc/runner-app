@@ -2,7 +2,7 @@ import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:meta/meta.dart';
 
-/// Una maraton vista por el panel.
+/// Una carrera vista por el panel.
 ///
 /// No reusa `Marathon` del catalogo a proposito: aquella es lo que ve un
 /// corredor —afiche, precio, cupos— y esta es lo que gestiona un admin, con
@@ -129,7 +129,7 @@ class AdminMarathon {
   final List<GeoPoint> route;
 
   /// El programa del dia y lo que la inscripcion incluye. Van como `jsonb` en
-  /// la maraton, asi que se guardan con el resto del formulario.
+  /// la carrera, asi que se guardan con el resto del formulario.
   final List<AdminScheduleItem> schedule;
   final List<String> includes;
 

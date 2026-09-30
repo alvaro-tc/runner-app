@@ -1,7 +1,7 @@
 name: camrun
 description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
-version: 1.0.7+8
+version: 1.0.8+9
 
 environment:
   sdk: ^3.12.2
@@ -63,10 +63,10 @@ dependencies:
   json_annotation: ^4.12.0
   drift: ^2.34.3
   drift_flutter: ^0.3.1
-  # Mapa en vivo de la maraton y aviso de largada. El backend ya expone un
+  # Mapa en vivo de la carrera y aviso de largada. El backend ya expone un
   # gateway Socket.IO en /live: esto es su cliente, no una capa nueva.
   socket_io_client: ^3.1.6
-  # Seguimiento en vivo de la maraton oficial: servicio nativo, cola offline y
+  # Seguimiento en vivo de la carrera oficial: servicio nativo, cola offline y
   # reintento ya resueltos. Solo se enciende durante la carrera.
   traccar_client_sdk: ^1.0.10
   # Avisos por voz durante la carrera: cierre de vuelta. Es el TTS del sistema

@@ -171,7 +171,7 @@ List<GeoPoint> _puntos(Object? geoJson) {
   ];
 }
 
-/// El recorrido oficial de una maraton, para dibujarlo bajo el del corredor.
+/// El recorrido oficial de una carrera, para dibujarlo bajo el del corredor.
 List<GeoPoint> routePointsFrom(Object? geoJson) => _puntos(geoJson);
 
 /// `GET /races/me/summary`. La cabecera de "Mis carreras".
@@ -188,17 +188,17 @@ RaceTotals raceTotalsFrom(Map<String, dynamic> j) {
 // ─── Inscripcion ───────────────────────────────────────────────────────────
 
 Registration registrationFrom(Map<String, dynamic> j) {
-  final maraton = j['marathon'] as Map<String, dynamic>? ?? const {};
+  final carrera = j['marathon'] as Map<String, dynamic>? ?? const {};
 
   return Registration(
     id: j['id'] as String,
-    marathonId: maraton['id'] as String? ?? '',
-    marathonName: maraton['name'] as String? ?? '',
+    marathonId: carrera['id'] as String? ?? '',
+    marathonName: carrera['name'] as String? ?? '',
     state: RegistrationState.fromApi(j['status'] as String?),
     step: RegistrationStep.fromNumber(_i(j['step'])),
     quote: quoteFrom(j),
-    marathonDate: _fechaOpcional(maraton['startsAt']),
-    marathonCity: maraton['city'] as String?,
+    marathonDate: _fechaOpcional(carrera['startsAt']),
+    marathonCity: carrera['city'] as String?,
     categoryId: j['categoryId'] as String?,
     bibNumber: j['bibNumber'] as String?,
   );

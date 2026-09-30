@@ -248,7 +248,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inscríbete en eventos desde la app y guarda tu dorsal, tu tiempo de meta y tus parciales en un mismo sitio.';
 
   @override
-  String get homeUpcomingMarathon => 'Tu próximo maratón en';
+  String get homeUpcomingMarathon => 'Tu próxima carrera en';
 
   @override
   String homePlanTitleOf(String name) {
@@ -755,11 +755,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get racesTotalSpent => 'Total gastado';
 
   @override
-  String get racesNoMarathonYet => 'Todavía no hay ningún maratón terminado.';
+  String get racesNoMarathonYet => 'Todavía no hay ninguna carrera terminada.';
 
   @override
   String racesBestMarathon(String time) {
-    return 'Mejor maratón: $time';
+    return 'Mejor carrera: $time';
   }
 
   @override
@@ -1470,10 +1470,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get changePasswordSubmit => 'Guardar y continuar';
 
   @override
-  String get homeUpcomingMarathons => 'Tus próximos maratones';
+  String get homeUpcomingMarathons => 'Tus próximas carreras';
 
   @override
-  String get racesUpcomingMarathons => 'Próximos maratones';
+  String get racesUpcomingMarathons => 'Próximas carreras';
 
   @override
   String get registerEmailHint => 'Donde te enviamos la confirmación';
@@ -1609,7 +1609,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminNavLive => 'En vivo';
 
   @override
-  String get adminNavMarathons => 'Maratones';
+  String get adminNavMarathons => 'Carreras';
 
   @override
   String get adminNavUsers => 'Usuarios';
@@ -1618,7 +1618,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminLoadFailed => 'No se pudo cargar. Reintenta.';
 
   @override
-  String get adminNoMarathonsTitle => 'Todavía no hay maratones';
+  String get adminNoMarathonsTitle => 'Todavía no hay carreras';
 
   @override
   String get adminNoMarathonsBody =>
@@ -1641,7 +1641,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'El mapa se actualizará solo cuando llegue la primera ubicación.';
 
   @override
-  String get adminStart => 'Iniciar maratón';
+  String get adminStart => 'Iniciar carrera';
 
   @override
   String get adminFinish => 'Finalizar';
@@ -1663,7 +1663,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get adminAlreadyFinished => 'Esta maratón ya terminó';
+  String get adminAlreadyFinished => 'Esta carrera ya terminó';
 
   @override
   String get adminPrepare => 'Poner en preparación';
@@ -1707,7 +1707,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get marathonPreparingHint =>
-      'El resto de la app vuelve cuando la maratón termine.';
+      'El resto de la app vuelve cuando la carrera termine.';
 
   @override
   String get marathonPreparingBib => 'Tu dorsal';
@@ -1716,13 +1716,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get raceFinishedLockedTitle => 'Llegaste a meta';
 
   @override
-  String get adminMarathonsTitle => 'Maratones';
+  String get adminMarathonsTitle => 'Carreras';
 
   @override
-  String get adminNewMarathon => 'Nueva maratón';
+  String get adminNewMarathon => 'Nueva carrera';
 
   @override
-  String get adminEditMarathon => 'Editar maratón';
+  String get adminEditMarathon => 'Editar carrera';
 
   @override
   String get adminLive => 'En vivo';
@@ -1766,7 +1766,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminStartsAt => 'Fecha y hora';
 
   @override
-  String get adminNameRequired => 'Ponle un nombre a la maratón.';
+  String get adminNameRequired => 'Ponle un nombre a la carrera.';
 
   @override
   String get adminCityRequired => 'Indica la ciudad.';
@@ -1862,7 +1862,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inscripciones cerradas. Nadie más puede anotarse.';
 
   @override
-  String get adminCoverTitle => 'Foto de la maratón';
+  String get adminCoverTitle => 'Foto de la carrera';
 
   @override
   String get adminCoverHint =>
@@ -1873,7 +1873,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adminCoverAfterSave =>
-      'Guarda la maratón para poder subir la foto';
+      'Guarda la carrera para poder subir la foto';
 
   @override
   String get adminCoverUploaded => 'Foto actualizada.';
@@ -1929,14 +1929,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get adminCreateMarathon => 'Crear maratón';
+  String get adminCreateMarathon => 'Crear carrera';
 
   @override
-  String get adminMarathonSaved => 'Maratón guardada.';
+  String get adminMarathonSaved => 'Carrera guardada.';
 
   @override
   String get adminMarathonCreated =>
-      'Maratón creada. Ya puedes subirle la foto y el QR.';
+      'Carrera creada. Ya puedes subirle la foto y el QR.';
 
   @override
   String get adminNothingChanged => 'No hay cambios que guardar.';
@@ -1945,7 +1945,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminDelete => 'Eliminar';
 
   @override
-  String get adminDeleteMarathonTitle => '¿Eliminar la maratón?';
+  String get adminDeleteMarathonTitle => '¿Eliminar la carrera?';
 
   @override
   String get adminDeleteMarathonBody =>
@@ -2040,7 +2040,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get adminAfterSave => 'Guarda la maratón para poder añadirlos';
+  String get adminAfterSave => 'Guarda la carrera para poder añadirlos';
 
   @override
   String get adminRequiredField => 'Este campo no puede quedar vacío.';
@@ -2432,10 +2432,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Nombre, CI, dorsal o n.º de transacción';
 
   @override
-  String get organizerMarathon => 'Maratón';
+  String get organizerMarathon => 'Carrera';
 
   @override
-  String get organizerAllMarathons => 'Todas las maratones';
+  String get organizerAllMarathons => 'Todas las carreras';
 
   @override
   String get organizerNoTicketsTitle => 'Nada por revisar';
@@ -2586,6 +2586,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationsMarkAllRead => 'Marcar todo leído';
+
+  @override
+  String get notificationsMarkRead => 'Marcar como leída';
+
+  @override
+  String get notificationsDelete => 'Eliminar';
+
+  @override
+  String get notificationsDeleteRead => 'Borrar las leídas';
+
+  @override
+  String get notificationsMoreActions => 'Más opciones';
+
+  @override
+  String get notificationsFilterAll => 'Todas';
+
+  @override
+  String get notificationsFilterUnread => 'No leídas';
+
+  @override
+  String get notificationsUnreadEmptyTitle => 'Todo al día';
+
+  @override
+  String get notificationsUnreadEmptyBody =>
+      'No tienes notificaciones sin leer.';
 
   @override
   String get notificationsEmptyTitle => 'Sin notificaciones';

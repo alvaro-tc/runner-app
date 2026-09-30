@@ -39,7 +39,7 @@ void main() {
 
   test('de la foto del QR sale su texto, no la imagen', () async {
     const cobro =
-        '00020101021226580014BR.GOV.BCB.PIX0136maraton@banco.bo5204000053039865802BO';
+        '00020101021226580014BR.GOV.BCB.PIX0136carrera@banco.bo5204000053039865802BO';
 
     expect(await readQrFromImage(_png(cobro, temp).path), cobro);
   });

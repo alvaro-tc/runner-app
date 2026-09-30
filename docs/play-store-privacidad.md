@@ -30,7 +30,7 @@ Ambas deben abrir **sin iniciar sesion** y sin redirigir a un login.
 | Info personal | Nombre | Si | No | Si | Gestion de la cuenta, perfil |
 | Info personal | Otra info (fecha nacimiento, sexo, peso/altura si el usuario los rellena) | Si | No | No | Funcionalidad de la app (calculo de ritmo/calorias) |
 | Fotos | Foto de perfil y comprobante de pago | Si | No | No | Funcionalidad de la app, inscripciones |
-| Ubicacion | **Ubicacion precisa** | Si | No | Si (para grabar salidas) | Funcionalidad de la app: trazar la ruta, ritmo y distancia; seguimiento en vivo durante la maraton |
+| Ubicacion | **Ubicacion precisa** | Si | No | Si (para grabar salidas) | Funcionalidad de la app: trazar la ruta, ritmo y distancia; seguimiento en vivo durante la carrera |
 | Ubicacion | Ubicacion aproximada | Si | No | No | Funcionalidad de la app |
 | Actividad fisica | Actividad, distancia, ritmo, duracion | Si | No | Si | Funcionalidad de la app, historial y plan de entrenamiento |
 | Info financiera | Comprobante de pago (imagen) subido por el usuario | Si | No | No | Inscripcion a carreras |

@@ -91,7 +91,7 @@ class RacesApi {
       });
 
   /// Paso 1. Idempotente del lado del servidor: si ya hay un borrador para esa
-  /// maraton lo devuelve actualizado en vez de abrir un segundo.
+  /// carrera lo devuelve actualizado en vez de abrir un segundo.
   Future<Map<String, dynamic>> createDraft({
     required String marathonId,
     required Map<String, Object?> personalData,

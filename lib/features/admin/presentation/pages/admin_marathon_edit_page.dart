@@ -29,7 +29,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-/// Alta y edicion de una maraton, entera desde el movil.
+/// Alta y edicion de una carrera, entera desde el movil.
 ///
 /// Con [marathonId] en `null` es el alta. Es la misma pantalla porque los
 /// campos son los mismos: dos formularios paralelos se desincronizan en el
@@ -55,8 +55,8 @@ class AdminMarathonEditPage extends ConsumerWidget {
 
     if (id == null) return const _Formulario(original: null);
 
-    final maraton = ref.watch(adminMarathonProvider(id));
-    return maraton.when(
+    final carrera = ref.watch(adminMarathonProvider(id));
+    return carrera.when(
       // Un refresco de fondo no vacia una pantalla que ya tiene datos.
       skipLoadingOnReload: true,
       // Al refrescar tras subir una imagen se sigue pintando el formulario con
@@ -115,7 +115,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
       _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
   late List<GeoPoint> _ruta = _m?.route ?? const [];
 
-  /// Cronograma y "que incluye" son dos campos `jsonb` de la propia maraton,
+  /// Cronograma y "que incluye" son dos campos `jsonb` de la propia carrera,
   /// asi que se editan aqui y viajan con el boton de guardar, como el nombre.
   /// Categorias y extras no: esos son tablas aparte y se guardan al momento.
   late List<AdminScheduleItem> _cronograma = _m?.schedule ?? const [];
@@ -381,14 +381,14 @@ class _FormularioState extends ConsumerState<_Formulario> {
     required bool publicar,
     required bool valor,
   }) async {
-    final maraton = _m;
-    if (maraton == null || _cambiandoEstado) return;
+    final carrera = _m;
+    if (carrera == null || _cambiandoEstado) return;
 
     setState(() => _cambiandoEstado = true);
     final notifier = ref.read(adminMarathonsProvider.notifier);
     final fallo = publicar
-        ? await notifier.setPublished(maraton, value: valor)
-        : await notifier.setRegistrationsOpen(maraton, value: valor);
+        ? await notifier.setPublished(carrera, value: valor)
+        : await notifier.setRegistrationsOpen(carrera, value: valor);
 
     if (!mounted) return;
     setState(() => _cambiandoEstado = false);
@@ -834,7 +834,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
   /// Las categorias. A diferencia de las dos de arriba son filas de su propia
   /// tabla, con su id: se crean y se borran al momento, no al guardar. Por eso
-  /// necesitan que la maraton exista antes, igual que el afiche.
+  /// necesitan que la carrera exista antes, igual que el afiche.
   Widget _seccionCategorias(AppLocalizations t) => _ListaEditable(
     title: t.adminCategoriesTitle,
     hint: t.adminCategoriesHint,
@@ -1012,7 +1012,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     await _guardarFila((api, _) => borrar(api));
   }
 
-  /// Un si/no destructivo. Lo usan el borrado de la maraton y el de cada
+  /// Un si/no destructivo. Lo usan el borrado de la carrera y el de cada
   /// categoria o extra: son la misma pregunta con distinto texto.
   Future<bool> _confirmar(String titulo, String cuerpo) async {
     final t = context.l10n;
@@ -1238,7 +1238,7 @@ class _ListaEditable extends StatelessWidget {
   final VoidCallback onAdd;
 
   /// En el alta, categorias y extras todavia no se pueden crear: no hay
-  /// maraton a la que colgarlas. [disabledHint] dice por que.
+  /// carrera a la que colgarlas. [disabledHint] dice por que.
   final bool enabled;
   final String? disabledHint;
 

@@ -10,7 +10,7 @@ Español (Latinoamérica); la ficha en inglés es opcional (la app está traduci
 ### Descripción breve (máx. 80 caracteres)
 
 ```
-Entrena, corre con GPS e inscríbete a las maratones del CAM.
+Entrena, corre con GPS e inscríbete a las carreras del CAM.
 ```
 *59 caracteres.*
 
@@ -29,7 +29,7 @@ Corre, entrena y compite: GPS en vivo, plan semanal e inscripciones.
 ### Descripción completa (máx. 4000 caracteres)
 
 ```
-CamRun es la app oficial del CAM (Centro de Apoyo a la Mujer), una organización sin fines de lucro que acompaña a mujeres en situación de vulnerabilidad. Con ella entrenas, grabas tus salidas y te inscribes a las carreras del CAM: cada maratón que corres apoya esa labor.
+CamRun es la app oficial del CAM (Centro de Apoyo a la Mujer), una organización sin fines de lucro que acompaña a mujeres en situación de vulnerabilidad. Con ella entrenas, grabas tus salidas y te inscribes a las carreras del CAM: cada carrera que corres apoya esa labor.
 
 ENTRENA CON UN PLAN QUE SE ADAPTA
 Elige la carrera que persigues y CamRun reparte las semanas por ti. Ves la sesión de cada día en el calendario, mueves entrenamientos cuando la vida se cruza y el plan sigue apuntando al objetivo. Cada sesión indica distancia, tipo y ritmo sugerido.
@@ -40,7 +40,7 @@ El GPS dibuja tu ruta mientras avanzas. Distancia, ritmo actual y medio, tiempo 
 TU HISTORIAL, COMPLETO
 Todas tus salidas quedan guardadas: mapa del recorrido, parciales, ritmo, desnivel y notas. Revisa tu progreso semana a semana y lleva el control del kilometraje de tus zapatillas para saber cuándo toca retirarlas.
 
-INSCRÍBETE A LAS MARATONES DEL CAM
+INSCRÍBETE A LAS CARRERAS DEL CAM
 Consulta el catálogo de carreras con su fecha, recorrido, categorías, cronograma y qué incluye la inscripción. Te inscribes desde la app, eliges tu categoría y adicionales, subes el comprobante de pago y sigues el estado de tu inscripción hasta que queda confirmada.
 
 DÍA DE CARRERA
@@ -52,7 +52,7 @@ TODO EN UN MISMO SITIO
 · Modo claro y oscuro
 · Puedes eliminar tu cuenta y tus datos desde la propia app
 
-CamRun necesita acceso a la ubicación precisa para grabar la ruta, el ritmo y la distancia de tus salidas, y para el seguimiento en vivo durante una maratón. Solo se usa cuando tú inicias una grabación.
+CamRun necesita acceso a la ubicación precisa para grabar la ruta, el ritmo y la distancia de tus salidas, y para el seguimiento en vivo durante una carrera. Solo se usa cuando tú inicias una grabación.
 
 Corre por ti. Corre por el CAM.
 ```
@@ -95,7 +95,7 @@ ALL IN ONE PLACE
 · Light and dark mode
 · You can delete your account and data from inside the app
 
-CamRun needs precise location access to record your route, pace and distance, and for live tracking during a marathon. It is only used when you start a recording.
+CamRun needs precise location access to record your route, pace and distance, and for live tracking during a race. It is only used when you start a recording.
 
 Run for yourself. Run for CAM.
 ```

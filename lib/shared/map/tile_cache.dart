@@ -57,7 +57,7 @@ math.Point<int> tileOf(double lat, double lng, int zoom) {
   return math.Point(x.clamp(0, n - 1), y.clamp(0, n - 1));
 }
 
-/// La Paz y El Alto: la app es del CAM y sus maratones se corren aqui, asi que
+/// La Paz y El Alto: la app es del CAM y sus carreras se corren aqui, asi que
 /// esta es la ciudad que vale la pena tener guardada aunque nadie la haya
 /// abierto todavia.
 const laPazCenter = (lat: -16.4955, lng: -68.1336);

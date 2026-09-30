@@ -42,7 +42,8 @@ class _RacesPageState extends ConsumerState<RacesPage> {
           onRefresh: () async {
             ref
               ..invalidate(racesProvider)
-              ..invalidate(upcomingMarathonsProvider);
+              ..invalidate(upcomingMarathonsProvider)
+              ..invalidate(marathonProvider);
             await ref.read(upcomingMarathonsProvider.future);
           },
           child: entries.when(

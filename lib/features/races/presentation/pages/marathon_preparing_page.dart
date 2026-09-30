@@ -7,7 +7,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// La sala de espera de una maraton que esta a punto de largar.
+/// La sala de espera de una carrera que esta a punto de largar.
 ///
 /// **Es toda la app mientras dura.** No tiene barra de navegacion, ni boton de
 /// atras, ni nada que tocar: el organizador cerro el kiosko y a partir de ese

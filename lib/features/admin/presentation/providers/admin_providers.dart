@@ -13,7 +13,7 @@ final adminApiProvider = Provider<AdminApi>(
   (ref) => AdminApi(ref.watch(dioProvider)),
 );
 
-/// Todas las maratones del panel, la mas proxima primero.
+/// Todas las carreras del panel, la mas proxima primero.
 ///
 /// Es un `AsyncNotifier` y no un `FutureProvider` porque la lista no solo se
 /// lee: publica, retira y abre inscripciones sin abrir el detalle, y eso pide
@@ -29,20 +29,20 @@ class AdminMarathonsNotifier extends AsyncNotifier<List<AdminMarathon>> {
   }
 
   /// Publica o retira del catalogo. Retirar **no** cancela inscripciones.
-  Future<Failure?> setPublished(AdminMarathon maraton, {required bool value}) =>
+  Future<Failure?> setPublished(AdminMarathon carrera, {required bool value}) =>
       _cambiar(
-        maraton.id,
+        carrera.id,
         (m) => m.copyWith(published: value),
-        (api) => api.setPublished(maraton.id, value),
+        (api) => api.setPublished(carrera.id, value),
       );
 
   Future<Failure?> setRegistrationsOpen(
-    AdminMarathon maraton, {
+    AdminMarathon carrera, {
     required bool value,
   }) => _cambiar(
-    maraton.id,
+    carrera.id,
     (m) => m.copyWith(registrationsOpen: value),
-    (api) => api.setRegistrationsOpen(maraton.id, value),
+    (api) => api.setRegistrationsOpen(carrera.id, value),
   );
 
   /// Pinta primero y pregunta despues.
@@ -91,12 +91,12 @@ final adminMarathonsProvider =
 /// El servidor las manda de la mas lejana a la mas cercana, que es el orden
 /// contrario al que se trabaja: lo que un admin abre el panel a mirar es la
 /// carrera que viene, no la del ano que viene ni la del ano pasado.
-List<AdminMarathon> ordenarParaElPanel(List<AdminMarathon> maratones) {
+List<AdminMarathon> ordenarParaElPanel(List<AdminMarathon> carreras) {
   final ahora = DateTime.now();
   final proximas = <AdminMarathon>[];
   final pasadas = <AdminMarathon>[];
 
-  for (final m in maratones) {
+  for (final m in carreras) {
     (m.startsAt.isBefore(ahora) ? pasadas : proximas).add(m);
   }
 
@@ -158,7 +158,7 @@ final adminTicketProvider = FutureProvider.autoDispose
           AdminTicket.fromJson(await ref.watch(adminApiProvider).payment(id)),
     );
 
-/// Cual maraton mira el mapa de Home. La elige el selector de arriba; se queda
+/// Cual carrera mira el mapa de Home. La elige el selector de arriba; se queda
 /// puesta al navegar a otra pestana y volver.
 class SelectedMarathonNotifier extends Notifier<String?> {
   @override
@@ -289,7 +289,7 @@ class LiveBoard {
   );
 }
 
-/// El mapa en vivo de una maraton.
+/// El mapa en vivo de una carrera.
 ///
 /// **Foto primero, socket despues.** Al abrirse pide la foto por REST: sin ella
 /// el mapa estaria vacio hasta que a cada corredor le tocara su siguiente

@@ -31,7 +31,7 @@ class RunGoal {
 
   static const free = RunGoal(type: RunGoalType.free);
 
-  /// Correr una maraton en la que ya se esta inscrito.
+  /// Correr una carrera en la que ya se esta inscrito.
   ///
   /// [registrationId] es lo que convierte la sesion en carrera del lado del
   /// servidor: sin el, los puntos son un entrenamiento cualquiera y no salen
@@ -51,11 +51,11 @@ class RunGoal {
     circuitLaps: circuitLaps,
   );
 
-  /// La maraton oficial, la que arranca el organizador desde el panel.
+  /// La carrera oficial, la que arranca el organizador desde el panel.
   ///
   /// Es una carrera con [marathonId] puesto, y ese id es lo que **cierra la
   /// pantalla**: mientras el evento este en marcha no hay atras, ni pausa, ni
-  /// descartar. Quien corre una maraton no puede tirar su tiempo oficial por
+  /// descartar. Quien corre una carrera no puede tirar su tiempo oficial por
   /// tocar un boton sin querer, y el final no lo decide el —lo decide el
   /// organizador cuando corta la carrera—.
   factory RunGoal.marathon({
@@ -85,11 +85,11 @@ class RunGoal {
   /// Solo en carrera. Es lo que se manda al arrancar la sesion remota.
   final String? registrationId;
 
-  /// Solo en maraton oficial. Ver [RunGoal.marathon].
+  /// Solo en carrera oficial. Ver [RunGoal.marathon].
   final String? marathonId;
 
   /// El dorsal de esta persona. Es como se reconoce en el aviso de llegada que
-  /// manda el servidor, que viaja por la sala de la maraton y solo lleva
+  /// manda el servidor, que viaja por la sala de la carrera y solo lleva
   /// dorsales — nunca nombres ni ids.
   final String? bib;
 
@@ -111,7 +111,7 @@ class RunGoal {
 
   bool get isRace => type == RunGoalType.race;
 
-  /// Maraton oficial en marcha: la pantalla no se puede abandonar.
+  /// Carrera oficial en marcha: la pantalla no se puede abandonar.
   bool get isLiveMarathon => marathonId != null;
 
   /// Se corre dando vueltas al mismo trazado.
@@ -349,7 +349,7 @@ class RunSessionNotifier extends Notifier<RunSessionState> {
           ? goal.sessionId
           : null,
       registrationId: goal.registrationId,
-      // Traccar solo en la maraton oficial: es la unica salida donde el
+      // Traccar solo en la carrera oficial: es la unica salida donde el
       // seguimiento en vivo importa y donde el telefono pasa horas fuera de
       // pantalla. Ver [LiveUploader].
       live: goal.isLiveMarathon,

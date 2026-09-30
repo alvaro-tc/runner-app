@@ -38,6 +38,37 @@ class NotificationsNotifier extends AsyncNotifier<NotificationInbox> {
     ));
     await ref.read(notificationRepositoryProvider).markAllRead();
   }
+
+  /// Optimista como `markRead`: si falla, el siguiente sondeo la devuelve.
+  Future<void> delete(String id) async {
+    final actual = state.value;
+    if (actual == null) return;
+    final era = actual.items.where((n) => n.id == id).firstOrNull;
+    if (era == null) return;
+    state = AsyncData((
+      items: [
+        for (final n in actual.items)
+          if (n.id != id) n,
+      ],
+      unreadCount: era.unread && actual.unreadCount > 0
+          ? actual.unreadCount - 1
+          : actual.unreadCount,
+    ));
+    await ref.read(notificationRepositoryProvider).delete(id);
+  }
+
+  Future<void> deleteRead() async {
+    final actual = state.value;
+    if (actual == null || actual.items.every((n) => n.unread)) return;
+    state = AsyncData((
+      items: [
+        for (final n in actual.items)
+          if (n.unread) n,
+      ],
+      unreadCount: actual.unreadCount,
+    ));
+    await ref.read(notificationRepositoryProvider).deleteRead();
+  }
 }
 
 final notificationsProvider =

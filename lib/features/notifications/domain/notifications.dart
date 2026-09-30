@@ -92,6 +92,11 @@ abstract interface class NotificationRepository {
 
   Future<Result<void>> markAllRead();
 
+  Future<Result<void>> delete(String id);
+
+  /// Borra las ya leidas; las pendientes se quedan.
+  Future<Result<void>> deleteRead();
+
   /// Cuelga el token de FCM de este telefono en la cuenta con sesion.
   Future<Result<void>> registerPushToken(String token);
 }

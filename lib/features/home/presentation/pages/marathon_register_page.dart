@@ -28,7 +28,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-/// Alta en una maraton, en los mismos tres pasos que lleva el servidor:
+/// Alta en una carrera, en los mismos tres pasos que lleva el servidor:
 /// datos, categoria y extras, y pago.
 ///
 /// **Aqui no se suma dinero.** Cada paso guarda contra la API y devuelve el
@@ -121,8 +121,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   @override
   void initState() {
     super.initState();
-    // Descarta el borrador de otra maraton que hubiera quedado a medias en esta
-    // misma pantalla. Con la misma maraton no toca nada: el flujo se retoma.
+    // Descarta el borrador de otra carrera que hubiera quedado a medias en esta
+    // misma pantalla. Con la misma carrera no toca nada: el flujo se retoma.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final retomar = widget.resumeRegistrationId;
       if (retomar == null) return _flow.openFor(widget.marathonId);
@@ -448,7 +448,7 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final t = context.l10n;
 
     // Lo que la cuenta ya sabe entra en los campos antes de pintarlos: el
-    // corredor no vuelve a teclear su celular en cada maraton.
+    // corredor no vuelve a teclear su celular en cada carrera.
     if (!_prefilled && profile != null) {
       _prefilled = true;
       _name.text = profile.fullName.trim();

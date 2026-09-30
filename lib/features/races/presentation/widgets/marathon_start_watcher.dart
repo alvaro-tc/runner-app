@@ -26,7 +26,7 @@ class MarathonStartWatcher extends ConsumerStatefulWidget {
 }
 
 class _MarathonStartWatcherState extends ConsumerState<MarathonStartWatcher> {
-  /// Ya se abrio la pantalla para esta maraton. Sin esto, cada aviso repetido
+  /// Ya se abrio la pantalla para esta carrera. Sin esto, cada aviso repetido
   /// —una reconexion del socket manda el estado otra vez— apilaria una pantalla
   /// de carrera encima de la anterior.
   String? _abierta;
@@ -40,10 +40,10 @@ class _MarathonStartWatcherState extends ConsumerState<MarathonStartWatcher> {
     // coordenadas que solo hacen falta este momento exacto. Si la peticion
     // falla se corre igual, con el mapa sin linea de referencia — perder la
     // largada por un corte de red seria mucho peor.
-    final maraton = await ref
+    final carrera = await ref
         .read(marathonRepositoryProvider)
         .fetchById(viva.entry.marathon.id);
-    final recorrido = maraton.fold(
+    final recorrido = carrera.fold(
       (m) => [
         for (final p in m.routePreview)
           GeoPoint(lat: p.lat, lng: p.lng, timestamp: DateTime(2000)),
@@ -52,7 +52,7 @@ class _MarathonStartWatcherState extends ConsumerState<MarathonStartWatcher> {
     );
     // Las vueltas del detalle mandan sobre las de la lista solo porque el
     // detalle es mas nuevo; si la peticion fallo, la lista ya las traia.
-    final vueltas = maraton.fold((m) => m.laps, (_) => viva.entry.marathon.laps);
+    final vueltas = carrera.fold((m) => m.laps, (_) => viva.entry.marathon.laps);
 
     if (!mounted) return;
 

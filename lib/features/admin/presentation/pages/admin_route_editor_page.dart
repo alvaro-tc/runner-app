@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 class AdminRouteEditorPage extends StatefulWidget {
   const AdminRouteEditorPage({required this.initial, super.key});
 
-  /// El trazado que ya tenia la maraton. Se puede seguir editando encima.
+  /// El trazado que ya tenia la carrera. Se puede seguir editando encima.
   final List<GeoPoint> initial;
 
   @override

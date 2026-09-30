@@ -81,13 +81,13 @@ Future<void> openNotification(
         context.go(Routes.raceDetailOf(inscripcion));
       }
     case NotificationTypes.paymentRejected:
-      final (maraton, inscripcion) = (n.marathonId, n.registrationId);
+      final (carrera, inscripcion) = (n.marathonId, n.registrationId);
       final reintentar = await showPaymentRejectedDialog(context, n);
       if (reintentar &&
-          maraton != null &&
+          carrera != null &&
           inscripcion != null &&
           context.mounted) {
-        context.go(Routes.marathonResumePaymentOf(maraton, inscripcion));
+        context.go(Routes.marathonResumePaymentOf(carrera, inscripcion));
       }
   }
 }

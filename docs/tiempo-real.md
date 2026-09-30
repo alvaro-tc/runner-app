@@ -20,12 +20,12 @@ valida el JWT (`live.gateway.ts`). Por ahi van dos cosas:
   vez a quien esta en las dos.
 
 Esto es lo que hace inmediato el pago validado: quien espera revision no esta
-inscrito todavia, y no hay sala de maraton de la que colgarle el aviso.
+inscrito todavia, y no hay sala de carrera de la que colgarle el aviso.
 
 ## 2. Posicion en preparacion → el organizador ve la salida
 
 `GET/POST /tracking/osmand` resuelve el dispositivo a su sesion abierta; si no
-tiene, busca una **inscripcion confirmada en una maraton en fase `preparing`** y
+tiene, busca una **inscripcion confirmada en una carrera en fase `preparing`** y
 publica `runner:position` en `marathon:{id}` con `distanceMeters: 0`
 (`LiveService.publicarCalentamiento`). Esos puntos **no se guardan**: son de
 antes de la largada y no pueden acabar en el entrenamiento; la respuesta dice
@@ -35,11 +35,11 @@ antes de la largada y no pueden acabar en el entrenamiento; la respuesta dice
 El `id` es el `uniqueId` que la app genera y guarda, y la fila `Device` que lo
 traduce a una persona se escribe **al iniciar sesion** (y en cada refresco), no
 al grabar el primer entrenamiento: quien se instala la app para su primera
-maraton nunca grabo ninguno, y sin esa fila su posicion en la salida se
+carrera nunca grabo ninguno, y sin esa fila su posicion en la salida se
 rechazaba con `SESSION_NOT_ACTIVE`. El dueño se reescribe en cada login, que es
 lo que hace que el movil de pruebas no siga resolviendo a la cuenta anterior.
 
-La resolucion dispositivo → maraton se cachea un minuto, positivos y negativos:
+La resolucion dispositivo → carrera se cachea un minuto, positivos y negativos:
 OsmAnd manda un punto por peticion y sin cache seria una consulta por segundo y
 por corredor. Cuando arranca la sesion de verdad, `publicar()` borra el estado
 de calentamiento de ese dispositivo para que no queden dos marcadores con el

@@ -98,7 +98,7 @@ void main() {
       'registrationId': 'r1',
       'marathon': {
         'id': 'm1',
-        'name': 'Maraton de prueba',
+        'name': 'Carrera de prueba',
         'city': 'La Paz',
         'startsAt': '2026-09-12T10:00:00Z',
         'distanceMeters': 42195,
@@ -210,7 +210,7 @@ void main() {
       'id': 'r9',
       'marathon': {
         'id': 'm1',
-        'name': 'Maraton de prueba',
+        'name': 'Carrera de prueba',
         'city': 'La Paz',
         'startsAt': '2026-09-12T10:00:00Z',
         'distanceMeters': 42195,
@@ -306,7 +306,7 @@ void main() {
     },
   }) => {
     'id': 'reg1',
-    'marathon': {'id': 'm1', 'name': 'Maraton de prueba'},
+    'marathon': {'id': 'm1', 'name': 'Carrera de prueba'},
     'status': status,
     'step': step,
     'bibNumber': bibNumber,

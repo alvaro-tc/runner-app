@@ -1,4 +1,4 @@
-# PROMPT — Backend Node.js para app de maratones (Flutter)
+# PROMPT — Backend Node.js para app de carreras (Flutter)
 
 > Pásale este archivo completo a Claude Code como primer mensaje, o guárdalo en la raíz del backend como `PROMPT.md` y dile: "Lee PROMPT.md y empieza por la Fase 0".
 
@@ -48,7 +48,7 @@ No inventes librerías ni versiones: antes de usar un paquete que no conozcas co
 
 ## 1. CONTEXTO Y ESTRUCTURA DE REPOSITORIOS
 
-Tengo una **app móvil en Flutter casi terminada** (solo UI + datos mock) para seguimiento de maratones y entrenamiento de running. Necesito el **backend en Node.js** que la alimente, más la **capa de integración del lado Flutter**.
+Tengo una **app móvil en Flutter casi terminada** (solo UI + datos mock) para seguimiento de carreras y entrenamiento de running. Necesito el **backend en Node.js** que la alimente, más la **capa de integración del lado Flutter**.
 
 **Repositorios separados**, en carpetas hermanas:
 
@@ -77,7 +77,7 @@ Requisitos que me importan especialmente:
 - **Offline-first**: los entrenamientos individuales se guardan primero en local y se sincronizan después.
 - **Pagos simulados** por ahora, detrás de una interfaz que permita enchufar un proveedor real sin reescribir el módulo.
 - Backend pensado para que **más adelante se le monte un front-end web**: API limpia, versionada y documentada.
-- Preparado para, en el futuro, **seguir en vivo a todos los corredores de una maratón** en un mapa.
+- Preparado para, en el futuro, **seguir en vivo a todos los corredores de una carrera** en un mapa.
 
 ---
 
@@ -160,7 +160,7 @@ Reglas transversales:
     "meta": { "requestId": "..." } }
   ```
   Códigos de error como enum de TypeScript, listados en `docs/api.md`, para que Flutter mapee por `code` y no por texto.
-- **Unidades base**: distancias en **metros**, duraciones en **segundos**, dinero en **centavos** (entero) + `currency: "BOB"`, fechas **ISO-8601 UTC**. El formateo (km/mi, min/km, `Bs`) es del cliente. Cada maratón guarda su `timezone` IANA (por defecto `America/La_Paz`).
+- **Unidades base**: distancias en **metros**, duraciones en **segundos**, dinero en **centavos** (entero) + `currency: "BOB"`, fechas **ISO-8601 UTC**. El formateo (km/mi, min/km, `Bs`) es del cliente. Cada carrera guarda su `timezone` IANA (por defecto `America/La_Paz`).
 - Paginación por cursor en listados largos: `?limit=&cursor=`, respuesta con `meta.nextCursor`.
 - Idempotencia: header `Idempotency-Key` en pagos y en sincronización masiva de entrenamientos.
 - Rate limiting global, más estricto en `/auth/*` y en ingesta de posiciones.
@@ -180,12 +180,12 @@ Mínimo esperado en `schema.prisma`. Ajusta nombres y agrega lo que falte, pero 
 - `AuthSession`: userId, refreshTokenHash, deviceId, deviceName, platform, ip, userAgent, expiresAt, revokedAt, rotatedFromId, lastUsedAt.
 - `PasswordResetToken`: userId, tokenHash, expiresAt, usedAt.
 
-**Maratones e inscripciones**
+**Carreras e inscripciones**
 - `Marathon`: slug, name, description, startsAt, timezone, city, country, lat, lng, distanceMeters, capacity, slotsTaken, priceCents, currency, registrationStatus (`open` | `closing_soon` | `full` | `closed`), routeGeoJson (jsonb), schedule (jsonb), includes (jsonb), coverUrl, kitPickup (jsonb), registrationClosesAt, publishedAt, **serviceFeeConfigId (nullable → override del global)**.
 - `MarathonCategory`: marathonId, name, minAge, maxAge, gender, extraPriceCents.
 - `MarathonExtra`: marathonId, name (remera, medalla, transporte…), priceCents, stock.
 - `ServiceFeeConfig`: scope (`global` | `marathon`), **enabled (boolean)**, type (`percent` | `fixed` | `mixed`), percentBps (basis points), fixedCents, minCents, maxCents, label, updatedByUserId, updatedAt.
-- `Registration`: userId, marathonId, categoryId, status (`draft` | `pending_payment` | `confirmed` | `cancelled` | `refunded`), step (1..3, para retomar el flujo), bibNumber (único por maratón), personalData (jsonb), extras (jsonb), subtotalCents, **serviceFeeCents + serviceFeeSnapshot (jsonb)**, totalCents, currency, termsAcceptedAt, registeredAt, cancelledAt.
+- `Registration`: userId, marathonId, categoryId, status (`draft` | `pending_payment` | `confirmed` | `cancelled` | `refunded`), step (1..3, para retomar el flujo), bibNumber (único por carrera), personalData (jsonb), extras (jsonb), subtotalCents, **serviceFeeCents + serviceFeeSnapshot (jsonb)**, totalCents, currency, termsAcceptedAt, registeredAt, cancelledAt.
 - `Payment`: registrationId, provider (`mock`), method (`card` | `qr` | `bank_transfer`), status (`pending` | `paid` | `failed` | `refunded`), amountCents, currency, methodDetails (jsonb, **solo datos enmascarados**), idempotencyKey (único), receiptUrl, externalId, paidAt, refundedAt, failureReason.
 
 **Entrenamiento**
@@ -249,7 +249,7 @@ Los botones sociales (Google, LinkedIn, Facebook) son **solo UI** por ahora: dej
 
 ### 6.2 Home
 - `GET /marathons/upcoming?limit=` → carrusel.
-- `GET /home/summary` → **endpoint agregado**, una sola llamada al arrancar: maratón destacada con `startsAt` (la cuenta regresiva la calcula el cliente contra `meta.timestamp`), tiempo de llegada estimado, semana actual del plan, tira Mon–Sun con progreso y distancia por día, sesión de hoy.
+- `GET /home/summary` → **endpoint agregado**, una sola llamada al arrancar: carrera destacada con `startsAt` (la cuenta regresiva la calcula el cliente contra `meta.timestamp`), tiempo de llegada estimado, semana actual del plan, tira Mon–Sun con progreso y distancia por día, sesión de hoy.
 - `GET /training-plans/me/current?week=` → selector de semana.
 - `PATCH /training-plans/sessions/:id/complete`
 - `PATCH /training-plans/sessions/:id/reschedule`
@@ -257,7 +257,7 @@ Los botones sociales (Google, LinkedIn, Facebook) son **solo UI** por ahora: dej
 
 **Tiempo estimado de llegada:** servicio `PredictionService` con la fórmula de **Riegel** (`T2 = T1 × (D2/D1)^1.06`) sobre el mejor esfuerzo reciente (últimas 8–12 semanas), ajustado por volumen semanal medio. Devuelve `null` con `reason: "insufficient_data"` si hay menos de 3 entrenamientos. Documenta la fórmula en `docs/decisiones.md`.
 
-### 6.3 Maratones e inscripción
+### 6.3 Carreras e inscripción
 ```
 GET    /marathons?city=&from=&to=&status=&cursor=
 GET    /marathons/:slug
@@ -270,10 +270,10 @@ POST   /registrations/:id/checkout           ← paso 3: pago + términos → do
 DELETE /registrations/:id                    ← cancelar (solo si la carrera no ocurrió)
 ```
 
-- **`QuoteService` (módulo `pricing`)** es la única fuente del total: cuota base + categoría + extras + **service fee resuelto**. La resolución del fee es: override de la maratón → config global → si `enabled = false`, `serviceFeeCents = 0` y el campo **no se muestra** en la respuesta (`serviceFee: null`), para que la UI no pinte una línea "Bs 0,00". El cliente llama a `/quote` en cada cambio. **El precio nunca se calcula en el móvil.**
+- **`QuoteService` (módulo `pricing`)** es la única fuente del total: cuota base + categoría + extras + **service fee resuelto**. La resolución del fee es: override de la carrera → config global → si `enabled = false`, `serviceFeeCents = 0` y el campo **no se muestra** en la respuesta (`serviceFee: null`), para que la UI no pinte una línea "Bs 0,00". El cliente llama a `/quote` en cada cambio. **El precio nunca se calcula en el móvil.**
 - Al confirmar se guarda `serviceFeeSnapshot` con la configuración exacta aplicada, para que cambiar el fee después **no altere comprobantes históricos**.
 - **Cupos**: al confirmar, incrementa `slotsTaken` en una **transacción con `SELECT ... FOR UPDATE`**; falla con `MARATHON_FULL` si no hay lugar. `registrationStatus` se recalcula a `closing_soon` cuando queda <10% de cupo o faltan <7 días.
-- **Dorsal**: secuencial por maratón (`prefijo + correlativo`), asignado en la misma transacción del pago confirmado, con constraint único `(marathonId, bibNumber)`.
+- **Dorsal**: secuencial por carrera (`prefijo + correlativo`), asignado en la misma transacción del pago confirmado, con constraint único `(marathonId, bibNumber)`.
 - **Cancelación**: solo si `marathon.startsAt > now()`. Libera cupo, marca el pago como `refunded` (mock), registra `cancelledAt`.
 
 ### 6.4 Planes de entrenamiento (simplificado, elegible por el usuario)
@@ -287,16 +287,16 @@ GET  /training-plans/templates/:slug
 POST /training-plans          { templateId, startDate }
 ```
 
-**B. El usuario elige una maratón objetivo y el backend le sugiere planes**
+**B. El usuario elige una carrera objetivo y el backend le sugiere planes**
 ```
 GET  /training-plans/suggestions?marathonId=
 POST /training-plans          { templateId, marathonId }
 ```
-La sugerencia filtra plantillas cuya `goalDistanceMeters` coincida con la distancia de la maratón y cuyo `totalWeeks` quepa en las semanas disponibles hasta `startsAt`. Devuelve cada opción con `weeksAvailable`, `fits: boolean` y `level`, ordenadas por ajuste.
+La sugerencia filtra plantillas cuya `goalDistanceMeters` coincida con la distancia de la carrera y cuyo `totalWeeks` quepa en las semanas disponibles hasta `startsAt`. Devuelve cada opción con `weeksAvailable`, `fits: boolean` y `level`, ordenadas por ajuste.
 
 **Instanciación** (`TrainingPlanInstantiationService`):
 - Materializa `TrainingPlanSession` con fechas reales.
-- Si hay maratón objetivo, **ancla el final del plan a la semana de la carrera** (la última semana es el tapering).
+- Si hay carrera objetivo, **ancla el final del plan a la semana de la carrera** (la última semana es el tapering).
 - Si quedan menos semanas que las de la plantilla, **recorta desde las semanas de base (el medio), nunca del tapering ni de la primera semana**.
 - Personaliza los ritmos: `paceBasisSecPerKm` sale del mejor esfuerzo reciente vía Riegel; si no hay datos, del `level` autodeclarado. Cada sesión calcula su rango con `paceFactor ± 4%`.
 
@@ -332,7 +332,7 @@ GET    /workouts/stats/weekly?weeks=         ← resumen semanal + barras por d�
 
 ### 6.6 Races
 ```
-GET  /races/me/summary                  ← cuántas maratones corriste, distancia total, total gastado
+GET  /races/me/summary                  ← cuántas carreras corriste, distancia total, total gastado
 GET  /races/me?status=upcoming|completed
 GET  /races/:registrationId
 GET  /races/:registrationId/splits
@@ -342,7 +342,7 @@ POST /races/:registrationId/share-card  ← tarjeta de imagen del resultado
 - El detalle devuelve el recorrido (GeoJSON **simplificado con Douglas-Peucker**, para no mandar 20.000 puntos al móvil) + checkpoints cada 5 km + métricas completas (tiempo de llegada, chip time, ritmo y velocidad medios, distancia, elevación, mejor km, puesto general y por categoría).
 - Próximas: cuenta regresiva, dorsal, info logística (`kitPickup`, hora de largada).
 - **Tarjeta de imagen**: PNG generado con `sharp`, guardado vía interfaz `StorageService` (driver local en `/uploads`, cambiable a S3 después).
-- **Total gastado** = suma de `Payment.amountCents` con status `paid` menos reembolsos. No sumes precios de maratón.
+- **Total gastado** = suma de `Payment.amountCents` con status `paid` menos reembolsos. No sumes precios de carrera.
 
 ### 6.7 Profile
 ```
@@ -444,15 +444,15 @@ No lo implementes completo ahora, pero deja la estructura:
 
 Usa **AdminJS** con el adaptador de Prisma, montado en `/admin`, protegido por autenticación propia + rol `admin` + rate limiting. Es la opción de menor esfuerzo: genera el CRUD desde el esquema de Prisma casi sin código.
 
-**Recursos CRUD automáticos:** maratones, categorías, extras, plantillas de planes y sus sesiones, usuarios (solo lectura de datos sensibles), inscripciones, pagos.
+**Recursos CRUD automáticos:** carreras, categorías, extras, plantillas de planes y sus sesiones, usuarios (solo lectura de datos sensibles), inscripciones, pagos.
 
 **Acciones personalizadas (las que AdminJS no da gratis):**
-- **Activar/desactivar el service fee** (global y por maratón) con vista previa del efecto sobre un total de ejemplo.
-- Publicar / despublicar una maratón.
+- **Activar/desactivar el service fee** (global y por carrera) con vista previa del efecto sobre un total de ejemplo.
+- Publicar / despublicar una carrera.
 - Confirmar manualmente un pago por transferencia bancaria.
 - Cerrar inscripciones y recalcular `registrationStatus`.
 - Cargar resultados de una carrera y **recalcular puestos** general y por categoría.
-- Exportar inscritos de una maratón a CSV.
+- Exportar inscritos de una carrera a CSV.
 
 **Importante:** toda la lógica vive en servicios de Nest expuestos también como **endpoints REST bajo `/api/v1/admin/*`**, y AdminJS solo los invoca. Así, cuando construyas el panel web propio, la API ya está lista y no hay que reimplementar nada.
 
@@ -483,7 +483,7 @@ Documenta todo en `docs/despliegue.md`.
 `npm run db:seed` debe dejar un entorno usable de inmediato:
 
 - 3 usuarios: `runner@test.com`, `runner2@test.com`, `admin@test.com` (password `Test1234!`).
-- **10 maratones bolivianas realistas** (La Paz, Santa Cruz, Cochabamba, Sucre, Tarija…): 6 futuras (una a 3 días, una a 2 semanas, una a 4 meses), 4 pasadas, estados variados (`open`, `closing_soon`, `full`, `closed`), con categorías, extras, recorrido GeoJSON y cronograma. Precios en BOB realistas (Bs 80–350).
+- **10 carreras bolivianas realistas** (La Paz, Santa Cruz, Cochabamba, Sucre, Tarija…): 6 futuras (una a 3 días, una a 2 semanas, una a 4 meses), 4 pasadas, estados variados (`open`, `closing_soon`, `full`, `closed`), con categorías, extras, recorrido GeoJSON y cronograma. Precios en BOB realistas (Bs 80–350).
 - **8 plantillas de plan** (5K/10K/21K/42K × principiante/intermedio), de 8 a 16 semanas.
 - 1 plan activo instanciado para el usuario runner, con la semana actual parcialmente completada.
 - ~40 entrenamientos históricos en 4 meses, con posiciones GPS reales (track GeoJSON de ejemplo desplazado y con ruido), splits y sensaciones.
@@ -532,16 +532,16 @@ Ejecuta **una fase por vez**. Al terminar, aplica el protocolo 0.2 y espera.
 | 2 | Esquema de datos | `schema.prisma` completo, primera migración, particionado de `positions`, Prisma service |
 | 3 | Auth | Registro, login, refresh rotativo 60 días, logout, sesiones, recuperación, guards, rol admin + tests |
 | 4 | Usuarios y perfil | Perfil, preferencias, avatar, zapatillas, salud, highlights |
-| 5 | Maratones | Catálogo, detalle, categorías, extras, estados de inscripción |
-| 6 | Pricing | `ServiceFeeConfig`, `QuoteService`, fee opcional con override por maratón, snapshot |
+| 5 | Carreras | Catálogo, detalle, categorías, extras, estados de inscripción |
+| 6 | Pricing | `ServiceFeeConfig`, `QuoteService`, fee opcional con override por carrera, snapshot |
 | 7 | Inscripciones | Flujo de 3 pasos, cupos transaccionales, dorsal, cancelación |
 | 8 | Pagos mock | `PaymentProvider`, driver mock con card/QR/transferencia, idempotencia, webhook, comprobante PDF en BOB |
-| 9 | Planes de entrenamiento | Catálogo de plantillas, sugerencias por maratón, instanciación con anclaje y tapering, gestión de sesiones |
+| 9 | Planes de entrenamiento | Catálogo de plantillas, sugerencias por carrera, instanciación con anclaje y tapering, gestión de sesiones |
 | 10 | Workouts | Sesiones, finish, consolidación de métricas y splits, historial, filtros, stats semanales |
 | 11 | **Tracking** | Ingesta por lotes, `ingestToken`, dedupe, `PositionIngestionSource`, endpoint OsmAnd, modo simulación |
 | 12 | Races | Resultados, checkpoints cada 5 km, ranking, comprobante, tarjeta de imagen |
 | 13 | Home + predicción | `/home/summary`, `PredictionService` (Riegel) |
-| 14 | Realtime | Socket.IO + Redis adapter, rooms por maratón, throttling (base para live tracking) |
+| 14 | Realtime | Socket.IO + Redis adapter, rooms por carrera, throttling (base para live tracking) |
 | 15 | Panel admin | AdminJS + endpoints `/api/v1/admin/*`, acciones personalizadas |
 | 16 | Transversales | Deep links, `/config/app`, notificaciones stub, rate limiting, borrado de cuenta |
 | 17 | Seeds + docs + tests | Seeds completos, `docs/*`, README, suite e2e verde |

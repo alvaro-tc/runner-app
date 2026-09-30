@@ -49,11 +49,11 @@ void main() {
     });
   });
 
-  group('estado en vivo de una maraton', () {
+  group('estado en vivo de una carrera', () {
     AdminMarathon conFechas({String? largo, String? termino}) =>
         AdminMarathon.fromJson({
           'id': 'm1',
-          'name': 'Maraton',
+          'name': 'Carrera',
           'city': 'La Paz',
           'startsAt': '2026-09-13T11:00:00.000Z',
           'capacity': 100,
@@ -88,7 +88,7 @@ void main() {
   group('afiche y QR de cobro', () {
     AdminMarathon con({String? cover, String? qr}) => AdminMarathon.fromJson({
       'id': 'm1',
-      'name': 'Maraton',
+      'name': 'Carrera',
       'city': 'La Paz',
       'startsAt': '2026-09-13T11:00:00.000Z',
       'capacity': 100,

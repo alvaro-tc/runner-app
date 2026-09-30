@@ -7,13 +7,13 @@ import 'package:camrun/features/races/presentation/widgets/races_autorefresh.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// La puerta de la app del corredor el dia de su maraton.
+/// La puerta de la app del corredor el dia de su carrera.
 ///
 /// Envuelve la app entera y no una pantalla concreta porque el estado de la
 /// carrera puede cambiar con el corredor mirando cualquier cosa, y porque lo
 /// que hace es justamente **quitar** la app: en preparacion solo existe el
 /// aviso del organizador, y despues de cruzar la meta solo existen sus
-/// estadisticas, hasta que la maraton se de por terminada.
+/// estadisticas, hasta que la carrera se de por terminada.
 ///
 /// Solo lo ve quien esta inscrito: el estado sale de *mis carreras*. Ver
 /// [marathonGateProvider].

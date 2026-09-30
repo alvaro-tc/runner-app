@@ -56,7 +56,7 @@ final racesSummaryProvider = FutureProvider<RaceTotals>((ref) async {
 /// No son carreras: el servidor no las devuelve en "mis carreras" hasta que el
 /// pago se valida. Se piden aparte para que quien subio su captura la siga
 /// viendo, y para no dejarle empezar una segunda inscripcion a la misma
-/// maraton mientras tanto.
+/// carrera mientras tanto.
 final awaitingValidationProvider = FutureProvider<List<Registration>>(
   (ref) async {
     // Cuelga de la lista: refrescar "mis carreras" —o inscribirse, o cancelar—

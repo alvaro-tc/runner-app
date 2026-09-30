@@ -50,7 +50,7 @@ probar directamente; si se quiere, con `bundletool build-apks --local-testing`.
 | Capturas de tablet 7" y 10" | opcionales | ______ |
 | Video de YouTube | opcional | ______ |
 | Categoria | — | Salud y bienestar (alternativa: Deportes) |
-| Etiquetas | hasta 5 | running, entrenamiento, GPS, carreras, maraton |
+| Etiquetas | hasta 5 | running, entrenamiento, GPS, carreras, carrera |
 
 ## 4. URLs publicas obligatorias
 
@@ -66,10 +66,10 @@ Las dos tienen que abrir **sin login**. Ver `docs/play-store-privacidad.md`.
 | Formulario | Respuesta |
 |---|---|
 | Data safety | Ya redactado en `docs/play-store-privacidad.md` §3. **Revisar antes de enviarlo**: ese documento declara background location y `ACTIVITY_RECOGNITION`, pero el manifest actual los elimina (`tools:node="remove"`). Con el manifest de hoy la respuesta correcta es **no** hay recogida en segundo plano y **no** se usa actividad fisica del sensor. |
-| Clasificacion de contenido (cuestionario IARC) | Categoria "Referencia/Educacion o Estilo de vida", sin violencia, sin contenido sexual, sin apuestas, sin compras. Comparte ubicacion con otros usuarios durante la maraton → declararlo. |
+| Clasificacion de contenido (cuestionario IARC) | Categoria "Referencia/Educacion o Estilo de vida", sin violencia, sin contenido sexual, sin apuestas, sin compras. Comparte ubicacion con otros usuarios durante la carrera → declararlo. |
 | Publico objetivo | 18+ (o 13+; si se marca por debajo de 13 se activan las politicas de Families y hay que cambiar el consentimiento) |
 | Anuncios | No contiene anuncios |
-| Permisos sensibles: ubicacion precisa | Justificacion: grabar la ruta, ritmo y distancia de la salida, y el seguimiento en vivo durante una maraton. Se pide solo cuando el usuario inicia una grabacion. |
+| Permisos sensibles: ubicacion precisa | Justificacion: grabar la ruta, ritmo y distancia de la salida, y el seguimiento en vivo durante una carrera. Se pide solo cuando el usuario inicia una grabacion. |
 | Permiso de servicio en primer plano (`FOREGROUND_SERVICE_LOCATION`) | Declaracion obligatoria + **video de demostracion** (enlace de YouTube o Drive, no listado) mostrando el flujo: usuario pulsa iniciar → aparece la notificacion persistente → la ruta se sigue trazando con la pantalla apagada. **[bloqueante, grabarlo]** |
 | App de noticias / finanzas / salud / gobierno | No |
 | Seguridad de datos: cifrado en transito | Si, HTTPS |
@@ -84,7 +84,7 @@ de desarrollo**: apuntan a la API local. Crear una en produccion y anotar:
 |---|---|
 | Correo | ______ |
 | Contrasena | ______ |
-| Instrucciones | "El campo de login acepta correo o CI. Para ver el seguimiento en vivo hace falta estar inscrito a una maraton en curso; la cuenta ya lo esta." |
+| Instrucciones | "El campo de login acepta correo o CI. Para ver el seguimiento en vivo hace falta estar inscrito a una carrera en curso; la cuenta ya lo esta." |
 
 Formato de las cuentas y roles: `docs/cuentas-de-prueba.md` (esas son de
 desarrollo, **no** las que van a Play).

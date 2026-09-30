@@ -8,15 +8,15 @@ import 'package:camrun/features/races/presentation/providers/races_provider.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// En que estado deja la app la maraton del usuario.
+/// En que estado deja la app la carrera del usuario.
 ///
 /// Es una puerta, no un aviso: mientras haya algo distinto de [GateOpen], el
 /// corredor no ve la app —ni su perfil, ni sus entrenamientos, ni el catalogo—.
-/// Una maraton en preparacion o en marcha es un evento presencial con una
+/// Una carrera en preparacion o en marcha es un evento presencial con una
 /// persona con megafono delante, y la app tiene que decir una sola cosa.
 ///
 /// **Solo afecta a los inscritos.** Todo esto sale de *mis carreras*, que es
-/// una lista de inscripciones confirmadas propias: quien no corre esta maraton
+/// una lista de inscripciones confirmadas propias: quien no corre esta carrera
 /// no tiene ninguna entrada de la que sacar el bloqueo.
 @immutable
 sealed class MarathonGate {
@@ -28,7 +28,7 @@ class GateOpen extends MarathonGate {
   const GateOpen();
 }
 
-/// La maraton esta a punto. Solo se ve el aviso del organizador.
+/// La carrera esta a punto. Solo se ve el aviso del organizador.
 class GatePreparing extends MarathonGate {
   const GatePreparing({required this.entry, this.message});
 
@@ -47,14 +47,14 @@ class GateRunning extends MarathonGate {
   final DateTime startedAt;
 }
 
-/// Ya cruzo la meta, pero la maraton sigue en marcha: solo sus estadisticas.
+/// Ya cruzo la meta, pero la carrera sigue en marcha: solo sus estadisticas.
 class GateFinished extends MarathonGate {
   const GateFinished({required this.entry});
 
   final RaceEntry entry;
 }
 
-/// La maraton del usuario que se esta corriendo ahora mismo, o `null`.
+/// La carrera del usuario que se esta corriendo ahora mismo, o `null`.
 ///
 /// Es la vista de [GateRunning] para quien solo necesita eso: el vigia que
 /// abre la pantalla de carrera.
@@ -80,7 +80,7 @@ const _ventana = Duration(hours: 12);
 /// corredor no recibio ningun aviso y aun asi tiene que acabar en la misma
 /// pantalla.
 class MarathonGateNotifier extends Notifier<MarathonGate> {
-  /// Lo que dijo el socket, por maraton. Manda sobre lo que trajo la lista:
+  /// Lo que dijo el socket, por carrera. Manda sobre lo que trajo la lista:
   /// llego despues.
   final _avisos = <String, MarathonLiveState>{};
 
@@ -212,7 +212,7 @@ MarathonGate resolverPuerta(
   Set<String> llegados = const {},
 }) {
   for (final entrada in carreras) {
-    // La puerta es solo para inscritos. Quien no corre esta maraton no tiene
+    // La puerta es solo para inscritos. Quien no corre esta carrera no tiene
     // ninguna entrada de la que sacar el bloqueo, y por eso no lo ve nunca.
     if (!entrada.isEnrolled) continue;
 
@@ -233,7 +233,7 @@ MarathonGate resolverPuerta(
         );
 
       case MarathonPhase.inProgress:
-        // Ya llego: sus estadisticas, y solo eso, hasta que la maraton se de
+        // Ya llego: sus estadisticas, y solo eso, hasta que la carrera se de
         // por terminada. El dorsal recordado cubre los segundos que el
         // servidor tarda en consolidar el resultado oficial.
         if (entrada.hasResult || llegados.contains(entrada.bibNumber)) {

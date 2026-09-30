@@ -25,7 +25,7 @@ de cuenta. Secciones:
      unicamente mientras el usuario tiene una salida en grabacion o participa en
      una carrera con seguimiento en vivo. Sirve para trazar la ruta, calcular
      distancia, ritmo y desnivel, y mostrar la posicion en el mapa en vivo de la
-     maraton. La grabacion se inicia siempre por accion explicita del usuario y
+     carrera. La grabacion se inicia siempre por accion explicita del usuario y
      se detiene cuando este la para; con la app sin salida activa no se recoge
      ninguna ubicacion.
    - *Actividad fisica*: distancia, ritmo, duracion, y el sensor de reconocimiento

@@ -74,13 +74,13 @@ class RaceEntry {
   bool get canStart =>
       isUpcoming && paymentStatus == PaymentStatus.paid && result == null;
 
-  /// Esta persona corre esta maraton.
+  /// Esta persona corre esta carrera.
   ///
   /// A diferencia de [canStart], **no** mira si la fecha ya paso ni si hay
   /// resultado: el dia de la carrera la inscripcion figura como pasada desde el
   /// primer minuto —la hora programada quedo atras— y quien ya llego a meta
   /// sigue siendo un inscrito. Es lo que decide si a esta persona le afecta el
-  /// estado en vivo de la maraton, y por tanto quien ve el aviso de
+  /// estado en vivo de la carrera, y por tanto quien ve el aviso de
   /// preparacion y quien no.
   bool get isEnrolled =>
       paymentStatus == PaymentStatus.paid &&

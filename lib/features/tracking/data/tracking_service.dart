@@ -43,7 +43,7 @@ class TrackingService {
   final SyncService _sync;
   final SharedPreferences? preferences;
 
-  /// Solo se usa en maraton oficial. Ver [LiveUploader].
+  /// Solo se usa en carrera oficial. Ver [LiveUploader].
   final LiveUploader? liveUploader;
 
   final _puntos = StreamController<GeoPoint>.broadcast();
@@ -107,7 +107,7 @@ class TrackingService {
     // Una carrera que seguia abierta cuando la app murio se **retoma**, con su
     // mismo `clientUuid`: el servidor devuelve esa sesion en vez de rechazar la
     // nueva por `SESSION_ALREADY_ACTIVE`. Sin esto, quien reabre la app a mitad
-    // de maraton —el sistema mata la app en dos horas de bolsillo— desaparece
+    // de carrera —el sistema mata la app en dos horas de bolsillo— desaparece
     // del mapa del organizador y termina como un entrenamiento suelto.
     final anterior = registrationId == null ? null : _retomable(registrationId);
     _clientUuid = clientUuid ?? anterior?['clientUuid'] ?? uuidV4();
@@ -223,7 +223,7 @@ class TrackingService {
       try {
         await _api.finish(sesion.sessionId, feeling: feeling, notes: notes);
       } on Failure catch (e) {
-        // El servidor pudo cerrarla el: en la maraton oficial cierra la carrera
+        // El servidor pudo cerrarla el: en la carrera oficial cierra la carrera
         // en cuanto el GPS dice que el corredor cruzo la meta, porque el
         // telefono puede estar en un bolsillo o sin bateria. Reintentar eso
         // seria pelearse con la outbox por algo que ya esta hecho.
@@ -276,7 +276,7 @@ class TrackingService {
     // Una carrera sin sesion remota es un corredor invisible para el
     // organizador y un resultado oficial que se pierde, asi que se reintenta en
     // cada lote hasta que entre: un corte de red justo en la largada no puede
-    // convertir la maraton en un entrenamiento. Una salida normal no lo
+    // convertir la carrera en un entrenamiento. Una salida normal no lo
     // necesita, sube entera al terminar.
     if (_sesion == null && _args?.registrationId != null && isRecording) {
       _sesion = await _abrirSesion();

@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// El puesto de mando: donde va cada corredor, y el boton que da la largada.
 ///
-/// La maraton se elige arriba porque puede haber varias abiertas a la vez —una
+/// La carrera se elige arriba porque puede haber varias abiertas a la vez —una
 /// corriendo y dos cargadas para el mes que viene— y el mapa solo puede mirar
 /// una: sin selector habria que adivinar cual, y adivinar mal el dia de la
 /// carrera es quedarse mirando un mapa vacio.
@@ -393,7 +393,7 @@ class _Controles extends ConsumerStatefulWidget {
 class _ControlesState extends ConsumerState<_Controles> {
   bool _enviando = false;
 
-  /// El estado que manda es el del socket: el objeto de la maraton se cargo
+  /// El estado que manda es el del socket: el objeto de la carrera se cargo
   /// hace rato y puede haber arrancado desde otro dispositivo mientras tanto.
   AdminLiveControl get _control =>
       adminLiveControlFor(widget.marathon, widget.board);

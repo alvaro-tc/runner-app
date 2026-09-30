@@ -46,7 +46,7 @@ class LivePosition {
   String get key => bib ?? '?';
 }
 
-/// Preparacion, largada y corte de una maraton, tal como llegan por el socket.
+/// Preparacion, largada y corte de una carrera, tal como llegan por el socket.
 @immutable
 class MarathonLiveState {
   const MarathonLiveState({
@@ -128,7 +128,7 @@ class LiveSocket {
   Timer? _reconnectTimer;
   bool _disposed = false;
 
-  /// Cuantas pantallas miran cada maraton. Salir de la sala al cerrar una
+  /// Cuantas pantallas miran cada carrera. Salir de la sala al cerrar una
   /// pantalla dejaria ciega a otra que siguiera abierta detras.
   final _salas = <(String, bool), int>{};
 
@@ -154,17 +154,17 @@ class LiveSocket {
   ///
   /// Llega por la sala personal del corredor, en la que el servidor lo mete al
   /// abrir el socket: antes de que el pago se valide esa persona no esta
-  /// inscrita en ninguna maraton y no hay sala de la que colgar el aviso.
+  /// inscrita en ninguna carrera y no hay sala de la que colgar el aviso.
   Stream<void> get registrations => _inscripciones.stream;
 
   /// Una notificacion nueva en la bandeja de este usuario, entera: el servidor
   /// ya la guardo, asi que no hay otra version con la que pueda discrepar.
   Stream<Map<String, dynamic>> get notifications => _notificaciones.stream;
 
-  /// Abre la conexion sin mirar ninguna maraton.
+  /// Abre la conexion sin mirar ninguna carrera.
   ///
   /// Hace falta para los avisos de la sala personal: quien espera a que le
-  /// validen el pago todavia no tiene ninguna sala de maraton que pedir, y sin
+  /// validen el pago todavia no tiene ninguna sala de carrera que pedir, y sin
   /// conexion no se entera de nada hasta el siguiente sondeo.
   Future<void> ensureConnected() async {
     _conectar();
@@ -190,7 +190,7 @@ class LiveSocket {
     _socket = null;
   }
 
-  /// Empieza a mirar una maraton. Devuelve la baja: llamarla es lo que la
+  /// Empieza a mirar una carrera. Devuelve la baja: llamarla es lo que la
   /// deja de mirar.
   Future<VoidCallback> watch(String marathonId, {bool positions = true}) async {
     final room = (marathonId, positions);

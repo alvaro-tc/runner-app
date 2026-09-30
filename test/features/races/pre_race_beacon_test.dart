@@ -72,7 +72,7 @@ void main() {
     expect(faro.apagados, 1);
   });
 
-  // El corredor abre la app con la maraton ya en preparacion: no hay ningun
+  // El corredor abre la app con la carrera ya en preparacion: no hay ningun
   // cambio de puerta que escuchar y aun asi tiene que salir en el mapa.
   testWidgets('montar ya en preparacion enciende igual', (tester) async {
     await montar(tester, inicial: GatePreparing(entry: _entrada));
@@ -173,7 +173,7 @@ final _entrada = RaceEntry(
   id: 'r1',
   marathon: Marathon(
     id: 'm1',
-    name: 'Maraton de La Paz',
+    name: 'Carrera de La Paz',
     date: DateTime(2026, 9, 2, 7),
     city: 'La Paz',
     country: 'BO',

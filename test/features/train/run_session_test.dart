@@ -144,7 +144,7 @@ void main() {
     await arrancar(
       RunGoal.race(
         registrationId: 'reg1',
-        title: 'Maraton de prueba',
+        title: 'Carrera de prueba',
         distanceKm: 42.195,
       ),
     );
@@ -202,7 +202,7 @@ void main() {
     await arrancar(
       RunGoal.race(
         registrationId: 'reg1',
-        title: 'Maraton de prueba',
+        title: 'Carrera de prueba',
         distanceKm: 42.195,
       ),
     );

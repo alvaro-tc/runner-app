@@ -96,7 +96,10 @@ class HomeNotifier extends AsyncNotifier<HomeData> {
   Future<void> refresh() async {
     ref
       ..invalidateSelf()
-      ..invalidate(upcomingMarathonsProvider);
+      ..invalidate(upcomingMarathonsProvider)
+      // El detalle de cada carrera tambien: si no, abrirla despues de recargar
+      // seguiria ensenando el afiche viejo.
+      ..invalidate(marathonProvider);
     await (future, ref.read(upcomingMarathonsProvider.future)).wait;
   }
 }

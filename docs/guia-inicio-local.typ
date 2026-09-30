@@ -53,7 +53,7 @@
 = Qué es y contra qué corre
 
 CamRun es la app móvil de running en Flutter: plan de entrenamiento, seguimiento
-de carreras en vivo con GPS, historial persistente e inscripción a maratones.
+de carreras en vivo con GPS, historial persistente e inscripción a carreras.
 
 Hay *dos formas* de levantarla, y esta guía cubre las dos por separado:
 
@@ -74,7 +74,7 @@ Hay *dos formas* de levantarla, y esta guía cubre las dos por separado:
   para trabajar en la app. Empieza por la Opción A.
 ]
 
-Auth, Home y el catálogo de maratones hablan ya con el backend real. Train,
+Auth, Home y el catálogo de carreras hablan ya con el backend real. Train,
 Races y Profile todavía usan repositorios en memoria (ver `ARCHITECTURE.md`,
 sección 9).
 
@@ -528,7 +528,7 @@ npm run dev               # escucha en :3000
 ```
 
 #nota[
-  *Sin `db:seed` no hay maratones ni cuentas de prueba:* la app arranca, llega al
+  *Sin `db:seed` no hay carreras ni cuentas de prueba:* la app arranca, llega al
   login, y no hay con qué entrar.
 ]
 
@@ -695,14 +695,14 @@ En macOS `make` llega con las Command Line Tools de Xcode
 
 #tabla(
   columns: (auto, 1fr),
-  [*Home*], [Cuenta atrás del próximo maratón, tarjeta del evento, plan semanal con anillos de progreso y sesión del día],
+  [*Home*], [Cuenta atrás del próxima carrera, tarjeta del evento, plan semanal con anillos de progreso y sesión del día],
   [*Train*], [Inicio rápido, resumen semanal, historial agrupado y filtrable],
   [*Races*], [Totales calculados, inscripciones próximas y completadas con resultados],
   [*Profile*], [Estadísticas, calzado, sueño, hidratación y ajustes],
 )
 
 Flujos completos disponibles: onboarding y auth (sign in / sign up / recuperar
-contraseña); detalle de maratón e inscripción en 3 pasos con dorsal; sesión de
+contraseña); detalle de carrera e inscripción en 3 pasos con dorsal; sesión de
 running a pantalla completa con mapa, splits y auto-pausa; resumen
 post-entrenamiento persistido; perfil editable. Tema claro y oscuro conmutables
 desde *Profile #sym.arrow.r Appearance*.
@@ -720,7 +720,7 @@ system con un interruptor de tema.
   [CORS. Confirma que arrancaste con `--web-port=5000` y que el origen está en `CORS_ORIGINS`],
   [*`401 INVALID_CREDENTIALS`*],
   [La base no está sembrada (`npm run db:seed`), o la contraseña no es `Test1234!`],
-  [*Catálogo de maratones vacío*],
+  [*Catálogo de carreras vacío*],
   [Falta `npm run db:seed` en el backend],
   [*El teléfono físico no conecta*],
   [Estás usando `10.0.2.2`, que solo existe en el emulador. Pasa la IP del equipo por `--dart-define`],

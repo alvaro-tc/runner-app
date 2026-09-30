@@ -33,7 +33,7 @@ class RegistrationFlowState {
     this.error,
   });
 
-  /// De que maraton es este flujo. Sirve para descartarlo al abrir otro: dos
+  /// De que carrera es este flujo. Sirve para descartarlo al abrir otro: dos
   /// altas a medias en la misma pantalla acabarian pagando la que no era.
   final String? marathonId;
 
@@ -91,8 +91,8 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
     return const RegistrationFlowState();
   }
 
-  /// Prepara el flujo para una maraton. Idempotente: llamarlo con la misma
-  /// maraton no tira el borrador en curso.
+  /// Prepara el flujo para una carrera. Idempotente: llamarlo con la misma
+  /// carrera no tira el borrador en curso.
   void openFor(String marathonId) {
     if (state.marathonId == marathonId) return;
 
@@ -129,7 +129,7 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
     );
   }
 
-  /// Paso 1. Si ya habia un borrador para esta maraton, el servidor lo devuelve
+  /// Paso 1. Si ya habia un borrador para esta carrera, el servidor lo devuelve
   /// en vez de abrir otro: el flujo se retoma donde se dejo.
   Future<bool> submitPersonalData(RegistrationPersonalData datos) {
     final marathonId = state.marathonId;
@@ -363,7 +363,7 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
 }
 
 /// Uno solo: la pantalla de alta es una a la vez, y `openFor` descarta el flujo
-/// anterior al abrir otra maraton.
+/// anterior al abrir otra carrera.
 final registrationFlowProvider =
     NotifierProvider<RegistrationFlowNotifier, RegistrationFlowState>(
       RegistrationFlowNotifier.new,

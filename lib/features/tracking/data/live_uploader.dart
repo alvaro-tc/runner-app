@@ -4,7 +4,7 @@ import 'package:camrun/core/network/api_config.dart';
 import 'package:camrun/core/storage/token_storage.dart';
 import 'package:traccar_client_sdk/traccar_client_sdk.dart';
 
-/// Quien sube las posiciones **solo durante una maraton oficial**.
+/// Quien sube las posiciones **solo durante una carrera oficial**.
 ///
 /// En un entrenamiento suelto sube [TrackingService] y punto. En la largada
 /// oficial no basta: ahi el corredor esta dos o tres horas con el telefono en

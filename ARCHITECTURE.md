@@ -213,7 +213,7 @@ no una frase, y `HistorySection` guarda *qué* cabecera es y no su título ya
 formateado. Lo mismo con los errores: los notifiers devuelven `Failure`, no
 `failure.message`, y la UI llama a `.localized(t)`.
 
-Lo que viene del servidor (`ApiFailure.message`, nombres de maratón, notas del
+Lo que viene del servidor (`ApiFailure.message`, nombres de carrera, notas del
 usuario) se pinta tal cual: es texto de quien lo escribió, o del backend.
 
 **Hueco conocido:** el backend devuelve sus mensajes de error siempre en
@@ -445,7 +445,7 @@ para guardar el par de tokens, `AppDatabase.wipe()` para borrar lo local.
 Los tests de widget no abren sockets: `pumpApp` inyecta un `Dio` con
 `FakeAdapter` y un `TokenStorage` en memoria.
 
-### Home y maratones conectados (Fase 22.2)
+### Home y carreras conectados (Fase 22.2)
 
 `GET /home/summary` es **una** peticion para las cinco cosas que pinta la
 pantalla. `HomeApi` devuelve el JSON crudo y `home_mappers.dart` lo convierte en
@@ -463,7 +463,7 @@ entidades: es el unico sitio donde metros, segundos y centavos dejan de serlo.
   activo no hay selector ni tarjeta del dia, y la pantalla se pinta igual.
 - **La lectura es offline-first** via `readThrough`: se emite la cache y despues
   la red; sin red, se queda con la cache y el fallo solo sube cuando no hay ni
-  eso. La lista de maratones viaja dentro de un documento (`{items: [...]}`)
+  eso. La lista de carreras viaja dentro de un documento (`{items: [...]}`)
   porque la cache guarda documentos, no listas.
 - **El pronostico llega como un numero** y la tarjeta pinta un rango: la banda
   sale de la confianza que declara el servidor (±4/8/12 %).
@@ -478,7 +478,7 @@ fingir que se guardo.
 `DateTime.now()`, para que las cuentas atrás y la agrupación por semana sean
 correctas se abra cuando se abra la app:
 
-- 6 maratones: 2 abiertas, 1 «closing soon», 1 llena, 2 pasadas.
+- 6 carreras: 2 abiertas, 1 «closing soon», 1 llena, 2 pasadas.
 - Plan de 12 semanas con la semana 4 activa (la que contiene hoy).
 - 25 entrenamientos repartidos en 8 semanas, con rutas GPS sintéticas
   coherentes generadas por `RouteGenerator` (bucles cerrados, no ruido).

@@ -245,7 +245,7 @@ class Registration {
   final String marathonId;
   final String marathonName;
 
-  /// Fecha y ciudad de la maraton. Solo para pintar una inscripcion que
+  /// Fecha y ciudad de la carrera. Solo para pintar una inscripcion que
   /// todavia no es carrera —no sale en `/races/me`— sin ir a buscar el
   /// catalogo entero por dos lineas de texto.
   final DateTime? marathonDate;

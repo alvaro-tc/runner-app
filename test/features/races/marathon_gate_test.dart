@@ -9,18 +9,18 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Es la parte del cambio que no puede fallar en produccion: dejar la app viva
 /// en preparacion arruina la largada, y bloquearsela a quien no corre esa
-/// maraton lo deja sin app sin haber hecho nada.
+/// carrera lo deja sin app sin haber hecho nada.
 void main() {
   final hoy = DateTime(2026, 9, 2, 7);
 
-  Marathon maraton({
+  Marathon carrera({
     DateTime? preparingAt,
     String? preparingMessage,
     DateTime? liveStartedAt,
     DateTime? liveFinishedAt,
   }) => Marathon(
     id: 'm1',
-    name: 'Maraton de La Paz',
+    name: 'Carrera de La Paz',
     date: hoy,
     city: 'La Paz',
     country: 'BO',
@@ -72,15 +72,15 @@ void main() {
     expect(resolverPuerta(const []), isA<GateOpen>());
   });
 
-  test('una maraton sin empezar no bloquea nada', () {
-    final puerta = resolverPuerta([inscripcion(en: maraton())]);
+  test('una carrera sin empezar no bloquea nada', () {
+    final puerta = resolverPuerta([inscripcion(en: carrera())]);
     expect(puerta, isA<GateOpen>());
   });
 
   test('en preparacion bloquea al inscrito, con el aviso del organizador', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(preparingAt: hoy, preparingMessage: 'Salimos 06:45'),
+        en: carrera(preparingAt: hoy, preparingMessage: 'Salimos 06:45'),
       ),
     ]);
 
@@ -89,14 +89,14 @@ void main() {
   });
 
   test('sin aviso propio el mensaje queda en null: lo pone la app', () {
-    final puerta = resolverPuerta([inscripcion(en: maraton(preparingAt: hoy))]);
+    final puerta = resolverPuerta([inscripcion(en: carrera(preparingAt: hoy))]);
     expect((puerta as GatePreparing).message, isNull);
   });
 
   test('a quien no pago no se le bloquea nada', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(preparingAt: hoy),
+        en: carrera(preparingAt: hoy),
         paymentStatus: PaymentStatus.pending,
       ),
     ]);
@@ -106,7 +106,7 @@ void main() {
   test('a quien cancelo su inscripcion tampoco', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(preparingAt: hoy),
+        en: carrera(preparingAt: hoy),
         status: RaceEntryStatus.cancelled,
       ),
     ]);
@@ -116,7 +116,7 @@ void main() {
   test('en marcha, el inscrito que no llego va a la pantalla de carrera', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(preparingAt: hoy, liveStartedAt: hoy),
+        en: carrera(preparingAt: hoy, liveStartedAt: hoy),
       ),
     ]);
 
@@ -124,10 +124,10 @@ void main() {
     expect((puerta as GateRunning).startedAt, hoy);
   });
 
-  test('con la maraton en marcha, quien ya tiene resultado ve sus datos', () {
+  test('con la carrera en marcha, quien ya tiene resultado ve sus datos', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(liveStartedAt: hoy),
+        en: carrera(liveStartedAt: hoy),
         result: resultado,
       ),
     ]);
@@ -138,7 +138,7 @@ void main() {
     // El servidor anuncia la llegada y consolida el resultado despues: sin
     // esto el corredor volveria un instante a la pantalla de carrera.
     final puerta = resolverPuerta(
-      [inscripcion(en: maraton(liveStartedAt: hoy))],
+      [inscripcion(en: carrera(liveStartedAt: hoy))],
       llegados: {'MLP-0042'},
     );
     expect(puerta, isA<GateFinished>());
@@ -146,7 +146,7 @@ void main() {
 
   test('la llegada de otro dorsal no mueve nada', () {
     final puerta = resolverPuerta(
-      [inscripcion(en: maraton(liveStartedAt: hoy))],
+      [inscripcion(en: carrera(liveStartedAt: hoy))],
       llegados: {'MLP-0099'},
     );
     expect(puerta, isA<GateRunning>());
@@ -155,7 +155,7 @@ void main() {
   test('cortada la carrera, todo el mundo recupera la app', () {
     final puerta = resolverPuerta([
       inscripcion(
-        en: maraton(preparingAt: hoy, liveStartedAt: hoy, liveFinishedAt: hoy),
+        en: carrera(preparingAt: hoy, liveStartedAt: hoy, liveFinishedAt: hoy),
         result: resultado,
       ),
     ]);
@@ -165,7 +165,7 @@ void main() {
   test('lo que dice el socket manda sobre lo que trajo la lista', () {
     // La lista se cargo antes de que el organizador tocara el boton.
     final puerta = resolverPuerta(
-      [inscripcion(en: maraton())],
+      [inscripcion(en: carrera())],
       avisos: {
         'm1': MarathonLiveState(
           marathonId: 'm1',
@@ -181,7 +181,7 @@ void main() {
   test('y el corte por socket suelta al corredor aunque la lista diga otra '
       'cosa', () {
     final puerta = resolverPuerta(
-      [inscripcion(en: maraton(liveStartedAt: hoy))],
+      [inscripcion(en: carrera(liveStartedAt: hoy))],
       avisos: {
         'm1': MarathonLiveState(
           marathonId: 'm1',

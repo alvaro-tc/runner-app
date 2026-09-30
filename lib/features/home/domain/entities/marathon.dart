@@ -29,7 +29,7 @@ enum RegistrationStatus {
   bool get acceptsEntries => this == open || this == closingSoon;
 }
 
-/// En que punto de su dia esta una maraton.
+/// En que punto de su dia esta una carrera.
 ///
 /// Se deriva de las tres fechas, igual que en el servidor: guardar ademas un
 /// campo con el estado seria un segundo sitio que puede discrepar del primero.
@@ -47,7 +47,7 @@ enum MarathonPhase {
   /// El organizador corto la carrera.
   finished;
 
-  /// Si un inscrito en esta maraton tiene la app bloqueada.
+  /// Si un inscrito en esta carrera tiene la app bloqueada.
   bool get locksEntrants => this == preparing || this == inProgress;
 }
 

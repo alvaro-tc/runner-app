@@ -40,7 +40,7 @@ class _FakeRaceRepository implements RaceRepository {
   static Registration _registro(RegistrationState state) => Registration(
     id: 'reg1',
     marathonId: 'm1',
-    marathonName: 'Maraton de prueba',
+    marathonName: 'Carrera de prueba',
     state: state,
     step: RegistrationStep.payment,
     quote: _quote,
@@ -192,13 +192,13 @@ void main() {
       expect(estado().isAwaitingPayment, isTrue);
       expect(estado().payment?.proof?.state, ProofState.rejected);
       expect(estado().payment?.proof?.note, 'Captura borrosa');
-      // La misma maraton despues no tira lo retomado.
+      // La misma carrera despues no tira lo retomado.
       flow().openFor('m1');
       expect(estado().payment, isNotNull);
     },
   );
 
-  test('sin abrir una maraton, el paso 1 no hace nada', () async {
+  test('sin abrir una carrera, el paso 1 no hace nada', () async {
     expect(await flow().submitPersonalData(datos), isFalse);
     expect(estado().registration, isNull);
   });
@@ -212,19 +212,19 @@ void main() {
     expect(estado().busy, isFalse);
   });
 
-  test('abrir otra maraton descarta el borrador a medias', () async {
+  test('abrir otra carrera descarta el borrador a medias', () async {
     flow().openFor('m1');
     await flow().submitPersonalData(datos);
 
     flow().openFor('m2');
 
-    // Seguir con el borrador de la maraton anterior acabaria pagando la que no
+    // Seguir con el borrador de la carrera anterior acabaria pagando la que no
     // era: por eso se tira en vez de conservarse.
     expect(estado().registration, isNull);
     expect(estado().marathonId, 'm2');
   });
 
-  test('reabrir la MISMA maraton conserva el borrador', () async {
+  test('reabrir la MISMA carrera conserva el borrador', () async {
     flow().openFor('m1');
     await flow().submitPersonalData(datos);
 
@@ -391,7 +391,7 @@ void main() {
     expect(repo.canceladas, ['reg1']);
     expect(estado().payment, isNull);
     expect(estado().registration, isNull);
-    // La maraton se conserva: se cancelo el pago, no se salio de la carrera.
+    // La carrera se conserva: se cancelo el pago, no se salio de la carrera.
     expect(estado().marathonId, 'm1');
   });
 

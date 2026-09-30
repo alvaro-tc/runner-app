@@ -19,7 +19,7 @@ Map<String, dynamic> _json({
   'status': status,
   'amountCents': 20000,
   'currency': 'BOB',
-  'marathon': 'Maraton de La Paz',
+  'marathon': 'Carrera de La Paz',
   'runner': 'Ana Quispe',
   'proofId': proofId,
   'validatedBy': validatedBy,

@@ -103,10 +103,10 @@ class _Body extends ConsumerWidget {
     final t = context.l10n;
     // El recorrido oficial vive en el catalogo, no en la inscripcion: es de la
     // carrera, no de quien corre.
-    final maraton = ref.watch(marathonProvider(entry.marathon.id));
+    final carrera = ref.watch(marathonProvider(entry.marathon.id));
     final recorrido = [
       for (final p
-          in maraton.value?.routePreview ??
+          in carrera.value?.routePreview ??
               const <({double lat, double lng})>[])
         GeoPoint(lat: p.lat, lng: p.lng, timestamp: DateTime(2000)),
     ];
@@ -124,7 +124,7 @@ class _Body extends ConsumerWidget {
           borderRadius: BorderRadius.circular(AppRadius.xl),
           child: SizedBox(
             height: 260,
-            child: maraton.isLoading
+            child: carrera.isLoading
                 ? const Skeleton(width: double.infinity, height: 260)
                 : RouteMapView(
                     route: const [],
@@ -205,7 +205,7 @@ class _Body extends ConsumerWidget {
               context,
               ref,
               recorrido,
-              maraton.value?.laps ?? entry.marathon.laps,
+              carrera.value?.laps ?? entry.marathon.laps,
             ),
           )
         else

@@ -36,7 +36,7 @@ abstract final class FakeDataSeed {
   static final List<Marathon> marathons = [
     Marathon(
       id: 'ny-halloween',
-      name: 'NY Halloween Marathon',
+      name: 'NY Halloween Race',
       // The next 26 October, so the name and the date always agree.
       date: _nextOccurrence(month: 10, day: 26, hour: 18),
       city: 'New York',
@@ -51,7 +51,7 @@ abstract final class FakeDataSeed {
       predictedFinishMax: const Duration(hours: 4, minutes: 10),
       about:
           'Five boroughs, one night, and a costume on every corner. The '
-          'Halloween Marathon closes Manhattan traffic from dusk and runs a '
+          'Halloween Race closes Manhattan traffic from dusk and runs a '
           'flat, fast loop lit by 12,000 pumpkins. Pacers start every 10 '
           'minutes from the 3:00 group down to 5:30.',
       schedule: const [
@@ -86,13 +86,13 @@ abstract final class FakeDataSeed {
       categories: const [
         RaceCategory(
           id: 'full',
-          label: 'Full marathon',
+          label: 'Full distance (42K)',
           distanceKm: 42.195,
           surcharge: Money.zero,
         ),
         RaceCategory(
           id: 'half',
-          label: 'Half marathon',
+          label: 'Half distance (21K)',
           distanceKm: 21.0975,
           surcharge: Money(-25),
         ),
@@ -226,8 +226,8 @@ abstract final class FakeDataSeed {
       routePreview: _kyotoRoute,
     ),
     Marathon(
-      id: 'jakarta-marathon',
-      name: 'Jakarta Marathon',
+      id: 'jakarta-race',
+      name: 'Jakarta Race',
       date: now.subtract(const Duration(days: 96)),
       city: 'Jakarta',
       country: 'Indonesia',
@@ -238,7 +238,7 @@ abstract final class FakeDataSeed {
       slotsTaken: 12000,
       status: RegistrationStatus.closed,
       about:
-          'The city\'s flagship marathon, run on closed roads through Monas, '
+          'The city\'s flagship race, run on closed roads through Monas, '
           'Kota Tua and back down Sudirman.',
       schedule: const [],
       included: const ['Chip timing', 'Finisher medal and tee'],
@@ -362,7 +362,7 @@ abstract final class FakeDataSeed {
   static final List<RaceEntry> raceEntries = _buildRaceEntries();
 
   static List<RaceEntry> _buildRaceEntries() {
-    final jakarta = marathons.firstWhere((m) => m.id == 'jakarta-marathon');
+    final jakarta = marathons.firstWhere((m) => m.id == 'jakarta-race');
     final bandung = marathons.firstWhere((m) => m.id == 'bandung-highland');
 
     return [

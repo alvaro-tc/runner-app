@@ -297,7 +297,7 @@ void main() {
     expect(service.recorded, isEmpty);
   });
 
-  test('en maraton sube Traccar y la app no encola ni un punto', () async {
+  test('en carrera sube Traccar y la app no encola ni un punto', () async {
     final traccar = _FakeUploader();
     final service = armar((o) async => _sesionAbierta(), uploader: traccar);
     await service.start(live: true);
@@ -328,7 +328,7 @@ void main() {
     expect((await db.duePositions(futuro())).length, 1);
   });
 
-  test('sin maraton Traccar ni se enciende', () async {
+  test('sin carrera Traccar ni se enciende', () async {
     final traccar = _FakeUploader();
     final service = armar((o) async => _sesionAbierta(), uploader: traccar);
     await service.start();
@@ -340,7 +340,7 @@ void main() {
   });
 
   // Las tres formas de quedarse fuera del mapa del organizador y terminar la
-  // maraton como un entrenamiento suelto. Todas empiezan igual: la sesion
+  // carrera como un entrenamiento suelto. Todas empiezan igual: la sesion
   // remota no se abre.
 
   test('una sesion vieja no deja a la carrera sin sesion', () async {
@@ -440,7 +440,7 @@ void main() {
     await service.flush();
     expect(service.sessionId, 'sesion-1');
     expect(traccar.starts, 1, reason: 'y ya sale en el mapa del organizador');
-    // Y no queda borrador de entrenamiento: subirlo seria la misma maraton
+    // Y no queda borrador de entrenamiento: subirlo seria la misma carrera
     // otra vez, esta vez como salida suelta.
     expect(await db.dueWorkouts(futuro()), isEmpty);
   });

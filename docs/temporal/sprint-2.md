@@ -217,8 +217,7 @@ teléfono bloqueado en el bolsillo y volver con la ruta completa; un administrad
 sube el CSV de resultados de una carrera pasada desde el panel, con dos filas
 rechazadas que el informe explica, y publica; al atleta le llega la notificación,
 la toca y aterriza en el detalle de la carrera con su tiempo oficial, su puesto y
-su dorsal; comparte la tarjeta de finisher por WhatsApp; busca en el catálogo un
-maratón de 21K en Santa Cruz con los filtros nuevos. Todo en español, todo
+su dorsal; comparte la tarjeta de finisher por WhatsApp; busca en el catálogo una carrera de 21K en Santa Cruz con los filtros nuevos. Todo en español, todo
 navegable con TalkBack.
 
 ---

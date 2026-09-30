@@ -19,7 +19,7 @@ instalable y conectada a un backend real.
 | Navegación (4 tabs, shell con estado por pestaña, guards) | ✅ Completo |
 | Onboarding, welcome, sign in / sign up / forgot | ✅ UI + validación cliente |
 | Home (cuenta atrás, plan semanal, sesión del día) | ✅ Completo |
-| Detalle de maratón + inscripción en 3 pasos | ✅ UI, pago simulado |
+| Detalle de carrera + inscripción en 3 pasos | ✅ UI, pago simulado |
 | Train (resumen semanal, historial agrupado y filtrable) | ✅ Completo |
 | Sesión de running con GPS y persistencia en Hive | ✅ Completo (GPS simulado en debug) |
 | Races (totales derivados, detalle con resultados) | ✅ Completo |
@@ -32,7 +32,7 @@ instalable y conectada a un backend real.
 - **Autenticación real.** `FakeAuthRepository` acepta cualquier email con 8+
   caracteres y guarda un booleano en `SharedPreferences`.
 - **Pagos.** El paso de pago es una selección mock (`Card •••• 4242` / `Wallet`).
-- **Administración.** No hay roles, ni panel, ni forma de crear un maratón.
+- **Administración.** No hay roles, ni panel, ni forma de crear una carrera.
 - **Notificaciones.** Ninguna.
 - **Internacionalización.** Los textos están escritos en inglés en el código.
 - **Sincronización.** Los entrenamientos viven solo en el dispositivo.
@@ -89,7 +89,7 @@ Velocidad objetivo: **~36 puntos por sprint**.
 |---|---|---|
 | **E1** | Plataforma y backend | API, base de datos, entornos, CI/CD, observabilidad |
 | **E2** | Identidad y cuentas | Registro, login, OAuth, recuperación, sesión segura |
-| **E3** | Catálogo de eventos | Maratones reales, búsqueda, filtros, imágenes, cupos |
+| **E3** | Catálogo de eventos | Carreras reales, búsqueda, filtros, imágenes, cupos |
 | **E4** | Inscripciones y pagos | Pasarela real, recibos, cancelaciones, reembolsos |
 | **E5** | Datos del atleta | Plan, entrenamientos, perfil sincronizados y offline-first |
 | **E6** | Administración | Roles, CRUD de eventos, costos, usuarios, resultados |
@@ -103,7 +103,7 @@ Velocidad objetivo: **~36 puntos por sprint**.
 
 > **Objetivo de sprint:** que cualquiera pueda instalar la app desde un enlace,
 > crear una cuenta real, iniciar sesión contra un backend desplegado y ver el
-> catálogo de maratones servido por la API — sin datos falsos en ese camino.
+> catálogo de carreras servido por la API — sin datos falsos en ese camino.
 
 **Total: 34 puntos**
 
@@ -193,7 +193,7 @@ Capa de red compartida por todos los repositorios remotos.
 - **Criterios de aceptación**
   - Respuesta paginada por cursor, 20 por página.
   - `RemoteMarathonRepository` sustituye al fake en una línea.
-  - Home y el detalle de maratón muestran datos del servidor.
+  - Home y el detalle de carrera muestran datos del servidor.
   - Scroll infinito en el listado con skeleton al final.
   - El estado de error mantiene el `ErrorStateView` con «Try again».
 
@@ -210,7 +210,7 @@ Almacenamiento de las imágenes de cabecera y servido por CDN.
 
 Recorrido a enseñar: instalar desde el enlace → onboarding → **registrar una
 cuenta nueva de verdad** → cerrar y reabrir la app (sesión persiste) → Home con
-maratones servidos por la API → abrir el detalle de un evento → cerrar sesión →
+carreras servidas por la API → abrir el detalle de un evento → cerrar sesión →
 volver a entrar. El resto de la app sigue con datos locales y se enseña como
 «ya construido, pendiente de conectar».
 
@@ -375,7 +375,7 @@ Aplicación Flutter Web reutilizando el design system existente.
   - Layout responsive con navegación lateral: Eventos, Inscripciones, Usuarios.
   - Claro y oscuro funcionando, como en la app.
 
-#### PU-023 · CRUD de maratones — 8 pts `[ADMIN]` `[BE]`
+#### PU-023 · CRUD de carreras — 8 pts `[ADMIN]` `[BE]`
 La pieza que el producto no tiene hoy: crear un evento.
 
 - **Criterios de aceptación**
@@ -411,7 +411,7 @@ La pieza que el producto no tiene hoy: crear un evento.
 
 ### Demo del Sprint 3
 
-Un administrador crea un maratón desde el panel, le pone precio, extras y cupo, y
+Un administrador crea una carrera desde el panel, le pone precio, extras y cupo, y
 lo publica. En el teléfono aparece en el catálogo; un atleta se inscribe pagando
 con tarjeta sandbox, recibe dorsal y descarga el recibo. El admin lo ve en la
 lista de inscripciones, le restablece la contraseña por email y el atleta la

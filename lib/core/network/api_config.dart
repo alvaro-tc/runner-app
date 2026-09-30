@@ -49,7 +49,7 @@ const publicApiPaths = <String>[
 /// Compara **por segmentos**, no por subcadena. Da lo mismo escrito asi y con
 /// un `contains` hasta que aparece una ruta privada que contiene a una publica:
 /// `/admin/marathons` contiene `/marathons`, y con `contains` el panel entero
-/// de maratones salia sin `Authorization` y el servidor lo rechazaba con un 401
+/// de carreras salia sin `Authorization` y el servidor lo rechazaba con un 401
 /// que, por creerse publico, ni siquiera disparaba el refresh.
 ///
 /// Una entrada sin barra final cubre la ruta y lo que cuelgue de ella

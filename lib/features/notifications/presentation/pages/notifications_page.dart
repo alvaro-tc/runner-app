@@ -12,24 +12,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// El registro de notificaciones: lo que llego, del mas nuevo al mas viejo.
-class NotificationsPage extends ConsumerWidget {
+///
+/// Cada fila se desliza para borrarla o abre su menu para marcarla leida sin
+/// navegar; el filtro de arriba deja ver solo lo pendiente.
+class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  bool _soloNoLeidas = false;
+
+  @override
+  Widget build(BuildContext context) {
     final t = context.l10n;
     final bandeja = ref.watch(notificationsProvider);
     final sinLeer = ref.watch(unreadNotificationsProvider);
+    final hayLeidas = bandeja.value?.items.any((n) => !n.unread) ?? false;
+    final notifier = ref.read(notificationsProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(t.notificationsTitle),
         actions: [
-          if (sinLeer > 0)
-            TextButton(
-              onPressed: () =>
-                  ref.read(notificationsProvider.notifier).markAllRead(),
-              child: Text(t.notificationsMarkAllRead),
+          if (sinLeer > 0 || hayLeidas)
+            PopupMenuButton<VoidCallback>(
+              tooltip: t.notificationsMoreActions,
+              onSelected: (accion) => accion(),
+              itemBuilder: (_) => [
+                if (sinLeer > 0)
+                  PopupMenuItem(
+                    value: notifier.markAllRead,
+                    child: Text(t.notificationsMarkAllRead),
+                  ),
+                if (hayLeidas)
+                  PopupMenuItem(
+                    value: notifier.deleteRead,
+                    child: Text(t.notificationsDeleteRead),
+                  ),
+              ],
             ),
         ],
       ),
@@ -49,40 +72,88 @@ class NotificationsPage extends ConsumerWidget {
               ),
             ],
           ),
-          data: (b) => b.items.isEmpty
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(height: context.screenSize.height * 0.15),
+          data: (b) {
+            final items = _soloNoLeidas
+                ? b.items.where((n) => n.unread).toList()
+                : b.items;
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+              children: [
+                if (b.items.isNotEmpty) _filtro(context),
+                if (items.isEmpty) ...[
+                  SizedBox(height: context.screenSize.height * 0.15),
+                  if (b.items.isNotEmpty)
+                    EmptyState(
+                      icon: Icons.done_all_rounded,
+                      title: t.notificationsUnreadEmptyTitle,
+                      message: t.notificationsUnreadEmptyBody,
+                    )
+                  else
                     EmptyState(
                       icon: Icons.notifications_none_rounded,
                       title: t.notificationsEmptyTitle,
                       message: t.notificationsEmptyBody,
                     ),
-                  ],
-                )
-              : ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                  itemCount: b.items.length,
-                  separatorBuilder: (_, _) =>
-                      const AppDivider(indent: AppSpacing.screenH),
-                  itemBuilder: (context, i) => _Fila(
-                    notification: b.items[i],
-                    onTap: () => openNotification(context, ref, b.items[i]),
+                ],
+                for (final (i, n) in items.indexed) ...[
+                  if (i > 0) const AppDivider(indent: AppSpacing.screenH),
+                  _Fila(
+                    key: ValueKey(n.id),
+                    notification: n,
+                    onTap: () => openNotification(context, ref, n),
+                    onMarkRead: () => notifier.markRead(n.id),
+                    onDelete: () => notifier.delete(n.id),
                   ),
-                ),
+                ],
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _filtro(BuildContext context) {
+    final t = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenH,
+        vertical: AppSpacing.sm,
+      ),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        children: [
+          for (final (solo, texto) in [
+            (false, t.notificationsFilterAll),
+            (true, t.notificationsFilterUnread),
+          ])
+            ChoiceChip(
+              label: Text(texto),
+              selected: _soloNoLeidas == solo,
+              onSelected: (_) => setState(() => _soloNoLeidas = solo),
+            ),
+        ],
       ),
     );
   }
 }
 
+enum _Accion { markRead, delete }
+
 class _Fila extends StatelessWidget {
-  const _Fila({required this.notification, required this.onTap});
+  const _Fila({
+    required this.notification,
+    required this.onTap,
+    required this.onMarkRead,
+    required this.onDelete,
+    super.key,
+  });
 
   final AppNotification notification;
   final VoidCallback onTap;
+  final VoidCallback onMarkRead;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -96,72 +167,111 @@ class _Fila extends StatelessWidget {
     };
     final colores = tono.resolve(context);
 
-    return Material(
-      // Las no leidas con fondo propio: se distinguen de un vistazo.
-      color: nueva ? colores.bg.withValues(alpha: 0.35) : Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenH,
-            vertical: AppSpacing.md,
+    final t = context.l10n;
+
+    return Dismissible(
+      key: ValueKey(notification.id),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => onDelete(),
+      background: ColoredBox(
+        color: c.error,
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(end: AppSpacing.screenH),
+            child: Icon(Icons.delete_outline_rounded, color: c.onPrimary),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: AppSizes.minTapTarget,
-                height: AppSizes.minTapTarget,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colores.bg,
+        ),
+      ),
+      child: Material(
+        // Las no leidas con fondo propio: se distinguen de un vistazo.
+        color: nueva ? colores.bg.withValues(alpha: 0.35) : Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenH,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: AppSizes.minTapTarget,
+                  height: AppSizes.minTapTarget,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colores.bg,
+                  ),
+                  child: Icon(
+                    notificationIcon(notification),
+                    color: colores.fg,
+                  ),
                 ),
-                child: Icon(notificationIcon(notification), color: colores.fg),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      texto.title,
-                      style: context.text.titleMd.copyWith(
-                        fontWeight: nueva ? FontWeight.w700 : null,
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        texto.title,
+                        style: context.text.titleMd.copyWith(
+                          fontWeight: nueva ? FontWeight.w700 : null,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        texto.body,
+                        style: context.text.bodySm.copyWith(
+                          color: c.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '${Fmt.dayMonth(notification.createdAt.toLocal())} · '
+                        '${Fmt.timeOfDay(notification.createdAt.toLocal())}',
+                        style: context.text.labelSm.copyWith(
+                          color: c.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (nueva) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Container(
+                      width: AppSpacing.sm,
+                      height: AppSpacing.sm,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: c.primary,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      texto.body,
-                      style: context.text.bodySm.copyWith(
-                        color: c.textSecondary,
+                  ),
+                ],
+                PopupMenuButton<_Accion>(
+                  tooltip: t.notificationsMoreActions,
+                  icon: Icon(Icons.more_vert_rounded, color: c.textSecondary),
+                  onSelected: (a) => switch (a) {
+                    _Accion.markRead => onMarkRead(),
+                    _Accion.delete => onDelete(),
+                  },
+                  itemBuilder: (_) => [
+                    if (nueva)
+                      PopupMenuItem(
+                        value: _Accion.markRead,
+                        child: Text(t.notificationsMarkRead),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${Fmt.dayMonth(notification.createdAt.toLocal())} · '
-                      '${Fmt.timeOfDay(notification.createdAt.toLocal())}',
-                      style: context.text.labelSm.copyWith(
-                        color: c.textSecondary,
-                      ),
+                    PopupMenuItem(
+                      value: _Accion.delete,
+                      child: Text(t.notificationsDelete),
                     ),
                   ],
                 ),
-              ),
-              if (nueva) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: Container(
-                    width: AppSpacing.sm,
-                    height: AppSpacing.sm,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: c.primary,
-                    ),
-                  ),
-                ),
               ],
-            ],
+            ),
           ),
         ),
       ),

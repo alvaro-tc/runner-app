@@ -4,7 +4,7 @@ import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/notifications/domain/notifications.dart';
 import 'package:dio/dio.dart';
 
-/// Habla con `/notifications`. Cuatro llamadas: no justifican un `Api` aparte.
+/// Habla con `/notifications`. Seis llamadas: no justifican un `Api` aparte.
 class RemoteNotificationRepository implements NotificationRepository {
   const RemoteNotificationRepository(this._dio, this._storage);
 
@@ -33,6 +33,14 @@ class RemoteNotificationRepository implements NotificationRepository {
   @override
   Future<Result<void>> markAllRead() =>
       guard(() => apiCall(() => _dio.post<dynamic>('/notifications/read-all')));
+
+  @override
+  Future<Result<void>> delete(String id) =>
+      guard(() => apiCall(() => _dio.delete<dynamic>('/notifications/$id')));
+
+  @override
+  Future<Result<void>> deleteRead() =>
+      guard(() => apiCall(() => _dio.delete<dynamic>('/notifications/read')));
 
   @override
   Future<Result<void>> registerPushToken(String token) => guard(

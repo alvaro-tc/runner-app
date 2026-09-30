@@ -244,7 +244,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.';
 
   @override
-  String get homeUpcomingMarathon => 'Upcoming Marathon In';
+  String get homeUpcomingMarathon => 'Upcoming Race In';
 
   @override
   String homePlanTitleOf(String name) {
@@ -749,11 +749,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get racesTotalSpent => 'Total spent';
 
   @override
-  String get racesNoMarathonYet => 'No marathon finish recorded yet.';
+  String get racesNoMarathonYet => 'No race finish recorded yet.';
 
   @override
   String racesBestMarathon(String time) {
-    return 'Best marathon: $time';
+    return 'Best race: $time';
   }
 
   @override
@@ -1458,10 +1458,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePasswordSubmit => 'Save and continue';
 
   @override
-  String get homeUpcomingMarathons => 'Upcoming Marathons';
+  String get homeUpcomingMarathons => 'Upcoming Races';
 
   @override
-  String get racesUpcomingMarathons => 'Upcoming marathons';
+  String get racesUpcomingMarathons => 'Upcoming races';
 
   @override
   String get registerEmailHint => 'Where we send your confirmation';
@@ -1596,7 +1596,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminNavLive => 'Live';
 
   @override
-  String get adminNavMarathons => 'Marathons';
+  String get adminNavMarathons => 'Races';
 
   @override
   String get adminNavUsers => 'Users';
@@ -1605,7 +1605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminLoadFailed => 'Could not load. Try again.';
 
   @override
-  String get adminNoMarathonsTitle => 'No marathons yet';
+  String get adminNoMarathonsTitle => 'No races yet';
 
   @override
   String get adminNoMarathonsBody =>
@@ -1628,7 +1628,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The map will update automatically when the first location arrives.';
 
   @override
-  String get adminStart => 'Start marathon';
+  String get adminStart => 'Start race';
 
   @override
   String get adminFinish => 'Finish';
@@ -1650,7 +1650,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminAlreadyFinished => 'This marathon has already finished';
+  String get adminAlreadyFinished => 'This race has already finished';
 
   @override
   String get adminPrepare => 'Put in preparation';
@@ -1703,13 +1703,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get raceFinishedLockedTitle => 'You finished';
 
   @override
-  String get adminMarathonsTitle => 'Marathons';
+  String get adminMarathonsTitle => 'Races';
 
   @override
-  String get adminNewMarathon => 'New marathon';
+  String get adminNewMarathon => 'New race';
 
   @override
-  String get adminEditMarathon => 'Edit marathon';
+  String get adminEditMarathon => 'Edit race';
 
   @override
   String get adminLive => 'Live';
@@ -1753,7 +1753,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminStartsAt => 'Date and time';
 
   @override
-  String get adminNameRequired => 'Give the marathon a name.';
+  String get adminNameRequired => 'Give the race a name.';
 
   @override
   String get adminCityRequired => 'Enter the city.';
@@ -1849,7 +1849,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Registrations closed. Nobody else can sign up.';
 
   @override
-  String get adminCoverTitle => 'Marathon photo';
+  String get adminCoverTitle => 'Race photo';
 
   @override
   String get adminCoverHint =>
@@ -1859,8 +1859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminCoverEmpty => 'Add photo';
 
   @override
-  String get adminCoverAfterSave =>
-      'Save the marathon first to upload the photo';
+  String get adminCoverAfterSave => 'Save the race first to upload the photo';
 
   @override
   String get adminCoverUploaded => 'Photo updated.';
@@ -1916,14 +1915,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminCreateMarathon => 'Create marathon';
+  String get adminCreateMarathon => 'Create race';
 
   @override
-  String get adminMarathonSaved => 'Marathon saved.';
+  String get adminMarathonSaved => 'Race saved.';
 
   @override
   String get adminMarathonCreated =>
-      'Marathon created. You can upload its photo and QR now.';
+      'Race created. You can upload its photo and QR now.';
 
   @override
   String get adminNothingChanged => 'Nothing to save.';
@@ -1932,7 +1931,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminDelete => 'Delete';
 
   @override
-  String get adminDeleteMarathonTitle => 'Delete this marathon?';
+  String get adminDeleteMarathonTitle => 'Delete this race?';
 
   @override
   String get adminDeleteMarathonBody =>
@@ -2025,7 +2024,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminAfterSave => 'Save the marathon first to add these';
+  String get adminAfterSave => 'Save the race first to add these';
 
   @override
   String get adminRequiredField => 'This field can\'t be empty.';
@@ -2415,10 +2414,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Name, ID, bib or transaction number';
 
   @override
-  String get organizerMarathon => 'Marathon';
+  String get organizerMarathon => 'Race';
 
   @override
-  String get organizerAllMarathons => 'All marathons';
+  String get organizerAllMarathons => 'All races';
 
   @override
   String get organizerNoTicketsTitle => 'Nothing to review';
@@ -2569,6 +2568,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsMarkAllRead => 'Mark all read';
+
+  @override
+  String get notificationsMarkRead => 'Mark as read';
+
+  @override
+  String get notificationsDelete => 'Delete';
+
+  @override
+  String get notificationsDeleteRead => 'Delete read';
+
+  @override
+  String get notificationsMoreActions => 'More options';
+
+  @override
+  String get notificationsFilterAll => 'All';
+
+  @override
+  String get notificationsFilterUnread => 'Unread';
+
+  @override
+  String get notificationsUnreadEmptyTitle => 'All caught up';
+
+  @override
+  String get notificationsUnreadEmptyBody =>
+      'You have no unread notifications.';
 
   @override
   String get notificationsEmptyTitle => 'No notifications';

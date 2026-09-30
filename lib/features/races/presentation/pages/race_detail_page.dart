@@ -26,7 +26,7 @@ class RaceDetailPage extends ConsumerWidget {
 
   final String entryId;
 
-  /// Sin salida. Es lo que ve quien ya cruzo la meta mientras la maraton sigue
+  /// Sin salida. Es lo que ve quien ya cruzo la meta mientras la carrera sigue
   /// en marcha: la pantalla es la app entera, asi que un boton de atras no
   /// llevaria a ningun sitio. Ver `MarathonGateView`.
   final bool locked;

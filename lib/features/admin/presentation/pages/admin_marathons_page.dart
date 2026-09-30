@@ -29,7 +29,7 @@ class AdminMarathonsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.l10n;
-    final maratones = ref.watch(adminMarathonsProvider);
+    final carreras = ref.watch(adminMarathonsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.adminMarathonsTitle)),
@@ -38,7 +38,7 @@ class AdminMarathonsPage extends ConsumerWidget {
         icon: const Icon(Icons.add_rounded),
         label: Text(t.adminNewMarathon),
       ),
-      body: maratones.when(
+      body: carreras.when(
         // Un refresco de fondo no vacia una pantalla que ya tiene datos.
         skipLoadingOnReload: true,
         loading: _Cargando.new,
@@ -61,9 +61,9 @@ class AdminMarathonsPage extends ConsumerWidget {
 }
 
 class _Lista extends ConsumerWidget {
-  const _Lista(this.maratones);
+  const _Lista(this.carreras);
 
-  final List<AdminMarathon> maratones;
+  final List<AdminMarathon> carreras;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,10 +71,10 @@ class _Lista extends ConsumerWidget {
 
     // Ya vienen ordenadas del provider; aqui solo se marca donde empieza el
     // archivo para que no parezca que la lista sigue teniendo carreras vivas.
-    final corte = maratones.indexWhere((m) => m.past);
+    final corte = carreras.indexWhere((m) => m.past);
 
     final hijos = <Widget>[];
-    for (var i = 0; i < maratones.length; i++) {
+    for (var i = 0; i < carreras.length; i++) {
       // Los rotulos solo aparecen cuando hay dos mitades que separar. Con todo
       // por delante, un "PROXIMAS" solitario encabezando la lista entera no
       // dice nada que la lista no diga ya.
@@ -86,13 +86,13 @@ class _Lista extends ConsumerWidget {
         _Aparece(
           // La clave va por id y no por posicion: asi el estado de la fila
           // sigue a su carrera si la lista se reordena.
-          key: ValueKey(maratones[i].id),
+          key: ValueKey(carreras[i].id),
           // Se escalona solo la primera pantalla: al noveno el retardo ya se
           // notaria como lentitud en vez de como entrada.
           delay: AppDurations.fast * (i.clamp(0, 8) / 8),
           child: Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: _Fila(marathon: maratones[i]),
+            child: _Fila(marathon: carreras[i]),
           ),
         ),
       );
@@ -201,7 +201,7 @@ class _FilaState extends ConsumerState<_Fila> {
     final t = context.l10n;
     final notifier = ref.read(adminMarathonsProvider.notifier);
     // El estado al que se va, leido antes de la peticion: despues de ella el
-    // widget ya recibio la maraton nueva y `_m` diria lo contrario.
+    // widget ya recibio la carrera nueva y `_m` diria lo contrario.
     final activando = publicar ? !_m.published : !_m.registrationsOpen;
 
     final fallo = publicar
