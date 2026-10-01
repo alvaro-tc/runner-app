@@ -4925,6 +4925,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save or print the receipt. Please try again.'**
   String get raceReceiptActionFailed;
+
+  /// No description provided for @waiverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms, Conditions and Liability Waiver'**
+  String get waiverTitle;
+
+  /// No description provided for @waiverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CAM RUN (Social Run)'**
+  String get waiverSubtitle;
+
+  /// No description provided for @waiverIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'By registering for and taking part in CAM RUN, I declare that I have read and fully understood the conditions of participation and state the following:'**
+  String get waiverIntro;
+
+  /// No description provided for @waiverS1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature of the event and voluntary participation'**
+  String get waiverS1Title;
+
+  /// No description provided for @waiverS1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand and accept that CAM RUN is a strictly recreational event (Social Run), non-competitive and with no prizes for finishing positions. My participation is free and voluntary, and I declare that I am in adequate physical and health condition for the activity. A prior medical check-up is recommended for any condition or history that may affect physical activity.'**
+  String get waiverS1Body;
+
+  /// No description provided for @waiverS2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation of minors'**
+  String get waiverS2Title;
+
+  /// No description provided for @waiverS2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The minimum age to participate is 6 years. Minors must be properly registered and accompanied at all times along the course by their mother, father or legal guardian, who takes full responsibility for their care and supervision during the event.'**
+  String get waiverS2Body;
+
+  /// No description provided for @waiverS3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Assumption of risk'**
+  String get waiverS3Title;
+
+  /// No description provided for @waiverS3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I acknowledge the risks inherent to walking or running on public roads or a circuit, such as falls, knocks, injuries, collisions, fatigue, dehydration, weather conditions and uneven ground.'**
+  String get waiverS3Body;
+
+  /// No description provided for @waiverS4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compliance with rules'**
+  String get waiverS4Title;
+
+  /// No description provided for @waiverS4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to follow the course, the rules of conduct and the instructions of THE ORGANISERS, authorities, marshals and support staff. THE ORGANISERS reserve the right to remove from the event any participant who endangers their own safety or that of others.'**
+  String get waiverS4Body;
+
+  /// No description provided for @waiverS5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Release of liability'**
+  String get waiverS5Title;
+
+  /// No description provided for @waiverS5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I assume the risks arising from my participation and release CAM RUN, its organisers, sponsors, partners and suppliers from all liability for damage, loss or harm arising from those risks or from my own actions, except where the law does not allow liability to be excluded.'**
+  String get waiverS5Body;
+
+  /// No description provided for @waiverS6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bib collection and use'**
+  String get waiverS6Title;
+
+  /// No description provided for @waiverS6Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The event does not include a runner kit; only a participant number (bib) will be handed out. The bib is personal, unique and non-transferable, and must be worn visibly throughout the event for identification and course access. Bib collection dates and locations will be announced through the official channels.'**
+  String get waiverS6Body;
+
+  /// No description provided for @waiverS7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund and changes policy'**
+  String get waiverS7Title;
+
+  /// No description provided for @waiverS7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The registration fee is non-refundable and non-transferable. I accept that the event may be suspended, rescheduled, modified or cancelled due to force majeure, unforeseen circumstances, decisions of the competent authority or situations beyond the control of THE ORGANISERS.'**
+  String get waiverS7Body;
+
+  /// No description provided for @waiverS8Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal belongings'**
+  String get waiverS8Title;
+
+  /// No description provided for @waiverS8Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that the event has no cloakroom service. Each participant is therefore responsible for looking after their own belongings. THE ORGANISERS are not responsible for the loss, theft or damage of personal items during the event.'**
+  String get waiverS8Body;
+
+  /// No description provided for @waiverS9Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Image rights'**
+  String get waiverS9Title;
+
+  /// No description provided for @waiverS9Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I expressly authorise THE ORGANISERS, sponsors and partners to use, reproduce and distribute my image and that of any minors in my care in photographs or videos taken during the activity. This authorisation is granted for promotional, advertising and informational purposes in any physical or digital medium, without the right to financial compensation.'**
+  String get waiverS9Body;
+
+  /// No description provided for @waiverS10Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal data protection'**
+  String get waiverS10Title;
+
+  /// No description provided for @waiverS10Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I consent to the processing of my personal data in accordance with Law No. 29733 (Personal Data Protection Law), for the purposes of event logistics, participation validation and sending information about future activities. I may exercise my rights of access, rectification, cancellation or objection through the official contact email of THE ORGANISERS.'**
+  String get waiverS10Body;
+
+  /// No description provided for @waiverS11Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Sworn statement and digital acceptance'**
+  String get waiverS11Title;
+
+  /// No description provided for @waiverS11Body.
+  ///
+  /// In en, this message translates to:
+  /// **'I declare that the information provided is true, complete and up to date. For minors, registration and acceptance of these conditions is carried out by their mother, father or legal guardian. Ticking the checkbox is mandatory and constitutes the signature of agreement required to complete registration.'**
+  String get waiverS11Body;
+
+  /// No description provided for @waiverScrollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to the end to accept'**
+  String get waiverScrollHint;
+
+  /// No description provided for @waiverAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'I accept the terms'**
+  String get waiverAccept;
+
+  /// No description provided for @waiverDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get waiverDecline;
+
+  /// No description provided for @waiverRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read terms and waiver'**
+  String get waiverRead;
 }
 
 class _AppLocalizationsDelegate

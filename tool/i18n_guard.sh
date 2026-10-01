@@ -100,12 +100,13 @@ ALLOW_VALUE = re.compile(
         [\s\W\d]*                     # solo simbolos/numeros: '', ' ', '--:--'
       | (km|mi|mph|km/h|m|s|h|d|K|%|/|·|—|–|,|\.)
       | [a-z0-9_.\-]+                 # identificadores snake/dotted en minuscula
+      | [a-z][a-z0-9]*([A-Z][a-z0-9]*)+  # claves JSON en camelCase: 'startsAt'
       | \#[0-9A-Fa-f]{3,8}            # colores
       | https?://.*
       | [\w.+-]+@[\w-]+\.[\w.-]+       # direcciones de correo
       | [A-Z]{1,3}                    # codigos de talla y unidad: XS, KM, QR
       # Marcas: no se traducen en ningun idioma.
-      | (Google|LinkedIn|Facebook|CamRun|Apple)
+      | (Google|LinkedIn|Facebook|CamRun|Apple|Esri)
     )$""",
     re.X,
 )

@@ -2693,4 +2693,104 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get raceReceiptActionFailed =>
       'No se pudo guardar o imprimir el recibo. Vuelve a intentarlo.';
+
+  @override
+  String get waiverTitle =>
+      'Términos, Condiciones y Deslinde de Responsabilidad';
+
+  @override
+  String get waiverSubtitle => 'CAM RUN (Social Run)';
+
+  @override
+  String get waiverIntro =>
+      'Al inscribirme y participar en el CAM RUN, declaro haber leído y comprendido en su totalidad las condiciones de participación y manifiesto lo siguiente:';
+
+  @override
+  String get waiverS1Title => 'Carácter del evento y participación voluntaria';
+
+  @override
+  String get waiverS1Body =>
+      'Entiendo y acepto que el CAM RUN es un evento estrictamente recreativo (Social Run), no competitivo y sin fines de premiación por posiciones. Mi participación es libre y voluntaria, y declaro encontrarme en condiciones físicas y de salud adecuadas para la actividad. Se recomienda una evaluación médica previa ante cualquier condición o antecedente que pueda afectar la práctica deportiva.';
+
+  @override
+  String get waiverS2Title => 'Participación de menores de edad';
+
+  @override
+  String get waiverS2Body =>
+      'La edad mínima de participación es de 6 años. Los menores de edad deberán estar debidamente inscritos y acompañados en todo momento durante el recorrido por su madre, padre o apoderado legal, quien asume la responsabilidad total de su cuidado y supervisión durante el evento.';
+
+  @override
+  String get waiverS3Title => 'Asunción de riesgos';
+
+  @override
+  String get waiverS3Body =>
+      'Reconozco los riesgos inherentes a una caminata o carrera en vía pública o circuito, tales como caídas, golpes, lesiones, colisiones, fatiga, deshidratación, condiciones climáticas e irregularidades del terreno.';
+
+  @override
+  String get waiverS4Title => 'Cumplimiento de normas';
+
+  @override
+  String get waiverS4Body =>
+      'Me comprometo a respetar el recorrido, las normas de convivencia y las indicaciones de LA ORGANIZACIÓN, autoridades e inspectores o personal de apoyo. LA ORGANIZACIÓN se reserva el derecho de retirar del evento a cualquier participante que ponga en riesgo su seguridad o la de terceros.';
+
+  @override
+  String get waiverS5Title => 'Liberación de responsabilidad';
+
+  @override
+  String get waiverS5Body =>
+      'Asumo los riesgos derivados de mi participación y libero de toda responsabilidad a CAM RUN, sus organizadores, auspiciadores, aliados y proveedores por daños, pérdidas o perjuicios derivados de dichos riesgos o de mis propios actos, salvo en aquellos casos donde la ley no permita la exclusión de responsabilidad.';
+
+  @override
+  String get waiverS6Title => 'Entrega y uso del dorsal';
+
+  @override
+  String get waiverS6Body =>
+      'El evento no incluye kit de corredor; únicamente se entregará un número o dorsal de participante. El dorsal es personal, único e intransferible, y su portación en un lugar visible es obligatoria durante todo el evento para fines de identificación y acceso al recorrido. Las fechas y puntos de recogida de dorsales serán comunicados por los canales oficiales.';
+
+  @override
+  String get waiverS7Title => 'Política de reembolso y modificaciones';
+
+  @override
+  String get waiverS7Body =>
+      'El pago de la inscripción no es reembolsable ni transferible. Acepto que el evento podrá ser suspendido, reprogramado, modificado o cancelado por razones de fuerza mayor, caso fortuito, decisiones de la autoridad competente o situaciones ajenas al control de LA ORGANIZACIÓN.';
+
+  @override
+  String get waiverS8Title => 'Objetos personales';
+
+  @override
+  String get waiverS8Body =>
+      'Declaro conocer que el evento no cuenta con servicio de guardarropa. Por lo tanto, cada participante es responsable de la custodia de sus pertenencias. LA ORGANIZACIÓN no se hace responsable por la pérdida, hurto, robo o deterioro de objetos personales durante el desarrollo del evento.';
+
+  @override
+  String get waiverS9Title => 'Derechos de imagen';
+
+  @override
+  String get waiverS9Body =>
+      'Autorizo expresamente a LA ORGANIZACIÓN, auspiciadores y aliados a utilizar, reproducir y difundir mi imagen y la de los menores a mi cargo en fotografías o videos obtenidos durante la actividad. Esta autorización se otorga para fines promocionales, publicitarios e informativos en cualquier medio físico o digital, sin derecho a compensación económica.';
+
+  @override
+  String get waiverS10Title => 'Protección de datos personales';
+
+  @override
+  String get waiverS10Body =>
+      'Otorgo mi consentimiento para el tratamiento de mis datos personales en conformidad con la Ley N.º 29733 (Ley de Protección de Datos Personales), para fines de gestión logística del evento, validación de participación y envío de información sobre futuras actividades. Puedo ejercer mis derechos de acceso, rectificación, cancelación u oposición a través del correo oficial de contacto de LA ORGANIZACIÓN.';
+
+  @override
+  String get waiverS11Title => 'Declaración jurada y aceptación digital';
+
+  @override
+  String get waiverS11Body =>
+      'Declaro que la información registrada es verdadera, completa y actual. En el caso de menores de edad, la inscripción y aceptación de estas condiciones la realiza su madre, padre o apoderado legal. La marcación de la casilla de verificación (checkbox) es obligatoria y constituye la firma de conformidad para completar el proceso de inscripción.';
+
+  @override
+  String get waiverScrollHint => 'Desliza hasta el final para poder aceptar';
+
+  @override
+  String get waiverAccept => 'Acepto los términos';
+
+  @override
+  String get waiverDecline => 'Cancelar';
+
+  @override
+  String get waiverRead => 'Leer términos y deslinde';
 }

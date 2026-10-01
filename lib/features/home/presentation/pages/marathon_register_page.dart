@@ -6,6 +6,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/home/presentation/providers/marathon_providers.dart';
+import 'package:camrun/features/home/presentation/widgets/waiver_sheet.dart';
 import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/features/races/domain/entities/registration.dart';
@@ -257,6 +258,11 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       return;
     }
     await ref.read(profileProvider.notifier).save(actualizado);
+  }
+
+  Future<void> _abrirDeslinde() async {
+    final acepto = await showWaiverSheet(context);
+    if (acepto && mounted) setState(() => _acceptedTerms = true);
   }
 
   Future<void> _pay(Marathon marathon) async {
@@ -742,12 +748,28 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             AppCheckbox(
               value: _acceptedTerms,
               semanticsLabel: t.registerAcceptTermsSemantics,
-              onChanged: (v) => setState(() => _acceptedTerms = v),
+              // Marcar exige pasar por el deslinde; desmarcar es libre.
+              onChanged: (v) =>
+                  v ? _abrirDeslinde() : setState(() => _acceptedTerms = false),
             ),
             Expanded(
-              child: Text(
-                t.registerAcceptTerms,
-                style: context.text.bodySm.copyWith(color: c.textSecondary),
+              child: GestureDetector(
+                onTap: _abrirDeslinde,
+                child: Text.rich(
+                  TextSpan(
+                    text: '${t.registerAcceptTerms} ',
+                    children: [
+                      TextSpan(
+                        text: t.waiverRead,
+                        style: TextStyle(
+                          color: c.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                  style: context.text.bodySm.copyWith(color: c.textSecondary),
+                ),
               ),
             ),
           ],
