@@ -21,10 +21,12 @@ mixin _$AuthUser {
  String? get ci;/// `true` cuando la contrasena la puso otro: alta desde la web, donde el
 /// usuario y la contrasena son la CI. Hasta que la cambie, la app no le
 /// deja pasar de la pantalla de cambio.
- bool get mustChangePassword;/// `false` en las cuentas que entraron con Google y nunca pusieron una.
-/// Sin contrasena no hay nada que confirmar al borrar la cuenta, ni nada
-/// que cambiar en la pantalla de cambio.
- bool get hasPassword;/// `null` = todavia no vio los slides. Vive en el backend ademas de en
+ bool get mustChangePassword;/// `false` en las cuentas que entraron con Google o Apple y nunca pusieron
+/// una. Sin contrasena no hay nada que confirmar al borrar la cuenta, ni
+/// nada que cambiar en la pantalla de cambio.
+ bool get hasPassword;/// La cuenta esta vinculada a Sign in with Apple. Ajustes lo dice —"Usando
+/// Iniciar sesion con Apple"—, como pide la guia de Apple.
+ bool get hasApple;/// `null` = todavia no vio los slides. Vive en el backend ademas de en
 /// local, asi que sobrevive a una reinstalacion.
  DateTime? get onboardingSeenAt;
 /// Create a copy of AuthUser
@@ -39,16 +41,16 @@ $AuthUserCopyWith<AuthUser> get copyWith => _$AuthUserCopyWithImpl<AuthUser>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.hasApple, hasApple) || other.hasApple == hasApple)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,hasPassword,onboardingSeenAt);
+int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,hasPassword,hasApple,onboardingSeenAt);
 
 @override
 String toString() {
-  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, hasPassword: $hasPassword, onboardingSeenAt: $onboardingSeenAt)';
+  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, hasPassword: $hasPassword, hasApple: $hasApple, onboardingSeenAt: $onboardingSeenAt)';
 }
 
 
@@ -59,7 +61,7 @@ abstract mixin class $AuthUserCopyWith<$Res>  {
   factory $AuthUserCopyWith(AuthUser value, $Res Function(AuthUser) _then) = _$AuthUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String role, String? email, String? ci, bool mustChangePassword, bool hasPassword, DateTime? onboardingSeenAt
+ String id, String name, String role, String? email, String? ci, bool mustChangePassword, bool hasPassword, bool hasApple, DateTime? onboardingSeenAt
 });
 
 
@@ -76,7 +78,7 @@ class _$AuthUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? hasPassword = null,Object? onboardingSeenAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? hasPassword = null,Object? hasApple = null,Object? onboardingSeenAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -85,6 +87,7 @@ as String,email: freezed == email ? _self.email : email // ignore: cast_nullable
 as String?,ci: freezed == ci ? _self.ci : ci // ignore: cast_nullable_to_non_nullable
 as String?,mustChangePassword: null == mustChangePassword ? _self.mustChangePassword : mustChangePassword // ignore: cast_nullable_to_non_nullable
 as bool,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,hasApple: null == hasApple ? _self.hasApple : hasApple // ignore: cast_nullable_to_non_nullable
 as bool,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -171,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  DateTime? onboardingSeenAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  bool hasApple,  DateTime? onboardingSeenAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthUser() when $default != null:
-return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.hasApple,_that.onboardingSeenAt);case _:
   return orElse();
 
 }
@@ -192,10 +195,10 @@ return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustCh
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  DateTime? onboardingSeenAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  bool hasApple,  DateTime? onboardingSeenAt)  $default,) {final _that = this;
 switch (_that) {
 case _AuthUser():
-return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.hasApple,_that.onboardingSeenAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +215,10 @@ return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustCh
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  DateTime? onboardingSeenAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String role,  String? email,  String? ci,  bool mustChangePassword,  bool hasPassword,  bool hasApple,  DateTime? onboardingSeenAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthUser() when $default != null:
-return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.onboardingSeenAt);case _:
+return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustChangePassword,_that.hasPassword,_that.hasApple,_that.onboardingSeenAt);case _:
   return null;
 
 }
@@ -227,7 +230,7 @@ return $default(_that.id,_that.name,_that.role,_that.email,_that.ci,_that.mustCh
 @JsonSerializable()
 
 class _AuthUser implements AuthUser {
-  const _AuthUser({required this.id, required this.name, required this.role, this.email, this.ci, this.mustChangePassword = false, this.hasPassword = true, this.onboardingSeenAt});
+  const _AuthUser({required this.id, required this.name, required this.role, this.email, this.ci, this.mustChangePassword = false, this.hasPassword = true, this.hasApple = false, this.onboardingSeenAt});
   factory _AuthUser.fromJson(Map<String, dynamic> json) => _$AuthUserFromJson(json);
 
 @override final  String id;
@@ -242,10 +245,13 @@ class _AuthUser implements AuthUser {
 /// usuario y la contrasena son la CI. Hasta que la cambie, la app no le
 /// deja pasar de la pantalla de cambio.
 @override@JsonKey() final  bool mustChangePassword;
-/// `false` en las cuentas que entraron con Google y nunca pusieron una.
-/// Sin contrasena no hay nada que confirmar al borrar la cuenta, ni nada
-/// que cambiar en la pantalla de cambio.
+/// `false` en las cuentas que entraron con Google o Apple y nunca pusieron
+/// una. Sin contrasena no hay nada que confirmar al borrar la cuenta, ni
+/// nada que cambiar en la pantalla de cambio.
 @override@JsonKey() final  bool hasPassword;
+/// La cuenta esta vinculada a Sign in with Apple. Ajustes lo dice —"Usando
+/// Iniciar sesion con Apple"—, como pide la guia de Apple.
+@override@JsonKey() final  bool hasApple;
 /// `null` = todavia no vio los slides. Vive en el backend ademas de en
 /// local, asi que sobrevive a una reinstalacion.
 @override final  DateTime? onboardingSeenAt;
@@ -263,16 +269,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.role, role) || other.role == role)&&(identical(other.email, email) || other.email == email)&&(identical(other.ci, ci) || other.ci == ci)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.hasApple, hasApple) || other.hasApple == hasApple)&&(identical(other.onboardingSeenAt, onboardingSeenAt) || other.onboardingSeenAt == onboardingSeenAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,hasPassword,onboardingSeenAt);
+int get hashCode => Object.hash(runtimeType,id,name,role,email,ci,mustChangePassword,hasPassword,hasApple,onboardingSeenAt);
 
 @override
 String toString() {
-  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, hasPassword: $hasPassword, onboardingSeenAt: $onboardingSeenAt)';
+  return 'AuthUser(id: $id, name: $name, role: $role, email: $email, ci: $ci, mustChangePassword: $mustChangePassword, hasPassword: $hasPassword, hasApple: $hasApple, onboardingSeenAt: $onboardingSeenAt)';
 }
 
 
@@ -283,7 +289,7 @@ abstract mixin class _$AuthUserCopyWith<$Res> implements $AuthUserCopyWith<$Res>
   factory _$AuthUserCopyWith(_AuthUser value, $Res Function(_AuthUser) _then) = __$AuthUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String role, String? email, String? ci, bool mustChangePassword, bool hasPassword, DateTime? onboardingSeenAt
+ String id, String name, String role, String? email, String? ci, bool mustChangePassword, bool hasPassword, bool hasApple, DateTime? onboardingSeenAt
 });
 
 
@@ -300,7 +306,7 @@ class __$AuthUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? hasPassword = null,Object? onboardingSeenAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? role = null,Object? email = freezed,Object? ci = freezed,Object? mustChangePassword = null,Object? hasPassword = null,Object? hasApple = null,Object? onboardingSeenAt = freezed,}) {
   return _then(_AuthUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -309,6 +315,7 @@ as String,email: freezed == email ? _self.email : email // ignore: cast_nullable
 as String?,ci: freezed == ci ? _self.ci : ci // ignore: cast_nullable_to_non_nullable
 as String?,mustChangePassword: null == mustChangePassword ? _self.mustChangePassword : mustChangePassword // ignore: cast_nullable_to_non_nullable
 as bool,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,hasApple: null == hasApple ? _self.hasApple : hasApple // ignore: cast_nullable_to_non_nullable
 as bool,onboardingSeenAt: freezed == onboardingSeenAt ? _self.onboardingSeenAt : onboardingSeenAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

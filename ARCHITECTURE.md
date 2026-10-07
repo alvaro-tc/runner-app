@@ -498,6 +498,17 @@ para guardar el par de tokens, `AppDatabase.wipe()` para borrar lo local.
 Los tests de widget no abren sockets: `pumpApp` inyecta un `Dio` con
 `FakeAdapter` y un `TokenStorage` en memoria.
 
+### Iniciar sesión con Google y con Apple
+
+Google (`GoogleSignInService`) y Apple (`AppleSignInService`) son el mismo
+patrón: el SDK del sistema entrega una credencial, el repositorio la manda a
+`/auth/google` o `/auth/apple` y el servidor devuelve la sesión de siempre.
+Apple existe por la guía 4.8 de App Review y sigue su guía de interfaz al pie de
+la letra: botón **nativo** del sistema (`ASAuthorizationAppleIDButton`, pintado
+por `AppDelegate.swift`), solo nombre y correo, nonce, estado de la credencial
+al arrancar y al volver al frente, y revocación del token al borrar la cuenta.
+Detalle y configuración pendiente en `docs/sign-in-with-apple.md`.
+
 ### Home y carreras conectados (Fase 22.2)
 
 `GET /home/summary` es **una** peticion para las cinco cosas que pinta la

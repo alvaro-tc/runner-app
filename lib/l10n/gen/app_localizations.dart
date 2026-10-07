@@ -290,6 +290,18 @@ abstract class AppLocalizations {
   /// **'We could not sign you in with Google. Try again.'**
   String get authGoogleError;
 
+  /// Shown when the Sign in with Apple flow fails for a reason other than the user cancelling it.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not sign you in with Apple. Try again.'**
+  String get authAppleError;
+
+  /// Greeting right after Sign in with Apple completes, using the name the user shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {name}'**
+  String authAppleWelcome(String name);
+
   /// No description provided for @authSignUpTitle.
   ///
   /// In en, this message translates to:
@@ -3944,6 +3956,12 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccount;
 
+  /// Row in Settings that tells the user their account is linked to Sign in with Apple, as Apple's guidelines ask. Its subtitle is the (possibly private relay) email they shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Sign in with Apple'**
+  String get settingsAppleSignIn;
+
   /// No description provided for @deleteAccountTitle.
   ///
   /// In en, this message translates to:
@@ -3977,7 +3995,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountNoPassword.
   ///
   /// In en, this message translates to:
-  /// **'Your account signs in with Google, so there is no password to confirm.'**
+  /// **'Your account signs in with Google or Apple, so there is no password to confirm.'**
   String get deleteAccountNoPassword;
 
   /// No description provided for @deleteAccountPasswordHint.

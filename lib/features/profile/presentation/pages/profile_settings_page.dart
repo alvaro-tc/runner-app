@@ -3,6 +3,7 @@ import 'package:camrun/core/constants/legal_urls.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
+import 'package:camrun/features/auth/presentation/providers/auth_provider.dart';
 import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
@@ -137,6 +138,18 @@ class ProfileSettingsPage extends ConsumerWidget {
           Text(t.settingsAccount, style: context.text.headingMd),
           _Group(
             children: [
+              // La guia de Apple pide decir con que se inicio sesion, y dejar
+              // ver el correo compartido: con "Ocultar mi correo" es un relay
+              // que el usuario no conoce de memoria.
+              if (ref.watch(authProvider.select((a) => a.hasApple))) ...[
+                StatRow(
+                  icon: Icons.apple,
+                  title: t.settingsAppleSignIn,
+                  subtitle: ref.watch(profileProvider).value?.email,
+                  tone: c.textPrimary,
+                ),
+                const AppDivider(),
+              ],
               StatRow(
                 icon: Icons.delete_forever_outlined,
                 title: t.deleteAccountTitle,

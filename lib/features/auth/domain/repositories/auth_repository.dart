@@ -28,6 +28,11 @@ abstract interface class AuthRepository {
   /// `null` cuando cierra el dialogo sin elegir: cancelar no es un fallo.
   Future<Result<AuthUser?>> signInWithGoogle();
 
+  /// Entra —o se da de alta— con Sign in with Apple. Solo en iOS.
+  ///
+  /// `null` cuando el usuario cierra la hoja de Apple sin continuar.
+  Future<Result<AuthUser?>> signInWithApple();
+
   /// El usuario de la sesion guardada. Se pide al arrancar: `mustChangePassword`
   /// puede haber cambiado desde el ultimo login y no vive en el dispositivo.
   Future<Result<AuthUser>> currentUser();
@@ -45,7 +50,7 @@ abstract interface class AuthRepository {
   /// instalado. Irreversible: pide la contrasena para confirmar que es el
   /// dueno quien lo pide.
   ///
-  /// [password] va en `null` en las cuentas de Google, que no tienen: el
+  /// [password] va en `null` en las cuentas de Google o Apple, que no tienen: el
   /// servidor solo la exige a quien tiene una.
   Future<Result<void>> deleteAccount(String? password);
 }

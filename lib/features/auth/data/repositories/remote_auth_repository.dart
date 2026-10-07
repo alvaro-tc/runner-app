@@ -1,6 +1,7 @@
 import 'package:camrun/core/db/app_database.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/services/apple_sign_in_service.dart';
 import 'package:camrun/core/services/google_sign_in_service.dart';
 import 'package:camrun/core/storage/token_storage.dart';
 import 'package:camrun/core/utils/result.dart';
@@ -17,6 +18,7 @@ class RemoteAuthRepository implements AuthRepository {
     required this.storage,
     required this.db,
     required this.google,
+    required this.apple,
   });
 
   final AuthApi api;
@@ -24,6 +26,7 @@ class RemoteAuthRepository implements AuthRepository {
   final TokenStorage storage;
   final AppDatabase db;
   final GoogleSignInService google;
+  final AppleSignInService apple;
 
   @override
   Future<Result<AuthUser>> signIn({
@@ -61,6 +64,26 @@ class RemoteAuthRepository implements AuthRepository {
     final idToken = await google.idToken();
     if (idToken == null) return null;
     return _entrar(() => api.google(idToken));
+  });
+
+  /// Igual que Google: cerrar la hoja de Apple devuelve `null`. Lo que si se
+  /// guarda, y solo cuando el servidor ya abrio la cuenta, es quien entro:
+  /// con eso se comprueba en cada arranque que la autorizacion sigue viva.
+  @override
+  Future<Result<AuthUser?>> signInWithApple() => guard(() async {
+    final credencial = await apple.credential();
+    if (credencial == null) return null;
+    final user = await _entrar(
+      () => api.apple(
+        identityToken: credencial.identityToken,
+        authorizationCode: credencial.authorizationCode,
+        nonce: credencial.rawNonce,
+        givenName: credencial.givenName,
+        familyName: credencial.familyName,
+      ),
+    );
+    await apple.remember(credencial.userIdentifier);
+    return user;
   });
 
   @override
@@ -108,6 +131,7 @@ class RemoteAuthRepository implements AuthRepository {
     // Sin esto la proxima vez Google entra sola con la cuenta anterior, sin
     // dar opcion a elegir otra.
     await google.signOut();
+    await apple.forget();
     await session.clear();
     await db.wipe();
   });
@@ -118,6 +142,7 @@ class RemoteAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> deleteAccount(String? password) => guard(() async {
     await api.deleteAccount(password);
+    await apple.forget();
     await session.clear();
     await db.wipe();
   });

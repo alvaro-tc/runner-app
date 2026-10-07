@@ -9,7 +9,7 @@ import 'package:camrun/features/auth/data/models/auth_models.dart';
 import 'package:camrun/features/home/presentation/providers/home_provider.dart';
 import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
 import 'package:camrun/features/races/presentation/providers/races_provider.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Habia sesion al arrancar. Se resuelve en `bootstrap()` leyendo el refresh
@@ -31,16 +31,20 @@ class AuthState {
     this.mustChangePassword = false,
     this.role = '',
     this.hasPassword = true,
+    this.hasApple = false,
   });
 
   final bool signedIn;
   final bool mustChangePassword;
 
-  /// `false` en las cuentas de Google que nunca pusieron contrasena: no hay
+  /// `false` en las cuentas de Google o Apple que nunca pusieron contrasena: no hay
   /// ninguna que pedir para borrar la cuenta. Se asume `true` mientras no se
   /// sepa —pedirla de mas se corrige tecleando; de menos, el servidor rechaza
   /// el borrado—.
   final bool hasPassword;
+
+  /// La cuenta esta vinculada a Sign in with Apple: Ajustes lo muestra.
+  final bool hasApple;
 
   /// `admin`, `organizer` o `runner`. Vacio mientras no se sepa: con sesion
   /// recuperada del arranque el rol tarda una peticion en llegar, y asumir
@@ -75,6 +79,15 @@ class AuthNotifier extends Notifier<AuthState> {
     caducada.addListener(alCaducar);
     ref.onDispose(() => caducada.removeListener(alCaducar));
 
+    // Apple pide atar la sesion al estado de la credencial: si el usuario dejo
+    // de usar Sign in with Apple con la app, o el iPhone tiene ahora otra Apple
+    // Account, la sesion abierta con Apple se cierra. Se mira al arrancar y
+    // cada vez que la app vuelve al frente, que es cuando pudo cambiar.
+    final alVolver = AppLifecycleListener(
+      onResume: () => unawaited(_comprobarApple()),
+    );
+    ref.onDispose(alVolver.dispose);
+
     final habiaSesion = ref.watch(initialSessionProvider);
 
     // `mustChangePassword` no vive en el dispositivo: pudo cambiar desde el
@@ -82,7 +95,10 @@ class AuthNotifier extends Notifier<AuthState> {
     // despues— asi que se relee. Hasta que responda se asume que no bloquea:
     // arrancar bloqueado y desbloquear despues haria parpadear la pantalla de
     // cambio a todo el mundo en cada arranque.
-    if (habiaSesion) unawaited(_refrescarUsuario());
+    if (habiaSesion) {
+      unawaited(_refrescarUsuario());
+      unawaited(_comprobarApple());
+    }
 
     return AuthState(signedIn: habiaSesion);
   }
@@ -101,6 +117,17 @@ class AuthNotifier extends Notifier<AuthState> {
     return result.fold(
       (user) => user == null ? null : _aplicar(user),
       (f) => f,
+    );
+  }
+
+  /// Igual que con Google, cerrar la hoja de Apple no es un fallo: vuelve
+  /// todo en `null`. Con exito devuelve tambien el usuario, para darle la
+  /// bienvenida por su nombre como sugiere la guia de Apple.
+  Future<({AuthUser? user, Failure? failure})> signInWithApple() async {
+    final result = await ref.read(authRepositoryProvider).signInWithApple();
+    return result.fold(
+      (user) => (user: user, failure: user == null ? null : _aplicar(user)),
+      (f) => (user: null, failure: f),
     );
   }
 
@@ -167,6 +194,7 @@ class AuthNotifier extends Notifier<AuthState> {
     mustChangePassword: user.mustChangePassword,
     role: user.role,
     hasPassword: user.hasPassword,
+    hasApple: user.hasApple,
   );
 
   Future<void> _refrescarUsuario() async {
@@ -175,6 +203,13 @@ class AuthNotifier extends Notifier<AuthState> {
     // pantalla de cambio: se deja el estado como estaba y se reintentara en el
     // siguiente login.
     result.fold((AuthUser user) => state = _desde(user), (Failure _) {});
+  }
+
+  /// Primero la consulta y despues el estado: se llama desde `build`, cuando
+  /// el estado todavia no existe, y leerlo antes del primer `await` romperia.
+  Future<void> _comprobarApple() async {
+    final revocada = await ref.read(appleSignInServiceProvider).wasRevoked();
+    if (revocada && state.signedIn) await signOut();
   }
 
   Future<void> signOut() async {

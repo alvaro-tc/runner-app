@@ -107,6 +107,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo entrar con Google. Inténtalo de nuevo.';
 
   @override
+  String get authAppleError =>
+      'No se pudo entrar con Apple. Inténtalo de nuevo.';
+
+  @override
+  String authAppleWelcome(String name) {
+    return 'Te damos la bienvenida, $name';
+  }
+
+  @override
   String get authSignUpTitle => 'Crea tu\ncuenta.';
 
   @override
@@ -2146,6 +2155,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsAccount => 'Cuenta';
 
   @override
+  String get settingsAppleSignIn => 'Usando Iniciar sesión con Apple';
+
+  @override
   String get deleteAccountTitle => 'Eliminar cuenta';
 
   @override
@@ -2165,7 +2177,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountNoPassword =>
-      'Tu cuenta entra con Google, así que no hay contraseña que confirmar.';
+      'Tu cuenta entra con Google o con Apple, así que no hay contraseña que confirmar.';
 
   @override
   String get deleteAccountPasswordHint => 'Confirma que eres tú';

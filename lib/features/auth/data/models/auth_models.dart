@@ -23,10 +23,14 @@ abstract class AuthUser with _$AuthUser {
     /// deja pasar de la pantalla de cambio.
     @Default(false) bool mustChangePassword,
 
-    /// `false` en las cuentas que entraron con Google y nunca pusieron una.
-    /// Sin contrasena no hay nada que confirmar al borrar la cuenta, ni nada
-    /// que cambiar en la pantalla de cambio.
+    /// `false` en las cuentas que entraron con Google o Apple y nunca pusieron
+    /// una. Sin contrasena no hay nada que confirmar al borrar la cuenta, ni
+    /// nada que cambiar en la pantalla de cambio.
     @Default(true) bool hasPassword,
+
+    /// La cuenta esta vinculada a Sign in with Apple. Ajustes lo dice —"Usando
+    /// Iniciar sesion con Apple"—, como pide la guia de Apple.
+    @Default(false) bool hasApple,
 
     /// `null` = todavia no vio los slides. Vive en el backend ademas de en
     /// local, asi que sobrevive a una reinstalacion.

@@ -14,6 +14,7 @@ _AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => _AuthUser(
   ci: json['ci'] as String?,
   mustChangePassword: json['mustChangePassword'] as bool? ?? false,
   hasPassword: json['hasPassword'] as bool? ?? true,
+  hasApple: json['hasApple'] as bool? ?? false,
   onboardingSeenAt: json['onboardingSeenAt'] == null
       ? null
       : DateTime.parse(json['onboardingSeenAt'] as String),
@@ -27,6 +28,7 @@ Map<String, dynamic> _$AuthUserToJson(_AuthUser instance) => <String, dynamic>{
   'ci': instance.ci,
   'mustChangePassword': instance.mustChangePassword,
   'hasPassword': instance.hasPassword,
+  'hasApple': instance.hasApple,
   'onboardingSeenAt': instance.onboardingSeenAt?.toIso8601String(),
 };
 

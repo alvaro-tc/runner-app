@@ -107,6 +107,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not sign you in with Google. Try again.';
 
   @override
+  String get authAppleError =>
+      'We could not sign you in with Apple. Try again.';
+
+  @override
+  String authAppleWelcome(String name) {
+    return 'Welcome, $name';
+  }
+
+  @override
   String get authSignUpTitle => 'Create your\naccount.';
 
   @override
@@ -2130,6 +2139,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccount => 'Account';
 
   @override
+  String get settingsAppleSignIn => 'Using Sign in with Apple';
+
+  @override
   String get deleteAccountTitle => 'Delete account';
 
   @override
@@ -2149,7 +2161,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountNoPassword =>
-      'Your account signs in with Google, so there is no password to confirm.';
+      'Your account signs in with Google or Apple, so there is no password to confirm.';
 
   @override
   String get deleteAccountPasswordHint => 'Confirm it is you';

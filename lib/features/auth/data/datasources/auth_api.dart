@@ -69,6 +69,34 @@ class AuthApi {
     return AuthSession.fromJson(res.data as Map<String, dynamic>);
   });
 
+  /// Login con Apple. El servidor verifica el identity token contra las claves
+  /// de Apple, comprueba el nonce y canjea el codigo por el token con el que se
+  /// revoca el acceso al borrar la cuenta. Como con Google, entrar y darse de
+  /// alta son la misma llamada.
+  ///
+  /// El nombre solo viaja la primera vez: Apple no lo vuelve a mandar.
+  Future<AuthSession> apple({
+    required String identityToken,
+    required String authorizationCode,
+    required String nonce,
+    String? givenName,
+    String? familyName,
+  }) => apiCall(() async {
+    final res = await _dio.post<dynamic>(
+      '/auth/apple',
+      data: {
+        'identityToken': identityToken,
+        'authorizationCode': authorizationCode,
+        'nonce': nonce,
+        if (givenName != null && givenName.isNotEmpty) 'givenName': givenName,
+        if (familyName != null && familyName.isNotEmpty)
+          'familyName': familyName,
+        ...await _device(),
+      },
+    );
+    return AuthSession.fromJson(res.data as Map<String, dynamic>);
+  });
+
   /// Cerrar sesion es idempotente: si el token ya no vale, tampoco pasa nada.
   Future<void> logout(String refreshToken) => apiCall(() async {
     await _dio.post<dynamic>(
@@ -127,7 +155,7 @@ class AuthApi {
   /// servidor lo trata como tal —cancela las inscripciones futuras antes de
   /// borrar en cascada—.
   ///
-  /// Se manda vacia cuando la cuenta entro con Google y no tiene contrasena
+  /// Se manda vacia cuando la cuenta entro con Google o Apple y no tiene contrasena
   /// (`hasPassword: false`): el servidor la exige solo a quien tiene una.
   Future<void> deleteAccount(String? password) => apiCall(
     () async => _dio.delete<dynamic>(

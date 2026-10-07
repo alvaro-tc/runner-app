@@ -2,6 +2,7 @@ import 'package:camrun/core/db/app_database.dart';
 import 'package:camrun/core/network/api_client.dart';
 import 'package:camrun/core/network/server_clock.dart';
 import 'package:camrun/core/network/session_controller.dart';
+import 'package:camrun/core/services/apple_sign_in_service.dart';
 import 'package:camrun/core/services/google_sign_in_service.dart';
 import 'package:camrun/core/utils/result.dart';
 import 'package:camrun/features/auth/data/datasources/auth_api.dart';
@@ -26,6 +27,24 @@ class _FakeGoogle extends GoogleSignInService {
   Future<void> signOut() async {}
 }
 
+/// La hoja de Apple, sin hoja: `null` es el usuario que la cierra.
+class _FakeApple extends AppleSignInService {
+  _FakeApple([this.credencial]);
+  final AppleCredential? credencial;
+  String? recordado;
+  bool olvidado = false;
+
+  @override
+  Future<AppleCredential?> credential() async => credencial;
+
+  @override
+  Future<void> remember(String userIdentifier) async =>
+      recordado = userIdentifier;
+
+  @override
+  Future<void> forget() async => olvidado = true;
+}
+
 void main() {
   late AppDatabase db;
   late MemoryTokenStorage storage;
@@ -34,6 +53,7 @@ void main() {
   RemoteAuthRepository build(
     Future<ResponseBody> Function(RequestOptions) handler, {
     GoogleSignInService? google,
+    AppleSignInService? apple,
   }) {
     db = AppDatabase(NativeDatabase.memory());
     storage = MemoryTokenStorage();
@@ -52,10 +72,95 @@ void main() {
       // Sin plugin registrado todo lo de Google falla, y el servicio se traga
       // sus fallos a proposito: cerrar sesion no puede depender de el.
       google: google ?? GoogleSignInService(),
+      apple: apple ?? _FakeApple(),
     );
   }
 
   setUp(() => llamadas = []);
+
+  group('Sign in with Apple', () {
+    const credencial = AppleCredential(
+      identityToken: 'identity-token',
+      authorizationCode: 'codigo',
+      rawNonce: 'nonce-crudo',
+      userIdentifier: '001234.abc.1234',
+      givenName: 'Ana',
+      familyName: 'Perez',
+    );
+
+    test('cerrar la hoja de Apple no toca la sesion', () async {
+      final apple = _FakeApple();
+      final repo = build((_) async => envelope({}), apple: apple);
+
+      final result = await repo.signInWithApple();
+
+      expect((result as Success<AuthUser?>).value, isNull);
+      expect(llamadas, isEmpty);
+      expect(storage.refresh, isNull);
+      expect(apple.recordado, isNull);
+    });
+
+    test('manda token, codigo, nonce y nombre; guarda la sesion', () async {
+      Map<String, dynamic>? cuerpo;
+      final apple = _FakeApple(credencial);
+      final repo = build((req) async {
+        cuerpo = req.data as Map<String, dynamic>;
+        return envelope({
+          'accessToken': 'a1',
+          'refreshToken': 'r1',
+          'expiresIn': 900,
+          'user': {
+            'id': 'u1',
+            'name': 'Ana Perez',
+            'role': 'runner',
+            'hasPassword': false,
+            'hasApple': true,
+          },
+        });
+      }, apple: apple);
+
+      final result = await repo.signInWithApple();
+
+      expect(llamadas, ['/auth/apple']);
+      expect(cuerpo, containsPair('identityToken', 'identity-token'));
+      expect(cuerpo, containsPair('authorizationCode', 'codigo'));
+      // El original, no el hash: el hash ya lo tiene Apple dentro del token.
+      expect(cuerpo, containsPair('nonce', 'nonce-crudo'));
+      expect(cuerpo, containsPair('givenName', 'Ana'));
+      expect(cuerpo, containsPair('familyName', 'Perez'));
+      final user = (result as Success<AuthUser?>).value!;
+      expect(user.hasApple, isTrue);
+      expect(storage.refresh, 'r1');
+      // Con esto se comprueba en cada arranque que la autorizacion sigue viva.
+      expect(apple.recordado, '001234.abc.1234');
+    });
+
+    test('si el servidor rechaza, no se recuerda a nadie', () async {
+      final apple = _FakeApple(credencial);
+      final repo = build(
+        (_) async => errorBody('INVALID_CREDENTIALS', status: 401),
+        apple: apple,
+      );
+
+      final result = await repo.signInWithApple();
+
+      expect(result, isA<FailureResult<AuthUser?>>());
+      expect(apple.recordado, isNull);
+      expect(storage.refresh, isNull);
+    });
+
+    test(
+      'cerrar sesion olvida la cuenta de Apple de este dispositivo',
+      () async {
+        final apple = _FakeApple();
+        final repo = build((_) async => envelope({}), apple: apple);
+
+        await repo.signOut();
+
+        expect(apple.olvidado, isTrue);
+      },
+    );
+  });
 
   test('cancelar el dialogo de Google no toca la sesion', () async {
     final repo = build((_) async => envelope({}), google: _FakeGoogle(null));

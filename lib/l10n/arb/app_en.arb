@@ -41,6 +41,20 @@
   "@authGoogleError": {
     "description": "Shown when the Google sign-in flow fails for a reason other than the user cancelling it."
   },
+  "authAppleError": "We could not sign you in with Apple. Try again.",
+  "@authAppleError": {
+    "description": "Shown when the Sign in with Apple flow fails for a reason other than the user cancelling it."
+  },
+  "authAppleWelcome": "Welcome, {name}",
+  "@authAppleWelcome": {
+    "description": "Greeting right after Sign in with Apple completes, using the name the user shared.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Ana"
+      }
+    }
+  },
   "authSignUpTitle": "Create your\naccount.",
   "authSignUpSubtitle": "Two minutes now, and every run you take from here is counted.",
   "authFullNameLabel": "Full name",
@@ -998,12 +1012,16 @@
   "runRemaining": "To go",
   "runAlmostThere": "Almost there!",
   "settingsAccount": "Account",
+  "settingsAppleSignIn": "Using Sign in with Apple",
+  "@settingsAppleSignIn": {
+    "description": "Row in Settings that tells the user their account is linked to Sign in with Apple, as Apple's guidelines ask. Its subtitle is the (possibly private relay) email they shared."
+  },
   "deleteAccountTitle": "Delete account",
   "deleteAccountRowSubtitle": "Erase your account and everything in it, for good",
   "deleteAccountBody": "Deleting your account removes it from CamRun and cannot be undone. There is no way to get it back afterwards.",
   "deleteAccountWhatGoes": "You will lose your profile, your runs and their routes, your training plan and your race registrations. Payments already made stay in the accounting records of the race organiser, with no account attached to them.",
   "deleteAccountPasswordLabel": "Password",
-  "deleteAccountNoPassword": "Your account signs in with Google, so there is no password to confirm.",
+  "deleteAccountNoPassword": "Your account signs in with Google or Apple, so there is no password to confirm.",
   "deleteAccountPasswordHint": "Confirm it is you",
   "deleteAccountSubmit": "Delete my account",
   "deleteAccountConfirmTitle": "Delete it for good?",
