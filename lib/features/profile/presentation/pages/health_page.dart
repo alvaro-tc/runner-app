@@ -8,6 +8,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,15 +38,13 @@ class HealthPage extends ConsumerWidget {
       body: profile.when(
         // Un refresco de fondo no vacia una pantalla que ya tiene datos.
         skipLoadingOnReload: true,
-        loading: () => const Padding(
-          padding: EdgeInsets.all(AppSpacing.screenH),
-          child: Column(
-            children: [
-              Skeleton(width: double.infinity, height: 56),
-              SizedBox(height: AppSpacing.md),
-              Skeleton(width: double.infinity, height: 120),
-            ],
-          ),
+        loading: () => const PageListView(
+          maxWidth: AppSizes.contentMaxWidth,
+          children: [
+            Skeleton(width: double.infinity, height: 56),
+            SizedBox(height: AppSpacing.md),
+            Skeleton(width: double.infinity, height: 120),
+          ],
         ),
         error: (error, _) => ErrorStateView(
           message: error.localized(t),
@@ -119,8 +118,8 @@ class _FormState extends ConsumerState<_Form> {
     final c = context.colors;
     final t = context.l10n;
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.screenH),
+    return PageListView(
+      maxWidth: AppSizes.contentMaxWidth,
       children: [
         Text(t.profileInjuryFlags, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.md),

@@ -1,3 +1,4 @@
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_typography.dart';
 import 'package:camrun/core/theme/theme_extensions.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
@@ -14,6 +15,17 @@ extension ContextX on BuildContext {
 
   MediaQueryData get mq => MediaQuery.of(this);
   Size get screenSize => MediaQuery.sizeOf(this);
+
+  /// La clase de la ventana entera. Decide el armazon (barra o rail); dentro
+  /// de una pagina manda el ancho del hueco, ver `AppLayout`.
+  WindowClass get windowClass =>
+      AppBreakpoints.classify(MediaQuery.sizeOf(this).width);
+
+  /// Mas ancha que alta: una tablet apaisada.
+  bool get isLandscape {
+    final size = MediaQuery.sizeOf(this);
+    return size.width > size.height;
+  }
 
   /// Honours the OS "reduce motion" switch — every animated widget checks this
   /// before running a tween.

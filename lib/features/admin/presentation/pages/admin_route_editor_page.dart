@@ -1,5 +1,6 @@
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
@@ -93,40 +94,42 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: RouteMapView(
-              route: const [],
-              guideRoute: trazado,
-              onTap: _agregar,
-              // Sin el punto de giro marcado, una ida y vuelta se ve como una
-              // sola linea y no hay forma de saber donde se da media vuelta.
-              pins: [
-                for (var i = 0; i < _puntos.length; i++)
-                  MapPin(
-                    lat: _puntos[i].lat,
-                    lng: _puntos[i].lng,
-                    size: 14,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: c.primary,
-                        border: Border.all(color: c.surface, width: 2),
-                      ),
+      // Apaisada, los controles van a un costado: abajo dejarian el mapa en
+      // una rendija justo cuando hay que tocar en el.
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final side = AppLayout.mapSidePanel(box.maxWidth, box.maxHeight);
+          final map = RouteMapView(
+            route: const [],
+            guideRoute: trazado,
+            onTap: _agregar,
+            // Sin el punto de giro marcado, una ida y vuelta se ve como una
+            // sola linea y no hay forma de saber donde se da media vuelta.
+            pins: [
+              for (var i = 0; i < _puntos.length; i++)
+                MapPin(
+                  lat: _puntos[i].lat,
+                  lng: _puntos[i].lng,
+                  size: 14,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: c.primary,
+                      border: Border.all(color: c.surface, width: 2),
                     ),
                   ),
-              ],
-            ),
-          ),
-          Container(
+                ),
+            ],
+          );
+          final panel = Container(
             padding: const EdgeInsets.all(AppSpacing.screenH),
             decoration: BoxDecoration(
               color: c.surface,
-              border: Border(top: BorderSide(color: c.border)),
+              border: side ? null : Border(top: BorderSide(color: c.border)),
             ),
             child: SafeArea(
               top: false,
+              left: !side,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -164,8 +167,33 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
                 ],
               ),
             ),
-          ),
-        ],
+          );
+
+          if (side) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: map),
+                SizedBox(
+                  width: AppSizes.sidePanelWidth,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: c.surface,
+                      border: Border(left: BorderSide(color: c.border)),
+                    ),
+                    child: SingleChildScrollView(child: panel),
+                  ),
+                ),
+              ],
+            );
+          }
+          return Column(
+            children: [
+              Expanded(child: map),
+              panel,
+            ],
+          );
+        },
       ),
     );
   }

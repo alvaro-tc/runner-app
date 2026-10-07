@@ -1,5 +1,6 @@
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
@@ -9,6 +10,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/adaptive_sheet.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,104 +82,118 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
         icon: const Icon(Icons.person_add_alt_rounded),
         label: Text(t.adminNewUser),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenH,
-              AppSpacing.md,
-              AppSpacing.screenH,
-              AppSpacing.sm,
-            ),
-            child: AppTextField(
-              label: t.adminSearch,
-              hint: t.adminSearchHint,
-              controller: _busqueda,
-              suffixIcon: Icons.search_rounded,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
-            ),
-          ),
-          if (widget.runnersOnly)
-            const SizedBox.shrink()
-          else
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenH,
+      // En una tablet la lista queda en una columna centrada: con el nombre
+      // en un borde y el rol en el otro, una fila de lado a lado no se lee de
+      // un vistazo. Los scrolls siguen ocupando todo el ancho.
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final extra = AppLayout.surplus(
+            box.maxWidth,
+            maxWidth: AppSizes.readableMaxWidth,
+          );
+          const h = AppSpacing.screenH;
+          return Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  h + extra,
+                  AppSpacing.md,
+                  h + extra,
+                  AppSpacing.sm,
                 ),
-                children: [
-                  for (final rol in <String?>[null, ...adminRoles]) ...[
-                    ChoiceChip(
-                      label: Text(
-                        rol == null ? t.adminRoleAll : roleLabel(t, rol),
-                      ),
-                      selected: _rol == rol,
-                      onSelected: (_) => _reiniciar(() => _rol = rol),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                  ],
-                ],
+                child: AppTextField(
+                  label: t.adminSearch,
+                  hint: t.adminSearchHint,
+                  controller: _busqueda,
+                  suffixIcon: Icons.search_rounded,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
+                ),
               ),
-            ),
-          // Arriba y no al pie: abajo lo tapa el boton de nueva cuenta.
-          // Mientras recarga conserva el total anterior, para que los botones
-          // no parpadeen de activos a inactivos en cada salto de pagina.
-          AdminPaginator(
-            total: usuarios.value?.total,
-            pagina: _pagina,
-            porPagina: _porPagina,
-            onPagina: (p) => setState(() => _pagina = p),
-            onPorPagina: (n) => _reiniciar(() => _porPagina = n),
-          ),
-          Expanded(
-            child: usuarios.when(
-              // Un refresco de fondo no vacia una pantalla que ya tiene datos.
-              skipLoadingOnReload: true,
-              loading: () =>
-                  const Center(child: Skeleton(width: 180, height: 20)),
-              error: (error, _) => ErrorStateView(
-                message: error is Failure
-                    ? error.localized(t)
-                    : t.adminLoadFailed,
-                onRetry: () => ref.invalidate(adminUsersProvider(consulta)),
+              if (widget.runnersOnly)
+                const SizedBox.shrink()
+              else
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(horizontal: h + extra),
+                    children: [
+                      for (final rol in <String?>[null, ...adminRoles]) ...[
+                        ChoiceChip(
+                          label: Text(
+                            rol == null ? t.adminRoleAll : roleLabel(t, rol),
+                          ),
+                          selected: _rol == rol,
+                          onSelected: (_) => _reiniciar(() => _rol = rol),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                      ],
+                    ],
+                  ),
+                ),
+              // Arriba y no al pie: abajo lo tapa el boton de nueva cuenta.
+              // Mientras recarga conserva el total anterior, para que los
+              // botones no parpadeen de activos a inactivos en cada salto de
+              // pagina.
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: extra),
+                child: AdminPaginator(
+                  total: usuarios.value?.total,
+                  pagina: _pagina,
+                  porPagina: _porPagina,
+                  onPagina: (p) => setState(() => _pagina = p),
+                  onPorPagina: (n) => _reiniciar(() => _porPagina = n),
+                ),
               ),
-              data: (pagina) {
-                final lista = pagina.usuarios;
-                return lista.isEmpty
-                    ? EmptyState(
-                        icon: Icons.person_search_outlined,
-                        title: t.adminNoUsersTitle,
-                        message: t.adminNoUsersBody,
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.screenH,
-                          0,
-                          AppSpacing.screenH,
-                          AppSpacing.xxl * 2,
-                        ),
-                        itemCount: lista.length,
-                        separatorBuilder: (_, _) => const AppDivider(),
-                        itemBuilder: (context, i) => _Fila(
-                          user: lista[i],
-                          onTap: () => _abrirFicha(context, lista[i]),
-                        ),
-                      );
-              },
-            ),
-          ),
-        ],
+              Expanded(
+                child: usuarios.when(
+                  // Un refresco de fondo no vacia una pantalla que ya tiene
+                  // datos.
+                  skipLoadingOnReload: true,
+                  loading: () =>
+                      const Center(child: Skeleton(width: 180, height: 20)),
+                  error: (error, _) => ErrorStateView(
+                    message: error is Failure
+                        ? error.localized(t)
+                        : t.adminLoadFailed,
+                    onRetry: () => ref.invalidate(adminUsersProvider(consulta)),
+                  ),
+                  data: (pagina) {
+                    final lista = pagina.usuarios;
+                    return lista.isEmpty
+                        ? EmptyState(
+                            icon: Icons.person_search_outlined,
+                            title: t.adminNoUsersTitle,
+                            message: t.adminNoUsersBody,
+                          )
+                        : ListView.separated(
+                            padding: EdgeInsets.fromLTRB(
+                              h + extra,
+                              0,
+                              h + extra,
+                              AppSpacing.xxl * 2,
+                            ),
+                            itemCount: lista.length,
+                            separatorBuilder: (_, _) => const AppDivider(),
+                            itemBuilder: (context, i) => _Fila(
+                              user: lista[i],
+                              onTap: () => _abrirFicha(context, lista[i]),
+                            ),
+                          );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Future<void> _abrirFicha(BuildContext context, AdminUser? user) async {
-    final cambio = await showModalBottomSheet<bool>(
+    final cambio = await showAdaptiveSheet<bool>(
       context: context,
-      isScrollControlled: true,
       builder: (_) => _Ficha(user: user, runnersOnly: widget.runnersOnly),
     );
     // La familia entera: cambiar el rol de alguien lo mueve de una lista a otra.

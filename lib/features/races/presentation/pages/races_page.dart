@@ -14,6 +14,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,10 @@ class RacesPage extends ConsumerStatefulWidget {
 
 class _RacesPageState extends ConsumerState<RacesPage> {
   bool _showCompleted = false;
+
+  /// Lo que necesita una tarjeta de carrera para que el nombre y el dorsal no
+  /// se pisen. En telefono es una columna; en tablet, las que quepan.
+  static const _cardMinWidth = 400.0;
 
   @override
   Widget build(BuildContext context) {
@@ -89,55 +94,81 @@ class _RacesPageState extends ConsumerState<RacesPage> {
         ? const <Registration>[]
         : ref.watch(awaitingValidationProvider).value ?? const <Registration>[];
 
-    return ListView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        AppSpacing.base,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
-      ),
-      children: [
-        Text(t.racesTitle, style: context.text.headingLg),
-        const SizedBox(height: AppSpacing.lg),
-        const _TotalsCard(),
-        const SizedBox(height: AppSpacing.lg),
-        _Segmented(
-          showCompleted: _showCompleted,
-          onChanged: (v) => setState(() => _showCompleted = v),
+    return PageInsets(
+      maxWidth: AppSizes.wideMaxWidth,
+      builder: (context, inset) => ListView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        for (final registro in esperando)
-          PendingValidationCard(registration: registro),
-        // Con el catalogo debajo, el cartel de vacio sobra: ya hay algo que
-        // mirar y donde tocar.
-        if (shown.isEmpty && esperando.isEmpty && catalogo.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xl),
-            child: EmptyState(
-              icon: Icons.emoji_events_outlined,
-              title: _showCompleted
-                  ? t.racesNoFinishesTitle
-                  : t.racesNoRacesTitle,
-              message: _showCompleted
-                  ? t.racesNoFinishesMessage
-                  : t.racesNoRacesMessage,
-              actionLabel: t.racesBrowseEvents,
-              onAction: () => context.go(Routes.home),
+        padding: EdgeInsets.fromLTRB(
+          inset,
+          AppSpacing.base,
+          inset,
+          AppSpacing.xxl,
+        ),
+        children: [
+          Text(t.racesTitle, style: context.text.headingLg),
+          const SizedBox(height: AppSpacing.lg),
+          const _TotalsCard(),
+          const SizedBox(height: AppSpacing.lg),
+          // Dos opciones en una pastilla de lado a lado de una tablet quedan
+          // a un metro una de otra: se queda en el ancho de un formulario.
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSizes.contentMaxWidth,
+              ),
+              child: _Segmented(
+                showCompleted: _showCompleted,
+                onChanged: (v) => setState(() => _showCompleted = v),
+              ),
             ),
-          )
-        else if (shown.isNotEmpty)
-          for (final entry in shown)
-            RaceCard(
-              entry: entry,
-              onTap: () => context.push(Routes.raceDetailOf(entry.id)),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // Las tarjetas traen su margen inferior: entre filas no va otro.
+          ResponsiveGrid(
+            minItemWidth: _cardMinWidth,
+            runSpacing: 0,
+            children: [
+              for (final registro in esperando)
+                PendingValidationCard(registration: registro),
+            ],
+          ),
+          // Con el catalogo debajo, el cartel de vacio sobra: ya hay algo que
+          // mirar y donde tocar.
+          if (shown.isEmpty && esperando.isEmpty && catalogo.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              child: EmptyState(
+                icon: Icons.emoji_events_outlined,
+                title: _showCompleted
+                    ? t.racesNoFinishesTitle
+                    : t.racesNoRacesTitle,
+                message: _showCompleted
+                    ? t.racesNoFinishesMessage
+                    : t.racesNoRacesMessage,
+                actionLabel: t.racesBrowseEvents,
+                onAction: () => context.go(Routes.home),
+              ),
+            )
+          else if (shown.isNotEmpty)
+            ResponsiveGrid(
+              minItemWidth: _cardMinWidth,
+              runSpacing: 0,
+              children: [
+                for (final entry in shown)
+                  RaceCard(
+                    entry: entry,
+                    onTap: () => context.push(Routes.raceDetailOf(entry.id)),
+                  ),
+              ],
             ),
-        // Sin dorsal todavia, la pestaña no puede quedarse en un cartel: las
-        // proximas del catalogo son la respuesta a "no veo ninguna carrera".
-        if (catalogo.isNotEmpty) _OpenForRegistration(marathons: catalogo),
-      ],
+          // Sin dorsal todavia, la pestaña no puede quedarse en un cartel: las
+          // proximas del catalogo son la respuesta a "no veo ninguna carrera".
+          if (catalogo.isNotEmpty) _OpenForRegistration(marathons: catalogo),
+        ],
+      ),
     );
   }
 }
@@ -158,11 +189,17 @@ class _OpenForRegistration extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         SectionHeader(title: context.l10n.racesUpcomingMarathons),
         const SizedBox(height: AppSpacing.md),
-        for (final marathon in marathons)
-          _MarathonRow(
-            marathon: marathon,
-            onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
-          ),
+        ResponsiveGrid(
+          minItemWidth: _RacesPageState._cardMinWidth,
+          runSpacing: 0,
+          children: [
+            for (final marathon in marathons)
+              _MarathonRow(
+                marathon: marathon,
+                onTap: () => context.push(Routes.marathonDetailOf(marathon.id)),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -400,24 +437,31 @@ class _RacesSkeleton extends StatelessWidget {
   const _RacesSkeleton();
 
   @override
-  Widget build(BuildContext context) => ListView(
-    physics: const AlwaysScrollableScrollPhysics(),
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.screenH,
-      AppSpacing.base,
-      AppSpacing.screenH,
-      AppSpacing.xxl,
+  Widget build(BuildContext context) => PageInsets(
+    maxWidth: AppSizes.wideMaxWidth,
+    builder: (context, inset) => ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        inset,
+        AppSpacing.base,
+        inset,
+        AppSpacing.xxl,
+      ),
+      children: const [
+        Skeleton(width: 160, height: 28),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(width: double.infinity, height: 132, radius: AppRadius.xxl),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(width: double.infinity, height: 48, radius: AppRadius.pill),
+        SizedBox(height: AppSpacing.lg),
+        ResponsiveGrid(
+          minItemWidth: _RacesPageState._cardMinWidth,
+          children: [
+            Skeleton(width: double.infinity, height: 150, radius: AppRadius.xl),
+            Skeleton(width: double.infinity, height: 150, radius: AppRadius.xl),
+          ],
+        ),
+      ],
     ),
-    children: const [
-      Skeleton(width: 160, height: 28),
-      SizedBox(height: AppSpacing.lg),
-      Skeleton(width: double.infinity, height: 132, radius: AppRadius.xxl),
-      SizedBox(height: AppSpacing.lg),
-      Skeleton(width: double.infinity, height: 48, radius: AppRadius.pill),
-      SizedBox(height: AppSpacing.lg),
-      Skeleton(width: double.infinity, height: 150, radius: AppRadius.xl),
-      SizedBox(height: AppSpacing.md),
-      Skeleton(width: double.infinity, height: 150, radius: AppRadius.xl),
-    ],
   );
 }

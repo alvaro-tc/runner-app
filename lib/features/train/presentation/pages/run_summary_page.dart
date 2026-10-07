@@ -10,6 +10,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
@@ -135,139 +136,193 @@ class _RunSummaryPageState extends ConsumerState<RunSummaryPage> {
     final t = context.l10n;
     final miles = ref.watch(useMilesProvider);
 
-    return ListView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        0,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
-      ),
-      children: [
-        Text(run.localizedTitle(t), style: context.text.headingLg),
-        Text(
-          '${Fmt.weekdayDayMonth(run.startedAt)} · '
-          '${Fmt.timeOfDay(run.startedAt)}',
-          style: context.text.bodySm.copyWith(color: c.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          child: SizedBox(
-            height: 220,
-            child: RouteMapView(route: run.route, interactive: false),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppSpacing.md,
-          crossAxisSpacing: AppSpacing.md,
-          childAspectRatio: 1.55,
-          children: [
-            MetricTile(
-              icon: Icons.straighten_rounded,
-              value: Fmt.distance(run.distanceKm, miles: miles),
-              label: t.commonDistance,
-              compact: true,
+    return PageInsets(
+      maxWidth: AppSizes.wideMaxWidth,
+      builder: (context, inset) => LayoutBuilder(
+        builder: (context, box) {
+          final wide = box.maxWidth - inset * 2 >= _twoColumnsMinWidth;
+          final map = ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: SizedBox(
+              height: wide ? _mapHeightWide : _mapHeight,
+              child: RouteMapView(route: run.route, interactive: false),
             ),
-            MetricTile(
-              icon: Icons.schedule_rounded,
-              value: Fmt.clock(run.elapsed),
-              label: t.commonTime,
-              compact: true,
-            ),
-            MetricTile(
-              icon: Icons.speed_rounded,
-              value: Fmt.paceWithUnit(run.avgPacePerKm, miles: miles),
-              label: t.commonAveragePace,
-              compact: true,
-            ),
-            MetricTile(
-              icon: Icons.rocket_launch_outlined,
-              value: Fmt.speed(run.avgSpeedKmh, miles: miles),
-              label: t.commonAverageSpeed,
-              compact: true,
-            ),
-            MetricTile(
-              icon: Icons.terrain_rounded,
-              value: Fmt.elevation(run.elevationGainM),
-              label: t.commonElevationGain,
-              compact: true,
-            ),
-            MetricTile(
-              icon: Icons.local_fire_department_outlined,
-              value: '${run.calories ?? 0}',
-              label: t.commonCalories,
-              compact: true,
-              tone: c.warning,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        Text(t.commonSplits, style: context.text.headingMd),
-        const SizedBox(height: AppSpacing.md),
-        SplitsChart(splits: run.splits, miles: miles),
-        if (!widget.readOnly) ...[
-          const SizedBox(height: AppSpacing.xl),
-          Text(t.summaryHowDidItFeel, style: context.text.headingMd),
-          const SizedBox(height: AppSpacing.md),
-          Row(
+          );
+          final splits = [
+            Text(t.commonSplits, style: context.text.headingMd),
+            const SizedBox(height: AppSpacing.md),
+            SplitsChart(splits: run.splits, miles: miles),
+          ];
+          final metrics = _metrics(run, miles);
+          final closing = _closing(run);
+          return ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(inset, 0, inset, AppSpacing.xxl),
             children: [
-              for (final feeling in RunFeeling.values) ...[
-                Expanded(
-                  child: _FeelingButton(
-                    feeling: feeling,
-                    selected: _feeling == feeling,
-                    onTap: () => setState(() => _feeling = feeling),
-                  ),
-                ),
-                if (feeling != RunFeeling.values.last)
-                  const SizedBox(width: AppSpacing.sm),
+              Text(run.localizedTitle(t), style: context.text.headingLg),
+              Text(
+                '${Fmt.weekdayDayMonth(run.startedAt)} · '
+                '${Fmt.timeOfDay(run.startedAt)}',
+                style: context.text.bodySm.copyWith(color: c.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // En una tablet el recorrido y los parciales a la izquierda; las
+              // cifras y lo que queda por hacer, a la derecha.
+              if (wide)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          map,
+                          const SizedBox(height: AppSpacing.xl),
+                          ...splits,
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xl),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [metrics, ...closing],
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                map,
+                const SizedBox(height: AppSpacing.lg),
+                metrics,
+                const SizedBox(height: AppSpacing.xl),
+                ...splits,
+                ...closing,
               ],
             ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AppTextField(
-            label: t.summaryNotesLabel,
-            controller: _notes,
-            hint: t.summaryNotesHint,
-            maxLines: 3,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          AppButton(
-            label: t.summarySaveRun,
-            isLoading: _saving,
-            onPressed: () => _save(run),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          AppButton(
-            label: t.commonDiscard,
-            variant: AppButtonVariant.ghost,
-            onPressed: () => _delete(run),
-          ),
-        ] else ...[
-          if (run.feeling != null || (run.notes?.isNotEmpty ?? false)) ...[
-            const SizedBox(height: AppSpacing.xl),
-            Text(t.summaryYourNotes, style: context.text.headingMd),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              '${run.feeling == null ? '' : '${run.feeling!.emoji} ${run.feeling!.label(t)}. '}'
-              '${run.notes ?? ''}',
-              style: context.text.bodyMd.copyWith(color: c.textSecondary),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.xl),
-          AppButton(
-            label: t.summaryDeleteRun,
-            variant: AppButtonVariant.danger,
-            onPressed: () => _delete(run),
-          ),
-        ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Ancho util a partir del cual el resumen se parte en dos columnas.
+  static const _twoColumnsMinWidth = 720.0;
+
+  static const _mapHeight = 220.0;
+  static const _mapHeightWide = 320.0;
+
+  Widget _metrics(TrainingRun run, bool miles) {
+    final c = context.colors;
+    final t = context.l10n;
+    return ResponsiveGrid(
+      minItemWidth: MetricTile.minGridWidth,
+      equalHeight: true,
+      children: [
+        MetricTile(
+          icon: Icons.straighten_rounded,
+          value: Fmt.distance(run.distanceKm, miles: miles),
+          label: t.commonDistance,
+          compact: true,
+        ),
+        MetricTile(
+          icon: Icons.schedule_rounded,
+          value: Fmt.clock(run.elapsed),
+          label: t.commonTime,
+          compact: true,
+        ),
+        MetricTile(
+          icon: Icons.speed_rounded,
+          value: Fmt.paceWithUnit(run.avgPacePerKm, miles: miles),
+          label: t.commonAveragePace,
+          compact: true,
+        ),
+        MetricTile(
+          icon: Icons.rocket_launch_outlined,
+          value: Fmt.speed(run.avgSpeedKmh, miles: miles),
+          label: t.commonAverageSpeed,
+          compact: true,
+        ),
+        MetricTile(
+          icon: Icons.terrain_rounded,
+          value: Fmt.elevation(run.elevationGainM),
+          label: t.commonElevationGain,
+          compact: true,
+        ),
+        MetricTile(
+          icon: Icons.local_fire_department_outlined,
+          value: '${run.calories ?? 0}',
+          label: t.commonCalories,
+          compact: true,
+          tone: c.warning,
+        ),
       ],
     );
+  }
+
+  /// Lo que va despues de las cifras: valorar y guardar la salida recien
+  /// hecha, o las notas y el borrado de una del historial.
+  List<Widget> _closing(TrainingRun run) {
+    final c = context.colors;
+    final t = context.l10n;
+    return [
+      if (!widget.readOnly) ...[
+        const SizedBox(height: AppSpacing.xl),
+        Text(t.summaryHowDidItFeel, style: context.text.headingMd),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
+            for (final feeling in RunFeeling.values) ...[
+              Expanded(
+                child: _FeelingButton(
+                  feeling: feeling,
+                  selected: _feeling == feeling,
+                  onTap: () => setState(() => _feeling = feeling),
+                ),
+              ),
+              if (feeling != RunFeeling.values.last)
+                const SizedBox(width: AppSpacing.sm),
+            ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          label: t.summaryNotesLabel,
+          controller: _notes,
+          hint: t.summaryNotesHint,
+          maxLines: 3,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        AppButton(
+          label: t.summarySaveRun,
+          isLoading: _saving,
+          onPressed: () => _save(run),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppButton(
+          label: t.commonDiscard,
+          variant: AppButtonVariant.ghost,
+          onPressed: () => _delete(run),
+        ),
+      ] else ...[
+        if (run.feeling != null || (run.notes?.isNotEmpty ?? false)) ...[
+          const SizedBox(height: AppSpacing.xl),
+          Text(t.summaryYourNotes, style: context.text.headingMd),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '${run.feeling == null ? '' : '${run.feeling!.emoji} ${run.feeling!.label(t)}. '}'
+            '${run.notes ?? ''}',
+            style: context.text.bodyMd.copyWith(color: c.textSecondary),
+          ),
+        ],
+        const SizedBox(height: AppSpacing.xl),
+        AppButton(
+          label: t.summaryDeleteRun,
+          variant: AppButtonVariant.danger,
+          onPressed: () => _delete(run),
+        ),
+      ],
+    ];
   }
 }
 

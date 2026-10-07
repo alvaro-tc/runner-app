@@ -4,6 +4,7 @@ import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/profile/presentation/widgets/theme_option_tile.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,8 +26,7 @@ class ThemeSetupPage extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.screenH),
+              child: PageListView(
                 children: [
                   const SizedBox(height: AppSpacing.xl),
                   Text(t.themeSetupTitle, style: context.text.headingMd),
@@ -56,14 +56,16 @@ class ThemeSetupPage extends ConsumerWidget {
                 AppSpacing.screenH,
                 AppSpacing.xxl,
               ),
-              child: AppButton(
-                label: t.commonContinue,
-                onPressed: () async {
-                  await ref
-                      .read(settingsProvider.notifier)
-                      .setThemeMode(current);
-                  if (context.mounted) context.go(Routes.onboarding);
-                },
+              child: ContentWidth(
+                child: AppButton(
+                  label: t.commonContinue,
+                  onPressed: () async {
+                    await ref
+                        .read(settingsProvider.notifier)
+                        .setThemeMode(current);
+                    if (context.mounted) context.go(Routes.onboarding);
+                  },
+                ),
               ),
             ),
           ],

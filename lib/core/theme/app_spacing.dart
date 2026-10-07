@@ -14,6 +14,9 @@ abstract final class AppSpacing {
 
   /// Horizontal gutter used by every full-screen page.
   static const screenH = 20.0;
+
+  /// The same gutter once the window is tablet-wide (see `AppLayout.gutter`).
+  static const screenHWide = 32.0;
 }
 
 abstract final class AppRadius {
@@ -38,5 +41,23 @@ abstract final class AppSizes {
   static const minTapTarget = 48.0;
   static const dayRing = 56.0;
   static const avatarProfile = 110.0;
+
+  /// Forms and auth: one column you read top to bottom.
   static const contentMaxWidth = 560.0;
+
+  /// Settings lists and single-column detail screens.
+  static const readableMaxWidth = 760.0;
+
+  /// Dashboards and two-column details on tablets.
+  static const wideMaxWidth = 1200.0;
+
+  /// Fixed column beside a map: live session stats, race controls.
+  static const sidePanelWidth = 380.0;
+
+  /// Sheets that become centred dialogs on wide windows.
+  static const dialogMaxWidth = 560.0;
+
+  /// Navigation rail widths, collapsed (icon + label) and extended.
+  static const navRail = 88.0;
+  static const navRailExtended = 232.0;
 }

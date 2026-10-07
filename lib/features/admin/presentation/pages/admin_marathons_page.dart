@@ -9,6 +9,7 @@ import 'package:camrun/features/admin/presentation/providers/admin_providers.dar
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,44 +74,60 @@ class _Lista extends ConsumerWidget {
     // archivo para que no parezca que la lista sigue teniendo carreras vivas.
     final corte = carreras.indexWhere((m) => m.past);
 
-    final hijos = <Widget>[];
-    for (var i = 0; i < carreras.length; i++) {
+    Widget fila(int i) => _Aparece(
+      // La clave va por id y no por posicion: asi el estado de la fila
+      // sigue a su carrera si la lista se reordena.
+      key: ValueKey(carreras[i].id),
+      // Se escalona solo la primera pantalla: al noveno el retardo ya se
+      // notaria como lentitud en vez de como entrada.
+      delay: AppDurations.fast * (i.clamp(0, 8) / 8),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: _Fila(marathon: carreras[i]),
+      ),
+    );
+
+    // En telefono una columna; en una tablet, las tarjetas que quepan por
+    // fila. Cada mitad —proximas y archivo— es su propia rejilla, para que el
+    // rotulo no quede en medio de una fila.
+    Widget rejilla(int desde, int hasta) => ResponsiveGrid(
+      minItemWidth: _tarjetaMinWidth,
+      runSpacing: 0,
+      children: [for (var i = desde; i < hasta; i++) fila(i)],
+    );
+
+    final hijos = <Widget>[
       // Los rotulos solo aparecen cuando hay dos mitades que separar. Con todo
       // por delante, un "PROXIMAS" solitario encabezando la lista entera no
       // dice nada que la lista no diga ya.
-      if (i == 0 && corte > 0) hijos.add(_Cabecera(t.adminSectionUpcoming));
-      if (i == corte) {
-        hijos.add(_Cabecera(t.adminSectionPast, primera: i == 0));
-      }
-      hijos.add(
-        _Aparece(
-          // La clave va por id y no por posicion: asi el estado de la fila
-          // sigue a su carrera si la lista se reordena.
-          key: ValueKey(carreras[i].id),
-          // Se escalona solo la primera pantalla: al noveno el retardo ya se
-          // notaria como lentitud en vez de como entrada.
-          delay: AppDurations.fast * (i.clamp(0, 8) / 8),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: _Fila(marathon: carreras[i]),
-          ),
-        ),
-      );
-    }
+      if (corte > 0) _Cabecera(t.adminSectionUpcoming),
+      rejilla(0, corte < 0 ? carreras.length : corte),
+      if (corte >= 0) ...[
+        _Cabecera(t.adminSectionPast, primera: corte == 0),
+        rejilla(corte, carreras.length),
+      ],
+    ];
 
     return RefreshIndicator(
       onRefresh: () async => ref.refresh(adminMarathonsProvider.future),
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screenH,
-          AppSpacing.md,
-          AppSpacing.screenH,
-          AppSpacing.xxl * 2,
+      child: PageInsets(
+        maxWidth: AppSizes.wideMaxWidth,
+        builder: (context, inset) => ListView(
+          padding: EdgeInsets.fromLTRB(
+            inset,
+            AppSpacing.md,
+            inset,
+            AppSpacing.xxl * 2,
+          ),
+          children: hijos,
         ),
-        children: hijos,
       ),
     );
   }
+
+  /// Lo que pide una tarjeta para que el nombre y los dos interruptores de
+  /// abajo no se aprieten.
+  static const _tarjetaMinWidth = 360.0;
 }
 
 class _Cabecera extends StatelessWidget {
@@ -563,13 +580,10 @@ class _Cargando extends StatelessWidget {
   const _Cargando();
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.screenH,
-      AppSpacing.md,
-      AppSpacing.screenH,
-      AppSpacing.xxl,
-    ),
+  Widget build(BuildContext context) => PageListView(
+    maxWidth: AppSizes.wideMaxWidth,
+    top: AppSpacing.md,
+    bottom: AppSpacing.xxl,
     children: [
       for (var i = 0; i < 3; i++)
         Padding(

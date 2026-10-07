@@ -42,13 +42,15 @@ lib/
 ├── main.dart                     # bootstrap(CamRunApp.new)
 ├── app/
 │   ├── app.dart                  # MaterialApp.router + temas
-│   ├── bootstrap.dart            # orientación, system UI, Hive, prefs, overrides
+│   ├── bootstrap.dart            # system UI, Hive, prefs, overrides
+│   ├── orientation_policy.dart   # teléfono en vertical, tablet libre
 │   ├── dependencies.dart         # contenedor de dependencias
 │   └── router/
 │       ├── app_router.dart       # GoRouter + StatefulShellRoute.indexedStack
 │       ├── app_routes.dart       # constantes de paths
 │       └── guards.dart           # redirect de onboarding / sesión
 ├── core/
+│   ├── layout/breakpoints.dart   # clases de ventana y cuentas de layout
 │   ├── theme/                    # tokens, tipografía, espaciado, ThemeData
 │   ├── error/failure.dart        # jerarquía sellada de errores
 │   ├── utils/                    # Result, validators, route_generator
@@ -57,7 +59,7 @@ lib/
 │   ├── constants/fake_data_seed.dart
 │   └── services/                 # prefs, settings, location
 ├── l10n/                         # ARB, clases generadas y etiquetas de enums
-├── shared/widgets/               # atoms · molecules · organisms
+├── shared/widgets/               # atoms · molecules · organisms · layout
 └── features/<feature>/
     ├── domain/{entities,repositories}
     ├── data/repositories
@@ -95,6 +97,56 @@ dentro de un widget de pantalla: usar `AppSpacing`, `AppRadius`, `AppSizes`,
 En claro se usan sombras teñidas de `primary` (`cardShadow`, `floatingShadow`).
 En oscuro las sombras no se leen, así que `AppShadows` devuelve una lista vacía
 y la elevación se comunica con `surfaceElevated` más un borde de 1px.
+
+### Layout adaptativo (teléfono y tablet)
+
+La app corre en teléfono y en tablet. **El teléfono va siempre en vertical; la
+tablet gira libremente.** Lo decide `OrientationPolicy` (`lib/app/`) midiendo el
+lado corto de la *pantalla* (`AppBreakpoints.isTablet`, ≥ 600 pt), no de la
+ventana: un iPad en Split View sigue siendo una tablet. En iPhone, además,
+`Info.plist` solo admite vertical, así que ni arranca de lado.
+
+La interfaz, en cambio, se decide por **ancho de ventana**: un iPad en Split
+View puede ser tan estrecho como un teléfono y recibe la interfaz de teléfono.
+
+`core/layout/breakpoints.dart` define las clases de ventana de Material 3:
+
+| Clase | Ancho | Ejemplo |
+|---|---|---|
+| `compact` | < 600 | teléfono vertical, tablet partida |
+| `medium` | 600–839 | tablet vertical, tablet apaisada en Split View |
+| `expanded` | 840–1199 | tablet apaisada |
+| `large` | ≥ 1200 | tablet grande apaisada |
+
+`context.windowClass` decide el **armazón**: `compact` usa `AppBottomNavBar`; a
+partir de `medium`, `AppNavigationRail` al costado (extendido en `large`). Las
+dos leen las mismas pestañas de `appNavDestinations`. Dentro de una página
+manda el ancho del **hueco** (con `LayoutBuilder`), no el de la pantalla: el rail
+se come su franja.
+
+Herramientas, en `shared/widgets/layout/` y `AppLayout`:
+
+- `PageInsets` / `PageListView`: el margen lateral de siempre en teléfono y, en
+  tablet, contenido centrado con tope (`AppSizes.contentMaxWidth` para
+  formularios, `readableMaxWidth` para listas de una columna, `wideMaxWidth`
+  para tableros). El margen va en el `padding` del scroll y no envolviéndolo en
+  una caja estrecha, para que en tablet se pueda arrastrar desde cualquier
+  punto.
+- `ContentWidth`: centra y limita un bloque que no es lista (botoneras, barras
+  inferiores).
+- `ResponsiveGrid`: tantas columnas como quepan de un ancho mínimo; con una
+  sola es una lista. Filas, no `GridView`, para que cada tarjeta mida lo que
+  mide su texto.
+- `AdaptiveSplit` y el patrón "dos columnas desde 720 de hueco": los detalles
+  (carrera, resultado, salida, formulario del admin) se parten en dos en
+  tablet sin cambiar el orden de lectura en teléfono.
+- `AppLayout.mapSidePanel`: las pantallas de mapa (sesión en vivo, panel del
+  admin, editor de recorrido) llevan sus controles en una columna al costado
+  con ancho de tablet o en una ventana más ancha que alta.
+- `showAdaptiveSheet`: hoja inferior en teléfono, diálogo centrado en tablet.
+
+Regla: **en `compact` el layout es el de siempre**. Los goldens de teléfono no
+cambian con nada de lo anterior.
 
 ### Catálogo visual
 
@@ -137,7 +189,8 @@ En la capa de presentación:
 
 `GoRouter` con `StatefulShellRoute.indexedStack` y cuatro ramas
 (**Home · Train · Races · Profile**). Cada rama conserva su pila al cambiar de
-tab.
+tab, y también al girar la tablet: barra y rail son el mismo armazón (§4,
+"Layout adaptativo").
 
 - `/train/session` se declara con `parentNavigatorKey: _rootKey` para que ocupe
   toda la pantalla y oculte la barra inferior.
@@ -498,7 +551,7 @@ salen distancia (Haversine), desnivel y splits por kilómetro.
 | Tipo | Qué cubre |
 |---|---|
 | Unitarias | formatters, Haversine, generación de splits, totales de Races, mapeo de carreras e inscripción (`race_repository_test`), flujo de alta y claves de idempotencia (`registration_flow_test`), costura sesión ↔ tracking (`run_session_test`) |
-| Widget | `AppButton`, `AppProgressRing`, `CountdownPill`, `RaceCard` |
+| Widget | `AppButton`, `AppProgressRing`, `CountdownPill`, `RaceCard`; armazón y rejillas adaptativas (`test/shared/responsive_layout_test.dart`) |
 | Golden | Home, Races y Profile en claro y oscuro, en español |
 | i18n | paridad de claves y placeholders entre los dos ARB, y el cambio de idioma en caliente (`test/l10n/i18n_test.dart`) |
 | Integración | onboarding → welcome → sign in → home, con guards |
@@ -541,6 +594,7 @@ helper `drainHome` de `test/helpers.dart`.
 | **Poppins empaquetado en `assets/fonts/`** | `google_fonts` descarga en el primer arranque; con la fuente local la app es correcta sin red y los goldens son deterministas. |
 | **`flutter_lints` estricto en vez de `very_good_analysis`** | Cubre las reglas exigidas (`prefer_const_constructors`, `always_use_package_imports`, `require_trailing_commas`) más `strict-casts/inference/raw-types`, sin ruido añadido. |
 | **Ilustraciones y fotos generadas por `CustomPainter`** | No hay assets de diseño disponibles. `BlobIllustration` y `EventImage` dibujan marcadores de posición con la paleta de marca; `EventImage` usa `cached_network_image` en cuanto `heroImageUrl` no esté vacío, así que enchufar imágenes reales no requiere tocar las pantallas. |
+| **Teléfono solo en vertical, tablet libre; layout por ancho de ventana** | La app se usa en tablet (el panel del organizador sobre todo), apaisada o no; en el teléfono, en vertical. Se sigue a Material 3: clases de ventana por ancho, barra abajo en `compact` y rail desde `medium`. El teléfono conserva su layout exacto. |
 | **Anillos del plan semanal de tamaño adaptativo** | Siete anillos de 56pt no caben en 390pt. Se reducen hasta 40pt y, por debajo de eso, la tira pasa a scroll horizontal. Prioriza legibilidad sobre el tamaño fijo del diseño. |
 | **Sin golden de la sesión en vivo** | Ver §12. |
 | **Goldens fijados a español** | El idioma con el que se publica, y de estas capturas salen las fichas de tienda (PU-201/PU-202). Sin fijarlo, la referencia dependería del locale de la máquina que corra la suite. |

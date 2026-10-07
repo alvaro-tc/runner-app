@@ -19,6 +19,10 @@ class MetricTile extends StatelessWidget {
   final Color? tone;
   final bool compact;
 
+  /// Lo minimo que pide una celda en una rejilla de metricas: dos por fila en
+  /// cualquier telefono, y las que quepan en una tablet.
+  static const minGridWidth = 150.0;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;

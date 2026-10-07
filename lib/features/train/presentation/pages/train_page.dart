@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/home/domain/entities/training_plan.dart';
@@ -14,6 +15,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -34,39 +36,79 @@ class TrainPage extends ConsumerWidget {
         child: RefreshIndicator(
           color: context.colors.primary,
           onRefresh: () async => ref.invalidate(historyProvider),
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
-            slivers: [
-              const SliverToBoxAdapter(child: _QuickStart()),
-              const SliverToBoxAdapter(child: _WeeklySummaryBlock()),
-              const SliverToBoxAdapter(child: _Filters()),
-              ...history.when(
-                // Un refresco de fondo no vacia una pantalla que ya tiene datos.
-                skipLoadingOnReload: true,
-                loading: () => [
-                  const SliverToBoxAdapter(child: _HistorySkeleton()),
-                ],
-                error: (error, _) => [
-                  SliverToBoxAdapter(
-                    child: ErrorStateView(
-                      message: error.toString(),
-                      onRetry: () => ref.invalidate(historyProvider),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              // Cada bloque trae su margen de telefono; en una tablet se le
+              // suma lo que falte para centrar la columna. El scroll sigue
+              // ocupando todo el ancho, asi se arrastra desde cualquier lado.
+              final inset = AppLayout.inset(
+                box.maxWidth,
+                maxWidth: AppSizes.wideMaxWidth,
+              );
+              final content = box.maxWidth - inset * 2;
+              return CustomScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: inset - AppSpacing.screenH,
+                    ),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        const SliverToBoxAdapter(child: _QuickStart()),
+                        const SliverToBoxAdapter(child: _WeeklySummaryBlock()),
+                        const SliverToBoxAdapter(child: _Filters()),
+                        ...history.when(
+                          // Un refresco de fondo no vacia una pantalla que ya
+                          // tiene datos.
+                          skipLoadingOnReload: true,
+                          loading: () => [
+                            const SliverToBoxAdapter(child: _HistorySkeleton()),
+                          ],
+                          error: (error, _) => [
+                            SliverToBoxAdapter(
+                              child: ErrorStateView(
+                                message: error.toString(),
+                                onRetry: () => ref.invalidate(historyProvider),
+                              ),
+                            ),
+                          ],
+                          data: (_) => _historySlivers(
+                            context,
+                            ref,
+                            columns: AppLayout.columns(
+                              content,
+                              minItemWidth: _historyTileMinWidth,
+                              maxColumns: 2,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppSpacing.xxl),
+                  ),
                 ],
-                data: (_) => _historySlivers(context, ref),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _historySlivers(BuildContext context, WidgetRef ref) {
+  /// Por debajo de este ancho una fila del historial parte el titulo: dos
+  /// columnas solo cuando las dos caben enteras.
+  static const _historyTileMinWidth = 360.0;
+
+  List<Widget> _historySlivers(
+    BuildContext context,
+    WidgetRef ref, {
+    required int columns,
+  }) {
     final t = context.l10n;
     final sections = ref.watch(historySectionsProvider);
     if (sections.isEmpty) {
@@ -97,12 +139,29 @@ class TrainPage extends ConsumerWidget {
         SliverStickyHeader(label: section.label(t)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
+          // Por filas y no con `SliverGrid`: la lista sigue siendo perezosa y
+          // cada tarjeta mide lo que mida su texto.
           sliver: SliverList.builder(
-            itemCount: section.runs.length,
-            itemBuilder: (context, i) => TrainingHistoryTile(
-              run: section.runs[i],
-              onTap: () =>
-                  context.push(Routes.trainHistoryOf(section.runs[i].id)),
+            itemCount: (section.runs.length / columns).ceil(),
+            itemBuilder: (context, row) => Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var col = 0; col < columns; col++) ...[
+                  if (col > 0) const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: row * columns + col < section.runs.length
+                        ? TrainingHistoryTile(
+                            run: section.runs[row * columns + col],
+                            onTap: () => context.push(
+                              Routes.trainHistoryOf(
+                                section.runs[row * columns + col].id,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
             ),
           ),
         ),
@@ -249,10 +308,18 @@ class _QuickStart extends ConsumerWidget {
 class _WeeklySummaryBlock extends ConsumerWidget {
   const _WeeklySummaryBlock();
 
+  static const _chartHeight = 140.0;
+  static const _chartHeightWide = 200.0;
+  static const _barWidth = 16.0;
+  static const _barWidthWide = 28.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.l10n;
+    // Con la tira a todo el ancho de una tablet, siete barras de telefono
+    // quedan como palillos sueltos.
+    final wide = !context.windowClass.isCompact;
     final summary = ref.watch(weeklySummaryProvider);
     final miles = ref.watch(useMilesProvider);
     final maxY = summary.dailyDistanceKm.fold<double>(
@@ -267,52 +334,41 @@ class _WeeklySummaryBlock extends ConsumerWidget {
         children: [
           SectionHeader(title: t.trainThisWeek),
           const SizedBox(height: AppSpacing.md),
-          Row(
+          // Dos por fila en telefono; en una tablet las cuatro en una.
+          ResponsiveGrid(
+            minItemWidth: MetricTile.minGridWidth,
+            maxColumns: 4,
+            equalHeight: true,
             children: [
-              Expanded(
-                child: MetricTile(
-                  icon: Icons.straighten_rounded,
-                  value: Fmt.distance(summary.distanceKm, miles: miles),
-                  label: t.commonDistance,
-                  compact: true,
-                ),
+              MetricTile(
+                icon: Icons.straighten_rounded,
+                value: Fmt.distance(summary.distanceKm, miles: miles),
+                label: t.commonDistance,
+                compact: true,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: MetricTile(
-                  icon: Icons.schedule_rounded,
-                  value: Fmt.durationShort(summary.duration),
-                  label: t.commonTime,
-                  compact: true,
-                ),
+              MetricTile(
+                icon: Icons.schedule_rounded,
+                value: Fmt.durationShort(summary.duration),
+                label: t.commonTime,
+                compact: true,
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  icon: Icons.speed_rounded,
-                  value: Fmt.paceWithUnit(summary.avgPace, miles: miles),
-                  label: t.commonAveragePace,
-                  compact: true,
-                ),
+              MetricTile(
+                icon: Icons.speed_rounded,
+                value: Fmt.paceWithUnit(summary.avgPace, miles: miles),
+                label: t.commonAveragePace,
+                compact: true,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: MetricTile(
-                  icon: Icons.check_circle_outline_rounded,
-                  value: '${summary.sessions}',
-                  label: t.trainSessions,
-                  compact: true,
-                ),
+              MetricTile(
+                icon: Icons.check_circle_outline_rounded,
+                value: '${summary.sessions}',
+                label: t.trainSessions,
+                compact: true,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           SizedBox(
-            height: 140,
+            height: wide ? _chartHeightWide : _chartHeight,
             child: BarChart(
               BarChartData(
                 maxY: maxY == 0 ? 10 : maxY * 1.25,
@@ -349,7 +405,7 @@ class _WeeklySummaryBlock extends ConsumerWidget {
                       barRods: [
                         BarChartRodData(
                           toY: summary.dailyDistanceKm[i],
-                          width: 16,
+                          width: wide ? _barWidthWide : _barWidth,
                           color: summary.dailyDistanceKm[i] == 0
                               ? c.ringTrack
                               : c.primary,

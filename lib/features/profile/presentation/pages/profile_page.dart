@@ -10,6 +10,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
@@ -155,84 +156,100 @@ class _Body extends ConsumerWidget {
             onPressed: () => context.push(Routes.profileEdit),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _HighlightCard(profile: profile, miles: miles),
-                const SizedBox(height: AppSpacing.xl),
-                Text(t.profileYourWeek, style: context.text.headingMd),
-                _Card(
+          // En una tablet, lo del corredor a un lado y los ajustes al otro:
+          // en una sola columna de lado a lado las filas de ajustes medirian
+          // un metro para una palabra y un chevron.
+          PageInsets(
+            maxWidth: AppSizes.wideMaxWidth,
+            builder: (context, inset) => Padding(
+              padding: EdgeInsets.symmetric(horizontal: inset),
+              child: AdaptiveSplit(
+                primary: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StatRow(
-                      icon: Icons.healing_outlined,
-                      title: t.profileInjuryFlags,
-                      value: profile.injuryFlags.isEmpty
-                          ? t.profileInjuryNone
-                          : profile.injuryFlags,
-                      tone: c.success,
-                      onTap: () => context.push(Routes.profileHealth),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.bedtime_outlined,
-                      title: t.profileSleep,
-                      subtitle: t.profileSleepSubtitle,
-                      value: Fmt.durationShort(profile.sleep.averageLast7Days),
-                      onTap: () => context.push(Routes.profileHealth),
+                    _HighlightCard(profile: profile, miles: miles),
+                    const SizedBox(height: AppSpacing.xl),
+                    Text(t.profileYourWeek, style: context.text.headingMd),
+                    _Card(
+                      children: [
+                        StatRow(
+                          icon: Icons.healing_outlined,
+                          title: t.profileInjuryFlags,
+                          value: profile.injuryFlags.isEmpty
+                              ? t.profileInjuryNone
+                              : profile.injuryFlags,
+                          tone: c.success,
+                          onTap: () => context.push(Routes.profileHealth),
+                        ),
+                        const AppDivider(),
+                        StatRow(
+                          icon: Icons.bedtime_outlined,
+                          title: t.profileSleep,
+                          subtitle: t.profileSleepSubtitle,
+                          value: Fmt.durationShort(
+                            profile.sleep.averageLast7Days,
+                          ),
+                          onTap: () => context.push(Routes.profileHealth),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(t.commonSettings, style: context.text.headingMd),
-                _Card(
+                secondary: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StatRow(
-                      icon: Icons.palette_outlined,
-                      title: t.profileAppearance,
-                      value: switch (ref.watch(themeModeProvider)) {
-                        ThemeMode.light => t.themeLight,
-                        ThemeMode.dark => t.themeDark,
-                        ThemeMode.system => t.themeSystem,
-                      },
-                      onTap: () => context.push(Routes.profileAppearance),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.translate_rounded,
-                      title: t.languageTitle,
-                      value: ref.watch(languageProvider).label(t),
-                      onTap: () => context.push(Routes.profileLanguage),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.straighten_rounded,
-                      title: t.profileUnits,
-                      value: unit.label,
-                      onTap: () => ref
-                          .read(settingsProvider.notifier)
-                          .setUnit(miles ? DistanceUnit.km : DistanceUnit.mi),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.settings_outlined,
-                      title: t.profileNotificationsPrivacyHelp,
-                      onTap: () => context.push(Routes.profileSettings),
-                    ),
-                    const AppDivider(),
-                    StatRow(
-                      icon: Icons.logout_rounded,
-                      title: t.profileLogOut,
-                      tone: c.error,
-                      onTap: () => _logOut(context, ref),
+                    Text(t.commonSettings, style: context.text.headingMd),
+                    _Card(
+                      children: [
+                        StatRow(
+                          icon: Icons.palette_outlined,
+                          title: t.profileAppearance,
+                          value: switch (ref.watch(themeModeProvider)) {
+                            ThemeMode.light => t.themeLight,
+                            ThemeMode.dark => t.themeDark,
+                            ThemeMode.system => t.themeSystem,
+                          },
+                          onTap: () => context.push(Routes.profileAppearance),
+                        ),
+                        const AppDivider(),
+                        StatRow(
+                          icon: Icons.translate_rounded,
+                          title: t.languageTitle,
+                          value: ref.watch(languageProvider).label(t),
+                          onTap: () => context.push(Routes.profileLanguage),
+                        ),
+                        const AppDivider(),
+                        StatRow(
+                          icon: Icons.straighten_rounded,
+                          title: t.profileUnits,
+                          value: unit.label,
+                          onTap: () => ref
+                              .read(settingsProvider.notifier)
+                              .setUnit(
+                                miles ? DistanceUnit.km : DistanceUnit.mi,
+                              ),
+                        ),
+                        const AppDivider(),
+                        StatRow(
+                          icon: Icons.settings_outlined,
+                          title: t.profileNotificationsPrivacyHelp,
+                          onTap: () => context.push(Routes.profileSettings),
+                        ),
+                        const AppDivider(),
+                        StatRow(
+                          icon: Icons.logout_rounded,
+                          title: t.profileLogOut,
+                          tone: c.error,
+                          onTap: () => _logOut(context, ref),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xxl),
-              ],
+              ),
             ),
           ),
+          const SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/notifications/domain/notifications.dart';
 import 'package:camrun/features/notifications/presentation/providers/notifications_provider.dart';
@@ -76,37 +77,52 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             final items = _soloNoLeidas
                 ? b.items.where((n) => n.unread).toList()
                 : b.items;
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-              children: [
-                if (b.items.isNotEmpty) _filtro(context),
-                if (items.isEmpty) ...[
-                  SizedBox(height: context.screenSize.height * 0.15),
-                  if (b.items.isNotEmpty)
-                    EmptyState(
-                      icon: Icons.done_all_rounded,
-                      title: t.notificationsUnreadEmptyTitle,
-                      message: t.notificationsUnreadEmptyBody,
-                    )
-                  else
-                    EmptyState(
-                      icon: Icons.notifications_none_rounded,
-                      title: t.notificationsEmptyTitle,
-                      message: t.notificationsEmptyBody,
-                    ),
-                ],
-                for (final (i, n) in items.indexed) ...[
-                  if (i > 0) const AppDivider(indent: AppSpacing.screenH),
-                  _Fila(
-                    key: ValueKey(n.id),
-                    notification: n,
-                    onTap: () => openNotification(context, ref, n),
-                    onMarkRead: () => notifier.markRead(n.id),
-                    onDelete: () => notifier.delete(n.id),
+            // Las filas van de borde a borde en telefono; en una tablet, en una
+            // columna centrada: una notificacion de un metro no se lee.
+            return LayoutBuilder(
+              builder: (context, box) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  AppLayout.surplus(
+                    box.maxWidth,
+                    maxWidth: AppSizes.readableMaxWidth,
                   ),
+                  0,
+                  AppLayout.surplus(
+                    box.maxWidth,
+                    maxWidth: AppSizes.readableMaxWidth,
+                  ),
+                  AppSpacing.xxl,
+                ),
+                children: [
+                  if (b.items.isNotEmpty) _filtro(context),
+                  if (items.isEmpty) ...[
+                    SizedBox(height: context.screenSize.height * 0.15),
+                    if (b.items.isNotEmpty)
+                      EmptyState(
+                        icon: Icons.done_all_rounded,
+                        title: t.notificationsUnreadEmptyTitle,
+                        message: t.notificationsUnreadEmptyBody,
+                      )
+                    else
+                      EmptyState(
+                        icon: Icons.notifications_none_rounded,
+                        title: t.notificationsEmptyTitle,
+                        message: t.notificationsEmptyBody,
+                      ),
+                  ],
+                  for (final (i, n) in items.indexed) ...[
+                    if (i > 0) const AppDivider(indent: AppSpacing.screenH),
+                    _Fila(
+                      key: ValueKey(n.id),
+                      notification: n,
+                      onTap: () => openNotification(context, ref, n),
+                      onMarkRead: () => notifier.markRead(n.id),
+                      onDelete: () => notifier.delete(n.id),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             );
           },
         ),
@@ -283,18 +299,27 @@ class _Skeleton extends StatelessWidget {
   const _Skeleton();
 
   @override
-  Widget build(BuildContext context) => ListView.separated(
-    physics: const AlwaysScrollableScrollPhysics(),
-    padding: const EdgeInsets.all(AppSpacing.screenH),
-    itemCount: 6,
-    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
-    itemBuilder: (_, _) => const Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Skeleton.circle(size: AppSizes.minTapTarget),
-        SizedBox(width: AppSpacing.md),
-        Expanded(child: SkeletonLines()),
-      ],
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) => ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(AppSpacing.screenH).add(
+        EdgeInsets.symmetric(
+          horizontal: AppLayout.surplus(
+            box.maxWidth,
+            maxWidth: AppSizes.readableMaxWidth,
+          ),
+        ),
+      ),
+      itemCount: 6,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
+      itemBuilder: (_, _) => const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Skeleton.circle(size: AppSizes.minTapTarget),
+          SizedBox(width: AppSpacing.md),
+          Expanded(child: SkeletonLines()),
+        ],
+      ),
     ),
   );
 }

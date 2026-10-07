@@ -22,7 +22,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> bootstrap(Widget Function() builder) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // La orientacion no se fija aqui: telefono en vertical y tablet libre lo
+  // decide `OrientationPolicy`, que mide la pantalla ya montada.
   SystemChrome.setSystemUIOverlayStyle(
     systemUiStyleFor(
       WidgetsBinding.instance.platformDispatcher.platformBrightness ==

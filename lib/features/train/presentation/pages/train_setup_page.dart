@@ -12,6 +12,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,8 +123,8 @@ class _TrainSetupPageState extends ConsumerState<TrainSetupPage> {
         ),
         title: Text(t.setupTitle),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.screenH),
+      body: PageListView(
+        maxWidth: AppSizes.contentMaxWidth,
         children: [
           SectionHeader(title: t.setupWhatAreYouRunning),
           const SizedBox(height: AppSpacing.md),

@@ -3,6 +3,7 @@ import 'package:camrun/core/services/settings_provider.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/profile/presentation/widgets/theme_option_tile.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,8 +28,7 @@ class AppearancePage extends ConsumerWidget {
         ),
         title: Text(t.profileAppearance),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.screenH),
+      body: PageListView(
         children: [
           for (final option in themeOptions(t))
             ThemeOptionTile(

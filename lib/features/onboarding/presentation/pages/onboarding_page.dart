@@ -5,6 +5,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/onboarding/presentation/widgets/onboarding_illustration.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -96,6 +97,48 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 onPageChanged: (i) => setState(() => _index = i),
                 itemBuilder: (context, i) {
                   final slide = slides[i];
+                  final copy = Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: Column(
+                        children: [
+                          Text(
+                            slide.title,
+                            textAlign: TextAlign.center,
+                            style: context.text.headingMd,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            slide.body,
+                            textAlign: TextAlign.center,
+                            style: context.text.bodyMd.copyWith(
+                              color: c.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                  // Apaisada, la ilustracion encima del texto se quedaria en
+                  // un sello: van lado a lado y cada una con su mitad.
+                  if (context.isLandscape) {
+                    return Row(
+                      children: [
+                        Expanded(child: OnboardingIllustration(art: slide.art)),
+                        Expanded(
+                          child: Center(
+                            child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.screenH,
+                              ),
+                              child: copy,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
                   return Column(
                     children: [
                       Expanded(
@@ -112,28 +155,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.screenH,
                           ),
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 320),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    slide.title,
-                                    textAlign: TextAlign.center,
-                                    style: context.text.headingMd,
-                                  ),
-                                  const SizedBox(height: AppSpacing.md),
-                                  Text(
-                                    slide.body,
-                                    textAlign: TextAlign.center,
-                                    style: context.text.bodyMd.copyWith(
-                                      color: c.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          child: copy,
                         ),
                       ),
                     ],
@@ -161,20 +183,23 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(
+              // Apaisada el alto escasea: el boton se acerca a los puntos.
+              padding: EdgeInsets.fromLTRB(
                 AppSpacing.screenH,
-                AppSpacing.xl,
+                context.isLandscape ? AppSpacing.base : AppSpacing.xl,
                 AppSpacing.screenH,
-                AppSpacing.xxl,
+                context.isLandscape ? AppSpacing.base : AppSpacing.xxl,
               ),
-              child: AnimatedSize(
-                duration: AppDurations.base,
-                curve: AppDurations.curve,
-                child: AppButton(
-                  label: _isLast
-                      ? context.l10n.onboardingGetStarted
-                      : context.l10n.commonNext,
-                  onPressed: _next,
+              child: ContentWidth(
+                child: AnimatedSize(
+                  duration: AppDurations.base,
+                  curve: AppDurations.curve,
+                  child: AppButton(
+                    label: _isLast
+                        ? context.l10n.onboardingGetStarted
+                        : context.l10n.commonNext,
+                    onPressed: _next,
+                  ),
                 ),
               ),
             ),

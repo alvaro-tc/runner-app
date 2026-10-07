@@ -1,5 +1,6 @@
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
@@ -82,28 +83,57 @@ class _Tablero extends ConsumerWidget {
       await ref.read(liveBoardProvider(maraton.id).notifier).reload();
     }
 
-    return Column(
-      children: [
-        _Selector(marathons: marathons, current: maraton),
-        Expanded(
-          child: fallo != null || falloDetalle != null
-              ? ErrorStateView(
-                  message:
-                      fallo?.localized(context.l10n) ??
-                      context.l10n.adminLoadFailed,
-                  onRetry: recargar,
-                )
-              : cargando
-              ? const _MapLoading()
-              : _Mapa(
-                  route: detalle.value?.route ?? const [],
-                  board: tablero,
-                  laps: detalle.value?.laps ?? maraton.laps,
+    final selector = _Selector(marathons: marathons, current: maraton);
+    final mapa = fallo != null || falloDetalle != null
+        ? ErrorStateView(
+            message:
+                fallo?.localized(context.l10n) ?? context.l10n.adminLoadFailed,
+            onRetry: recargar,
+          )
+        : cargando
+        ? const _MapLoading()
+        : _Mapa(
+            route: detalle.value?.route ?? const [],
+            board: tablero,
+            laps: detalle.value?.laps ?? maraton.laps,
+          );
+    final controles = !cargando && fallo == null && falloDetalle == null
+        ? _Controles(marathon: detalle.value ?? maraton, board: tablero)
+        : null;
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // En una tablet el mapa se queda con todo
+        // el alto y la carrera y sus botones van en una columna al costado.
+        if (AppLayout.mapSidePanel(box.maxWidth, box.maxHeight)) {
+          final c = context.colors;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: mapa),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  border: Border(left: BorderSide(color: c.border)),
                 ),
-        ),
-        if (!cargando && fallo == null && falloDetalle == null)
-          _Controles(marathon: detalle.value ?? maraton, board: tablero),
-      ],
+                child: SizedBox(
+                  width: AppSizes.sidePanelWidth,
+                  child: Column(
+                    children: [selector, const Spacer(), ?controles],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            selector,
+            Expanded(child: mapa),
+            ?controles,
+          ],
+        );
+      },
     );
   }
 }

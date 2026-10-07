@@ -19,6 +19,7 @@ import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/phone_field.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
@@ -463,8 +464,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       _gender = profile.gender;
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.screenH),
+    return PageListView(
+      maxWidth: AppSizes.contentMaxWidth,
       children: [
         Text(t.registerYourDetails, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.xs),
@@ -561,8 +562,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
   Widget _categoryStep(Marathon marathon) {
     final c = context.colors;
     final t = context.l10n;
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.screenH),
+    return PageListView(
+      maxWidth: AppSizes.contentMaxWidth,
       children: [
         Text(t.registerCategoryAndExtras, style: context.text.headingMd),
         if (_errors['category'] != null) ...[
@@ -633,8 +634,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     final quote = flow.quote;
 
     if (_enPagoQr(flow)) {
-      return ListView(
-        padding: const EdgeInsets.all(AppSpacing.screenH),
+      return PageListView(
+        maxWidth: AppSizes.contentMaxWidth,
         children: [
           _ManualQrPayment(
             payment: flow.payment!,
@@ -646,8 +647,8 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.screenH),
+    return PageListView(
+      maxWidth: AppSizes.contentMaxWidth,
       children: [
         Text(t.registerReviewAndPay, style: context.text.headingMd),
         const SizedBox(height: AppSpacing.lg),
@@ -833,42 +834,49 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  t.commonTotal,
-                  style: context.text.labelSm.copyWith(color: c.textSecondary),
-                ),
-                Text(
-                  total == null
-                      // Antes del paso 1 no hay borrador: lo unico honesto que
-                      // se puede mostrar es el precio de catalogo.
-                      ? Fmt.money(
-                          marathon.entryFee.amount,
-                          marathon.entryFee.currency,
-                        )
-                      : Fmt.money(total.amount, total.currency),
-                  style: context.text.headingMd,
-                ),
-              ],
-            ),
-            const SizedBox(width: AppSpacing.base),
-            Expanded(
-              child: AppButton(
-                label: isLast ? t.registerPayAndRegister : t.commonContinue,
-                isLoading: flow.busy,
-                onPressed: !puedeAvanzar
-                    ? null
-                    : isLast
-                    ? () => _pay(marathon)
-                    : () => _next(marathon, profile),
+        // La barra va de lado a lado; el total y el boton, alineados con el
+        // formulario de arriba.
+        child: ContentWidth(
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.commonTotal,
+                    style: context.text.labelSm.copyWith(
+                      color: c.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    total == null
+                        // Antes del paso 1 no hay borrador: lo unico
+                        // honesto que se puede mostrar es el precio de
+                        // catalogo.
+                        ? Fmt.money(
+                            marathon.entryFee.amount,
+                            marathon.entryFee.currency,
+                          )
+                        : Fmt.money(total.amount, total.currency),
+                    style: context.text.headingMd,
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.base),
+              Expanded(
+                child: AppButton(
+                  label: isLast ? t.registerPayAndRegister : t.commonContinue,
+                  isLoading: flow.busy,
+                  onPressed: !puedeAvanzar
+                      ? null
+                      : isLast
+                      ? () => _pay(marathon)
+                      : () => _next(marathon, profile),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1302,34 +1310,36 @@ class _Stepper extends StatelessWidget {
         AppSpacing.screenH,
         AppSpacing.base,
       ),
-      child: Row(
-        children: [
-          for (var i = 0; i < labels.length; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedContainer(
-                    duration: AppDurations.base,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: i <= step ? c.primary : c.border,
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: ContentWidth(
+        child: Row(
+          children: [
+            for (var i = 0; i < labels.length; i++) ...[
+              if (i > 0) const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimatedContainer(
+                      duration: AppDurations.base,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: i <= step ? c.primary : c.border,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs + 2),
-                  Text(
-                    labels[i],
-                    style: context.text.labelSm.copyWith(
-                      color: i <= step ? c.primary : c.textSecondary,
+                    const SizedBox(height: AppSpacing.xs + 2),
+                    Text(
+                      labels[i],
+                      style: context.text.labelSm.copyWith(
+                        color: i <= step ? c.primary : c.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

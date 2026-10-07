@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/location_service.dart';
@@ -16,6 +17,7 @@ import 'package:camrun/features/train/presentation/widgets/hold_to_finish_button
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/progress_widgets.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
@@ -249,69 +251,137 @@ class _RunSessionPageState extends ConsumerState<RunSessionPage> {
         if (await _confirmDiscard() && context.mounted) context.pop();
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            Positioned.fill(child: _map),
-            SafeArea(
-              child: Column(
-                children: [
-                  _TopBar(
-                    locked: bloqueada,
-                    title: bloqueada ? state.goal.title : null,
-                    onBack: () async {
-                      if (await _confirmDiscard() && context.mounted) {
-                        context.pop();
-                      }
-                    },
-                  ),
-                  if (bloqueada) _Restante(state: state),
-                  if (state.goal.isCircuit) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    _Vueltas(state: state, vuelta: _vuelta, cerrada: _cerrada),
-                  ],
-                  if (state.error != null)
-                    _ErrorBanner(
-                      outcome: state.error!,
-                      onOpenSettings: () => unawaited(
-                        ref
-                            .read(locationServiceProvider)
-                            .openSettings(
-                              locationSettings:
-                                  state.error ==
-                                  LocationPermissionOutcome.serviceDisabled,
-                            ),
-                      ),
-                      // Volver de Ajustes no reintenta solo: sin esto habria
-                      // que salir de la carrera para volver a arrancarla.
-                      onRetry: () => unawaited(
-                        ref.read(runSessionProvider.notifier).start(state.goal),
-                      ),
-                    ),
-                  if (state.goal.laps != null) _LapCard(state: state),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        right: AppSpacing.base,
-                        bottom: AppSpacing.base,
-                      ),
-                      child: AppIconButton(
-                        icon: Icons.my_location_rounded,
-                        style: AppIconButtonStyle.ink,
-                        semanticsLabel: context.l10n.runRecentre,
-                        onPressed: () => _mapKey.currentState?.recenter(),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: context.screenSize.height * 0.28),
-                ],
+        body: LayoutBuilder(
+          builder: (context, box) {
+            // Lo que se mira encima del mapa: no cambia de sitio aunque la
+            // pantalla gire.
+            final overlays = <Widget>[
+              _TopBar(
+                locked: bloqueada,
+                title: bloqueada ? state.goal.title : null,
+                onBack: () async {
+                  if (await _confirmDiscard() && context.mounted) {
+                    context.pop();
+                  }
+                },
               ),
-            ),
-            _StatsSheet(onFinish: _finish, locked: bloqueada),
-            if (state.status == RunStatus.countdown)
-              _Countdown(value: state.countdownValue, background: c.background),
-          ],
+              if (bloqueada) _Restante(state: state),
+              if (state.goal.isCircuit) ...[
+                const SizedBox(height: AppSpacing.sm),
+                _Vueltas(state: state, vuelta: _vuelta, cerrada: _cerrada),
+              ],
+              if (state.error != null)
+                _ErrorBanner(
+                  outcome: state.error!,
+                  onOpenSettings: () => unawaited(
+                    ref
+                        .read(locationServiceProvider)
+                        .openSettings(
+                          locationSettings:
+                              state.error ==
+                              LocationPermissionOutcome.serviceDisabled,
+                        ),
+                  ),
+                  // Volver de Ajustes no reintenta solo: sin esto habria
+                  // que salir de la carrera para volver a arrancarla.
+                  onRetry: () => unawaited(
+                    ref.read(runSessionProvider.notifier).start(state.goal),
+                  ),
+                ),
+              if (state.goal.laps != null) _LapCard(state: state),
+            ];
+            final recenter = Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  right: AppSpacing.base,
+                  bottom: AppSpacing.base,
+                ),
+                child: AppIconButton(
+                  icon: Icons.my_location_rounded,
+                  style: AppIconButtonStyle.ink,
+                  semanticsLabel: context.l10n.runRecentre,
+                  onPressed: () => _mapKey.currentState?.recenter(),
+                ),
+              ),
+            );
+            final countdown = state.status == RunStatus.countdown
+                ? _Countdown(
+                    value: state.countdownValue,
+                    background: c.background,
+                  )
+                : null;
+
+            // Tablet: el mapa a la izquierda y las cifras fijas a la derecha.
+            // Apaisada, una hoja que se arrastra desde abajo taparia el mapa
+            // entero.
+            if (AppLayout.mapSidePanel(box.maxWidth, box.maxHeight)) {
+              return Stack(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            Positioned.fill(child: _map),
+                            SafeArea(
+                              right: false,
+                              child: Column(
+                                // Las tarjetas arriba y el recentrar abajo,
+                                // con el mapa libre entre los dos.
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // En una ventana baja, con carrera,
+                                  // vueltas y un aviso de GPS a la vez, las
+                                  // tarjetas se deslizan antes que
+                                  // desbordarse. Miden lo que su contenido,
+                                  // asi que el resto del mapa sigue
+                                  // respondiendo al dedo.
+                                  Flexible(
+                                    child: SingleChildScrollView(
+                                      child: Column(children: overlays),
+                                    ),
+                                  ),
+                                  recenter,
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: AppSizes.sidePanelWidth,
+                        child: _StatsPanel(
+                          onFinish: _finish,
+                          locked: bloqueada,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ?countdown,
+                ],
+              );
+            }
+
+            return Stack(
+              children: [
+                Positioned.fill(child: _map),
+                SafeArea(
+                  child: Column(
+                    children: [
+                      ...overlays,
+                      const Spacer(),
+                      recenter,
+                      SizedBox(height: context.screenSize.height * 0.28),
+                    ],
+                  ),
+                ),
+                _StatsSheet(onFinish: _finish, locked: bloqueada),
+                ?countdown,
+              ],
+            );
+          },
         ),
       ),
     );
@@ -637,8 +707,101 @@ class _LapCard extends StatelessWidget {
   }
 }
 
-class _StatsSheet extends ConsumerWidget {
+class _StatsSheet extends StatelessWidget {
   const _StatsSheet({required this.onFinish, this.locked = false});
+
+  final VoidCallback onFinish;
+
+  /// Sin pausa ni "terminar": en carrera oficial el final lo da el organizador.
+  final bool locked;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+
+    // En una tablet vertical la hoja no va de lado a lado: queda una tarjeta
+    // abajo, en el centro, y el mapa se sigue viendo a los costados.
+    return ContentWidth(
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.28,
+        minChildSize: 0.28,
+        maxChildSize: 0.9,
+        snap: true,
+        snapSizes: const [0.28, 0.55, 0.9],
+        builder: (context, controller) => Container(
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.sheet),
+            ),
+            boxShadow: c.floatingShadow,
+            border: c.isDark ? Border.all(color: c.border) : null,
+          ),
+          child: ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.base,
+              AppSpacing.md,
+              AppSpacing.base,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: c.border,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.base),
+              _StatsContent(onFinish: onFinish, locked: locked),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Las cifras de la sesion en una columna fija al costado del mapa: la forma
+/// de [_StatsSheet] cuando hay ancho de sobra y poco alto.
+class _StatsPanel extends StatelessWidget {
+  const _StatsPanel({required this.onFinish, this.locked = false});
+
+  final VoidCallback onFinish;
+  final bool locked;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(left: BorderSide(color: c.border)),
+      ),
+      child: SafeArea(
+        left: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.base,
+            AppSpacing.base,
+            AppSpacing.base,
+            AppSpacing.xl,
+          ),
+          children: [_StatsContent(onFinish: onFinish, locked: locked)],
+        ),
+      ),
+    );
+  }
+}
+
+/// Distancia, ritmos, parciales y controles: lo mismo en la hoja del
+/// telefono que en el panel de la tablet.
+class _StatsContent extends ConsumerWidget {
+  const _StatsContent({required this.onFinish, this.locked = false});
 
   final VoidCallback onFinish;
 
@@ -652,137 +815,101 @@ class _StatsSheet extends ConsumerWidget {
     final state = ref.watch(runSessionProvider);
     final miles = ref.watch(useMilesProvider);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.28,
-      minChildSize: 0.28,
-      maxChildSize: 0.9,
-      snap: true,
-      snapSizes: const [0.28, 0.55, 0.9],
-      builder: (context, controller) => Container(
-        decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.sheet),
-          ),
-          boxShadow: c.floatingShadow,
-          border: c.isDark ? Border.all(color: c.border) : null,
-        ),
-        child: ListView(
-          controller: controller,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.base,
-            AppSpacing.md,
-            AppSpacing.base,
-            AppSpacing.xl,
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _BigDistanceCard(distanceKm: state.distanceKm, miles: miles),
+        const SizedBox(height: AppSpacing.md),
+        Row(
           children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: c.border,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
+            Expanded(
+              child: _SmallStat(
+                value: Fmt.paceWithUnit(state.avgPace, miles: miles),
+                label: t.commonAveragePace,
               ),
             ),
-            const SizedBox(height: AppSpacing.base),
-            _BigDistanceCard(distanceKm: state.distanceKm, miles: miles),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _SmallStat(
-                    value: Fmt.paceWithUnit(state.avgPace, miles: miles),
-                    label: t.commonAveragePace,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _SmallStat(
-                    value: Fmt.clock(state.elapsed),
-                    label: t.runElapsedTime,
-                  ),
-                ),
-              ],
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _SmallStat(
+                value: Fmt.clock(state.elapsed),
+                label: t.runElapsedTime,
+              ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _SmallStat(
-                    value: Fmt.paceWithUnit(state.currentPace, miles: miles),
-                    label: t.runCurrentPace,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _SmallStat(
-                    value: Fmt.paceWithUnit(state.lastKmPace, miles: miles),
-                    label: t.runLastKm,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _SmallStat(
-                    value: Fmt.elevation(state.elevationGainM),
-                    label: t.runElevation,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _SmallStat(
-                    value: '${state.calories}',
-                    label: t.commonCalories,
-                  ),
-                ),
-              ],
-            ),
-            if (state.splits.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(t.commonSplits, style: context.text.titleMd),
-              const SizedBox(height: AppSpacing.sm),
-              for (final split in state.splits)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          t.runSplitKm(split.km),
-                          style: context.text.bodySm.copyWith(
-                            color: c.textSecondary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          Fmt.paceWithUnit(split.pace, miles: miles),
-                          style: context.text.bodyMd,
-                        ),
-                      ),
-                      Text(
-                        Fmt.durationShort(split.duration),
-                        style: context.text.bodySm.copyWith(
-                          color: c.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-            if (!locked) ...[
-              const SizedBox(height: AppSpacing.lg),
-              _Controls(state: state, onFinish: onFinish),
-            ],
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: _SmallStat(
+                value: Fmt.paceWithUnit(state.currentPace, miles: miles),
+                label: t.runCurrentPace,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _SmallStat(
+                value: Fmt.paceWithUnit(state.lastKmPace, miles: miles),
+                label: t.runLastKm,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: _SmallStat(
+                value: Fmt.elevation(state.elevationGainM),
+                label: t.runElevation,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _SmallStat(
+                value: '${state.calories}',
+                label: t.commonCalories,
+              ),
+            ),
+          ],
+        ),
+        if (state.splits.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.lg),
+          Text(t.commonSplits, style: context.text.titleMd),
+          const SizedBox(height: AppSpacing.sm),
+          for (final split in state.splits)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      t.runSplitKm(split.km),
+                      style: context.text.bodySm.copyWith(
+                        color: c.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      Fmt.paceWithUnit(split.pace, miles: miles),
+                      style: context.text.bodyMd,
+                    ),
+                  ),
+                  Text(
+                    Fmt.durationShort(split.duration),
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        if (!locked) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _Controls(state: state, onFinish: onFinish),
+        ],
+      ],
     );
   }
 }

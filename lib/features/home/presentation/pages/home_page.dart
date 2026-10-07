@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
@@ -10,6 +11,7 @@ import 'package:camrun/features/notifications/presentation/widgets/notification_
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
@@ -70,31 +72,34 @@ class _HomeBody extends ConsumerWidget {
         if (m.id != destacada?.id) m,
     ];
 
-    return ListView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        AppSpacing.base,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
-      ),
-      children: [
-        const Align(
-          alignment: Alignment.centerRight,
-          child: NotificationBell(style: AppIconButtonStyle.bordered),
+    return PageInsets(
+      maxWidth: AppSizes.wideMaxWidth,
+      builder: (context, inset) => ListView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
-        if (marathons.isNotEmpty) ...[
-          _UpcomingMarathons(marathons: marathons),
-          const SizedBox(height: AppSpacing.xl),
+        padding: EdgeInsets.fromLTRB(
+          inset,
+          AppSpacing.base,
+          inset,
+          AppSpacing.xxl,
+        ),
+        children: [
+          const Align(
+            alignment: Alignment.centerRight,
+            child: NotificationBell(style: AppIconButtonStyle.bordered),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // Sin ninguna carrera por delante no hay cuenta atras que enseñar.
+          if (marathons.isNotEmpty) ...[
+            _UpcomingMarathons(marathons: marathons),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+          SectionHeader(title: context.l10n.homeCamTitle),
+          const SizedBox(height: AppSpacing.md),
+          const _CamCard(),
         ],
-        SectionHeader(title: context.l10n.homeCamTitle),
-        const SizedBox(height: AppSpacing.md),
-        const _CamCard(),
-      ],
+      ),
     );
   }
 }
@@ -164,8 +169,10 @@ class _UpcomingMarathons extends ConsumerStatefulWidget {
 
 class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
   // `viewportFraction` deja asomar la siguiente: se ve que hay mas carreras
-  // sin tener que descubrirlo deslizando.
-  final _controller = PageController(viewportFraction: 0.92);
+  // sin tener que descubrirlo deslizando. Depende del ancho, asi que el
+  // controlador se rehace cuando la pantalla gira (ver `_controllerFor`).
+  PageController? _controller;
+  double? _fraction;
   int _index = 0;
   Timer? _autoplay;
   AppLifecycleListener? _lifecycle;
@@ -198,8 +205,9 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
       return;
     }
     _autoplay = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted || !_controller.hasClients) return;
-      _controller.animateToPage(
+      final controller = _controller;
+      if (!mounted || controller == null || !controller.hasClients) return;
+      controller.animateToPage(
         (_index + 1) % widget.marathons.length,
         duration: AppDurations.slow,
         curve: Curves.easeInOut,
@@ -217,8 +225,25 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
   void dispose() {
     _autoplay?.cancel();
     _lifecycle?.dispose();
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
+  }
+
+  /// El controlador para esta fraccion. Al girar la pantalla la fraccion
+  /// cambia y `PageController` no deja cambiarla en caliente: se hace otro
+  /// que arranca en la misma carrera, y el viejo se suelta tras el frame,
+  /// cuando el `PageView` ya no lo tiene enganchado.
+  PageController _controllerFor(double fraction) {
+    final actual = _controller;
+    if (actual != null && _fraction == fraction) return actual;
+    _fraction = fraction;
+    if (actual != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => actual.dispose());
+    }
+    return _controller = PageController(
+      viewportFraction: fraction,
+      initialPage: _index,
+    );
   }
 
   @override
@@ -255,32 +280,51 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
         ),
         const SizedBox(height: AppSpacing.lg),
         LayoutBuilder(
-          builder: (context, box) => SizedBox(
-            // El alto de la tarjeta: el afiche (16/11) mas el saliente de la
-            // ficha, que es lo que `MarathonHeroCard` reserva por debajo.
-            height: box.maxWidth * 11 / 16 + _heroOverhang,
-            child: NotificationListener<ScrollStartNotification>(
-              onNotification: (n) {
-                if (n.dragDetails != null) _restartAutoplay();
-                return false;
-              },
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: marathons.length,
-                onPageChanged: (i) => setState(() => _index = i),
-                itemBuilder: (context, i) => Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                  ),
-                  child: MarathonHeroCard(
-                    marathon: marathons[i],
-                    onTap: () =>
-                        context.push(Routes.marathonDetailOf(marathons[i].id)),
+          builder: (context, box) {
+            final fraction = heroViewportFraction(
+              box.maxWidth,
+              context.screenSize.height,
+            );
+            return SizedBox(
+              // El alto de la tarjeta: el afiche (16/11) mas el saliente de la
+              // ficha, que es lo que `MarathonHeroCard` reserva por debajo. En
+              // telefono la pagina es casi todo el ancho y se mide por el.
+              height:
+                  (fraction < heroPhoneFraction
+                          ? box.maxWidth * fraction
+                          : box.maxWidth) *
+                      11 /
+                      16 +
+                  _heroOverhang,
+              child: NotificationListener<ScrollStartNotification>(
+                onNotification: (n) {
+                  if (n.dragDetails != null) _restartAutoplay();
+                  return false;
+                },
+                child: PageView.builder(
+                  controller: _controllerFor(fraction),
+                  // En telefono la tarjeta va centrada con un asomo a cada
+                  // lado. Cuando caben casi dos, centrar la primera dejaria
+                  // media pantalla vacia a su izquierda: arranca alineada con
+                  // el titulo, como una fila.
+                  padEnds: fraction >= heroPhoneFraction,
+                  itemCount: marathons.length,
+                  onPageChanged: (i) => setState(() => _index = i),
+                  itemBuilder: (context, i) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
+                    child: MarathonHeroCard(
+                      marathon: marathons[i],
+                      onTap: () => context.push(
+                        Routes.marathonDetailOf(marathons[i].id),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
         if (marathons.length > 1) ...[
           const SizedBox(height: AppSpacing.md),
@@ -291,7 +335,7 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
                 GestureDetector(
                   onTap: () {
                     _restartAutoplay();
-                    _controller.animateToPage(
+                    _controller?.animateToPage(
                       i,
                       duration: AppDurations.base,
                       curve: Curves.easeInOut,
@@ -323,41 +367,79 @@ class _UpcomingMarathonsState extends ConsumerState<_UpcomingMarathons> {
 /// Lo que `MarathonHeroCard` deja libre por debajo del afiche para la ficha.
 const _heroOverhang = 44.0;
 
+/// La fraccion del carrusel en telefono: la tarjeta casi entera y un asomo de
+/// la siguiente.
+@visibleForTesting
+const heroPhoneFraction = 0.92;
+
+/// Tope de ancho de una tarjeta: mas alla el afiche no gana nada y empuja el
+/// resto de la pantalla fuera de vista.
+const _heroMaxWidth = AppSizes.contentMaxWidth;
+
+/// Cuanto del alto de la pantalla puede llevarse el carrusel.
+const _heroMaxHeightShare = 0.7;
+
+/// Que parte del hueco ocupa cada tarjeta del carrusel.
+///
+/// En telefono, casi todo. En una tablet la tarjeta se queda en un ancho que
+/// se lee de un vistazo y las vecinas asoman a los lados; en una ventana baja
+/// la limita el alto, para que la tarjeta entera quepa en pantalla.
+@visibleForTesting
+double heroViewportFraction(double available, double screenHeight) {
+  final byHeight =
+      (screenHeight * _heroMaxHeightShare - _heroOverhang) * 16 / 11;
+  final card = math.min(
+    available * heroPhoneFraction,
+    math.min(_heroMaxWidth, byHeight),
+  );
+  // Redondeada: si no, cada pixel de una animacion de cambio de tamano
+  // rehace el controlador.
+  return (card / available * 100).roundToDouble() / 100;
+}
+
 class _HomeSkeleton extends StatelessWidget {
   const _HomeSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        AppSpacing.base,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
-      ),
-      children: const [
-        Row(
-          children: [
-            Expanded(child: Skeleton(width: double.infinity, height: 28)),
-            SizedBox(width: AppSpacing.sm),
-            Skeleton(width: 130, height: 38, radius: AppRadius.pill),
-          ],
+    return PageInsets(
+      maxWidth: AppSizes.wideMaxWidth,
+      builder: (context, inset) => ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          inset,
+          AppSpacing.base,
+          inset,
+          AppSpacing.xxl,
         ),
-        SizedBox(height: AppSpacing.lg),
-        AspectRatio(
-          aspectRatio: 16 / 11,
-          child: Skeleton(
-            width: double.infinity,
-            height: double.infinity,
-            radius: AppRadius.xxl,
+        children: const [
+          Row(
+            children: [
+              Expanded(child: Skeleton(width: double.infinity, height: 28)),
+              SizedBox(width: AppSpacing.sm),
+              Skeleton(width: 130, height: 38, radius: AppRadius.pill),
+            ],
           ),
-        ),
-        SizedBox(height: AppSpacing.xxl + AppSpacing.base),
-        Skeleton(width: 220, height: 24),
-        SizedBox(height: AppSpacing.lg),
-        Skeleton(width: double.infinity, height: 110, radius: AppRadius.xl),
-      ],
+          SizedBox(height: AppSpacing.lg),
+          // La forma de la tarjeta, no la del hueco: en una tablet el
+          // carrusel no ocupa todo el ancho. El tope de `ContentWidth` es el
+          // mismo que el de la tarjeta.
+          ContentWidth(
+            child: AspectRatio(
+              aspectRatio: 16 / 11,
+              child: Skeleton(
+                width: double.infinity,
+                height: double.infinity,
+                radius: AppRadius.xxl,
+              ),
+            ),
+          ),
+          SizedBox(height: AppSpacing.xxl + AppSpacing.base),
+          Skeleton(width: 220, height: 24),
+          SizedBox(height: AppSpacing.lg),
+          Skeleton(width: double.infinity, height: 110, radius: AppRadius.xl),
+        ],
+      ),
     );
   }
 }

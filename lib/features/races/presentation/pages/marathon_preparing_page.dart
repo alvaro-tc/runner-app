@@ -4,6 +4,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/features/races/presentation/widgets/pre_race_beacon.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,54 +37,58 @@ class MarathonPreparingPage extends ConsumerWidget {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.screenH),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Icon(Icons.hourglass_top_rounded, size: 64, color: c.primary),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  t.marathonPreparingTitle,
-                  textAlign: TextAlign.center,
-                  style: context.text.headingLg,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  entry.marathon.name,
-                  textAlign: TextAlign.center,
-                  style: context.text.bodyMd.copyWith(color: c.textSecondary),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: c.surfaceElevated,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Text(
-                    aviso == null || aviso.isEmpty
-                        ? t.marathonPreparingDefault
-                        : aviso,
-                    textAlign: TextAlign.center,
-                    style: context.text.bodyMd,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _Dorsal(bib: entry.bibNumber),
-                // Sin ubicacion este corredor no aparece en el mapa del
-                // organizador, que es quien decide con ese mapa si larga o
-                // espera. Es lo unico accionable de esta pantalla.
-                if (permiso != null && !permiso.isGranted) ...[
+            // Un aviso para leer de un vistazo: en una tablet no se estira a
+            // lo ancho de la pantalla.
+            child: ContentWidth(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(Icons.hourglass_top_rounded, size: 64, color: c.primary),
                   const SizedBox(height: AppSpacing.lg),
-                  _SinUbicacion(outcome: permiso),
+                  Text(
+                    t.marathonPreparingTitle,
+                    textAlign: TextAlign.center,
+                    style: context.text.headingLg,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    entry.marathon.name,
+                    textAlign: TextAlign.center,
+                    style: context.text.bodyMd.copyWith(color: c.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: c.surfaceElevated,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Text(
+                      aviso == null || aviso.isEmpty
+                          ? t.marathonPreparingDefault
+                          : aviso,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodyMd,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _Dorsal(bib: entry.bibNumber),
+                  // Sin ubicacion este corredor no aparece en el mapa del
+                  // organizador, que es quien decide con ese mapa si larga o
+                  // espera. Es lo unico accionable de esta pantalla.
+                  if (permiso != null && !permiso.isGranted) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    _SinUbicacion(outcome: permiso),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    t.marathonPreparingHint,
+                    textAlign: TextAlign.center,
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
+                  ),
                 ],
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  t.marathonPreparingHint,
-                  textAlign: TextAlign.center,
-                  style: context.text.bodySm.copyWith(color: c.textSecondary),
-                ),
-              ],
+              ),
             ),
           ),
         ),

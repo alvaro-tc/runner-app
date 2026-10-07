@@ -1,6 +1,7 @@
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
@@ -12,6 +13,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/adaptive_sheet.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,121 +124,139 @@ class _OrganizerTicketsPageState extends ConsumerState<OrganizerTicketsPage> {
           SizedBox(width: AppSpacing.sm),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenH,
-              AppSpacing.md,
-              AppSpacing.screenH,
-              0,
-            ),
-            child: DropdownButtonFormField<String?>(
-              initialValue: _carreraId,
-              isExpanded: true,
-              decoration: InputDecoration(labelText: t.organizerMarathon),
-              items: [
-                DropdownMenuItem(child: Text(t.organizerAllMarathons)),
-                for (final m in carreras)
-                  DropdownMenuItem(
-                    value: m.id,
-                    child: Text(m.name, overflow: TextOverflow.ellipsis),
-                  ),
-              ],
-              onChanged: (id) => _reiniciar(() => _carreraId = id),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenH,
-              AppSpacing.sm,
-              AppSpacing.screenH,
-              0,
-            ),
-            child: AppTextField(
-              label: t.adminSearch,
-              hint: t.organizerTicketsSearchHint,
-              controller: _busqueda,
-              suffixIcon: Icons.search_rounded,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
-            ),
-          ),
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenH,
-                vertical: AppSpacing.sm,
+      // Como la lista de usuarios: en una tablet, una columna centrada con
+      // los scrolls a todo el ancho.
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final extra = AppLayout.surplus(
+            box.maxWidth,
+            maxWidth: AppSizes.readableMaxWidth,
+          );
+          const h = AppSpacing.screenH;
+          return Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  h + extra,
+                  AppSpacing.md,
+                  h + extra,
+                  0,
+                ),
+                child: DropdownButtonFormField<String?>(
+                  initialValue: _carreraId,
+                  isExpanded: true,
+                  decoration: InputDecoration(labelText: t.organizerMarathon),
+                  items: [
+                    DropdownMenuItem(child: Text(t.organizerAllMarathons)),
+                    for (final m in carreras)
+                      DropdownMenuItem(
+                        value: m.id,
+                        child: Text(m.name, overflow: TextOverflow.ellipsis),
+                      ),
+                  ],
+                  onChanged: (id) => _reiniciar(() => _carreraId = id),
+                ),
               ),
-              children: [
-                for (final estado in <String?>[null, ...adminPaymentStatuses])
-                  Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: ChoiceChip(
-                      label: Text(
-                        estado == null
-                            ? t.adminRoleAll
-                            : paymentStatusLabel(t, estado),
-                      ),
-                      selected: _estado == estado,
-                      onSelected: (_) => _reiniciar(() => _estado = estado),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          AdminPaginator(
-            total: tickets.value?.total,
-            pagina: _pagina,
-            porPagina: _porPagina,
-            onPagina: (p) => setState(() => _pagina = p),
-            onPorPagina: (n) => _reiniciar(() => _porPagina = n),
-          ),
-          Expanded(
-            child: tickets.when(
-              // Un refresco de fondo no vacia una pantalla que ya tiene datos.
-              skipLoadingOnReload: true,
-              loading: () =>
-                  const Center(child: Skeleton(width: 180, height: 20)),
-              error: (error, _) => ErrorStateView(
-                message: error is Failure
-                    ? error.localized(t)
-                    : t.adminLoadFailed,
-                onRetry: () => ref.invalidate(adminTicketsProvider(consulta)),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  h + extra,
+                  AppSpacing.sm,
+                  h + extra,
+                  0,
+                ),
+                child: AppTextField(
+                  label: t.adminSearch,
+                  hint: t.organizerTicketsSearchHint,
+                  controller: _busqueda,
+                  suffixIcon: Icons.search_rounded,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (v) => _reiniciar(() => _filtro = v.trim()),
+                ),
               ),
-              data: (pagina) => pagina.tickets.isEmpty
-                  ? EmptyState(
-                      icon: Icons.receipt_long_outlined,
-                      title: t.organizerNoTicketsTitle,
-                      message: t.organizerNoTicketsBody,
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.screenH,
-                        0,
-                        AppSpacing.screenH,
-                        AppSpacing.xxl,
+              SizedBox(
+                height: 48,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: h + extra,
+                    vertical: AppSpacing.sm,
+                  ),
+                  children: [
+                    for (final estado in <String?>[
+                      null,
+                      ...adminPaymentStatuses,
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.sm),
+                        child: ChoiceChip(
+                          label: Text(
+                            estado == null
+                                ? t.adminRoleAll
+                                : paymentStatusLabel(t, estado),
+                          ),
+                          selected: _estado == estado,
+                          onSelected: (_) => _reiniciar(() => _estado = estado),
+                        ),
                       ),
-                      itemCount: pagina.tickets.length,
-                      separatorBuilder: (_, _) => const AppDivider(),
-                      itemBuilder: (context, i) => _Fila(
-                        ticket: pagina.tickets[i],
-                        onTap: () => _abrir(pagina.tickets[i]),
-                      ),
-                    ),
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: extra),
+                child: AdminPaginator(
+                  total: tickets.value?.total,
+                  pagina: _pagina,
+                  porPagina: _porPagina,
+                  onPagina: (p) => setState(() => _pagina = p),
+                  onPorPagina: (n) => _reiniciar(() => _porPagina = n),
+                ),
+              ),
+              Expanded(
+                child: tickets.when(
+                  // Un refresco de fondo no vacia una pantalla que ya tiene
+                  // datos.
+                  skipLoadingOnReload: true,
+                  loading: () =>
+                      const Center(child: Skeleton(width: 180, height: 20)),
+                  error: (error, _) => ErrorStateView(
+                    message: error is Failure
+                        ? error.localized(t)
+                        : t.adminLoadFailed,
+                    onRetry: () =>
+                        ref.invalidate(adminTicketsProvider(consulta)),
+                  ),
+                  data: (pagina) => pagina.tickets.isEmpty
+                      ? EmptyState(
+                          icon: Icons.receipt_long_outlined,
+                          title: t.organizerNoTicketsTitle,
+                          message: t.organizerNoTicketsBody,
+                        )
+                      : ListView.separated(
+                          padding: EdgeInsets.fromLTRB(
+                            h + extra,
+                            0,
+                            h + extra,
+                            AppSpacing.xxl,
+                          ),
+                          itemCount: pagina.tickets.length,
+                          separatorBuilder: (_, _) => const AppDivider(),
+                          itemBuilder: (context, i) => _Fila(
+                            ticket: pagina.tickets[i],
+                            onTap: () => _abrir(pagina.tickets[i]),
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Future<void> _abrir(AdminTicket ticket) async {
-    final cambio = await showModalBottomSheet<bool>(
+    final cambio = await showAdaptiveSheet<bool>(
       context: context,
-      isScrollControlled: true,
       builder: (_) => _Ficha(ticket: ticket),
     );
     // La familia entera: acreditar un cobro lo saca de "pendientes" y lo mete

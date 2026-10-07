@@ -11,6 +11,7 @@ import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/phone_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -261,8 +262,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
           error: (error, _) => Center(child: Text(error.localized(t))),
           data: (data) {
             if (!_loaded) _hydrate(data);
-            return ListView(
-              padding: const EdgeInsets.all(AppSpacing.screenH),
+            return PageListView(
+              maxWidth: AppSizes.contentMaxWidth,
               children: [
                 Center(
                   child: Column(

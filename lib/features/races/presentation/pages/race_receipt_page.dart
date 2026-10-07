@@ -7,6 +7,7 @@ import 'package:camrun/features/races/presentation/providers/races_provider.dart
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,9 +53,12 @@ class _ReceiptLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.all(AppSpacing.screenH),
-    child: AspectRatio(
-      aspectRatio: 828 / 495,
-      child: Skeleton(width: double.infinity, height: double.infinity),
+    child: ContentWidth(
+      maxWidth: AppSizes.readableMaxWidth,
+      child: AspectRatio(
+        aspectRatio: 828 / 495,
+        child: Skeleton(width: double.infinity, height: double.infinity),
+      ),
     ),
   );
 }
@@ -126,23 +130,25 @@ class _ReceiptDocumentState extends State<_ReceiptDocument> {
         ),
         Padding(
           padding: const EdgeInsets.all(AppSpacing.screenH),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppButton(
-                label: t.raceReceiptSave,
-                icon: Icons.ios_share_rounded,
-                isLoading: _busy,
-                onPressed: _busy ? null : () => _export(print: false),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppButton(
-                label: t.raceReceiptPrint,
-                variant: AppButtonVariant.outline,
-                icon: Icons.print_outlined,
-                onPressed: _busy ? null : () => _export(print: true),
-              ),
-            ],
+          child: ContentWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppButton(
+                  label: t.raceReceiptSave,
+                  icon: Icons.ios_share_rounded,
+                  isLoading: _busy,
+                  onPressed: _busy ? null : () => _export(print: false),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppButton(
+                  label: t.raceReceiptPrint,
+                  variant: AppButtonVariant.outline,
+                  icon: Icons.print_outlined,
+                  onPressed: _busy ? null : () => _export(print: true),
+                ),
+              ],
+            ),
           ),
         ),
       ],

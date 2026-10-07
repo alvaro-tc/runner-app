@@ -13,6 +13,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
@@ -112,108 +113,139 @@ class _Body extends ConsumerWidget {
     ];
     final faltan = entry.marathon.date.difference(DateTime.now());
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        0,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
-      ),
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          child: SizedBox(
-            height: 260,
-            child: carrera.isLoading
-                ? const Skeleton(width: double.infinity, height: 260)
-                : RouteMapView(
-                    route: const [],
-                    guideRoute: recorrido,
-                    interactive: false,
-                    markerEveryKm: 5,
-                  ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.base),
-        Text(entry.marathon.name, style: context.text.headingLg),
-        Text(
-          '${Fmt.fullDate(entry.marathon.date)} · ${entry.marathon.location}',
-          style: context.text.bodySm.copyWith(color: c.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            AppBadge(
-              label: t.commonBib(entry.bibNumber),
-              icon: Icons.confirmation_num_outlined,
-            ),
-            AppBadge(
-              label: Fmt.distance(entry.marathon.distanceKm),
-              icon: Icons.straighten_rounded,
-            ),
-            if (entry.marathon.laps > 1)
-              AppBadge(
-                label: t.raceCircuitLaps(
-                  Fmt.distance(
-                    entry.marathon.distanceKm / entry.marathon.laps,
-                  ),
-                  '${entry.marathon.laps}',
-                ),
-                icon: Icons.loop_rounded,
+    Widget map(double height) => ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      child: SizedBox(
+        height: height,
+        child: carrera.isLoading
+            ? Skeleton(width: double.infinity, height: height)
+            : RouteMapView(
+                route: const [],
+                guideRoute: recorrido,
+                interactive: false,
+                markerEveryKm: 5,
               ),
-            if (!faltan.isNegative) CountdownPill(remaining: faltan),
+      ),
+    );
+
+    final info = <Widget>[
+      Text(entry.marathon.name, style: context.text.headingLg),
+      Text(
+        '${Fmt.fullDate(entry.marathon.date)} · ${entry.marathon.location}',
+        style: context.text.bodySm.copyWith(color: c.textSecondary),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          AppBadge(
+            label: t.commonBib(entry.bibNumber),
+            icon: Icons.confirmation_num_outlined,
+          ),
+          AppBadge(
+            label: Fmt.distance(entry.marathon.distanceKm),
+            icon: Icons.straighten_rounded,
+          ),
+          if (entry.marathon.laps > 1)
+            AppBadge(
+              label: t.raceCircuitLaps(
+                Fmt.distance(entry.marathon.distanceKm / entry.marathon.laps),
+                '${entry.marathon.laps}',
+              ),
+              icon: Icons.loop_rounded,
+            ),
+          if (!faltan.isNegative) CountdownPill(remaining: faltan),
+        ],
+      ),
+      const SizedBox(height: AppSpacing.lg),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(color: c.border),
+        ),
+        child: Column(
+          children: [
+            StatRow(
+              icon: Icons.route_outlined,
+              title: t.raceDayCourseTitle,
+              subtitle: t.raceDayCourseSubtitle,
+            ),
+            const AppDivider(),
+            StatRow(
+              icon: Icons.sensors_rounded,
+              title: t.raceDayPositionTitle,
+              subtitle: t.raceDayPositionSubtitle,
+            ),
+            const AppDivider(),
+            StatRow(
+              icon: Icons.wifi_off_rounded,
+              title: t.raceDaySignalTitle,
+              subtitle: t.raceDaySignalSubtitle,
+            ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: c.border),
+      ),
+      const SizedBox(height: AppSpacing.lg),
+      if (entry.canStart)
+        AppButton(
+          label: t.raceDayStart,
+          icon: Icons.play_arrow_rounded,
+          onPressed: () => _start(
+            context,
+            ref,
+            recorrido,
+            carrera.value?.laps ?? entry.marathon.laps,
           ),
-          child: Column(
-            children: [
-              StatRow(
-                icon: Icons.route_outlined,
-                title: t.raceDayCourseTitle,
-                subtitle: t.raceDayCourseSubtitle,
-              ),
-              const AppDivider(),
-              StatRow(
-                icon: Icons.sensors_rounded,
-                title: t.raceDayPositionTitle,
-                subtitle: t.raceDayPositionSubtitle,
-              ),
-              const AppDivider(),
-              StatRow(
-                icon: Icons.wifi_off_rounded,
-                title: t.raceDaySignalTitle,
-                subtitle: t.raceDaySignalSubtitle,
-              ),
-            ],
-          ),
+        )
+      else
+        Text(
+          entry.hasResult ? t.raceDayAlreadyFinished : t.raceDayNotReady,
+          style: context.text.bodySm.copyWith(color: c.textSecondary),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        if (entry.canStart)
-          AppButton(
-            label: t.raceDayStart,
-            icon: Icons.play_arrow_rounded,
-            onPressed: () => _start(
-              context,
-              ref,
-              recorrido,
-              carrera.value?.laps ?? entry.marathon.laps,
-            ),
-          )
-        else
-          Text(
-            entry.hasResult ? t.raceDayAlreadyFinished : t.raceDayNotReady,
-            style: context.text.bodySm.copyWith(color: c.textSecondary),
-          ),
-      ],
+    ];
+
+    return PageInsets(
+      maxWidth: AppSizes.wideMaxWidth,
+      builder: (context, inset) => LayoutBuilder(
+        builder: (context, box) {
+          final wide = box.maxWidth - inset * 2 >= _twoColumnsMinWidth;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(inset, 0, inset, AppSpacing.xxl),
+            children: [
+              // En la linea de salida, con la tablet apaisada: el recorrido
+              // grande a un lado y el dorsal y el boton al otro, sin bajar.
+              if (wide)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: map(_mapHeightWide)),
+                    const SizedBox(width: AppSpacing.xl),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: info,
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                map(_mapHeight),
+                const SizedBox(height: AppSpacing.base),
+                ...info,
+              ],
+            ],
+          );
+        },
+      ),
     );
   }
+
+  /// Ancho util a partir del cual la pantalla se parte en dos columnas.
+  static const _twoColumnsMinWidth = 720.0;
+
+  static const _mapHeight = 260.0;
+  static const _mapHeightWide = 420.0;
 }

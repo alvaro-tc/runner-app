@@ -19,6 +19,7 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
@@ -500,66 +501,121 @@ class _FormularioState extends ConsumerState<_Formulario> {
             ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screenH,
-          AppSpacing.md,
-          AppSpacing.screenH,
-          AppSpacing.xxl,
-        ),
-        children: [
-          _seccionFoto(t),
-          const SizedBox(height: AppSpacing.lg),
-          _seccionDatos(t),
-          const SizedBox(height: AppSpacing.lg),
-          _seccionFechaYRuta(t),
-          if (_ruta.length > 1) ...[
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              child: SizedBox(
-                height: 180,
-                child: RouteMapView(
-                  route: const [],
-                  guideRoute: _ruta,
-                  interactive: false,
-                  // Previsualizacion de gestion: el trazado solo. Quien edita
-                  // la carrera ya sabe donde es, y las teselas aqui solo son
-                  // una descarga y un rato en gris.
-                  tiles: false,
+      body: PageInsets(
+        maxWidth: AppSizes.wideMaxWidth,
+        builder: (context, inset) => LayoutBuilder(
+          builder: (context, box) {
+            final wide = box.maxWidth - inset * 2 >= _dosColumnasMinWidth;
+            // La carrera en si —afiche, datos, fecha y recorrido— y lo que se
+            // le cuelga —horario, kit, categorias, cobro—. En telefono van una
+            // detras de otra; en una tablet, cada mitad en su columna.
+            final carrera = <Widget>[
+              _seccionFoto(t),
+              const SizedBox(height: AppSpacing.lg),
+              _seccionDatos(t),
+              const SizedBox(height: AppSpacing.lg),
+              _seccionFechaYRuta(t),
+              if (_ruta.length > 1) ...[
+                const SizedBox(height: AppSpacing.md),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  child: SizedBox(
+                    height: wide ? _mapaAltoAncho : _mapaAlto,
+                    child: RouteMapView(
+                      route: const [],
+                      guideRoute: _ruta,
+                      interactive: false,
+                      // Previsualizacion de gestion: el trazado solo. Quien
+                      // edita la carrera ya sabe donde es, y las teselas aqui
+                      // solo son una descarga y un rato en gris.
+                      tiles: false,
+                    ),
+                  ),
                 ),
+              ],
+            ];
+            final detalles = <Widget>[
+              _seccionCronograma(t),
+              const SizedBox(height: AppSpacing.lg),
+              _seccionIncluye(t),
+              const SizedBox(height: AppSpacing.lg),
+              _seccionCategorias(t),
+              const SizedBox(height: AppSpacing.lg),
+              _seccionExtras(t),
+              if (!_esAlta) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _seccionEstado(t),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              _seccionQr(t),
+            ];
+
+            return ListView(
+              padding: EdgeInsets.fromLTRB(
+                inset,
+                AppSpacing.md,
+                inset,
+                AppSpacing.xxl,
               ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          _seccionCronograma(t),
-          const SizedBox(height: AppSpacing.lg),
-          _seccionIncluye(t),
-          const SizedBox(height: AppSpacing.lg),
-          _seccionCategorias(t),
-          const SizedBox(height: AppSpacing.lg),
-          _seccionExtras(t),
-          if (!_esAlta) ...[
-            const SizedBox(height: AppSpacing.lg),
-            _seccionEstado(t),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          _seccionQr(t),
-          _BannerDeError(
-            failure: _errorGuardado,
-            onDismiss: () => setState(() => _errorGuardado = null),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AppButton(
-            label: _esAlta ? t.adminCreateMarathon : t.commonSave,
-            icon: Icons.check_rounded,
-            isLoading: _guardando,
-            onPressed: _guardando ? null : _guardar,
-          ),
-        ],
+              children: [
+                if (wide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: carrera,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xl),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: detalles,
+                        ),
+                      ),
+                    ],
+                  )
+                else ...[
+                  ...carrera,
+                  const SizedBox(height: AppSpacing.lg),
+                  ...detalles,
+                ],
+                _BannerDeError(
+                  failure: _errorGuardado,
+                  onDismiss: () => setState(() => _errorGuardado = null),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Bajo las dos columnas el guardar no se estira a lo ancho de
+                // la tablet: queda a la derecha, donde termina el formulario.
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: AppSizes.contentMaxWidth,
+                    ),
+                    child: AppButton(
+                      label: _esAlta ? t.adminCreateMarathon : t.commonSave,
+                      icon: Icons.check_rounded,
+                      isLoading: _guardando,
+                      onPressed: _guardando ? null : _guardar,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
+
+  /// Ancho util a partir del cual el formulario se parte en dos columnas.
+  static const _dosColumnasMinWidth = 760.0;
+
+  static const _mapaAlto = 180.0;
+  static const _mapaAltoAncho = 260.0;
 
   Widget _seccionFoto(AppLocalizations t) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1449,14 +1505,20 @@ class _Tarjeta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-      decoration: BoxDecoration(
-        color: c.surface,
+    // `Material` y no una caja pintada: dentro van filas de `ListTile`, que
+    // dibujan su fondo y su salpicadura en el `Material` mas cercano. Con una
+    // caja de color en medio, el toque no se veria.
+    return Material(
+      color: c.surface,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: c.border),
+        side: BorderSide(color: c.border),
       ),
-      child: Column(children: children),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+        child: Column(children: children),
+      ),
     );
   }
 }
@@ -1466,13 +1528,9 @@ class _CargandoDetalle extends StatelessWidget {
   const _CargandoDetalle();
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.screenH,
-      AppSpacing.md,
-      AppSpacing.screenH,
-      AppSpacing.xxl,
-    ),
+  Widget build(BuildContext context) => PageListView(
+    top: AppSpacing.md,
+    bottom: AppSpacing.xxl,
     children: [
       const AspectRatio(
         aspectRatio: 16 / 9,

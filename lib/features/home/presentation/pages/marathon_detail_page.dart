@@ -1,6 +1,7 @@
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
@@ -14,6 +15,7 @@ import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +56,16 @@ class _Content extends StatelessWidget {
 
   final Marathon marathon;
 
+  static const _headerHeight = 280.0;
+  static const _headerHeightMin = 180.0;
+  static const _headerHeightMax = 420.0;
+
+  /// Lo que se lleva la foto del alto de la pantalla en una tablet.
+  static const _headerShare = 0.42;
+
+  static const _mapHeight = 190.0;
+  static const _mapHeightWide = 300.0;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -61,18 +73,28 @@ class _Content extends StatelessWidget {
       for (final p in marathon.routePreview)
         GeoPoint(lat: p.lat, lng: p.lng, timestamp: marathon.date),
     ];
+    // En telefono la foto mide lo de siempre. En una tablet crece con la
+    // pantalla, con tope para que en una ventana baja no se coma todo el
+    // alto.
+    final headerHeight = context.windowClass.isCompact
+        ? _headerHeight
+        : (context.screenSize.height * _headerShare).clamp(
+            _headerHeightMin,
+            _headerHeightMax,
+          );
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
         SliverLayoutBuilder(
           builder: (context, constraints) {
-            final collapsed = constraints.scrollOffset >= 280 - kToolbarHeight;
+            final collapsed =
+                constraints.scrollOffset >= headerHeight - kToolbarHeight;
             return SliverAppBar(
               systemOverlayStyle: systemUiStyleFor(
                 collapsed ? c.background : Colors.black,
               ),
-              expandedHeight: 280,
+              expandedHeight: headerHeight,
               pinned: true,
               leading: Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
@@ -125,141 +147,210 @@ class _Content extends StatelessWidget {
             );
           },
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenH,
-            AppSpacing.lg,
-            AppSpacing.screenH,
-            AppSpacing.xxl,
-          ),
-          sliver: SliverList.list(
-            children: [
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  AppBadge(
-                    label: Fmt.distance(marathon.distanceKm),
-                    icon: Icons.straighten_rounded,
-                  ),
-                  // En un circuito el mapa de abajo dibuja una sola vuelta:
-                  // decirlo aqui, junto a la distancia total, es lo que evita
-                  // que parezca que el trazado se quedo corto.
-                  if (marathon.laps > 1)
-                    AppBadge(
-                      label: context.l10n.raceCircuitLaps(
-                        Fmt.distance(marathon.distanceKm / marathon.laps),
-                        '${marathon.laps}',
-                      ),
-                      icon: Icons.loop_rounded,
-                    ),
-                  AppBadge(
-                    label: Fmt.fullDate(marathon.date),
-                    icon: Icons.event_rounded,
-                  ),
-                  AppBadge(
-                    label: marathon.location,
-                    icon: Icons.place_outlined,
-                  ),
-                  AppBadge(
-                    label: marathon.status.label(context.l10n),
-                    tone: switch (marathon.status) {
-                      RegistrationStatus.open => AppTone.success,
-                      RegistrationStatus.closingSoon => AppTone.warning,
-                      RegistrationStatus.full ||
-                      RegistrationStatus.closed => AppTone.error,
-                    },
-                  ),
-                ],
+        SliverLayoutBuilder(
+          builder: (context, constraints) => SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppLayout.inset(
+                constraints.crossAxisExtent,
+                maxWidth: AppSizes.wideMaxWidth,
               ),
-              const SizedBox(height: AppSpacing.xl),
-              _Section(
-                title: context.l10n.marathonAbout,
-                child: Text(
-                  marathon.about,
-                  style: context.text.bodyMd.copyWith(color: c.textSecondary),
-                ),
-              ),
-              _Section(
-                title: context.l10n.marathonRoute,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  child: SizedBox(
-                    height: 190,
-                    child: RouteMapView(route: route, interactive: false),
-                  ),
-                ),
-              ),
-              if (marathon.schedule.isNotEmpty)
-                _Section(
-                  title: context.l10n.marathonSchedule,
-                  child: Column(
+            ).copyWith(top: AppSpacing.lg, bottom: AppSpacing.xxl),
+            sliver: SliverToBoxAdapter(
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final wide = box.maxWidth >= _twoColumnsMinWidth;
+                  final badges = _badges(context);
+                  // En una tablet, lo que se lee a la izquierda y el mapa y
+                  // el horario a la derecha; en telefono, el orden de
+                  // siempre, de arriba abajo.
+                  if (!wide) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        badges,
+                        const SizedBox(height: AppSpacing.xl),
+                        ..._about(context),
+                        ..._route(context, route, wide: wide),
+                        ..._schedule(context),
+                        ..._included(context),
+                        ..._fee(context),
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      for (final item in marathon.schedule)
-                        _TimelineRow(
-                          item: item,
-                          isLast: item == marathon.schedule.last,
-                        ),
+                      badges,
+                      const SizedBox(height: AppSpacing.xl),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ..._about(context),
+                                ..._included(context),
+                                ..._fee(context),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xl),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ..._route(context, route, wide: wide),
+                                ..._schedule(context),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                  ),
-                ),
-              _Section(
-                title: context.l10n.marathonWhatsIncluded,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final line in marathon.included)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              size: 18,
-                              color: c.success,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Text(line, style: context.text.bodyMd),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
+                  );
+                },
               ),
-              _Section(
-                title: context.l10n.marathonEntryFee,
-                child: Row(
-                  children: [
-                    Text(
-                      Fmt.money(
-                        marathon.entryFee.amount,
-                        marathon.entryFee.currency,
-                      ),
-                      style: context.text.displayMd,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        context.l10n.marathonPlacesLeft(
-                          marathon.slotsLeft,
-                          marathon.slotsTotal,
-                        ),
-                        style: context.text.bodySm.copyWith(
-                          color: c.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ],
     );
+  }
+
+  /// Ancho a partir del cual la ficha se parte en dos columnas.
+  static const _twoColumnsMinWidth = 720.0;
+
+  Widget _badges(BuildContext context) => Wrap(
+    spacing: AppSpacing.sm,
+    runSpacing: AppSpacing.sm,
+    children: [
+      AppBadge(
+        label: Fmt.distance(marathon.distanceKm),
+        icon: Icons.straighten_rounded,
+      ),
+      // En un circuito el mapa de abajo dibuja una sola vuelta:
+      // decirlo aqui, junto a la distancia total, es lo que evita
+      // que parezca que el trazado se quedo corto.
+      if (marathon.laps > 1)
+        AppBadge(
+          label: context.l10n.raceCircuitLaps(
+            Fmt.distance(marathon.distanceKm / marathon.laps),
+            '${marathon.laps}',
+          ),
+          icon: Icons.loop_rounded,
+        ),
+      AppBadge(label: Fmt.fullDate(marathon.date), icon: Icons.event_rounded),
+      AppBadge(label: marathon.location, icon: Icons.place_outlined),
+      AppBadge(
+        label: marathon.status.label(context.l10n),
+        tone: switch (marathon.status) {
+          RegistrationStatus.open => AppTone.success,
+          RegistrationStatus.closingSoon => AppTone.warning,
+          RegistrationStatus.full || RegistrationStatus.closed => AppTone.error,
+        },
+      ),
+    ],
+  );
+
+  List<Widget> _about(BuildContext context) {
+    final c = context.colors;
+    return [
+      _Section(
+        title: context.l10n.marathonAbout,
+        child: Text(
+          marathon.about,
+          style: context.text.bodyMd.copyWith(color: c.textSecondary),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _route(
+    BuildContext context,
+    List<GeoPoint> route, {
+    required bool wide,
+  }) => [
+    _Section(
+      title: context.l10n.marathonRoute,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: SizedBox(
+          height: wide ? _mapHeightWide : _mapHeight,
+          child: RouteMapView(route: route, interactive: false),
+        ),
+      ),
+    ),
+  ];
+
+  List<Widget> _schedule(BuildContext context) => [
+    if (marathon.schedule.isNotEmpty)
+      _Section(
+        title: context.l10n.marathonSchedule,
+        child: Column(
+          children: [
+            for (final item in marathon.schedule)
+              _TimelineRow(item: item, isLast: item == marathon.schedule.last),
+          ],
+        ),
+      ),
+  ];
+
+  List<Widget> _included(BuildContext context) {
+    final c = context.colors;
+    return [
+      _Section(
+        title: context.l10n.marathonWhatsIncluded,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in marathon.included)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: 18,
+                      color: c.success,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text(line, style: context.text.bodyMd)),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _fee(BuildContext context) {
+    final c = context.colors;
+    return [
+      _Section(
+        title: context.l10n.marathonEntryFee,
+        child: Row(
+          children: [
+            Text(
+              Fmt.money(marathon.entryFee.amount, marathon.entryFee.currency),
+              style: context.text.displayMd,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                context.l10n.marathonPlacesLeft(
+                  marathon.slotsLeft,
+                  marathon.slotsTotal,
+                ),
+                style: context.text.bodySm.copyWith(color: c.textSecondary),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 }
 
@@ -366,43 +457,48 @@ class _BottomBar extends ConsumerWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.marathonEntryFee,
-                  style: context.text.labelSm.copyWith(color: c.textSecondary),
-                ),
-                Text(
-                  Fmt.money(
-                    marathon.entryFee.amount,
-                    marathon.entryFee.currency,
+        child: ContentWidth(
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.l10n.marathonEntryFee,
+                    style: context.text.labelSm.copyWith(
+                      color: c.textSecondary,
+                    ),
                   ),
-                  style: context.text.headingMd,
-                ),
-              ],
-            ),
-            const SizedBox(width: AppSpacing.base),
-            Expanded(
-              child: AppButton(
-                label: esperandoValidacion
-                    ? context.l10n.racesPendingValidation
-                    : canRegister
-                    ? context.l10n.marathonRegisterNow
-                    : marathon.status.label(context.l10n),
-                // Esperando validacion el boton sigue vivo, pero no lleva al
-                // alta: lleva al motivo por el que no se puede repetir.
-                onPressed: esperandoValidacion
-                    ? () => showPendingValidationDialog(context)
-                    : canRegister
-                    ? () => context.push(Routes.marathonRegisterOf(marathon.id))
-                    : null,
+                  Text(
+                    Fmt.money(
+                      marathon.entryFee.amount,
+                      marathon.entryFee.currency,
+                    ),
+                    style: context.text.headingMd,
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.base),
+              Expanded(
+                child: AppButton(
+                  label: esperandoValidacion
+                      ? context.l10n.racesPendingValidation
+                      : canRegister
+                      ? context.l10n.marathonRegisterNow
+                      : marathon.status.label(context.l10n),
+                  // Esperando validacion el boton sigue vivo, pero no lleva al
+                  // alta: lleva al motivo por el que no se puede repetir.
+                  onPressed: esperandoValidacion
+                      ? () => showPendingValidationDialog(context)
+                      : canRegister
+                      ? () =>
+                            context.push(Routes.marathonRegisterOf(marathon.id))
+                      : null,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

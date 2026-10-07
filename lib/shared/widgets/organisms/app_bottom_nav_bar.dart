@@ -5,11 +5,90 @@ import 'package:camrun/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Quien esta mirando la app. Decide las cuatro pestanas de abajo.
+/// Quien esta mirando la app. Decide las cuatro pestanas de la navegacion.
 ///
 /// Un enum y no dos banderas: `admin: true, organizer: true` no significa
 /// nada, y con banderas ese estado imposible se puede escribir.
 enum AppShellRole { runner, admin, organizer }
+
+typedef AppNavDestination = ({String label, IconData icon, IconData active});
+
+/// Las cuatro pestanas de cada rol. Las comparten la barra de abajo y el rail
+/// de las tablets: son el mismo menu en otro sitio, y dos copias acabarian
+/// diciendo cosas distintas.
+///
+/// Los iconos son fijos; la etiqueta se resuelve por `build` para que el
+/// cambio de idioma llegue tambien a la navegacion.
+List<AppNavDestination> appNavDestinations(
+  AppLocalizations t,
+  AppShellRole role,
+) => switch (role) {
+  AppShellRole.admin => [
+    (
+      label: t.adminNavLive,
+      icon: Icons.map_outlined,
+      active: Icons.map_rounded,
+    ),
+    (
+      label: t.adminNavMarathons,
+      icon: Icons.emoji_events_outlined,
+      active: Icons.emoji_events_rounded,
+    ),
+    (
+      label: t.adminNavUsers,
+      icon: Icons.group_outlined,
+      active: Icons.group_rounded,
+    ),
+    (
+      label: t.navProfile,
+      icon: Icons.person_outline_rounded,
+      active: Icons.person_rounded,
+    ),
+  ],
+  // El organizador mira la carrera pero no la mueve, y en el sitio que el
+  // admin usa para el catalogo lleva su cola de cobros: es su trabajo del
+  // dia, no una pantalla secundaria.
+  AppShellRole.organizer => [
+    (
+      label: t.adminNavLive,
+      icon: Icons.map_outlined,
+      active: Icons.map_rounded,
+    ),
+    (
+      label: t.organizerNavTickets,
+      icon: Icons.receipt_long_outlined,
+      active: Icons.receipt_long_rounded,
+    ),
+    (
+      label: t.organizerNavRunners,
+      icon: Icons.group_outlined,
+      active: Icons.group_rounded,
+    ),
+    (
+      label: t.navProfile,
+      icon: Icons.person_outline_rounded,
+      active: Icons.person_rounded,
+    ),
+  ],
+  AppShellRole.runner => [
+    (label: t.navHome, icon: Icons.home_outlined, active: Icons.home_rounded),
+    (
+      label: t.navTrain,
+      icon: Icons.directions_run_outlined,
+      active: Icons.directions_run_rounded,
+    ),
+    (
+      label: t.navRaces,
+      icon: Icons.emoji_events_outlined,
+      active: Icons.emoji_events_rounded,
+    ),
+    (
+      label: t.navProfile,
+      icon: Icons.person_outline_rounded,
+      active: Icons.person_rounded,
+    ),
+  ],
+};
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
@@ -27,83 +106,10 @@ class AppBottomNavBar extends StatelessWidget {
   /// administra lo que del lado del corredor se usa.
   final AppShellRole role;
 
-  /// Los iconos son fijos; la etiqueta se resuelve por `build` para que el
-  /// cambio de idioma llegue tambien a la barra.
-  static List<({String label, IconData icon, IconData active})> _items(
-    AppLocalizations t,
-    AppShellRole role,
-  ) => switch (role) {
-    AppShellRole.admin => [
-      (
-        label: t.adminNavLive,
-        icon: Icons.map_outlined,
-        active: Icons.map_rounded,
-      ),
-      (
-        label: t.adminNavMarathons,
-        icon: Icons.emoji_events_outlined,
-        active: Icons.emoji_events_rounded,
-      ),
-      (
-        label: t.adminNavUsers,
-        icon: Icons.group_outlined,
-        active: Icons.group_rounded,
-      ),
-      (
-        label: t.navProfile,
-        icon: Icons.person_outline_rounded,
-        active: Icons.person_rounded,
-      ),
-    ],
-    // El organizador mira la carrera pero no la mueve, y en el sitio que el
-    // admin usa para el catalogo lleva su cola de cobros: es su trabajo del
-    // dia, no una pantalla secundaria.
-    AppShellRole.organizer => [
-      (
-        label: t.adminNavLive,
-        icon: Icons.map_outlined,
-        active: Icons.map_rounded,
-      ),
-      (
-        label: t.organizerNavTickets,
-        icon: Icons.receipt_long_outlined,
-        active: Icons.receipt_long_rounded,
-      ),
-      (
-        label: t.organizerNavRunners,
-        icon: Icons.group_outlined,
-        active: Icons.group_rounded,
-      ),
-      (
-        label: t.navProfile,
-        icon: Icons.person_outline_rounded,
-        active: Icons.person_rounded,
-      ),
-    ],
-    AppShellRole.runner => [
-      (label: t.navHome, icon: Icons.home_outlined, active: Icons.home_rounded),
-      (
-        label: t.navTrain,
-        icon: Icons.directions_run_outlined,
-        active: Icons.directions_run_rounded,
-      ),
-      (
-        label: t.navRaces,
-        icon: Icons.emoji_events_outlined,
-        active: Icons.emoji_events_rounded,
-      ),
-      (
-        label: t.navProfile,
-        icon: Icons.person_outline_rounded,
-        active: Icons.person_rounded,
-      ),
-    ],
-  };
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final items = _items(context.l10n, role);
+    final items = appNavDestinations(context.l10n, role);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: systemUiStyleFor(c.surface),
       child: DecoratedBox(
@@ -142,7 +148,7 @@ class _NavItem extends StatelessWidget {
     required this.onTap,
   });
 
-  final ({String label, IconData icon, IconData active}) item;
+  final AppNavDestination item;
   final bool selected;
   final VoidCallback onTap;
 

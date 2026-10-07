@@ -1,6 +1,8 @@
+import 'package:camrun/app/orientation_policy.dart';
 import 'package:camrun/app/router/app_router.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/services/settings_provider.dart';
+import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/theme/app_theme.dart';
 import 'package:camrun/core/theme/system_ui_style.dart';
 import 'package:camrun/features/profile/presentation/providers/profile_provider.dart';
@@ -37,13 +39,29 @@ class CamRunApp extends ConsumerWidget {
         // que leen el de `Intl`. Se fija aqui, dentro del subarbol que ya
         // resolvio el locale, para que fechas y numeros sigan al selector.
         Intl.defaultLocale = Localizations.localeOf(context).toLanguageTag();
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: systemUiStyleFor(Theme.of(context).scaffoldBackgroundColor),
-          child: MediaQuery.withClampedTextScaling(
-            // Beyond 1.3 the metric grids stop fitting; clamping keeps the layout
-            // intact while still honouring the user's larger-text preference.
-            maxScaleFactor: 1.3,
-            child: child!,
+        final theme = Theme.of(context);
+        return OrientationPolicy(
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: systemUiStyleFor(theme.scaffoldBackgroundColor),
+            child: MediaQuery.withClampedTextScaling(
+              // Beyond 1.3 the metric grids stop fitting; clamping keeps the layout
+              // intact while still honouring the user's larger-text preference.
+              maxScaleFactor: 1.3,
+              // En una tablet un aviso flotante de lado a lado es una franja de
+              // un metro para una frase: se queda en el ancho de un formulario.
+              // El `Theme` va siempre, cambie o no: alternar entre envolver y no
+              // envolver al girar la tablet rehacia el router entero.
+              child: Theme(
+                data: context.windowClass.isCompact
+                    ? theme
+                    : theme.copyWith(
+                        snackBarTheme: theme.snackBarTheme.copyWith(
+                          width: AppSizes.contentMaxWidth,
+                        ),
+                      ),
+                child: child!,
+              ),
+            ),
           ),
         );
       },

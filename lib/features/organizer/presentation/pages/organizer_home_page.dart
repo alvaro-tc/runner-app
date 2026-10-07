@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
+import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/network/live_socket.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
@@ -13,6 +14,7 @@ import 'package:camrun/features/organizer/presentation/providers/organizer_provi
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
+import 'package:camrun/shared/widgets/layout/adaptive_sheet.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
@@ -165,9 +167,8 @@ class _Dashboard extends StatelessWidget {
   }
 
   void _openRunner(BuildContext context, LivePosition position) {
-    showModalBottomSheet<void>(
+    showAdaptiveSheet<void>(
       context: context,
-      isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => _RunnerDetail(
         marathonId: marathon.id,
@@ -185,61 +186,125 @@ class _Dashboard extends StatelessWidget {
         .where((p) => !board.finishedBibs.contains(p.key))
         .length;
 
-    return ListView(
-      key: const Key('organizer-live-dashboard'),
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenH,
-        AppSpacing.base,
-        AppSpacing.screenH,
-        AppSpacing.xxl,
+    final header = _MarathonHeader(
+      marathon: marathon,
+      runningCount: runningCount,
+    );
+    final map = ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      child: RouteMapView(
+        route: const [],
+        guideRoute: marathon.route,
+        markerEveryKm: 5,
+        pins: [
+          for (final position in positions)
+            MapPin(
+              lat: position.lat,
+              lng: position.lng,
+              size: 38,
+              child: _RunnerPin(
+                bib: position.bib,
+                finished: board.finishedBibs.contains(position.key),
+                onTap: () => _openRunner(context, position),
+              ),
+            ),
+        ],
       ),
-      children: [
-        _MarathonHeader(marathon: marathon, runningCount: runningCount),
-        const SizedBox(height: AppSpacing.base),
-        SizedBox(
-          height: 310,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            child: RouteMapView(
-              route: const [],
-              guideRoute: marathon.route,
-              markerEveryKm: 5,
-              pins: [
-                for (final position in positions)
-                  MapPin(
-                    lat: position.lat,
-                    lng: position.lng,
-                    size: 38,
-                    child: _RunnerPin(
-                      bib: position.bib,
-                      finished: board.finishedBibs.contains(position.key),
-                      onTap: () => _openRunner(context, position),
-                    ),
+    );
+    final title = Text(
+      t.organizerParticipantsOnCourse(runningCount),
+      style: context.text.headingMd,
+    );
+    final runners = [
+      if (positions.isEmpty)
+        _NoRunners()
+      else
+        for (final position in positions)
+          _RunnerTile(
+            position: position,
+            participant: participants[position.bib],
+            finished: board.finishedBibs.contains(position.key),
+            onTap: () => _openRunner(context, position),
+          ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // En una tablet el mapa se queda con todo el alto y la lista corre a
+        // su lado: mirar donde va alguien y tocarlo en la lista es un solo
+        // vistazo, sin subir y bajar.
+        if (box.maxWidth >= AppBreakpoints.expanded) {
+          final gutter = AppLayout.gutter(box.maxWidth);
+          return Padding(
+            key: const Key('organizer-live-dashboard'),
+            padding: EdgeInsets.fromLTRB(
+              gutter,
+              AppSpacing.base,
+              gutter,
+              AppSpacing.base,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                header,
+                const SizedBox(height: AppSpacing.base),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(flex: 3, child: map),
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            title,
+                            const SizedBox(height: AppSpacing.sm),
+                            Expanded(
+                              child: ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.xxl,
+                                ),
+                                children: runners,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
+                ),
               ],
             ),
+          );
+        }
+
+        return ListView(
+          key: const Key('organizer-live-dashboard'),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenH,
+            AppSpacing.base,
+            AppSpacing.screenH,
+            AppSpacing.xxl,
           ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          t.organizerParticipantsOnCourse(runningCount),
-          style: context.text.headingMd,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        if (positions.isEmpty)
-          _NoRunners()
-        else
-          for (final position in positions)
-            _RunnerTile(
-              position: position,
-              participant: participants[position.bib],
-              finished: board.finishedBibs.contains(position.key),
-              onTap: () => _openRunner(context, position),
-            ),
-      ],
+          children: [
+            header,
+            const SizedBox(height: AppSpacing.base),
+            SizedBox(height: _mapHeight, child: map),
+            const SizedBox(height: AppSpacing.lg),
+            title,
+            const SizedBox(height: AppSpacing.sm),
+            ...runners,
+          ],
+        );
+      },
     );
   }
+
+  static const _mapHeight = 310.0;
 }
 
 class _MarathonHeader extends StatelessWidget {
