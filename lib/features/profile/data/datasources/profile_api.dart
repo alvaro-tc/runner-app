@@ -33,9 +33,7 @@ class ProfileApi {
 
   /// Sube la foto de perfil. Devuelve solo `{avatarUrl}`, no el perfil entero.
   Future<String> uploadAvatar(String filePath) => apiCall(() async {
-    final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
-    });
+    final form = FormData.fromMap({'file': await multipartFromPath(filePath)});
     final res = await _dio.post<dynamic>('/users/me/avatar', data: form);
     return ((res.data as Map)['avatarUrl'] as String?) ?? '';
   });

@@ -70,6 +70,8 @@ class Marathon {
     required this.included,
     required this.routePreview,
     this.laps = 1,
+    this.logoVerticalUrl = '',
+    this.logoHorizontalUrl = '',
     this.predictedFinishMin,
     this.predictedFinishMax,
     this.categories = const [],
@@ -88,6 +90,28 @@ class Marathon {
   final String city;
   final String country;
   final String heroImageUrl;
+
+  /// Los dos logos de la carrera. Vacio = no se subio. Ver [artworkFor].
+  final String logoVerticalUrl;
+  final String logoHorizontalUrl;
+
+  /// La imagen que mejor llena un hueco de esta forma (ancho / alto): el logo
+  /// que tiene su orientacion, despues el otro logo y al final el afiche. Los
+  /// logos van antes que el afiche porque son lo que identifica la carrera; el
+  /// afiche suele ser un cartel con letra pequena que en un hueco chico no se
+  /// lee. `url` vacia = no hay ninguna imagen.
+  static const _hastaVertical = 1.1;
+
+  ({String url, bool isLogo}) artworkFor(double aspectRatio) {
+    // Hasta casi cuadrado manda el vertical: en un cuadrado un 4:5 lo llena y
+    // un 16:9 se queda en una franja.
+    final (preferido, otro) = aspectRatio <= _hastaVertical
+        ? (logoVerticalUrl, logoHorizontalUrl)
+        : (logoHorizontalUrl, logoVerticalUrl);
+    if (preferido.isNotEmpty) return (url: preferido, isLogo: true);
+    if (otro.isNotEmpty) return (url: otro, isLogo: true);
+    return (url: heroImageUrl, isLogo: false);
+  }
 
   /// El total que se corre, vueltas incluidas.
   final double distanceKm;

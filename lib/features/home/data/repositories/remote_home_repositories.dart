@@ -40,6 +40,20 @@ class RemoteMarathonRepository implements MarathonRepository {
   );
 
   @override
+  Future<Result<List<Marathon>>> fetchPast({int limit = 6}) => guard(
+    () => _fresco(
+      db: db,
+      key: 'marathons.past',
+      fetch: () async => {'items': await api.pastMarathons()},
+      parse: (j) => [
+        for (final m
+            in (j['items'] as List).reversed.cast<Map<String, dynamic>>())
+          marathonFrom(m),
+      ].take(limit).toList(),
+    ),
+  );
+
+  @override
   Future<Result<Marathon>> fetchById(String idOrSlug) => guard(
     () => _fresco(
       db: db,

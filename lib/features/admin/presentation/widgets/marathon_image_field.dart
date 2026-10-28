@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
+import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -27,6 +27,7 @@ class MarathonImageField extends StatelessWidget {
     required this.emptyLabel,
     required this.aspectRatio,
     this.emptyIcon = Icons.add_photo_alternate_outlined,
+    this.isLogo = false,
     this.onRemove,
     this.enabled = true,
     this.disabledHint,
@@ -52,6 +53,11 @@ class MarathonImageField extends StatelessWidget {
 
   /// 16/9 para el afiche, 1 para el QR.
   final double aspectRatio;
+
+  /// Los logos se ven sobre el fondo claro que tendran en la app; el afiche,
+  /// sobre una copia suya difuminada. Ninguno se recorta: una vista previa
+  /// cortada no deja juzgar lo que se subio.
+  final bool isLogo;
 
   /// En el alta no hay donde poner la imagen: la carrera todavia no tiene id.
   final bool enabled;
@@ -108,7 +114,7 @@ class MarathonImageField extends StatelessWidget {
   Widget _contenido(BuildContext context) => switch (status) {
     ImageSlotStatus.uploading => _Subiendo(
       key: const ValueKey('subiendo'),
-      debajo: _hasImage ? _Imagen(url: imageUrl!) : null,
+      debajo: _hasImage ? _Imagen(url: imageUrl!, isLogo: isLogo) : null,
     ),
     _ when _hasImage => _Imagen(
       // La clave lleva la URL: al subir una foto nueva el servidor devuelve
@@ -116,6 +122,7 @@ class MarathonImageField extends StatelessWidget {
       // haria la transicion.
       key: ValueKey(imageUrl),
       url: imageUrl!,
+      isLogo: isLogo,
       overlay: enabled ? context.l10n.adminImageChange : null,
     ),
     _ => _Vacio(
@@ -191,9 +198,15 @@ Future<ImagePick?> pickImageSource(
 
 /// La imagen guardada, con la pista de que se puede cambiar.
 class _Imagen extends StatelessWidget {
-  const _Imagen({required this.url, this.overlay, super.key});
+  const _Imagen({
+    required this.url,
+    this.isLogo = false,
+    this.overlay,
+    super.key,
+  });
 
   final String url;
+  final bool isLogo;
   final String? overlay;
 
   @override
@@ -202,15 +215,17 @@ class _Imagen extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        CachedNetworkImage(
+        // `EventImage` y no `CachedNetworkImage`: en web este pide la imagen
+        // por XHR, `/uploads` no manda CORS y la vista previa quedaba vacia
+        // aunque la subida hubiera ido bien.
+        EventImage(
           imageUrl: url,
-          fit: BoxFit.cover,
-          placeholder: (context, _) =>
-              ColoredBox(color: c.shimmerBase, child: const SizedBox.expand()),
-          errorWidget: (context, _, _) => ColoredBox(
-            color: c.surfaceElevated,
-            child: Icon(Icons.broken_image_outlined, color: c.textSecondary),
-          ),
+          fit: BoxFit.contain,
+          blurBackdrop: !isLogo,
+          icon: Icons.broken_image_outlined,
+          // Los logos llevan transparencia: se juzgan sobre el mismo fondo
+          // claro que tendran en la app.
+          background: isLogo ? c.logoBackdrop : null,
         ),
         if (overlay != null) ...[
           // El degradado existe para que la pastilla se lea sobre cualquier

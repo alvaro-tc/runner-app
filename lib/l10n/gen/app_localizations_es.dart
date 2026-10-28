@@ -63,13 +63,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navProfile => 'Perfil';
 
   @override
-  String get authWelcomeTitle => 'Te damos la\nbienvenida';
-
-  @override
-  String get authWelcomeBody =>
-      'Tu plan de entrenamiento, tus salidas y tus carreras, todo en un mismo sitio. Empieza donde estás y construye desde ahí.';
-
-  @override
   String get authLogin => 'Iniciar sesión';
 
   @override
@@ -82,10 +75,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authSignInWelcomeBack => 'Qué bueno verte de nuevo';
 
   @override
-  String get authSignInMissed => '¡Te echábamos de menos!';
-
-  @override
-  String get authIdentifierLabel => 'Usuario o correo';
+  String get authIdentifierLabel => 'Correo o CI';
 
   @override
   String get authEmailHint => 'tucorreo@ejemplo.com';
@@ -228,36 +218,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get failureSessionExpired =>
       'Tu sesión caducó. Vuelve a iniciar sesión.';
-
-  @override
-  String get onboardingSkip => 'Saltar';
-
-  @override
-  String get onboardingGetStarted => 'Empezar';
-
-  @override
-  String get onboardingPlanTitle => 'Entrena con un plan que se adapta';
-
-  @override
-  String get onboardingPlanBody =>
-      'Dile a CamRun qué carrera persigues. Reparte las semanas, mueve las sesiones cuando la vida se cruza y no pierde de vista el objetivo.';
-
-  @override
-  String get onboardingTrackTitle => 'Sigue cada salida en tiempo real';
-
-  @override
-  String get onboardingTrackBody =>
-      'El GPS dibuja tu ruta según avanzas. Ritmo, parciales y tiempo transcurrido siempre en pantalla, para que sepas si apretar o aguantar.';
-
-  @override
-  String get onboardingRaceTitle => 'Compite y guarda cada medalla';
-
-  @override
-  String get onboardingRaceBody =>
-      'Inscríbete en eventos desde la app y guarda tu dorsal, tu tiempo de meta y tus parciales en un mismo sitio.';
-
-  @override
-  String get homeUpcomingMarathon => 'Tu próxima carrera en';
 
   @override
   String homePlanTitleOf(String name) {
@@ -1429,7 +1389,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authIdLabel => 'Carnet de identidad (CI)';
 
   @override
-  String get authIdHint => '1234567 LP';
+  String get authIdHint => 'Introduzca su correo o CI';
 
   @override
   String get authEmailOptionalLabel => 'Correo (opcional)';
@@ -1477,9 +1437,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get changePasswordSubmit => 'Guardar y continuar';
-
-  @override
-  String get homeUpcomingMarathons => 'Tus próximas carreras';
 
   @override
   String get racesUpcomingMarathons => 'Próximas carreras';
@@ -1592,11 +1549,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get authWelcomeCamTitle => 'CAM · Centro de Apoyo a la Mujer';
+  String get authWelcomeCamTitle =>
+      'Centro de Ayuda para la Mujer · CAM Bolivia';
 
   @override
   String get authWelcomeCamBody =>
-      'CamRun es la app del Centro de Apoyo a la Mujer: una organización sin fines de lucro que acompaña a mujeres en situación de vulnerabilidad. Cada carrera que corres apoya esa labor.';
+      'Un lugar de vida en La Paz donde las mujeres reciben acogida, información y ayuda. CamRun es su app: cada carrera que corres apoya esa labor.';
 
   @override
   String get homeNoSessionTitle => 'Sin sesión para este día';
@@ -2287,7 +2245,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeCamTitle => 'Quiénes somos';
 
   @override
-  String get homeCamSubtitle => 'CAM · Centro de Ayuda a la Mujer';
+  String get homeCamSubtitle => 'CAM · Centro de Ayuda para la Mujer';
 
   @override
   String get homeCamBody =>
@@ -2805,4 +2763,173 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get waiverRead => 'Leer términos y deslinde';
+
+  @override
+  String get camTagline => 'No estás sola.';
+
+  @override
+  String get camPillarMotherhoodTitle => 'Maternidad acompañada';
+
+  @override
+  String get camPillarMotherhoodBody =>
+      'Apoyo a madres gestantes antes y después de la llegada del bebé.';
+
+  @override
+  String get camPillarChildrenTitle => 'Niñas y niños';
+
+  @override
+  String get camPillarChildrenBody =>
+      'Festejos como el Día del Niño, donde cada pequeño se lleva un juguete nuevo.';
+
+  @override
+  String get camCommunity =>
+      'Voluntarios, parroquias y donadores sostienen su labor. Corriendo, tú también sumas.';
+
+  @override
+  String get storyWelcomeBody =>
+      'Un lugar de vida en La Paz donde cada mujer recibe acogida, información y ayuda.';
+
+  @override
+  String get storyMotherhoodTitle => 'Cada vida vale la pena.';
+
+  @override
+  String get storyChildrenTitle => 'Su alegría nos mueve.';
+
+  @override
+  String get storyCommunityEyebrow => 'Comunidad';
+
+  @override
+  String get storyCommunityTitle => 'Juntos sumamos.';
+
+  @override
+  String get storyRunTitle => 'Corre por la vida.';
+
+  @override
+  String get storyRunBody =>
+      'CamRun es la app del CAM: tus entrenamientos, tus carreras y cada kilómetro, al servicio de su labor.';
+
+  @override
+  String get storyHelp => '¿Necesitas ayuda?';
+
+  @override
+  String get authSignInPasswordHint => 'Introduzca su contraseña';
+
+  @override
+  String get homeHeroTitle => 'Cada kilómetro suma';
+
+  @override
+  String get homeHeroSubtitle =>
+      'Corre con el CAM y apoya a mujeres que salen adelante.';
+
+  @override
+  String get homeNextRaceBadge => 'La más próxima';
+
+  @override
+  String get homeRaceDay => '¡Hoy se corre!';
+
+  @override
+  String get homeCountdownDays => 'días';
+
+  @override
+  String get homeCountdownHours => 'horas';
+
+  @override
+  String get homeCountdownMinutes => 'min';
+
+  @override
+  String get homeViewDetails => 'Ver detalles';
+
+  @override
+  String get homeMoreRaces => 'Más carreras';
+
+  @override
+  String get homePastRaces => 'Carreras pasadas';
+
+  @override
+  String get homeRaceFinished => 'Finalizada';
+
+  @override
+  String get homeNoRacesTitle => 'Pronto, la próxima carrera';
+
+  @override
+  String get homeNoRacesMessage =>
+      'Estamos preparando la siguiente. Tira hacia abajo para ver si ya está publicada.';
+
+  @override
+  String get adminLogosTitle => 'Logos';
+
+  @override
+  String get adminLogosHint =>
+      'PNG con fondo transparente. El vertical es el afiche grande del inicio; el horizontal, tarjetas y cabeceras. Con uno solo, la app lo usa para todo.';
+
+  @override
+  String get adminLogoVertical => 'Logo vertical';
+
+  @override
+  String get adminLogoHorizontal => 'Logo horizontal';
+
+  @override
+  String get adminRehearsalCreate => 'Crear ensayo con inscritos de prueba';
+
+  @override
+  String adminRehearsalDialogTitle(String name) {
+    return 'Ensayo de $name';
+  }
+
+  @override
+  String get adminRehearsalDialogBody =>
+      'Se crea una copia privada de la carrera, con sus logos, recorrido y programa. Sus inscritos serán solo las cuentas que pongas aquí: la carrera real y sus inscritos no se tocan.';
+
+  @override
+  String get adminRehearsalEmailsLabel => 'Emails de las cuentas de prueba';
+
+  @override
+  String get adminRehearsalEmailsHint =>
+      'Uno por línea. Cada cuenta tiene que existir en la app.';
+
+  @override
+  String get adminRehearsalCreateAction => 'Crear ensayo';
+
+  @override
+  String get adminRehearsalCreated =>
+      'Ensayo creado. Ya puedes prepararlo, largarlo y reiniciarlo.';
+
+  @override
+  String get adminRehearsalBadge => 'Ensayo';
+
+  @override
+  String get adminRehearsalNotice =>
+      'Ensayo: solo afecta a los inscritos de prueba.';
+
+  @override
+  String get adminReset => 'Reiniciar carrera';
+
+  @override
+  String adminResetConfirmTitle(String name) {
+    return '¿Reiniciar $name?';
+  }
+
+  @override
+  String get adminResetConfirmBodyRehearsal =>
+      'Vuelve a quedar sin preparar ni largar y se borra lo que corrieron los inscritos de prueba. Puedes repetir el ensayo desde cero.';
+
+  @override
+  String get adminResetConfirmBodyReal =>
+      'Vuelve a quedar sin preparar ni largar y los móviles de sus inscritos se liberan. Lo que ya corrieron no se borra.';
+
+  @override
+  String get adminResetDone => 'Carrera reiniciada.';
+
+  @override
+  String get adminRehearsalDelete => 'Borrar ensayo';
+
+  @override
+  String get adminRehearsalDeleteConfirmTitle => '¿Borrar este ensayo?';
+
+  @override
+  String get adminRehearsalDeleteConfirmBody =>
+      'Se borra la copia con sus inscritos de prueba y lo que corrieron. La carrera original no se toca.';
+
+  @override
+  String get adminRehearsalDeleted => 'Ensayo borrado.';
 }

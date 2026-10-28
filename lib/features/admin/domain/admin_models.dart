@@ -2,6 +2,21 @@ import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:meta/meta.dart';
 
+/// Las imagenes que se suben de una carrera, con el campo que las guarda.
+enum MarathonImageSlot {
+  cover('coverUrl', 'cover'),
+  logoVertical('logoVerticalUrl', 'logo/vertical'),
+  logoHorizontal('logoHorizontalUrl', 'logo/horizontal');
+
+  const MarathonImageSlot(this.field, this.path);
+
+  /// El campo del detalle; tambien el que se pone a `null` para quitarla.
+  final String field;
+
+  /// El tramo del endpoint de subida: `/admin/marathons/:id/<path>`.
+  final String path;
+}
+
 /// Una carrera vista por el panel.
 ///
 /// No reusa `Marathon` del catalogo a proposito: aquella es lo que ve un
@@ -29,6 +44,8 @@ class AdminMarathon {
     this.currency = 'BOB',
     this.country = 'BO',
     this.coverUrl,
+    this.logoVerticalUrl,
+    this.logoHorizontalUrl,
     this.paymentQrPayload,
     this.paymentQrInstructions,
     this.route = const [],
@@ -40,6 +57,7 @@ class AdminMarathon {
     this.preparingMessage,
     this.liveStartedAt,
     this.liveFinishedAt,
+    this.rehearsalOfId,
   });
 
   factory AdminMarathon.fromJson(Map<String, dynamic> json) => AdminMarathon(
@@ -59,6 +77,8 @@ class AdminMarathon {
     priceCents: (json['priceCents'] as num?)?.toInt() ?? 0,
     currency: json['currency'] as String? ?? 'BOB',
     coverUrl: json['coverUrl'] as String?,
+    logoVerticalUrl: json['logoVerticalUrl'] as String?,
+    logoHorizontalUrl: json['logoHorizontalUrl'] as String?,
     published: json['published'] as bool? ?? false,
     // La lista manda `intent`/`resolved` y el detalle `registrationStatus`. Lo
     // que le importa al panel es el interruptor: si el admin las cerro a mano.
@@ -87,6 +107,7 @@ class AdminMarathon {
     preparingMessage: json['preparingMessage'] as String?,
     liveStartedAt: DateTime.tryParse(json['liveStartedAt'] as String? ?? ''),
     liveFinishedAt: DateTime.tryParse(json['liveFinishedAt'] as String? ?? ''),
+    rehearsalOfId: json['rehearsalOfId'] as String?,
   );
 
   final String id;
@@ -116,6 +137,10 @@ class AdminMarathon {
   /// El afiche. Siempre una URL del servidor: desde que se sube en vez de
   /// pegarse, no hay forma de que apunte a otro sitio.
   final String? coverUrl;
+
+  /// Los dos logos. La app elige el que encaja en cada hueco.
+  final String? logoVerticalUrl;
+  final String? logoHorizontalUrl;
 
   /// El **contenido** del QR de cobro, no su imagen: el movil lo redibuja
   /// desde este texto. Lo que el organizador sube es una foto, y de ella solo
@@ -148,6 +173,18 @@ class AdminMarathon {
   /// Cuando el admin dio la largada de verdad, no la hora programada.
   final DateTime? liveStartedAt;
   final DateTime? liveFinishedAt;
+
+  /// De que carrera es ensayo. `null` = es una carrera de verdad. Ver
+  /// [isRehearsal].
+  final String? rehearsalOfId;
+
+  /// Copia privada con inscritos de prueba: se larga, se corta y se reinicia
+  /// sin tocar la carrera real ni a sus inscritos.
+  bool get isRehearsal => rehearsalOfId != null;
+
+  /// Algo del dia de carrera ya paso: hay que reiniciar para volver a empezar.
+  bool get hasLiveState =>
+      preparingAt != null || liveStartedAt != null || liveFinishedAt != null;
 
   double get distanceKm => distanceMeters / 1000;
 
@@ -207,6 +244,8 @@ class AdminMarathon {
         registrationsOpen: registrationsOpen ?? this.registrationsOpen,
         registrations: registrations,
         coverUrl: coverUrl,
+        logoVerticalUrl: logoVerticalUrl,
+        logoHorizontalUrl: logoHorizontalUrl,
         paymentQrPayload: paymentQrPayload,
         paymentQrInstructions: paymentQrInstructions,
         route: route,
@@ -218,6 +257,7 @@ class AdminMarathon {
         preparingMessage: preparingMessage,
         liveStartedAt: liveStartedAt,
         liveFinishedAt: liveFinishedAt,
+        rehearsalOfId: rehearsalOfId,
       );
 }
 

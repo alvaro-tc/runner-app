@@ -52,7 +52,10 @@ class _MarathonStartWatcherState extends ConsumerState<MarathonStartWatcher> {
     );
     // Las vueltas del detalle mandan sobre las de la lista solo porque el
     // detalle es mas nuevo; si la peticion fallo, la lista ya las traia.
-    final vueltas = carrera.fold((m) => m.laps, (_) => viva.entry.marathon.laps);
+    final vueltas = carrera.fold(
+      (m) => m.laps,
+      (_) => viva.entry.marathon.laps,
+    );
 
     if (!mounted) return;
 

@@ -31,6 +31,9 @@ abstract interface class MarathonRepository {
   /// Las proximas del catalogo, de la mas cercana a la mas lejana.
   Future<Result<List<Marathon>>> fetchUpcoming({int limit});
 
+  /// Las que ya largaron, de la mas reciente a la mas antigua.
+  Future<Result<List<Marathon>>> fetchPast({int limit});
+
   /// Acepta id o slug: la API resuelve los dos.
   Future<Result<Marathon>> fetchById(String idOrSlug);
 }

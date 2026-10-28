@@ -94,6 +94,8 @@ abstract final class Fmt {
   // ------------------------------------------------------------------- date
 
   static String dayMonth(DateTime d) => DateFormat('MMM d').format(d);
+  static String dayOfMonth(DateTime d) => DateFormat('d').format(d);
+  static String monthShort(DateTime d) => DateFormat('MMM').format(d);
   static String weekdayDayMonth(DateTime d) =>
       DateFormat('EEE, d MMM').format(d);
   static String fullDate(DateTime d) => DateFormat('d MMMM y').format(d);

@@ -188,6 +188,18 @@ class _Selector extends ConsumerWidget {
                                 color: m.running ? c.success : c.warning,
                               ),
                             ),
+                          if (m.isRehearsal)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: AppSpacing.sm,
+                              ),
+                              child: Icon(
+                                Icons.science_outlined,
+                                size: 16,
+                                semanticLabel: context.l10n.adminRehearsalBadge,
+                                color: c.primary,
+                              ),
+                            ),
                           Expanded(
                             child: Text(
                               m.name,
@@ -503,9 +515,84 @@ class _ControlesState extends ConsumerState<_Controles> {
     );
   }
 
+  /// Algo del dia de carrera ya paso, segun lo ultimo que se supo: hay algo
+  /// que reiniciar.
+  bool get _hayEstado =>
+      widget.marathon.hasLiveState ||
+      widget.board.preparingAt != null ||
+      widget.board.startedAt != null ||
+      widget.board.finishedAt != null;
+
+  /// Vuelve la carrera a antes de la preparacion. En un ensayo borra tambien
+  /// lo corrido, para repetir la prueba desde cero.
+  Future<void> _reiniciar() async {
+    final t = context.l10n;
+    final confirmado = await _confirmar(
+      titulo: t.adminResetConfirmTitle(widget.marathon.name),
+      cuerpo: widget.marathon.isRehearsal
+          ? t.adminResetConfirmBodyRehearsal
+          : t.adminResetConfirmBodyReal,
+      accion: t.adminReset,
+    );
+    if (confirmado != true || !mounted) return;
+    if (await _enviar((api) => api.resetLive(widget.marathon.id)) && mounted) {
+      context.showSnack(t.adminResetDone);
+    }
+  }
+
+  /// Copia privada con inscritos de prueba. Al crearla el panel pasa a mirarla:
+  /// es lo siguiente que se va a preparar y largar.
+  Future<void> _crearEnsayo() async {
+    final t = context.l10n;
+    final emails = await showDialog<List<String>>(
+      context: context,
+      builder: (_) => _DialogoDeEnsayo(marathonName: widget.marathon.name),
+    );
+    if (emails == null || emails.isEmpty || !mounted) return;
+
+    setState(() => _enviando = true);
+    try {
+      final copia = await ref
+          .read(adminApiProvider)
+          .createRehearsal(widget.marathon.id, emails);
+      ref.invalidate(adminMarathonsProvider);
+      ref.read(selectedMarathonProvider.notifier).select(copia.id);
+      if (mounted) context.showSnack(t.adminRehearsalCreated);
+    } on Failure catch (f) {
+      if (mounted) context.showSnack(f.localized(t));
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
+  }
+
+  /// Borra el ensayo con sus inscritos de prueba y vuelve a la original.
+  Future<void> _borrarEnsayo() async {
+    final t = context.l10n;
+    final confirmado = await _confirmar(
+      titulo: t.adminRehearsalDeleteConfirmTitle,
+      cuerpo: t.adminRehearsalDeleteConfirmBody,
+      accion: t.adminRehearsalDelete,
+    );
+    if (confirmado != true || !mounted) return;
+
+    setState(() => _enviando = true);
+    try {
+      await ref.read(adminApiProvider).deleteMarathon(widget.marathon.id);
+      ref
+          .read(selectedMarathonProvider.notifier)
+          .select(widget.marathon.rehearsalOfId);
+      ref.invalidate(adminMarathonsProvider);
+      if (mounted) context.showSnack(t.adminRehearsalDeleted);
+    } on Failure catch (f) {
+      if (mounted) context.showSnack(f.localized(t));
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
+  }
+
   /// Manda la orden y refresca. Un solo sitio que sepa apagar el boton y
-  /// contar el fallo: las cuatro acciones del panel fallan igual.
-  Future<void> _enviar(
+  /// contar el fallo: las acciones del panel fallan igual. Devuelve si salio.
+  Future<bool> _enviar(
     Future<Map<String, dynamic>> Function(AdminApi) accion,
   ) async {
     setState(() => _enviando = true);
@@ -522,12 +609,14 @@ class _ControlesState extends ConsumerState<_Controles> {
       ref
         ..invalidate(adminMarathonsProvider)
         ..invalidate(adminMarathonProvider(widget.marathon.id));
+      return true;
     } on Failure catch (f) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(f.localized(context.l10n))));
       }
+      return false;
     } finally {
       if (mounted) setState(() => _enviando = false);
     }
@@ -580,76 +669,214 @@ class _ControlesState extends ConsumerState<_Controles> {
       ),
       child: SafeArea(
         top: false,
-        child: _terminada
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.sports_score_rounded,
-                    size: 18,
-                    color: c.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    t.adminAlreadyFinished,
-                    style: context.text.bodySm.copyWith(color: c.textSecondary),
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // La preparacion va arriba y sola: es el paso previo a la
-                  // largada y es el que apaga la app de todos los inscritos.
-                  // Compartir fila con "largar" invita a pulsar el que no era.
-                  if (!_corriendo) ...[
-                    if (_preparando)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Text(
-                          t.adminPreparingNotice,
-                          textAlign: TextAlign.center,
-                          style: context.text.bodySm.copyWith(color: c.warning),
-                        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Que se esta ensayando se ve antes que cualquier boton: largar
+            // la real creyendo que era el ensayo bloquea a gente de verdad.
+            if (widget.marathon.isRehearsal)
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: c.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.science_outlined, size: 18, color: c.primary),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        t.adminRehearsalNotice,
+                        style: context.text.bodySm.copyWith(color: c.primary),
                       ),
-                    AppButton(
-                      label: _preparando
-                          ? t.adminPrepareCancel
-                          : t.adminPrepare,
-                      icon: _preparando
-                          ? Icons.lock_open_rounded
-                          : Icons.hourglass_top_rounded,
-                      variant: AppButtonVariant.secondary,
-                      isLoading: _enviando,
-                      onPressed: _enviando
-                          ? null
-                          : () => _preparar(activar: !_preparando),
                     ),
-                    const SizedBox(height: AppSpacing.md),
                   ],
-                  if (_corriendo)
-                    AppButton(
-                      key: const Key('admin-finish-marathon'),
-                      label: t.adminFinish,
-                      icon: Icons.stop_rounded,
-                      variant: AppButtonVariant.danger,
-                      isLoading: _enviando,
-                      onPressed: _enviando
-                          ? null
-                          : () => _pulsar(largar: false),
-                    )
-                  else
-                    AppButton(
-                      key: const Key('admin-start-marathon'),
-                      label: t.adminStart,
-                      icon: Icons.flag_rounded,
-                      isLoading: _enviando,
-                      onPressed: _enviando ? null : () => _pulsar(largar: true),
-                    ),
-                ],
+                ),
               ),
+            _principal(context),
+            if (_hayEstado) ...[
+              const SizedBox(height: AppSpacing.md),
+              AppButton(
+                key: const Key('admin-reset-marathon'),
+                label: t.adminReset,
+                icon: Icons.restart_alt_rounded,
+                variant: AppButtonVariant.outline,
+                onPressed: _enviando ? null : _reiniciar,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.sm),
+            if (widget.marathon.isRehearsal)
+              AppButton(
+                label: t.adminRehearsalDelete,
+                icon: Icons.delete_outline_rounded,
+                variant: AppButtonVariant.ghost,
+                size: AppButtonSize.sm,
+                onPressed: _enviando ? null : _borrarEnsayo,
+              )
+            else
+              AppButton(
+                key: const Key('admin-create-rehearsal'),
+                label: t.adminRehearsalCreate,
+                icon: Icons.science_outlined,
+                variant: AppButtonVariant.ghost,
+                size: AppButtonSize.sm,
+                onPressed: _enviando ? null : _crearEnsayo,
+              ),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Preparar, largar o cortar: el boton grande de cada fase.
+  Widget _principal(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    return _terminada
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.sports_score_rounded,
+                size: 18,
+                color: c.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                t.adminAlreadyFinished,
+                style: context.text.bodySm.copyWith(color: c.textSecondary),
+              ),
+            ],
+          )
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // La preparacion va arriba y sola: es el paso previo a la
+              // largada y es el que apaga la app de todos los inscritos.
+              // Compartir fila con "largar" invita a pulsar el que no era.
+              if (!_corriendo) ...[
+                if (_preparando)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text(
+                      t.adminPreparingNotice,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodySm.copyWith(color: c.warning),
+                    ),
+                  ),
+                AppButton(
+                  label: _preparando ? t.adminPrepareCancel : t.adminPrepare,
+                  icon: _preparando
+                      ? Icons.lock_open_rounded
+                      : Icons.hourglass_top_rounded,
+                  variant: AppButtonVariant.secondary,
+                  isLoading: _enviando,
+                  onPressed: _enviando
+                      ? null
+                      : () => _preparar(activar: !_preparando),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              if (_corriendo)
+                AppButton(
+                  key: const Key('admin-finish-marathon'),
+                  label: t.adminFinish,
+                  icon: Icons.stop_rounded,
+                  variant: AppButtonVariant.danger,
+                  isLoading: _enviando,
+                  onPressed: _enviando ? null : () => _pulsar(largar: false),
+                )
+              else
+                AppButton(
+                  key: const Key('admin-start-marathon'),
+                  label: t.adminStart,
+                  icon: Icons.flag_rounded,
+                  isLoading: _enviando,
+                  onPressed: _enviando ? null : () => _pulsar(largar: true),
+                ),
+            ],
+          );
+  }
+}
+
+/// Quienes se inscriben en el ensayo. Se escriben a mano, uno por linea: son
+/// las cuentas que se van a quedar bloqueadas mientras se ensaya, asi que se
+/// eligen con nombre y apellido, no con un "todos".
+class _DialogoDeEnsayo extends StatefulWidget {
+  const _DialogoDeEnsayo({required this.marathonName});
+
+  final String marathonName;
+
+  @override
+  State<_DialogoDeEnsayo> createState() => _DialogoDeEnsayoState();
+}
+
+class _DialogoDeEnsayoState extends State<_DialogoDeEnsayo> {
+  final _emails = TextEditingController();
+
+  @override
+  void dispose() {
+    _emails.dispose();
+    super.dispose();
+  }
+
+  List<String> get _lista => [
+    for (final linea in _emails.text.split(RegExp(r'[\s,;]+')))
+      if (linea.contains('@')) linea.trim(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.l10n;
+    return AlertDialog(
+      title: Text(t.adminRehearsalDialogTitle(widget.marathonName)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.adminRehearsalDialogBody,
+              style: context.text.bodySm.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.base),
+            TextField(
+              controller: _emails,
+              autofocus: true,
+              minLines: 3,
+              maxLines: 6,
+              keyboardType: TextInputType.emailAddress,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: t.adminRehearsalEmailsLabel,
+                helperText: t.adminRehearsalEmailsHint,
+                helperMaxLines: 2,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(t.commonCancel),
+        ),
+        TextButton(
+          onPressed: _lista.isEmpty
+              ? null
+              : () => Navigator.of(context).pop(_lista),
+          child: Text(t.adminRehearsalCreateAction),
+        ),
+      ],
     );
   }
 }

@@ -6,7 +6,7 @@ import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
-import 'package:camrun/shared/widgets/atoms/event_image.dart';
+import 'package:camrun/shared/widgets/atoms/marathon_artwork.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,9 +48,7 @@ class RaceCard extends ConsumerWidget {
                       child: SizedBox(
                         width: 60,
                         height: 60,
-                        child: EventImage(
-                          imageUrl: entry.marathon.heroImageUrl,
-                        ),
+                        child: MarathonArtwork(marathon: entry.marathon),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),

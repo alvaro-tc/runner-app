@@ -74,14 +74,13 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final c = context.colors;
     final t = context.l10n;
     return AuthScaffold(
+      title: t.authSignUpTitle,
       children: [
-        Text(t.authSignUpTitle, style: context.text.displayMd),
-        const SizedBox(height: AppSpacing.md),
         Text(
           t.authSignUpSubtitle,
           style: context.text.bodyMd.copyWith(color: c.textSecondary),
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.xl),
         AppTextField(
           label: t.authEmailLabel,
           controller: _email,

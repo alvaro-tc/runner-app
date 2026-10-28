@@ -213,10 +213,11 @@ LiveBoard liveBoardAfterServerState({
   required MarathonLiveState next,
 }) {
   if (next.marathonId != marathonId) return current;
-  final finished = next.finishedAt != null;
+  // Sin largada —porque se reinicio— tampoco queda nadie en el mapa.
+  final vacio = next.finishedAt != null || next.startedAt == null;
   return LiveBoard(
-    runners: finished ? const {} : current.runners,
-    finishedBibs: finished ? const {} : current.finishedBibs,
+    runners: vacio ? const {} : current.runners,
+    finishedBibs: vacio ? const {} : current.finishedBibs,
     preparingAt: next.preparingAt,
     preparingMessage: next.preparingMessage,
     startedAt: next.startedAt,

@@ -206,18 +206,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// Welcome screen headline. The line break is intentional.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to\nCamRun'**
-  String get authWelcomeTitle;
-
-  /// No description provided for @authWelcomeBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Your training plan, your runs and your races — all in one place. Start where you are and build from there.'**
-  String get authWelcomeBody;
-
   /// No description provided for @authLogin.
   ///
   /// In en, this message translates to:
@@ -242,16 +230,10 @@ abstract class AppLocalizations {
   /// **'Welcome back'**
   String get authSignInWelcomeBack;
 
-  /// No description provided for @authSignInMissed.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'\'ve been missed!'**
-  String get authSignInMissed;
-
   /// No description provided for @authIdentifierLabel.
   ///
   /// In en, this message translates to:
-  /// **'Username or Email'**
+  /// **'Email or ID'**
   String get authIdentifierLabel;
 
   /// No description provided for @authEmailHint.
@@ -499,60 +481,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your session expired. Sign in again.'**
   String get failureSessionExpired;
-
-  /// No description provided for @onboardingSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardingSkip;
-
-  /// No description provided for @onboardingGetStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Get started'**
-  String get onboardingGetStarted;
-
-  /// No description provided for @onboardingPlanTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Train with a plan that adapts'**
-  String get onboardingPlanTitle;
-
-  /// No description provided for @onboardingPlanBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Tell CamRun the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.'**
-  String get onboardingPlanBody;
-
-  /// No description provided for @onboardingTrackTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Track every run in real time'**
-  String get onboardingTrackTitle;
-
-  /// No description provided for @onboardingTrackBody.
-  ///
-  /// In en, this message translates to:
-  /// **'GPS draws your route as you go. Pace, splits and elapsed time stay on screen, so you always know whether to push or hold back.'**
-  String get onboardingTrackBody;
-
-  /// No description provided for @onboardingRaceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Race, and keep every medal'**
-  String get onboardingRaceTitle;
-
-  /// No description provided for @onboardingRaceBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.'**
-  String get onboardingRaceBody;
-
-  /// No description provided for @homeUpcomingMarathon.
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming Race In'**
-  String get homeUpcomingMarathon;
 
   /// No description provided for @homePlanTitleOf.
   ///
@@ -2657,7 +2585,7 @@ abstract class AppLocalizations {
   /// No description provided for @authIdHint.
   ///
   /// In en, this message translates to:
-  /// **'1234567 LP'**
+  /// **'Enter your email or ID'**
   String get authIdHint;
 
   /// No description provided for @authEmailOptionalLabel.
@@ -2743,12 +2671,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save and continue'**
   String get changePasswordSubmit;
-
-  /// No description provided for @homeUpcomingMarathons.
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming Races'**
-  String get homeUpcomingMarathons;
 
   /// No description provided for @racesUpcomingMarathons.
   ///
@@ -2957,13 +2879,13 @@ abstract class AppLocalizations {
   /// No description provided for @authWelcomeCamTitle.
   ///
   /// In en, this message translates to:
-  /// **'CAM · Women\'\'s Support Centre'**
+  /// **'Women\'\'s Help Centre · CAM Bolivia'**
   String get authWelcomeCamTitle;
 
   /// No description provided for @authWelcomeCamBody.
   ///
   /// In en, this message translates to:
-  /// **'CamRun is the app of the Centro de Apoyo a la Mujer, a non-profit supporting women in vulnerable situations. Every run you log backs that work.'**
+  /// **'A place of life in La Paz where women find shelter, information and help. CamRun is its app: every run you log backs that work.'**
   String get authWelcomeCamBody;
 
   /// No description provided for @homeNoSessionTitle.
@@ -5117,6 +5039,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read terms and waiver'**
   String get waiverRead;
+
+  /// No description provided for @camTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not alone.'**
+  String get camTagline;
+
+  /// No description provided for @camPillarMotherhoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported motherhood'**
+  String get camPillarMotherhoodTitle;
+
+  /// No description provided for @camPillarMotherhoodBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Support for expecting mothers before and after the baby arrives.'**
+  String get camPillarMotherhoodBody;
+
+  /// No description provided for @camPillarChildrenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get camPillarChildrenTitle;
+
+  /// No description provided for @camPillarChildrenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Celebrations like Children\'\'s Day, where every child takes home a new toy.'**
+  String get camPillarChildrenBody;
+
+  /// No description provided for @camCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteers, parishes and donors keep the work going. By running, you add to it too.'**
+  String get camCommunity;
+
+  /// No description provided for @storyWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A place of life in La Paz where every woman finds shelter, information and help.'**
+  String get storyWelcomeBody;
+
+  /// No description provided for @storyMotherhoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Every life is worth it.'**
+  String get storyMotherhoodTitle;
+
+  /// No description provided for @storyChildrenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Their joy keeps us going.'**
+  String get storyChildrenTitle;
+
+  /// No description provided for @storyCommunityEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get storyCommunityEyebrow;
+
+  /// No description provided for @storyCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Together we add up.'**
+  String get storyCommunityTitle;
+
+  /// No description provided for @storyRunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run for life.'**
+  String get storyRunTitle;
+
+  /// No description provided for @storyRunBody.
+  ///
+  /// In en, this message translates to:
+  /// **'CamRun is the CAM\'\'s app: your training, your races and every kilometre, in service of its work.'**
+  String get storyRunBody;
+
+  /// No description provided for @storyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get storyHelp;
+
+  /// No description provided for @authSignInPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get authSignInPasswordHint;
+
+  /// No description provided for @homeHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Every kilometre counts'**
+  String get homeHeroTitle;
+
+  /// No description provided for @homeHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run with CAM and back women building a way forward.'**
+  String get homeHeroSubtitle;
+
+  /// No description provided for @homeNextRaceBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up next'**
+  String get homeNextRaceBadge;
+
+  /// No description provided for @homeRaceDay.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'\'s race day!'**
+  String get homeRaceDay;
+
+  /// No description provided for @homeCountdownDays.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get homeCountdownDays;
+
+  /// No description provided for @homeCountdownHours.
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get homeCountdownHours;
+
+  /// No description provided for @homeCountdownMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get homeCountdownMinutes;
+
+  /// No description provided for @homeViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get homeViewDetails;
+
+  /// No description provided for @homeMoreRaces.
+  ///
+  /// In en, this message translates to:
+  /// **'More races'**
+  String get homeMoreRaces;
+
+  /// No description provided for @homePastRaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Past races'**
+  String get homePastRaces;
+
+  /// No description provided for @homeRaceFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get homeRaceFinished;
+
+  /// No description provided for @homeNoRacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next race coming soon'**
+  String get homeNoRacesTitle;
+
+  /// No description provided for @homeNoRacesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are preparing the next one. Pull down to check whether it is out.'**
+  String get homeNoRacesMessage;
+
+  /// No description provided for @adminLogosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logos'**
+  String get adminLogosTitle;
+
+  /// No description provided for @adminLogosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG with a transparent background. The vertical one is the big poster on Home; the horizontal one goes on cards and headers. With only one, the app uses it everywhere.'**
+  String get adminLogosHint;
+
+  /// No description provided for @adminLogoVertical.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical logo'**
+  String get adminLogoVertical;
+
+  /// No description provided for @adminLogoHorizontal.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal logo'**
+  String get adminLogoHorizontal;
+
+  /// No description provided for @adminRehearsalCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a rehearsal with test entrants'**
+  String get adminRehearsalCreate;
+
+  /// No description provided for @adminRehearsalDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal of {name}'**
+  String adminRehearsalDialogTitle(String name);
+
+  /// No description provided for @adminRehearsalDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A private copy of the race is created, with its logos, route and schedule. Its entrants are only the accounts you list here: the real race and its entrants are left untouched.'**
+  String get adminRehearsalDialogBody;
+
+  /// No description provided for @adminRehearsalEmailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test account emails'**
+  String get adminRehearsalEmailsLabel;
+
+  /// No description provided for @adminRehearsalEmailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One per line. Each account must already exist in the app.'**
+  String get adminRehearsalEmailsHint;
+
+  /// No description provided for @adminRehearsalCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create rehearsal'**
+  String get adminRehearsalCreateAction;
+
+  /// No description provided for @adminRehearsalCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal created. You can now prepare, start and reset it.'**
+  String get adminRehearsalCreated;
+
+  /// No description provided for @adminRehearsalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal'**
+  String get adminRehearsalBadge;
+
+  /// No description provided for @adminRehearsalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal: only test entrants are affected.'**
+  String get adminRehearsalNotice;
+
+  /// No description provided for @adminReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset race'**
+  String get adminReset;
+
+  /// No description provided for @adminResetConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset {name}?'**
+  String adminResetConfirmTitle(String name);
+
+  /// No description provided for @adminResetConfirmBodyRehearsal.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to not prepared and not started, and what the test entrants ran is deleted. You can repeat the rehearsal from scratch.'**
+  String get adminResetConfirmBodyRehearsal;
+
+  /// No description provided for @adminResetConfirmBodyReal.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to not prepared and not started, and its entrants\'\' phones are released. What they already ran is kept.'**
+  String get adminResetConfirmBodyReal;
+
+  /// No description provided for @adminResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Race reset.'**
+  String get adminResetDone;
+
+  /// No description provided for @adminRehearsalDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rehearsal'**
+  String get adminRehearsalDelete;
+
+  /// No description provided for @adminRehearsalDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this rehearsal?'**
+  String get adminRehearsalDeleteConfirmTitle;
+
+  /// No description provided for @adminRehearsalDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy is deleted with its test entrants and what they ran. The original race is untouched.'**
+  String get adminRehearsalDeleteConfirmBody;
+
+  /// No description provided for @adminRehearsalDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal deleted.'**
+  String get adminRehearsalDeleted;
 }
 
 class _AppLocalizationsDelegate

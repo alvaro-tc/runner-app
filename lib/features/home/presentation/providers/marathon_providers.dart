@@ -9,6 +9,12 @@ final upcomingMarathonsProvider = FutureProvider<List<Marathon>>(
       (await ref.watch(marathonRepositoryProvider).fetchUpcoming()).unwrap(),
 );
 
+/// Las ya corridas: en Home quedan como promocion de lo que se hizo.
+final pastMarathonsProvider = FutureProvider<List<Marathon>>(
+  (ref) async =>
+      (await ref.watch(marathonRepositoryProvider).fetchPast()).unwrap(),
+);
+
 final marathonProvider = FutureProvider.family<Marathon, String>(
   (ref, id) async =>
       (await ref.watch(marathonRepositoryProvider).fetchById(id)).unwrap(),

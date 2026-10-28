@@ -12,7 +12,7 @@ import 'package:camrun/features/races/presentation/widgets/pending_validation.da
 import 'package:camrun/features/races/presentation/widgets/race_card.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
-import 'package:camrun/shared/widgets/atoms/event_image.dart';
+import 'package:camrun/shared/widgets/atoms/marathon_artwork.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
@@ -235,7 +235,7 @@ class _MarathonRow extends StatelessWidget {
                   child: SizedBox(
                     width: 52,
                     height: 52,
-                    child: EventImage(imageUrl: marathon.heroImageUrl),
+                    child: MarathonArtwork(marathon: marathon),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),

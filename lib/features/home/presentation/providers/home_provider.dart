@@ -97,6 +97,7 @@ class HomeNotifier extends AsyncNotifier<HomeData> {
     ref
       ..invalidateSelf()
       ..invalidate(upcomingMarathonsProvider)
+      ..invalidate(pastMarathonsProvider)
       // El detalle de cada carrera tambien: si no, abrirla despues de recargar
       // seguiria ensenando el afiche viejo.
       ..invalidate(marathonProvider);
@@ -124,8 +125,11 @@ final countdownProvider = StreamProvider.autoDispose.family<Duration, DateTime>(
       final remaining = target.difference(now());
       controller.add(remaining);
       if (remaining.isNegative) return;
+      // Justo en el borde de un minuto el siguiente cambio es dentro de uno
+      // entero: con `+ 1` a secas, un reloj parado se reprograma sin fin.
+      final resto = remaining.inMilliseconds % 60000;
       timer = Timer(
-        Duration(milliseconds: remaining.inMilliseconds % 60000 + 1),
+        Duration(milliseconds: resto == 0 ? 60000 : resto + 1),
         tick,
       );
     }

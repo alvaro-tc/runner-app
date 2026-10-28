@@ -161,7 +161,9 @@ class AppCheckbox extends StatelessWidget {
               color: value ? c.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(AppRadius.sm),
               border: Border.all(
-                color: value ? c.primary : c.border,
+                // `border` es un filete decorativo: en oscuro casi no se
+                // distingue del fondo, y aqui marca un control.
+                color: value ? c.primary : c.textSecondary,
                 width: 1.5,
               ),
             ),

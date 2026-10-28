@@ -61,24 +61,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final c = context.colors;
     final t = context.l10n;
     return AuthScaffold(
+      title: t.authSignInTitle,
       children: [
-        Text(t.authSignInTitle, style: context.text.displayMd),
-        const SizedBox(height: AppSpacing.md),
         Text(
           t.authSignInWelcomeBack,
-          style: context.text.headingMd.copyWith(
-            fontWeight: FontWeight.w400,
-            color: c.textSecondary,
-          ),
+          style: context.text.bodyMd.copyWith(color: c.textSecondary),
         ),
-        Text(
-          t.authSignInMissed,
-          style: context.text.headingMd.copyWith(
-            fontWeight: FontWeight.w400,
-            color: c.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.xl),
         // Un solo campo: el usuario no tiene por que recordar con cual se dio
         // de alta. Quien decide si es email o CI es el servidor, por el `@`.
         AppTextField(
@@ -99,7 +88,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         AppTextField(
           label: t.authPasswordLabel,
           controller: _password,
-          hint: t.authPasswordHint,
+          hint: t.authSignInPasswordHint,
           errorText: _passwordError,
           isPassword: true,
           textInputAction: TextInputAction.done,
@@ -117,11 +106,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
+        AppButton(label: t.authLogin, isLoading: _loading, onPressed: _submit),
+        const SizedBox(height: AppSpacing.xl),
         const AuthDivider(),
         const SizedBox(height: AppSpacing.lg),
         const AppleAuthButton(),
         const GoogleAuthButton(),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.lg),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -136,8 +127,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        AppButton(label: t.authLogin, isLoading: _loading, onPressed: _submit),
       ],
     );
   }

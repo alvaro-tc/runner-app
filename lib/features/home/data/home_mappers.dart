@@ -32,6 +32,8 @@ Marathon marathonFrom(
     city: j['city'] as String? ?? '',
     country: j['country'] as String? ?? '',
     heroImageUrl: j['coverUrl'] as String? ?? '',
+    logoVerticalUrl: j['logoVerticalUrl'] as String? ?? '',
+    logoHorizontalUrl: j['logoHorizontalUrl'] as String? ?? '',
     paymentQrPayload: j['paymentQrPayload'] as String?,
     paymentQrInstructions: j['paymentQrInstructions'] as String?,
     distanceKm: _d(j['distanceMeters']) / 1000,

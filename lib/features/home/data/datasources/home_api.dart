@@ -44,6 +44,23 @@ class HomeApi {
         return (res.data as List).cast<Map<String, dynamic>>();
       });
 
+  /// Las del ultimo ano que ya largaron. El catalogo viene en orden de
+  /// largada, de la mas vieja a la mas nueva: quien quiera las recientes
+  /// primero le da la vuelta.
+  // ponytail: una pagina de 50; si un ano trae mas, pedir `meta.nextCursor`.
+  Future<List<Map<String, dynamic>>> pastMarathons() => apiCall(() async {
+    final ahora = DateTime.now().toUtc();
+    final res = await dio.get<dynamic>(
+      '/marathons',
+      queryParameters: {
+        'from': ahora.subtract(const Duration(days: 365)).toIso8601String(),
+        'to': ahora.toIso8601String(),
+        'limit': 50,
+      },
+    );
+    return (res.data as List).cast<Map<String, dynamic>>();
+  });
+
   /// Acepta id o slug: la API resuelve los dos.
   Future<Map<String, dynamic>> marathon(String idOrSlug) => apiCall(() async {
     final res = await dio.get<dynamic>('/marathons/$idOrSlug');

@@ -18,7 +18,6 @@ import 'package:camrun/features/home/presentation/pages/marathon_detail_page.dar
 import 'package:camrun/features/home/presentation/pages/marathon_register_page.dart';
 import 'package:camrun/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:camrun/features/notifications/presentation/widgets/notifications_listener.dart';
-import 'package:camrun/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:camrun/features/onboarding/presentation/pages/theme_setup_page.dart';
 import 'package:camrun/features/organizer/presentation/pages/organizer_home_page.dart';
 import 'package:camrun/features/profile/presentation/pages/appearance_page.dart';
@@ -70,7 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.onboarding,
-        builder: (context, state) => const OnboardingPage(),
+        builder: (context, state) => const WelcomePage(firstRun: true),
       ),
       GoRoute(
         path: Routes.welcome,

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
@@ -13,7 +15,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
-import 'package:camrun/shared/widgets/atoms/event_image.dart';
+import 'package:camrun/shared/widgets/atoms/marathon_artwork.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
@@ -56,12 +58,12 @@ class _Content extends StatelessWidget {
 
   final Marathon marathon;
 
-  static const _headerHeight = 280.0;
-  static const _headerHeightMin = 180.0;
-  static const _headerHeightMax = 420.0;
+  /// Forma del banner: la del logo horizontal, que es el que va aqui.
+  static const _bannerAspect = 16 / 9;
 
-  /// Lo que se lleva la foto del alto de la pantalla en una tablet.
-  static const _headerShare = 0.42;
+  /// Tope del banner respecto del alto de pantalla: en una ventana baja o una
+  /// tablet apaisada no puede comerse toda la ficha.
+  static const _bannerShare = 0.4;
 
   static const _mapHeight = 190.0;
   static const _mapHeightWide = 300.0;
@@ -73,15 +75,18 @@ class _Content extends StatelessWidget {
       for (final p in marathon.routePreview)
         GeoPoint(lat: p.lat, lng: p.lng, timestamp: marathon.date),
     ];
-    // En telefono la foto mide lo de siempre. En una tablet crece con la
-    // pantalla, con tope para que en una ventana baja no se coma todo el
-    // alto.
-    final headerHeight = context.windowClass.isCompact
-        ? _headerHeight
-        : (context.screenSize.height * _headerShare).clamp(
-            _headerHeightMin,
-            _headerHeightMax,
-          );
+    // El banner mide lo que pide su forma al ancho de la pantalla, con tope
+    // de alto. La cabecera es el banner mas la barra y un margen.
+    final pantalla = context.screenSize;
+    final anchoBanner = math.min(
+      pantalla.width - 2 * AppSpacing.screenH,
+      AppSizes.readableMaxWidth,
+    );
+    final altoBanner = math.min(
+      anchoBanner / _bannerAspect,
+      pantalla.height * _bannerShare,
+    );
+    final headerHeight = kToolbarHeight + altoBanner + AppSpacing.base;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -91,11 +96,13 @@ class _Content extends StatelessWidget {
             final collapsed =
                 constraints.scrollOffset >= headerHeight - kToolbarHeight;
             return SliverAppBar(
-              systemOverlayStyle: systemUiStyleFor(
-                collapsed ? c.background : Colors.black,
-              ),
+              // Ya no hay foto bajo la barra de estado: el banner flota sobre
+              // el fondo del tema y la barra se lee como en cualquier pantalla.
+              systemOverlayStyle: systemUiStyleFor(c.background),
               expandedHeight: headerHeight,
               pinned: true,
+              backgroundColor: c.background,
+              surfaceTintColor: Colors.transparent,
               leading: Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: AppIconButton(
@@ -104,45 +111,19 @@ class _Content extends StatelessWidget {
                   onPressed: () => context.pop(),
                 ),
               ),
-              backgroundColor: c.background,
-              flexibleSpace: Stack(
-                fit: StackFit.expand,
-                children: [
-                  FlexibleSpaceBar(
-                    title: Text(
-                      marathon.name,
-                      style: context.text.titleMd,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    titlePadding: const EdgeInsets.symmetric(
-                      horizontal: 56,
-                      vertical: AppSpacing.base,
-                    ),
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Hero(
-                          tag: 'marathon-${marathon.id}',
-                          child: EventImage(imageUrl: marathon.heroImageUrl),
-                        ),
-                        DecoratedBox(
-                          decoration: BoxDecoration(gradient: c.heroOverlay),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Photos can have any brightness. A scrim keeps the status area
-                  // readable until the header collapses onto the theme background.
-                  if (!collapsed)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: MediaQuery.paddingOf(context).top,
-                      child: const ColoredBox(color: Color(0x99000000)),
-                    ),
-                ],
+              title: AnimatedOpacity(
+                opacity: collapsed ? 1 : 0,
+                duration: AppDurations.base,
+                child: Text(
+                  marathon.name,
+                  style: context.text.titleMd,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              flexibleSpace: _Banner(
+                marathon: marathon,
+                expandedHeight: headerHeight,
               ),
             );
           },
@@ -166,7 +147,7 @@ class _Content extends StatelessWidget {
                   if (!wide) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
+                      children: _escalonado([
                         badges,
                         const SizedBox(height: AppSpacing.xl),
                         ..._about(context),
@@ -174,12 +155,12 @@ class _Content extends StatelessWidget {
                         ..._schedule(context),
                         ..._included(context),
                         ..._fee(context),
-                      ],
+                      ]),
                     );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                    children: _escalonado([
                       badges,
                       const SizedBox(height: AppSpacing.xl),
                       Row(
@@ -207,7 +188,7 @@ class _Content extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ],
+                    ]),
                   );
                 },
               ),
@@ -218,10 +199,27 @@ class _Content extends StatelessWidget {
     );
   }
 
+  /// Cada seccion entra subiendo un poco despues de la anterior.
+  static List<Widget> _escalonado(List<Widget> secciones) => [
+    for (var i = 0; i < secciones.length; i++)
+      _Entrada(orden: i, child: secciones[i]),
+  ];
+
   /// Ancho a partir del cual la ficha se parte en dos columnas.
   static const _twoColumnsMinWidth = 720.0;
 
-  Widget _badges(BuildContext context) => Wrap(
+  /// El nombre en grande y, debajo, de un vistazo: distancia, vueltas, fecha,
+  /// lugar y estado. El nombre ya no va sobre la imagen: tapaba el logo.
+  Widget _badges(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(marathon.name, style: context.text.displayMd),
+      const SizedBox(height: AppSpacing.md),
+      _chips(context),
+    ],
+  );
+
+  Widget _chips(BuildContext context) => Wrap(
     spacing: AppSpacing.sm,
     runSpacing: AppSpacing.sm,
     children: [
@@ -503,4 +501,111 @@ class _BottomBar extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// La cabecera: el banner de la carrera entero, en una tarjeta que flota sobre
+/// el fondo. Nada encima de la imagen —ni titulo, ni degradado, ni la barra de
+/// estado— y al subir la ficha se encoge y se desvanece en vez de quedar
+/// cortada por la barra.
+class _Banner extends StatelessWidget {
+  const _Banner({required this.marathon, required this.expandedHeight});
+
+  final Marathon marathon;
+  final double expandedHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final arriba = MediaQuery.paddingOf(context).top;
+    final alto = expandedHeight - kToolbarHeight - AppSpacing.base;
+    final ancho = math.min(
+      alto * _Content._bannerAspect,
+      context.screenSize.width - 2 * AppSpacing.screenH,
+    );
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // 1 = desplegada, 0 = plegada en la barra.
+        final minimo = arriba + kToolbarHeight;
+        final t =
+            ((box.maxHeight - minimo) / (expandedHeight + arriba - minimo))
+                .clamp(0.0, 1.0);
+        // Se va antes de llegar a la barra: el ultimo tramo, donde la barra lo
+        // taparia, ya es transparente.
+        final visible = Curves.easeIn.transform(
+          ((t - 0.25) / 0.75).clamp(0.0, 1.0),
+        );
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [c.primaryContainer, c.background],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: AppSpacing.base,
+              height: alto,
+              child: Opacity(
+                opacity: visible,
+                child: Transform.scale(
+                  scale: 0.9 + 0.1 * t,
+                  alignment: Alignment.bottomCenter,
+                  child: Center(
+                    child: Container(
+                      width: ancho,
+                      height: alto,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppRadius.xxl),
+                        boxShadow: c.floatingShadow,
+                      ),
+                      child: MarathonArtworkHero(
+                        marathon: marathon,
+                        aspectRatio: _Content._bannerAspect,
+                        radius: AppRadius.xxl,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Entra subiendo y apareciendo, [orden] pasos despues de la primera. Una sola
+/// vez: un refresco no la repite. Sin movimiento si el sistema lo pide.
+class _Entrada extends StatelessWidget {
+  const _Entrada({required this.orden, required this.child});
+
+  final int orden;
+  final Widget child;
+
+  static const _paso = Duration(milliseconds: 60);
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : AppDurations.slow + _paso * orden,
+    curve: Curves.easeOutCubic,
+    child: child,
+    builder: (context, v, child) => Opacity(
+      opacity: v,
+      child: Transform.translate(
+        offset: Offset(0, (1 - v) * AppSpacing.base),
+        child: child,
+      ),
+    ),
+  );
 }

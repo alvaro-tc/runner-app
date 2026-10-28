@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
@@ -8,6 +7,7 @@ import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
@@ -275,7 +275,7 @@ class _Resumen extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Miniatura(url: marathon.coverUrl),
+            _Miniatura(marathon: marathon),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -307,6 +307,11 @@ class _Resumen extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
+            if (marathon.isRehearsal)
+              AppBadge(
+                label: t.adminRehearsalBadge,
+                icon: Icons.science_outlined,
+              ),
             if (marathon.running)
               AppBadge(
                 label: t.adminLive,
@@ -398,15 +403,22 @@ class _BadgeQueCambia extends StatelessWidget {
 }
 
 class _Miniatura extends StatelessWidget {
-  const _Miniatura({required this.url});
+  const _Miniatura({required this.marathon});
 
-  final String? url;
+  final AdminMarathon marathon;
 
   static const _lado = 56.0;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // El logo que mejor cabe en un cuadrado, y si no el afiche. Entero siempre:
+    // con `cover` el cartel vertical quedaba cortado por arriba y por abajo.
+    final logo = [
+      marathon.logoHorizontalUrl,
+      marathon.logoVerticalUrl,
+    ].firstWhere((u) => (u ?? '').isNotEmpty, orElse: () => null);
+    final url = logo ?? marathon.coverUrl;
     final vacia = Icon(
       Icons.image_outlined,
       size: 20,
@@ -421,13 +433,14 @@ class _Miniatura extends StatelessWidget {
         decoration: BoxDecoration(gradient: c.routeGradient),
         child: (url ?? '').isEmpty
             ? vacia
-            : CachedNetworkImage(
+            // Como en la ficha: en web `CachedNetworkImage` choca con la falta
+            // de CORS de `/uploads`.
+            : EventImage(
                 imageUrl: url!,
-                memCacheWidth: (_lado * MediaQuery.devicePixelRatioOf(context))
-                    .ceil(),
-                fit: BoxFit.cover,
-                placeholder: (context, _) => vacia,
-                errorWidget: (context, _, _) => vacia,
+                icon: Icons.image_outlined,
+                fit: BoxFit.contain,
+                blurBackdrop: logo == null,
+                background: logo == null ? null : c.logoBackdrop,
               ),
       ),
     );
@@ -459,7 +472,8 @@ class _BarraDeAcciones extends StatelessWidget {
                 ? Icons.visibility_off_outlined
                 : Icons.visibility_outlined,
             label: marathon.published ? t.adminUnpublish : t.adminPublish,
-            onTap: ocupado ? null : onPublicar,
+            // Un ensayo no se publica nunca: el servidor lo rechazaria.
+            onTap: ocupado || marathon.isRehearsal ? null : onPublicar,
           ),
         ),
         SizedBox(

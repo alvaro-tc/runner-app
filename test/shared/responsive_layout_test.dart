@@ -2,7 +2,6 @@ import 'package:camrun/app/router/app_router.dart';
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/layout/breakpoints.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
-import 'package:camrun/features/home/presentation/pages/home_page.dart';
 import 'package:camrun/features/races/presentation/pages/race_detail_page.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/organisms/app_bottom_nav_bar.dart';
@@ -77,24 +76,6 @@ void main() {
       expect(AppLayout.mapSidePanel(844, 390), isTrue);
       expect(AppLayout.mapSidePanel(1194, 834), isTrue);
       expect(AppLayout.mapSidePanel(1024, 1366), isTrue);
-    });
-  });
-
-  group('carrusel de Home', () {
-    test('en telefono la tarjeta ocupa casi todo el ancho', () {
-      expect(heroViewportFraction(350, 844), heroPhoneFraction);
-    });
-
-    test('en una tablet apaisada asoma la siguiente tarjeta', () {
-      final fraction = heroViewportFraction(1042, 834);
-      expect(fraction, lessThan(0.6));
-      expect(fraction, greaterThan(0.4));
-    });
-
-    test('en una ventana baja la tarjeta cabe en el alto', () {
-      final fraction = heroViewportFraction(692, 390);
-      final cardHeight = 692 * fraction * 11 / 16;
-      expect(cardHeight, lessThan(390));
     });
   });
 

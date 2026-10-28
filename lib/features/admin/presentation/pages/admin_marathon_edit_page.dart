@@ -130,11 +130,12 @@ class _FormularioState extends ConsumerState<_Formulario> {
   bool _guardando = false;
   Failure? _errorGuardado;
 
-  var _estadoFoto = ImageSlotStatus.idle;
+  /// Cada hueco de imagen sube, falla y se reintenta por su cuenta.
+  final _estadoFoto = <MarathonImageSlot, ImageSlotStatus>{};
 
-  /// El ultimo archivo elegido para el afiche. Reintentar una subida que fallo
+  /// El ultimo archivo elegido para cada hueco. Reintentar una subida que fallo
   /// tiene que reenviar **ese** archivo, no abrir la galeria otra vez.
-  String? _ultimaFoto;
+  final _ultimaFoto = <MarathonImageSlot, String>{};
 
   /// El contenido del QR de cobro. De la foto que elige el organizador solo
   /// queda esto: la imagen se lee y se tira, y lo que se guarda es el texto.
@@ -290,13 +291,14 @@ class _FormularioState extends ConsumerState<_Formulario> {
     });
   }
 
-  /// Sube el afiche.
+  /// Sube el afiche o uno de los logos.
   ///
   /// Con [fuente] abre camara o galeria; con [reintentar] reenvia el archivo
   /// que ya se habia elegido. El estado no vuelve a `idle` hasta que el detalle
   /// se releyo del servidor: asi lo que se ve al terminar es la imagen
   /// guardada, y no la del telefono.
-  Future<void> _subirPortada({
+  Future<void> _subirPortada(
+    MarathonImageSlot hueco, {
     ImageSource? fuente,
     bool reintentar = false,
   }) async {
@@ -304,19 +306,19 @@ class _FormularioState extends ConsumerState<_Formulario> {
     if (id == null) return;
 
     final ruta = reintentar
-        ? _ultimaFoto
+        ? _ultimaFoto[hueco]
         : (fuente == null
               ? null
               : (await ImagePicker().pickImage(source: fuente))?.path);
     if (ruta == null || !mounted) return;
 
     setState(() {
-      _ultimaFoto = ruta;
-      _estadoFoto = ImageSlotStatus.uploading;
+      _ultimaFoto[hueco] = ruta;
+      _estadoFoto[hueco] = ImageSlotStatus.uploading;
     });
 
     try {
-      await ref.read(adminApiProvider).uploadCover(id, ruta);
+      await ref.read(adminApiProvider).uploadMarathonImage(id, hueco, ruta);
       // Se espera la relectura, no solo se pide: mientras no llegue, la URL
       // que hay en pantalla sigue siendo la anterior.
       ref.invalidate(adminMarathonProvider(id));
@@ -325,25 +327,27 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
       if (!mounted) return;
       setState(() {
-        _estadoFoto = ImageSlotStatus.idle;
-        _ultimaFoto = null;
+        _estadoFoto[hueco] = ImageSlotStatus.idle;
+        _ultimaFoto.remove(hueco);
       });
       context.showSnack(context.l10n.adminCoverUploaded);
     } on Failure {
-      if (mounted) setState(() => _estadoFoto = ImageSlotStatus.failed);
+      if (mounted) {
+        setState(() => _estadoFoto[hueco] = ImageSlotStatus.failed);
+      }
     }
   }
 
-  /// Quitar el afiche es vaciar su campo, y eso si va por la edicion normal:
+  /// Quitar una imagen es vaciar su campo, y eso si va por la edicion normal:
   /// no hay endpoint que borre un archivo, ni hace falta.
-  Future<void> _quitarPortada() async {
+  Future<void> _quitarPortada(MarathonImageSlot hueco) async {
     final id = _m?.id;
     if (id == null) return;
 
-    setState(() => _estadoFoto = ImageSlotStatus.uploading);
+    setState(() => _estadoFoto[hueco] = ImageSlotStatus.uploading);
 
     try {
-      await ref.read(adminApiProvider).updateMarathon(id, {'coverUrl': null});
+      await ref.read(adminApiProvider).updateMarathon(id, {hueco.field: null});
       ref.invalidate(adminMarathonProvider(id));
       await ref.read(adminMarathonProvider(id).future);
       ref.invalidate(adminMarathonsProvider);
@@ -353,7 +357,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
       // estado `failed` pintaria un boton de reintentar que no haria nada.
       if (mounted) context.showSnack(f.localized(context.l10n));
     } finally {
-      if (mounted) setState(() => _estadoFoto = ImageSlotStatus.idle);
+      if (mounted) setState(() => _estadoFoto[hueco] = ImageSlotStatus.idle);
     }
   }
 
@@ -622,18 +626,58 @@ class _FormularioState extends ConsumerState<_Formulario> {
     children: [
       _Rotulo(title: t.adminCoverTitle, hint: t.adminCoverHint),
       const SizedBox(height: AppSpacing.md),
-      MarathonImageField(
-        imageUrl: _m?.coverUrl,
-        status: _estadoFoto,
-        aspectRatio: 16 / 9,
-        emptyLabel: t.adminCoverEmpty,
-        enabled: !_esAlta,
-        disabledHint: _esAlta ? t.adminCoverAfterSave : null,
-        onPick: (fuente) => _subirPortada(fuente: fuente),
-        onRetry: () => _subirPortada(reintentar: true),
-        onRemove: _quitarPortada,
+      _hueco(t, MarathonImageSlot.cover, _m?.coverUrl, 16 / 9),
+      const SizedBox(height: AppSpacing.lg),
+      _Rotulo(title: t.adminLogosTitle, hint: t.adminLogosHint),
+      const SizedBox(height: AppSpacing.md),
+      // Cada hueco con la forma de su logo: lo que se ve aqui es como quedara
+      // en la app, que es lo que el organizador tiene que juzgar.
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: _hueco(
+              t,
+              MarathonImageSlot.logoVertical,
+              _m?.logoVerticalUrl,
+              4 / 5,
+              label: t.adminLogoVertical,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            flex: 3,
+            child: _hueco(
+              t,
+              MarathonImageSlot.logoHorizontal,
+              _m?.logoHorizontalUrl,
+              16 / 10,
+              label: t.adminLogoHorizontal,
+            ),
+          ),
+        ],
       ),
     ],
+  );
+
+  Widget _hueco(
+    AppLocalizations t,
+    MarathonImageSlot hueco,
+    String? url,
+    double aspectRatio, {
+    String? label,
+  }) => MarathonImageField(
+    imageUrl: url,
+    status: _estadoFoto[hueco] ?? ImageSlotStatus.idle,
+    aspectRatio: aspectRatio,
+    isLogo: hueco != MarathonImageSlot.cover,
+    emptyLabel: label ?? t.adminCoverEmpty,
+    enabled: !_esAlta,
+    disabledHint: _esAlta ? t.adminCoverAfterSave : null,
+    onPick: (fuente) => _subirPortada(hueco, fuente: fuente),
+    onRetry: () => _subirPortada(hueco, reintentar: true),
+    onRemove: () => _quitarPortada(hueco),
   );
 
   Widget _seccionDatos(AppLocalizations t) => _Tarjeta(

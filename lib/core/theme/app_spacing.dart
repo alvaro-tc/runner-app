@@ -33,6 +33,10 @@ abstract final class AppDurations {
   static const fast = Duration(milliseconds: 150);
   static const base = Duration(milliseconds: 250);
   static const slow = Duration(milliseconds: 400);
+
+  /// Entradas de pantalla y numeros que se llenan: lo bastante largo para
+  /// verse, nunca algo que haya que esperar para usar la pantalla.
+  static const showcase = Duration(milliseconds: 1200);
   static const curve = Curves.easeOutCubic;
 }
 

@@ -10,7 +10,7 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_icon_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
-import 'package:camrun/shared/widgets/atoms/event_image.dart';
+import 'package:camrun/shared/widgets/atoms/marathon_artwork.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
 import 'package:camrun/shared/widgets/molecules/countdown_pill.dart';
@@ -112,16 +112,18 @@ class _Body extends ConsumerWidget {
     final result = entry.result;
 
     final header = <Widget>[
-      ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        child: SizedBox(
-          height: 160,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              EventImage(imageUrl: entry.marathon.heroImageUrl),
-              DecoratedBox(decoration: BoxDecoration(gradient: c.heroOverlay)),
-            ],
+      // El banner entero, como en el detalle de la carrera: el degradado
+      // oscuro de antes apagaba el logo y el alto fijo lo dejaba en una franja.
+      AspectRatio(
+        aspectRatio: 16 / 9,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.xxl),
+            boxShadow: c.cardShadow,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xxl),
+            child: MarathonArtwork(marathon: entry.marathon),
           ),
         ),
       ),

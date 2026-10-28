@@ -4,6 +4,7 @@ import 'package:camrun/core/network/interceptors.dart';
 import 'package:camrun/core/network/server_clock.dart';
 import 'package:camrun/core/network/session_controller.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 
 BaseOptions _options(String baseUrl) => BaseOptions(
   baseUrl: baseUrl,
@@ -47,4 +48,18 @@ Future<T> apiCall<T>(Future<T> Function() body) async {
   } on DioException catch (e) {
     throw e.error is Failure ? e.error! as Failure : const UnexpectedFailure();
   }
+}
+
+/// El archivo elegido con `image_picker`, listo para un `FormData`.
+///
+/// No usa `MultipartFile.fromFile`: tira de `dart:io` y en web revienta, porque
+/// alli [path] es una URL `blob:` y no una ruta del disco. [XFile] sabe leer
+/// las dos. El nombre no puede ir vacio —en web lo esta—: sin `filename` el
+/// servidor toma la parte como un campo de texto y no como un archivo.
+Future<MultipartFile> multipartFromPath(String path) async {
+  final file = XFile(path);
+  return MultipartFile.fromBytes(
+    await file.readAsBytes(),
+    filename: file.name.isEmpty ? 'image' : file.name,
+  );
 }

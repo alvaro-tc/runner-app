@@ -163,7 +163,7 @@ class RacesApi {
     String? reference,
   }) => apiCall(() async {
     final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
+      'file': await multipartFromPath(filePath),
       if (reference != null && reference.isNotEmpty) 'reference': reference,
     });
 

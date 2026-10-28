@@ -6,6 +6,7 @@ sube**, aunque el `versionName` no cambie.
 
 | versionName | versionCode | Fecha | Notas |
 |---|---|---|---|
+| 1.1.2 | 13 | 2026-10-28 | Inicio del corredor simplificado y carreras pasadas |
 | 1.0.9 | 10 | 2026-10-01 | Deslinde de responsabilidad |
 | 1.0.8 | 9 | 2026-09-30 | Recibo de inscripcion |
 | 1.0.7 | 8 | 2026-09-24 | Notificaciones |

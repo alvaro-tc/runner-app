@@ -1,4 +1,5 @@
 import 'package:camrun/core/network/api_client.dart';
+import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:dio/dio.dart';
 
 /// Habla con `/admin/*`. Un solo cliente para todo el panel: son secciones de
@@ -61,17 +62,20 @@ class AdminApi {
   /// No hay variante con URL a proposito. Un enlace a un servidor ajeno se
   /// rompe sin avisar y deja la carrera sin cartel; subiendola, el archivo es
   /// nuestro. El servidor la reencoda y devuelve el detalle ya actualizado.
-  Future<Map<String, dynamic>> uploadCover(String id, String filePath) =>
-      apiCall(() async {
-        final form = FormData.fromMap({
-          'file': await MultipartFile.fromFile(filePath),
-        });
-        final res = await _dio.post<dynamic>(
-          '/admin/marathons/$id/cover',
-          data: form,
-        );
-        return res.data as Map<String, dynamic>;
-      });
+  ///
+  /// Los dos logos van igual, cada uno a su [MarathonImageSlot.path].
+  Future<Map<String, dynamic>> uploadMarathonImage(
+    String id,
+    MarathonImageSlot slot,
+    String filePath,
+  ) => apiCall(() async {
+    final form = FormData.fromMap({'file': await multipartFromPath(filePath)});
+    final res = await _dio.post<dynamic>(
+      '/admin/marathons/$id/${slot.path}',
+      data: form,
+    );
+    return res.data as Map<String, dynamic>;
+  });
 
   // ─── Categorias y extras ─────────────────────────────────────────────────
   //
@@ -153,6 +157,24 @@ class AdminApi {
     final res = await _dio.post<dynamic>('/admin/marathons/$id/finish');
     return res.data as Map<String, dynamic>;
   });
+
+  /// Quita preparacion, largada y corte, y libera los moviles de los
+  /// inscritos. En un ensayo borra ademas lo que se corrio en la prueba.
+  Future<Map<String, dynamic>> resetLive(String id) => apiCall(() async {
+    final res = await _dio.post<dynamic>('/admin/marathons/$id/reset-live');
+    return res.data as Map<String, dynamic>;
+  });
+
+  /// Crea un ensayo: copia privada de la carrera con [emails] como inscritos
+  /// de prueba ya confirmados. Devuelve el detalle de la copia.
+  Future<AdminMarathon> createRehearsal(String id, List<String> emails) =>
+      apiCall(() async {
+        final res = await _dio.post<dynamic>(
+          '/admin/marathons/$id/rehearsal',
+          data: {'emails': emails},
+        );
+        return AdminMarathon.fromJson(res.data as Map<String, dynamic>);
+      });
 
   /// Foto de donde va cada corredor. Es lo que llena el mapa al **abrirlo**;
   /// despues las posiciones llegan por el socket.

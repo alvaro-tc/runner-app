@@ -139,6 +139,38 @@ class AppPalette extends ThemeExtension<AppPalette> {
     colors: [Color(0x00000000), Color(0x59000000)],
   );
 
+  /// Texto e iconos sobre una foto a pantalla completa. Claro en los dos
+  /// temas: debajo siempre va [storyScrim], que es oscuro en los dos.
+  Color get onImage => const Color(0xFFFFFFFF);
+
+  /// Fondo de los logos de carrera. Claro en los dos temas a proposito: un
+  /// logo se disena sobre blanco y en oscuro se perderia la mitad de sus
+  /// trazos. Lleva un tinte de la marca para no parecer un hueco vacio.
+  LinearGradient get logoBackdrop => const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [LightTokens.surface, LightTokens.primaryContainer],
+  );
+
+  /// Velo de la marca sobre las fotos del CAM: las une al morado del tema
+  /// aunque cada una venga con su luz.
+  Color get imageTint => primary.withValues(alpha: 0.14);
+
+  /// Scrim de las fotos a pantalla completa: oscuro arriba para la barra de
+  /// estado, limpio en el centro para la foto y casi opaco abajo, donde va el
+  /// texto blanco. Usa la tinta de la marca, no negro.
+  LinearGradient get storyScrim => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: const [0, 0.3, 0.55, 1],
+    colors: [
+      inkPill.withValues(alpha: 0.6),
+      inkPill.withValues(alpha: 0),
+      inkPill.withValues(alpha: 0.55),
+      inkPill.withValues(alpha: 0.97),
+    ],
+  );
+
   List<BoxShadow> get cardShadow =>
       AppShadows.card(tint: primary, isDark: isDark);
 

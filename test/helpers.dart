@@ -144,8 +144,19 @@ Future<ProviderContainer> pumpApp(
 /// Home runs a one-second countdown and the fake repositories add latency, so
 /// the tree never goes quiet. Navigating away lets both wind down before the
 /// test framework checks for pending timers.
+///
+/// Se quita la app pero no el scope: Riverpod libera los `autoDispose` con el
+/// vsync del scope, y sin scope la cuenta atras queda viva con su timer.
 Future<void> drainHome(WidgetTester tester) async {
-  await tester.pumpWidget(const SizedBox.shrink());
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(CamRunApp)),
+  );
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: const SizedBox.shrink(),
+    ),
+  );
   await tester.pump(const Duration(seconds: 1));
 }
 

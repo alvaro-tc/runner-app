@@ -99,7 +99,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
         orElse: () => DistanceUnit.km,
       ),
       themeChosen: prefs.getString(_kTheme) != null,
-      // Los slides son parte del arranque, no un tramite que se firma una vez:
+      // La historia del CAM es parte del arranque, no un tramite que se firma:
       // se ven en cada sesion nueva. Por eso el flag vive solo en memoria.
       onboardingSeen: false,
     );

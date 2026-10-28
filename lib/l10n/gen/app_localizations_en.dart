@@ -63,13 +63,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get authWelcomeTitle => 'Welcome to\nCamRun';
-
-  @override
-  String get authWelcomeBody =>
-      'Your training plan, your runs and your races — all in one place. Start where you are and build from there.';
-
-  @override
   String get authLogin => 'Login';
 
   @override
@@ -82,10 +75,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authSignInWelcomeBack => 'Welcome back';
 
   @override
-  String get authSignInMissed => 'You\'ve been missed!';
-
-  @override
-  String get authIdentifierLabel => 'Username or Email';
+  String get authIdentifierLabel => 'Email or ID';
 
   @override
   String get authEmailHint => 'you@example.com';
@@ -224,36 +214,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failureSessionExpired => 'Your session expired. Sign in again.';
-
-  @override
-  String get onboardingSkip => 'Skip';
-
-  @override
-  String get onboardingGetStarted => 'Get started';
-
-  @override
-  String get onboardingPlanTitle => 'Train with a plan that adapts';
-
-  @override
-  String get onboardingPlanBody =>
-      'Tell CamRun the race you are chasing. It lays out the weeks, moves sessions when life gets in the way, and keeps the goal in sight.';
-
-  @override
-  String get onboardingTrackTitle => 'Track every run in real time';
-
-  @override
-  String get onboardingTrackBody =>
-      'GPS draws your route as you go. Pace, splits and elapsed time stay on screen, so you always know whether to push or hold back.';
-
-  @override
-  String get onboardingRaceTitle => 'Race, and keep every medal';
-
-  @override
-  String get onboardingRaceBody =>
-      'Enter events from inside the app, then keep your bib, your finish time and your splits together in one place.';
-
-  @override
-  String get homeUpcomingMarathon => 'Upcoming Race In';
 
   @override
   String homePlanTitleOf(String name) {
@@ -1416,7 +1376,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authIdLabel => 'ID number (CI)';
 
   @override
-  String get authIdHint => '1234567 LP';
+  String get authIdHint => 'Enter your email or ID';
 
   @override
   String get authEmailOptionalLabel => 'Email (optional)';
@@ -1465,9 +1425,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changePasswordSubmit => 'Save and continue';
-
-  @override
-  String get homeUpcomingMarathons => 'Upcoming Races';
 
   @override
   String get racesUpcomingMarathons => 'Upcoming races';
@@ -1579,11 +1536,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get authWelcomeCamTitle => 'CAM · Women\'s Support Centre';
+  String get authWelcomeCamTitle => 'Women\'s Help Centre · CAM Bolivia';
 
   @override
   String get authWelcomeCamBody =>
-      'CamRun is the app of the Centro de Apoyo a la Mujer, a non-profit supporting women in vulnerable situations. Every run you log backs that work.';
+      'A place of life in La Paz where women find shelter, information and help. CamRun is its app: every run you log backs that work.';
 
   @override
   String get homeNoSessionTitle => 'No session for this day';
@@ -2786,4 +2743,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waiverRead => 'Read terms and waiver';
+
+  @override
+  String get camTagline => 'You are not alone.';
+
+  @override
+  String get camPillarMotherhoodTitle => 'Supported motherhood';
+
+  @override
+  String get camPillarMotherhoodBody =>
+      'Support for expecting mothers before and after the baby arrives.';
+
+  @override
+  String get camPillarChildrenTitle => 'Children';
+
+  @override
+  String get camPillarChildrenBody =>
+      'Celebrations like Children\'s Day, where every child takes home a new toy.';
+
+  @override
+  String get camCommunity =>
+      'Volunteers, parishes and donors keep the work going. By running, you add to it too.';
+
+  @override
+  String get storyWelcomeBody =>
+      'A place of life in La Paz where every woman finds shelter, information and help.';
+
+  @override
+  String get storyMotherhoodTitle => 'Every life is worth it.';
+
+  @override
+  String get storyChildrenTitle => 'Their joy keeps us going.';
+
+  @override
+  String get storyCommunityEyebrow => 'Community';
+
+  @override
+  String get storyCommunityTitle => 'Together we add up.';
+
+  @override
+  String get storyRunTitle => 'Run for life.';
+
+  @override
+  String get storyRunBody =>
+      'CamRun is the CAM\'s app: your training, your races and every kilometre, in service of its work.';
+
+  @override
+  String get storyHelp => 'Need help?';
+
+  @override
+  String get authSignInPasswordHint => 'Enter your password';
+
+  @override
+  String get homeHeroTitle => 'Every kilometre counts';
+
+  @override
+  String get homeHeroSubtitle =>
+      'Run with CAM and back women building a way forward.';
+
+  @override
+  String get homeNextRaceBadge => 'Coming up next';
+
+  @override
+  String get homeRaceDay => 'It\'s race day!';
+
+  @override
+  String get homeCountdownDays => 'days';
+
+  @override
+  String get homeCountdownHours => 'hours';
+
+  @override
+  String get homeCountdownMinutes => 'min';
+
+  @override
+  String get homeViewDetails => 'View details';
+
+  @override
+  String get homeMoreRaces => 'More races';
+
+  @override
+  String get homePastRaces => 'Past races';
+
+  @override
+  String get homeRaceFinished => 'Finished';
+
+  @override
+  String get homeNoRacesTitle => 'Next race coming soon';
+
+  @override
+  String get homeNoRacesMessage =>
+      'We are preparing the next one. Pull down to check whether it is out.';
+
+  @override
+  String get adminLogosTitle => 'Logos';
+
+  @override
+  String get adminLogosHint =>
+      'PNG with a transparent background. The vertical one is the big poster on Home; the horizontal one goes on cards and headers. With only one, the app uses it everywhere.';
+
+  @override
+  String get adminLogoVertical => 'Vertical logo';
+
+  @override
+  String get adminLogoHorizontal => 'Horizontal logo';
+
+  @override
+  String get adminRehearsalCreate => 'Create a rehearsal with test entrants';
+
+  @override
+  String adminRehearsalDialogTitle(String name) {
+    return 'Rehearsal of $name';
+  }
+
+  @override
+  String get adminRehearsalDialogBody =>
+      'A private copy of the race is created, with its logos, route and schedule. Its entrants are only the accounts you list here: the real race and its entrants are left untouched.';
+
+  @override
+  String get adminRehearsalEmailsLabel => 'Test account emails';
+
+  @override
+  String get adminRehearsalEmailsHint =>
+      'One per line. Each account must already exist in the app.';
+
+  @override
+  String get adminRehearsalCreateAction => 'Create rehearsal';
+
+  @override
+  String get adminRehearsalCreated =>
+      'Rehearsal created. You can now prepare, start and reset it.';
+
+  @override
+  String get adminRehearsalBadge => 'Rehearsal';
+
+  @override
+  String get adminRehearsalNotice =>
+      'Rehearsal: only test entrants are affected.';
+
+  @override
+  String get adminReset => 'Reset race';
+
+  @override
+  String adminResetConfirmTitle(String name) {
+    return 'Reset $name?';
+  }
+
+  @override
+  String get adminResetConfirmBodyRehearsal =>
+      'It goes back to not prepared and not started, and what the test entrants ran is deleted. You can repeat the rehearsal from scratch.';
+
+  @override
+  String get adminResetConfirmBodyReal =>
+      'It goes back to not prepared and not started, and its entrants\' phones are released. What they already ran is kept.';
+
+  @override
+  String get adminResetDone => 'Race reset.';
+
+  @override
+  String get adminRehearsalDelete => 'Delete rehearsal';
+
+  @override
+  String get adminRehearsalDeleteConfirmTitle => 'Delete this rehearsal?';
+
+  @override
+  String get adminRehearsalDeleteConfirmBody =>
+      'The copy is deleted with its test entrants and what they ran. The original race is untouched.';
+
+  @override
+  String get adminRehearsalDeleted => 'Rehearsal deleted.';
 }

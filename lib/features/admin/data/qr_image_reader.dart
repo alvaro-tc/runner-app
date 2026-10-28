@@ -1,8 +1,6 @@
-import 'dart:io';
-import 'dart:isolate';
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:zxing2/qrcode.dart';
 
 /// Saca el **texto** del QR que hay en una foto. `null` si no se leyo ninguno.
@@ -13,10 +11,11 @@ import 'package:zxing2/qrcode.dart';
 /// La foto que sube el organizador es solo el vehiculo, y se tira aqui mismo.
 ///
 /// El decodificado va en un isolate: una foto de 12 MP tarda lo suficiente como
-/// para congelar la pantalla si se hace en el hilo de la interfaz.
+/// para congelar la pantalla si se hace en el hilo de la interfaz. En web no hay
+/// isolates: `compute` lo corre en linea y [XFile] lee la URL `blob:`.
 Future<String?> readQrFromImage(String path) async {
-  final bytes = await File(path).readAsBytes();
-  return Isolate.run(() => _leer(bytes));
+  final bytes = await XFile(path).readAsBytes();
+  return compute(_leer, bytes);
 }
 
 String? _leer(Uint8List bytes) {

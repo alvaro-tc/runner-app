@@ -11,7 +11,7 @@ const _authRoutes = {
   Routes.forgotPassword,
 };
 
-/// Onboarding first, then a session, then the app. Los slides preceden a cada
+/// Onboarding first, then a session, then the app. La historia del CAM precede a cada
 /// login: quien ya tiene sesion viva entra directo. Debug-only routes are let
 /// through untouched so the component showcase stays reachable.
 String? appGuard(Ref ref, GoRouterState state) {
