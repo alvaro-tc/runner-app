@@ -3365,31 +3365,31 @@ abstract class AppLocalizations {
   /// No description provided for @adminCoverTitle.
   ///
   /// In en, this message translates to:
-  /// **'Race photo'**
+  /// **'Logo'**
   String get adminCoverTitle;
 
   /// No description provided for @adminCoverHint.
   ///
   /// In en, this message translates to:
-  /// **'This is the poster runners see in the catalogue.'**
+  /// **'Square. It is the small logo shown in race previews and lists.'**
   String get adminCoverHint;
 
   /// No description provided for @adminCoverEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Add photo'**
+  /// **'Add logo'**
   String get adminCoverEmpty;
 
   /// No description provided for @adminCoverAfterSave.
   ///
   /// In en, this message translates to:
-  /// **'Save the race first to upload the photo'**
+  /// **'Save the race first to upload images'**
   String get adminCoverAfterSave;
 
   /// No description provided for @adminCoverUploaded.
   ///
   /// In en, this message translates to:
-  /// **'Photo updated.'**
+  /// **'Image updated.'**
   String get adminCoverUploaded;
 
   /// No description provided for @adminQrEmpty.
@@ -5211,25 +5211,25 @@ abstract class AppLocalizations {
   /// No description provided for @adminLogosTitle.
   ///
   /// In en, this message translates to:
-  /// **'Logos'**
+  /// **'Promotional material'**
   String get adminLogosTitle;
 
   /// No description provided for @adminLogosHint.
   ///
   /// In en, this message translates to:
-  /// **'PNG with a transparent background. The vertical one is the big poster on Home; the horizontal one goes on cards and headers. With only one, the app uses it everywhere.'**
+  /// **'PNG with a transparent background. The vertical one is the big poster on Home; the horizontal one goes on cards and headers.'**
   String get adminLogosHint;
 
   /// No description provided for @adminLogoVertical.
   ///
   /// In en, this message translates to:
-  /// **'Vertical logo'**
+  /// **'Vertical'**
   String get adminLogoVertical;
 
   /// No description provided for @adminLogoHorizontal.
   ///
   /// In en, this message translates to:
-  /// **'Horizontal logo'**
+  /// **'Horizontal'**
   String get adminLogoHorizontal;
 
   /// No description provided for @adminRehearsalCreate.
@@ -5339,6 +5339,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rehearsal deleted.'**
   String get adminRehearsalDeleted;
+
+  /// No description provided for @adminQrLogoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'QR logo'**
+  String get adminQrLogoTitle;
+
+  /// No description provided for @adminQrLogoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes in the centre of the payment QR. Keep it square and simple so the QR still scans.'**
+  String get adminQrLogoHint;
+
+  /// No description provided for @adminQrLogoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'QR logo'**
+  String get adminQrLogoEmpty;
+
+  /// No description provided for @adminRouteModeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'One way'**
+  String get adminRouteModeLine;
+
+  /// No description provided for @adminRouteModeLoop.
+  ///
+  /// In en, this message translates to:
+  /// **'Loop'**
+  String get adminRouteModeLoop;
+
+  /// No description provided for @adminRouteLineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start is the first point and finish is the last one.'**
+  String get adminRouteLineHint;
+
+  /// No description provided for @adminRouteLoopHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark the whole loop: the first point is both start and finish, and the route closes itself.'**
+  String get adminRouteLoopHint;
+
+  /// No description provided for @adminRouteStartFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Start and finish'**
+  String get adminRouteStartFinish;
+
+  /// No description provided for @adminRouteDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw route'**
+  String get adminRouteDraw;
+
+  /// No description provided for @adminRouteEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit route'**
+  String get adminRouteEdit;
+
+  /// No description provided for @adminSectionGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get adminSectionGeneral;
+
+  /// No description provided for @adminSectionImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get adminSectionImages;
+
+  /// No description provided for @adminSectionProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme'**
+  String get adminSectionProgram;
+
+  /// No description provided for @adminSectionSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get adminSectionSales;
+
+  /// No description provided for @adminSectionPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get adminSectionPayment;
+
+  /// No description provided for @adminSectionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminSectionStatus;
+
+  /// No description provided for @adminUnsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get adminUnsavedChanges;
+
+  /// No description provided for @adminFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get adminFilterAll;
+
+  /// No description provided for @adminNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No race matches your search.'**
+  String get adminNoMatches;
+
+  /// No description provided for @adminSearchMarathons.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or city'**
+  String get adminSearchMarathons;
+
+  /// No description provided for @trainHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Train'**
+  String get trainHubTitle;
+
+  /// No description provided for @trainHubStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a run'**
+  String get trainHubStart;
+
+  /// No description provided for @trainHubQuickFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free run now'**
+  String get trainHubQuickFree;
+
+  /// No description provided for @trainHubGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly goal'**
+  String get trainHubGoal;
+
+  /// No description provided for @trainHubOfGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'of {goal}'**
+  String trainHubOfGoal(String goal);
+
+  /// No description provided for @trainHubWeekCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get trainHubWeekCurrent;
+
+  /// No description provided for @trainHubWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String trainHubWeekOf(String date);
+
+  /// No description provided for @trainHubRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Your runs'**
+  String get trainHubRuns;
+
+  /// No description provided for @trainHubEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded yet'**
+  String get trainHubEmptyTitle;
+
+  /// No description provided for @trainHubEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your runs land here the moment you finish one.'**
+  String get trainHubEmptyBody;
+
+  /// No description provided for @trainHubLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not load your runs.'**
+  String get trainHubLoadError;
+
+  /// No description provided for @trainHubDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this run?'**
+  String get trainHubDeleteTitle;
+
+  /// No description provided for @trainHubDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It disappears from your history and from your weekly totals.'**
+  String get trainHubDeleteBody;
+
+  /// No description provided for @trainHubDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Run deleted'**
+  String get trainHubDeleted;
+
+  /// No description provided for @trainHubDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The run could not be deleted.'**
+  String get trainHubDeleteFailed;
+
+  /// No description provided for @trainHubSplits.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilometre splits'**
+  String get trainHubSplits;
+
+  /// No description provided for @trainHubNoSplits.
+  ///
+  /// In en, this message translates to:
+  /// **'No splits: this run was logged without a route.'**
+  String get trainHubNoSplits;
+
+  /// No description provided for @trainHubBestKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest km'**
+  String get trainHubBestKm;
+
+  /// No description provided for @trainHubMovingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving time'**
+  String get trainHubMovingTime;
+
+  /// No description provided for @trainHubFeeling.
+  ///
+  /// In en, this message translates to:
+  /// **'How it felt'**
+  String get trainHubFeeling;
+
+  /// No description provided for @trainHubNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get trainHubNotes;
+
+  /// No description provided for @trainHubRunMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning run'**
+  String get trainHubRunMorning;
+
+  /// No description provided for @trainHubRunMidday.
+  ///
+  /// In en, this message translates to:
+  /// **'Midday run'**
+  String get trainHubRunMidday;
+
+  /// No description provided for @trainHubRunAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon run'**
+  String get trainHubRunAfternoon;
+
+  /// No description provided for @trainHubRunEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening run'**
+  String get trainHubRunEvening;
+
+  /// No description provided for @trainHubRunNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night run'**
+  String get trainHubRunNight;
+
+  /// No description provided for @trainHubRunRace.
+  ///
+  /// In en, this message translates to:
+  /// **'Race'**
+  String get trainHubRunRace;
+
+  /// No description provided for @trainHubRunPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan session'**
+  String get trainHubRunPlan;
 }
 
 class _AppLocalizationsDelegate

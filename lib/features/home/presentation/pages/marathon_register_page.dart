@@ -1,7 +1,6 @@
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
-import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/core/utils/validators.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
@@ -20,6 +19,7 @@ import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
+import 'package:camrun/shared/widgets/molecules/branded_qr.dart';
 import 'package:camrun/shared/widgets/molecules/phone_field.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
@@ -28,7 +28,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 /// Alta en una carrera, en los mismos tres pasos que lleva el servidor:
 /// datos, categoria y extras, y pago.
@@ -125,16 +124,32 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
     super.initState();
     // Descarta el borrador de otra carrera que hubiera quedado a medias en esta
     // misma pantalla. Con la misma carrera no toca nada: el flujo se retoma.
+    //
+    // Si el flujo de esta carrera quedo abierto —el usuario se fue a Perfil con
+    // el QR en pantalla— se relee del servidor y se vuelve al pago, en vez de
+    // arrancar en el paso 1 con un cobro pendiente colgado encima.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final retomar = widget.resumeRegistrationId;
+      final enCurso = ref.read(registrationFlowProvider);
+      final retomar =
+          widget.resumeRegistrationId ??
+          (enCurso.marathonId == widget.marathonId
+              ? enCurso.registration?.id
+              : null);
       if (retomar == null) return _flow.openFor(widget.marathonId);
 
-      final ok = await _flow.resume(widget.marathonId, retomar);
-      if (!ok || !mounted) return;
-      // Los terminos ya los acepto al pagar la primera vez.
-      _acceptedTerms = true;
-      _goTo(2);
+      await _retomarPago(retomar);
     });
+  }
+
+  /// Carga la inscripcion y su ultimo cobro y, si hay cobro, salta al pago.
+  /// Devuelve `true` si salto.
+  Future<bool> _retomarPago(String registrationId) async {
+    final ok = await _flow.resume(widget.marathonId, registrationId);
+    if (!ok || !mounted) return false;
+    // Los terminos ya los acepto al pagar la primera vez.
+    _acceptedTerms = true;
+    _goTo(2);
+    return true;
   }
 
   void _goTo(int step) {
@@ -217,7 +232,18 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
 
     // El servidor engancha CI, celular y correo a la cuenta al guardar el paso
     // 1: se relee el perfil para que la proxima inscripcion los traiga puestos.
-    if (ok && _step == 0) ref.invalidate(profileProvider);
+    if (ok && _step == 0) {
+      ref.invalidate(profileProvider);
+
+      // Con la app cerrada a mitad del QR el flujo local se pierde, pero el
+      // servidor devuelve el mismo borrador ya en `pending_payment`: se vuelve
+      // a ese cobro en vez de abrir un segundo QR para la misma plaza.
+      final registro = ref.read(registrationFlowProvider).registration;
+      if (registro?.state == RegistrationState.pendingPayment &&
+          await _retomarPago(registro!.id)) {
+        return;
+      }
+    }
 
     if (ok && mounted) _goTo(_step + 1);
   }
@@ -443,7 +469,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
             ],
           ),
         ),
-        if (!_enPagoQr(flow)) _footer(marathon, profile, flow),
+        // Solo el paso de pago se queda sin footer: en otro paso, un cobro
+        // pendiente no puede dejar al usuario sin boton para avanzar.
+        if (_step != 2 || !_enPagoQr(flow)) _footer(marathon, profile, flow),
       ],
     );
   }
@@ -1089,7 +1117,12 @@ class _ManualQrPayment extends StatelessWidget {
         // El QR lo dibuja la app con el texto que mandó la API. No hay
         // version imagen: el QR es texto y nada mas.
         if (payment.qrPayload != null)
-          Center(child: _QrCode(data: payment.qrPayload!)),
+          Center(
+            child: _QrCode(
+              data: payment.qrPayload!,
+              logoUrl: payment.qrLogoUrl,
+            ),
+          ),
         if (payment.qrReference != null) ...[
           const SizedBox(height: AppSpacing.md),
           Text(
@@ -1171,41 +1204,25 @@ class _ManualQrPayment extends StatelessWidget {
 /// esté caída — que es justo lo que pasa cuando alguien saca el teléfono para
 /// pagar.
 ///
-/// El violeta de marca va sobre blanco **siempre**, en los dos temas: un QR es
-/// un contraste antes que un adorno, y el violeta claro del tema oscuro sobre
-/// fondo oscuro no lo lee ningún escáner. La corrección de errores alta es lo
-/// que deja teñir los módulos sin que deje de leerse.
+/// El color, el contraste y el logo del centro los pone [BrandedQr].
 class _QrCode extends StatelessWidget {
-  const _QrCode({required this.data});
+  const _QrCode({required this.data, this.logoUrl});
 
   final String data;
+  final String? logoUrl;
 
   @override
-  Widget build(BuildContext context) {
-    const tinta = LightTokens.primary;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: QrImageView(
-        data: data,
-        size: 220,
-        backgroundColor: Colors.white,
-        errorCorrectionLevel: QrErrorCorrectLevel.H,
-        // Sin margen propio: el padding blanco del contenedor ya es la zona
-        // silenciosa que el escáner necesita alrededor del código.
-        padding: EdgeInsets.zero,
-        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle, color: tinta),
-        dataModuleStyle: const QrDataModuleStyle(
-          dataModuleShape: QrDataModuleShape.square,
-          color: tinta,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(AppSpacing.base),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+    ),
+    child: SizedBox.square(
+      dimension: 220,
+      child: BrandedQr(data: data, logoUrl: logoUrl),
+    ),
+  );
 }
 
 /// Miniatura del comprobante ya subido, con toque para verlo entero.

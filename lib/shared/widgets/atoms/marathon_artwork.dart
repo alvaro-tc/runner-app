@@ -30,13 +30,19 @@ class MarathonArtwork extends StatelessWidget {
   /// midiendo, la imagen saltaria del logo vertical al horizontal a la mitad.
   final double? pickFor;
 
+  /// Hasta este lado el hueco es una miniatura y lleva el logo pequeno.
+  static const _miniatura = 120.0;
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       final medido = box.hasBoundedHeight && box.maxHeight > 0
           ? box.maxWidth / box.maxHeight
           : 1.0;
-      final art = marathon.artworkFor(pickFor ?? medido);
+      final art = marathon.artworkFor(
+        pickFor ?? medido,
+        small: box.biggest.shortestSide <= _miniatura,
+      );
       // Lo que se sube como "logo" suele ser un arte completo —un afiche, un
       // banner—, asi que va como el afiche: entero y a sangre cuando la forma
       // coincide, con su copia difuminada en lo que sobre. Bajo todo, el fondo

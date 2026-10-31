@@ -89,6 +89,8 @@ class Marathon {
   final DateTime date;
   final String city;
   final String country;
+
+  /// El logo pequeno de las vistas previas (`coverUrl` en la API).
   final String heroImageUrl;
 
   /// Los dos logos de la carrera. Vacio = no se subio. Ver [artworkFor].
@@ -102,7 +104,17 @@ class Marathon {
   /// lee. `url` vacia = no hay ninguna imagen.
   static const _hastaVertical = 1.1;
 
-  ({String url, bool isLogo}) artworkFor(double aspectRatio) {
+  ///
+  /// Con [small] —miniaturas de listas y vistas previas— manda el logo
+  /// pequeno ([heroImageUrl]): el material promocional es un arte completo que
+  /// a ese tamano no se lee.
+  ({String url, bool isLogo}) artworkFor(
+    double aspectRatio, {
+    bool small = false,
+  }) {
+    if (small && heroImageUrl.isNotEmpty) {
+      return (url: heroImageUrl, isLogo: true);
+    }
     // Hasta casi cuadrado manda el vertical: en un cuadrado un 4:5 lo llena y
     // un 16:9 se queda en una franja.
     final (preferido, otro) = aspectRatio <= _hastaVertical
@@ -110,7 +122,9 @@ class Marathon {
         : (logoHorizontalUrl, logoVerticalUrl);
     if (preferido.isNotEmpty) return (url: preferido, isLogo: true);
     if (otro.isNotEmpty) return (url: otro, isLogo: true);
-    return (url: heroImageUrl, isLogo: false);
+    // Sin ninguna imagen, el hueco lleva el degradado de marca, no el fondo
+    // claro de los logos.
+    return (url: heroImageUrl, isLogo: heroImageUrl.isNotEmpty);
   }
 
   /// El total que se corre, vueltas incluidas.

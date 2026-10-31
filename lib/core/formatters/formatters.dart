@@ -15,9 +15,14 @@ abstract final class Fmt {
     return '${value.toStringAsFixed(decimals)} ${miles ? 'mi' : 'km'}';
   }
 
-  /// Bare number for the big display metrics, e.g. `12.5`.
-  static String distanceValue(double km, {bool miles = false}) =>
-      (miles ? km / _kmPerMile : km).toStringAsFixed(2);
+  /// Bare number for the big display metrics, e.g. `12.5`. Dos decimales por
+  /// defecto, que es lo que pide el cronometro en marcha; un numero grande que
+  /// se lee de un vistazo pide uno.
+  static String distanceValue(
+    double km, {
+    bool miles = false,
+    int decimals = 2,
+  }) => (miles ? km / _kmPerMile : km).toStringAsFixed(decimals);
 
   /// Ring label: `5K`, `14K`, `21K`.
   static String distanceShort(double km) => '${km.round()}K';

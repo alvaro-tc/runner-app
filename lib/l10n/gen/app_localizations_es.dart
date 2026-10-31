@@ -1829,21 +1829,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inscripciones cerradas. Nadie más puede anotarse.';
 
   @override
-  String get adminCoverTitle => 'Foto de la carrera';
+  String get adminCoverTitle => 'Logo';
 
   @override
   String get adminCoverHint =>
-      'Es el afiche que ve el corredor en el catálogo.';
+      'Cuadrado. Es el logo pequeño de las vistas previas y listas de carreras.';
 
   @override
-  String get adminCoverEmpty => 'Añadir foto';
+  String get adminCoverEmpty => 'Añadir logo';
 
   @override
   String get adminCoverAfterSave =>
-      'Guarda la carrera para poder subir la foto';
+      'Guarda la carrera para poder subir imágenes';
 
   @override
-  String get adminCoverUploaded => 'Foto actualizada.';
+  String get adminCoverUploaded => 'Imagen actualizada.';
 
   @override
   String get adminQrEmpty => 'Añadir QR';
@@ -2856,17 +2856,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estamos preparando la siguiente. Tira hacia abajo para ver si ya está publicada.';
 
   @override
-  String get adminLogosTitle => 'Logos';
+  String get adminLogosTitle => 'Material promocional';
 
   @override
   String get adminLogosHint =>
-      'PNG con fondo transparente. El vertical es el afiche grande del inicio; el horizontal, tarjetas y cabeceras. Con uno solo, la app lo usa para todo.';
+      'PNG con fondo transparente. El vertical es el afiche grande del inicio; el horizontal va en tarjetas y cabeceras.';
 
   @override
-  String get adminLogoVertical => 'Logo vertical';
+  String get adminLogoVertical => 'Vertical';
 
   @override
-  String get adminLogoHorizontal => 'Logo horizontal';
+  String get adminLogoHorizontal => 'Horizontal';
 
   @override
   String get adminRehearsalCreate => 'Crear ensayo con inscritos de prueba';
@@ -2932,4 +2932,158 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adminRehearsalDeleted => 'Ensayo borrado.';
+
+  @override
+  String get adminQrLogoTitle => 'Logo del QR';
+
+  @override
+  String get adminQrLogoHint =>
+      'Va en el centro del QR de cobro. Cuadrado y simple, para que el QR se siga leyendo.';
+
+  @override
+  String get adminQrLogoEmpty => 'Logo del QR';
+
+  @override
+  String get adminRouteModeLine => 'Lineal';
+
+  @override
+  String get adminRouteModeLoop => 'Circular';
+
+  @override
+  String get adminRouteLineHint =>
+      'La salida es el primer punto y la meta el último.';
+
+  @override
+  String get adminRouteLoopHint =>
+      'Marca la vuelta completa: el primer punto es la salida y la meta, y el recorrido se cierra solo.';
+
+  @override
+  String get adminRouteStartFinish => 'Salida y meta';
+
+  @override
+  String get adminRouteDraw => 'Marcar recorrido';
+
+  @override
+  String get adminRouteEdit => 'Editar recorrido';
+
+  @override
+  String get adminSectionGeneral => 'General';
+
+  @override
+  String get adminSectionImages => 'Imágenes';
+
+  @override
+  String get adminSectionProgram => 'Programa';
+
+  @override
+  String get adminSectionSales => 'Inscripción';
+
+  @override
+  String get adminSectionPayment => 'Cobro';
+
+  @override
+  String get adminSectionStatus => 'Estado';
+
+  @override
+  String get adminUnsavedChanges => 'Cambios sin guardar';
+
+  @override
+  String get adminFilterAll => 'Todas';
+
+  @override
+  String get adminNoMatches => 'Ninguna carrera coincide con la búsqueda.';
+
+  @override
+  String get adminSearchMarathons => 'Buscar por nombre o ciudad';
+
+  @override
+  String get trainHubTitle => 'Entrenar';
+
+  @override
+  String get trainHubStart => 'Empezar a correr';
+
+  @override
+  String get trainHubQuickFree => 'Correr libre ya';
+
+  @override
+  String get trainHubGoal => 'Meta semanal';
+
+  @override
+  String trainHubOfGoal(String goal) {
+    return 'de $goal';
+  }
+
+  @override
+  String get trainHubWeekCurrent => 'Esta semana';
+
+  @override
+  String trainHubWeekOf(String date) {
+    return 'Semana del $date';
+  }
+
+  @override
+  String get trainHubRuns => 'Tus salidas';
+
+  @override
+  String get trainHubEmptyTitle => 'Todavía no hay nada grabado';
+
+  @override
+  String get trainHubEmptyBody =>
+      'Tus salidas aparecen aquí en cuanto termines una.';
+
+  @override
+  String get trainHubLoadError => 'No pudimos cargar tus salidas.';
+
+  @override
+  String get trainHubDeleteTitle => '¿Borrar esta salida?';
+
+  @override
+  String get trainHubDeleteBody =>
+      'Desaparece de tu historial y de los totales de la semana.';
+
+  @override
+  String get trainHubDeleted => 'Salida borrada';
+
+  @override
+  String get trainHubDeleteFailed => 'No se pudo borrar la salida.';
+
+  @override
+  String get trainHubSplits => 'Parciales por kilómetro';
+
+  @override
+  String get trainHubNoSplits =>
+      'Sin parciales: esta salida se registró sin recorrido.';
+
+  @override
+  String get trainHubBestKm => 'Km más rápido';
+
+  @override
+  String get trainHubMovingTime => 'Tiempo en movimiento';
+
+  @override
+  String get trainHubFeeling => 'Cómo se sintió';
+
+  @override
+  String get trainHubNotes => 'Notas';
+
+  @override
+  String get trainHubRunMorning => 'Salida de la mañana';
+
+  @override
+  String get trainHubRunMidday => 'Salida del mediodía';
+
+  @override
+  String get trainHubRunAfternoon => 'Salida de la tarde';
+
+  @override
+  String get trainHubRunEvening => 'Salida de la noche';
+
+  @override
+  String get trainHubRunNight => 'Salida nocturna';
+
+  @override
+  String get trainHubRunRace => 'Carrera';
+
+  @override
+  String get trainHubRunPlan => 'Sesión del plan';
 }

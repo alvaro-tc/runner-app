@@ -249,6 +249,7 @@ PaymentInfo paymentFrom(Map<String, dynamic> j) {
     amount: _dinero(j['amountCents'], j['currency'] as String? ?? 'BOB'),
     failureReason: j['failureReason'] as String?,
     qrPayload: qrManual?['payload'] as String?,
+    qrLogoUrl: qrManual?['logoUrl'] as String?,
     qrInstructions: qrManual?['instructions'] as String?,
     qrReference: qrManual?['reference'] as String?,
     bankReference: banco?['reference'] as String?,

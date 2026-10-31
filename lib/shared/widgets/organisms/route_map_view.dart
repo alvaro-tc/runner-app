@@ -211,6 +211,9 @@ class RouteMapViewState extends State<RouteMapView> {
         mapController: _controller,
         options: MapOptions(
           initialCenter: center,
+          // Transparente: debajo va el color del tema. El gris por defecto de
+          // flutter_map se veia como un parche claro en modo oscuro.
+          backgroundColor: Colors.transparent,
           initialZoom: widget.follow != null ? 16 : 14,
           // Esri no tiene teselas mas alla del 16: pasado ahi devuelve una
           // imagen que dice "Map data not yet available". Se deja acercar dos
@@ -269,8 +272,10 @@ class RouteMapViewState extends State<RouteMapView> {
               ],
             ),
           MarkerLayer(markers: _markers(points, guideDibujo, c.isDark)),
-          // Esri pide credito visible por usar sus teselas.
-          if (widget.tiles) const SimpleAttributionWidget(source: Text('Esri')),
+          // Esri pide credito visible por usar sus teselas. Propio y no
+          // `SimpleAttributionWidget`: ese antepone "flutter_map" sin opcion
+          // de quitarlo, y la libreria no es un credito que haya que dar.
+          if (widget.tiles) const _Credito(),
         ],
       ),
     );
@@ -300,9 +305,22 @@ class RouteMapViewState extends State<RouteMapView> {
     final banderas = guide.isEmpty ? points : guide;
 
     if (widget.showStartFinish && banderas.length > 1) {
-      markers
-        ..add(_flag(banderas.first, Icons.flag_rounded, c.success))
-        ..add(_flag(banderas.last, Icons.sports_score_rounded, c.error));
+      // Circuito cerrado: salida y meta son el mismo sitio. Dos banderas ahi
+      // se taparian una a otra; va una sola que dice las dos cosas.
+      // Se mira el trazado sin apartar: el corrimiento lateral separa unos
+      // metros el primer punto del ultimo aunque sean el mismo.
+      final original = widget.guideRoute.isEmpty
+          ? widget.route
+          : widget.guideRoute;
+      if (isClosedLoop([for (final p in original) (lat: p.lat, lng: p.lng)])) {
+        markers.add(
+          _flag(banderas.first, Icons.flag_circle_rounded, c.primary),
+        );
+      } else {
+        markers
+          ..add(_flag(banderas.first, Icons.flag_rounded, c.success))
+          ..add(_flag(banderas.last, Icons.sports_score_rounded, c.error));
+      }
     }
 
     // Flechas cada tramo del circuito: dicen hacia donde se corre, que es lo
@@ -405,6 +423,59 @@ class RouteMapViewState extends State<RouteMapView> {
       ),
     ),
   );
+}
+
+/// El trazado vuelve a donde empezo: salida y meta a menos de [toleranciaM].
+bool isClosedLoop(
+  List<({double lat, double lng})> puntos, {
+  double toleranciaM = 30,
+}) {
+  if (puntos.length < 3) return false;
+  final a = puntos.first;
+  final z = puntos.last;
+  return const Distance().as(
+        LengthUnit.Meter,
+        LatLng(a.lat, a.lng),
+        LatLng(z.lat, z.lng),
+      ) <=
+      toleranciaM;
+}
+
+class _Credito extends StatelessWidget {
+  const _Credito();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Container(
+        margin: const EdgeInsets.all(AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs + 2,
+          vertical: AppSpacing.xxs,
+        ),
+        decoration: BoxDecoration(
+          color: c.surface.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.copyright_rounded, size: 9, color: c.textSecondary),
+            const SizedBox(width: AppSpacing.xxs),
+            Text(
+              'Esri',
+              style: context.text.labelSm.copyWith(
+                color: c.textSecondary,
+                fontSize: 9,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _UserDot extends StatelessWidget {

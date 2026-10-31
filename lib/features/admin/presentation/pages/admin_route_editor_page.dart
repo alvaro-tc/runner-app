@@ -7,12 +7,39 @@ import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
 import 'package:flutter/material.dart';
 
+/// Como se cierra el trazado que se marca.
+enum RouteShape {
+  /// Salida en el primer punto, meta en el ultimo.
+  line,
+
+  /// Se marca la ida; la vuelta es la misma linea al reves.
+  outAndBack,
+
+  /// Se marca la vuelta entera; el ultimo punto se une al primero, que es a la
+  /// vez salida y meta.
+  loop,
+}
+
+/// Lo que se guarda para los vertices marcados en cada forma.
+///
+/// Ida y vuelta y circular se guardan **expandidos** —la vuelta duplicada, el
+/// cierre repetido— y no como una bandera: asi la distancia, el mapa del
+/// corredor y los marcadores de kilometro salen bien sin que nadie mas tenga
+/// que saber que esta ruta era especial.
+List<GeoPoint> routeForShape(List<GeoPoint> puntos, RouteShape forma) {
+  if (puntos.length < 2) return puntos;
+  return switch (forma) {
+    RouteShape.line => puntos,
+    // El punto de giro no se repite: seria un tramo de distancia cero.
+    RouteShape.outAndBack => [...puntos, ...puntos.reversed.skip(1)],
+    RouteShape.loop => [...puntos, puntos.first],
+  };
+}
+
 /// Marcar el recorrido tocando el mapa.
 ///
 /// Es un editor de **vertices**, no de calles: cada toque agrega un punto y la
-/// linea los une en orden. No sigue el trazado de la via porque eso necesita un
-/// servicio de rutas —una dependencia, una clave de API y una tarifa— para algo
-/// que en una carrera se resuelve poniendo un punto en cada esquina.
+/// linea los une en orden.
 ///
 /// ponytail: sin ajuste a calles. Si algun dia hace falta, el sitio es este y
 /// lo que cambia es de donde sale [_puntos]; el resto de la pantalla no se
@@ -28,24 +55,20 @@ class AdminRouteEditorPage extends StatefulWidget {
 }
 
 class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
-  late List<GeoPoint> _puntos = [...widget.initial];
+  // Un circuito guardado trae el cierre repetido: se quita para editar los
+  // vertices, y se vuelve a poner al guardar.
+  late final bool _eraCircular = isClosedLoop([
+    for (final p in widget.initial) (lat: p.lat, lng: p.lng),
+  ]);
+  late RouteShape _forma = _eraCircular ? RouteShape.loop : RouteShape.line;
+  late List<GeoPoint> _puntos = _eraCircular
+      ? widget.initial.sublist(0, widget.initial.length - 1)
+      : [...widget.initial];
 
-  /// Ida y vuelta por el mismo sitio.
-  ///
-  /// Es el caso de casi cualquier carrera en avenida recta: se marca solo la
-  /// ida y la vuelta es la misma linea al reves. Se guarda **duplicado** y no
-  /// como una bandera porque asi la distancia, el mapa del corredor y los
-  /// marcadores de kilometro salen bien sin que nadie mas tenga que saber que
-  /// esta ruta era especial.
-  bool _idaYVuelta = false;
+  List<GeoPoint> get _trazado => routeForShape(_puntos, _forma);
 
-  /// Lo que se guarda: la ida, mas la vuelta si toca. El punto de giro no se
-  /// repite —seria un punto a distancia cero— asi que la vuelta empieza en el
-  /// penultimo.
-  List<GeoPoint> get _trazado {
-    if (!_idaYVuelta || _puntos.length < 2) return _puntos;
-    return [..._puntos, ..._puntos.reversed.skip(1)];
-  }
+  /// Un circuito con dos puntos es una ida y vuelta: hacen falta tres.
+  int get _minimo => _forma == RouteShape.loop ? 3 : 2;
 
   double get _km {
     final ruta = _trazado;
@@ -103,10 +126,10 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
             route: const [],
             guideRoute: trazado,
             onTap: _agregar,
-            // Sin el punto de giro marcado, una ida y vuelta se ve como una
-            // sola linea y no hay forma de saber donde se da media vuelta.
             pins: [
-              for (var i = 0; i < _puntos.length; i++)
+              // El primero ya lo marca la bandera de salida en cuanto hay
+              // linea; un punto encima la taparia.
+              for (var i = trazado.length > 1 ? 1 : 0; i < _puntos.length; i++)
                 MapPin(
                   lat: _puntos[i].lat,
                   lng: _puntos[i].lng,
@@ -121,46 +144,69 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
                 ),
             ],
           );
-          final panel = Container(
+          final panel = Padding(
             padding: const EdgeInsets.all(AppSpacing.screenH),
-            decoration: BoxDecoration(
-              color: c.surface,
-              border: side ? null : Border(top: BorderSide(color: c.border)),
-            ),
             child: SafeArea(
               top: false,
               left: !side,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _puntos.isEmpty
-                        ? t.adminRouteHint
-                        : t.adminRoutePoints(_puntos.length, Fmt.distance(_km)),
-                    style: context.text.bodySm.copyWith(color: c.textSecondary),
+                  SegmentedButton<RouteShape>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: RouteShape.line,
+                        icon: const Icon(Icons.trending_flat_rounded),
+                        label: Text(t.adminRouteModeLine),
+                      ),
+                      ButtonSegment(
+                        value: RouteShape.outAndBack,
+                        icon: const Icon(Icons.swap_horiz_rounded),
+                        label: Text(t.adminRouteOutAndBack),
+                      ),
+                      ButtonSegment(
+                        value: RouteShape.loop,
+                        icon: const Icon(Icons.loop_rounded),
+                        label: Text(t.adminRouteModeLoop),
+                      ),
+                    ],
+                    selected: {_forma},
+                    onSelectionChanged: (s) => setState(() => _forma = s.first),
                   ),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    value: _idaYVuelta,
-                    onChanged: (v) => setState(() => _idaYVuelta = v),
-                    title: Text(
-                      t.adminRouteOutAndBack,
-                      style: context.text.bodyMd,
-                    ),
-                    subtitle: Text(
-                      t.adminRouteOutAndBackHint,
+                  const SizedBox(height: AppSpacing.md),
+                  // La pista cambia con la forma: es lo que explica que hacer
+                  // en el mapa, y un cambio sin transicion pasa desapercibido.
+                  AnimatedSwitcher(
+                    duration: context.reduceMotion
+                        ? Duration.zero
+                        : AppDurations.base,
+                    switchInCurve: AppDurations.curve,
+                    child: Text(
+                      switch (_forma) {
+                        RouteShape.line => t.adminRouteLineHint,
+                        RouteShape.outAndBack => t.adminRouteOutAndBackHint,
+                        RouteShape.loop => t.adminRouteLoopHint,
+                      },
+                      key: ValueKey(_forma),
                       style: context.text.bodySm.copyWith(
                         color: c.textSecondary,
                       ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    _puntos.isEmpty
+                        ? t.adminRouteHint
+                        : t.adminRoutePoints(_puntos.length, Fmt.distance(_km)),
+                    style: context.text.labelSm.copyWith(color: c.textPrimary),
+                  ),
+                  const SizedBox(height: AppSpacing.base),
                   AppButton(
                     label: t.commonSave,
                     icon: Icons.check_rounded,
-                    // Un punto suelto no es un recorrido: sin dos, el mapa del
-                    // corredor no tiene ninguna linea que seguir.
-                    onPressed: _puntos.length < 2
+                    onPressed: _puntos.length < _minimo
                         ? null
                         : () => Navigator.of(context).pop(trazado),
                   ),
@@ -190,7 +236,13 @@ class _AdminRouteEditorPageState extends State<AdminRouteEditorPage> {
           return Column(
             children: [
               Expanded(child: map),
-              panel,
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  border: Border(top: BorderSide(color: c.border)),
+                ),
+                child: panel,
+              ),
             ],
           );
         },

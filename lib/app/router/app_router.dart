@@ -31,9 +31,10 @@ import 'package:camrun/features/races/presentation/pages/race_receipt_page.dart'
 import 'package:camrun/features/races/presentation/pages/race_start_page.dart';
 import 'package:camrun/features/races/presentation/pages/races_page.dart';
 import 'package:camrun/features/races/presentation/widgets/marathon_gate.dart';
+import 'package:camrun/features/train/presentation/hub/pages/run_log_page.dart';
+import 'package:camrun/features/train/presentation/hub/pages/train_hub_page.dart';
 import 'package:camrun/features/train/presentation/pages/run_session_page.dart';
 import 'package:camrun/features/train/presentation/pages/run_summary_page.dart';
-import 'package:camrun/features/train/presentation/pages/train_page.dart';
 import 'package:camrun/features/train/presentation/pages/train_setup_page.dart';
 import 'package:camrun/shared/widgets/organisms/app_shell.dart';
 import 'package:camrun/shared/widgets/organisms/showcase_page.dart';
@@ -279,7 +280,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.train,
-                builder: (context, state) => const TrainPage(),
+                builder: (context, state) => const TrainHubPage(),
                 routes: [
                   GoRoute(
                     path: 'setup',
@@ -301,10 +302,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'history/:id',
-                    builder: (context, state) => RunSummaryPage(
-                      runId: state.pathParameters['id']!,
-                      readOnly: true,
-                    ),
+                    // El detalle de una salida ya subida: lee `/workouts/:id`,
+                    // no la caja local. `RunSummaryPage` sigue siendo la de
+                    // recien terminar de correr, que es otra pantalla.
+                    builder: (context, state) =>
+                        RunLogPage(runId: state.pathParameters['id']!),
                   ),
                 ],
               ),

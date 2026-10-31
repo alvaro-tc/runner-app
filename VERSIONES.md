@@ -6,6 +6,7 @@ sube**, aunque el `versionName` no cambie.
 
 | versionName | versionCode | Fecha | Notas |
 |---|---|---|---|
+| 1.1.3 | 14 | 2026-10-30 | Hub de entrenamiento con historial remoto, QR de marca, fixes de rutas en admin |
 | 1.1.2 | 13 | 2026-10-28 | Inicio del corredor simplificado y carreras pasadas |
 | 1.0.9 | 10 | 2026-10-01 | Deslinde de responsabilidad |
 | 1.0.8 | 9 | 2026-09-30 | Recibo de inscripcion |

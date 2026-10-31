@@ -4,13 +4,13 @@ import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/error/failure.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
-import 'package:camrun/core/theme/app_colors.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/data/qr_image_reader.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/pages/admin_route_editor_page.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
+import 'package:camrun/features/admin/presentation/widgets/fade_in_up.dart';
 import 'package:camrun/features/admin/presentation/widgets/marathon_image_field.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
@@ -18,8 +18,9 @@ import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_button.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
 import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
+import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
-import 'package:camrun/shared/widgets/layout/responsive.dart';
+import 'package:camrun/shared/widgets/molecules/branded_qr.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
 import 'package:camrun/shared/widgets/organisms/route_map_view.dart';
@@ -28,22 +29,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 /// Alta y edicion de una carrera, entera desde el movil.
 ///
 /// Con [marathonId] en `null` es el alta. Es la misma pantalla porque los
 /// campos son los mismos: dos formularios paralelos se desincronizan en el
-/// primer campo nuevo, y entonces el panel puede crear algo que no puede editar.
+/// primer campo nuevo.
 ///
-/// Hay dos velocidades conviviendo, y la diferencia es deliberada:
+/// El formulario va por secciones con un indice arriba (al costado en tablet)
+/// que salta a cada una y sigue a la que se esta viendo. Hay dos velocidades:
 ///
-/// * **El contenido se guarda.** Nombre, fecha, precio y demas se editan y
-///   viajan juntos al pulsar Guardar, y solo viaja lo que se toco.
-/// * **El estado y las imagenes son inmediatos.** Publicar, abrir inscripciones
-///   y subir una foto tienen su propio endpoint y ocurren al momento. Meterlos
-///   en el boton de guardar obligaria a explicar por que una foto que ya se ve
-///   todavia no esta subida.
+/// * **El contenido se guarda.** Nombre, fecha, precio y demas viajan juntos
+///   desde la barra de guardar, que solo aparece cuando hay algo que guardar.
+/// * **El estado, las imagenes, categorias y extras son inmediatos**: tienen
+///   su propio endpoint y ocurren al momento.
 class AdminMarathonEditPage extends ConsumerWidget {
   const AdminMarathonEditPage({this.marathonId, super.key});
 
@@ -58,11 +57,10 @@ class AdminMarathonEditPage extends ConsumerWidget {
 
     final carrera = ref.watch(adminMarathonProvider(id));
     return carrera.when(
-      // Un refresco de fondo no vacia una pantalla que ya tiene datos.
-      skipLoadingOnReload: true,
       // Al refrescar tras subir una imagen se sigue pintando el formulario con
       // lo anterior: cambiarlo por el esqueleto lo desmontaria y se perderia lo
       // que hubiera escrito sin guardar.
+      skipLoadingOnReload: true,
       skipLoadingOnRefresh: true,
       loading: () => Scaffold(
         appBar: AppBar(title: Text(t.adminEditMarathon)),
@@ -78,6 +76,17 @@ class AdminMarathonEditPage extends ConsumerWidget {
       data: (m) => _Formulario(original: m),
     );
   }
+}
+
+/// Las secciones del formulario, en el orden en que se pintan.
+enum _Seccion {
+  general,
+  imagenes,
+  recorrido,
+  inscripcion,
+  programa,
+  cobro,
+  estado,
 }
 
 class _Formulario extends ConsumerStatefulWidget {
@@ -96,8 +105,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
   late final _cupo = TextEditingController(
     text: _m == null ? '' : '${_m!.capacity}',
   );
-  // El precio se edita en bolivianos y viaja en centavos: la conversion vive en
-  // la frontera, como en el resto de la app.
+  // El precio se edita en bolivianos y viaja en centavos.
   late final _precio = TextEditingController(
     text: _m == null ? '' : (_m!.priceCents / 100).toStringAsFixed(2),
   );
@@ -112,63 +120,87 @@ class _FormularioState extends ConsumerState<_Formulario> {
     text: _m?.paymentQrInstructions ?? '',
   );
 
+  late final _controles = [
+    _nombre,
+    _ciudad,
+    _descripcion,
+    _cupo,
+    _precio,
+    _distancia,
+    _vueltas,
+    _qrTexto,
+  ];
+
   late DateTime _fecha =
       _m?.startsAt ?? DateTime.now().add(const Duration(days: 30));
   late List<GeoPoint> _ruta = _m?.route ?? const [];
 
-  /// Cronograma y "que incluye" son dos campos `jsonb` de la propia carrera,
-  /// asi que se editan aqui y viajan con el boton de guardar, como el nombre.
-  /// Categorias y extras no: esos son tablas aparte y se guardan al momento.
+  /// Cronograma y "que incluye" son campos `jsonb` de la propia carrera: viajan
+  /// con el guardado. Categorias y extras son tablas aparte y van al momento.
   late List<AdminScheduleItem> _cronograma = _m?.schedule ?? const [];
   late List<String> _incluye = _m?.includes ?? const [];
 
-  /// Como estaba todo al abrir. Es contra esto que se decide que viaja: la
-  /// edicion es parcial, y mandar el objeto entero pisaria con valores viejos
-  /// lo que otro haya cambiado mientras tanto.
+  /// Como estaba todo al abrir. Contra esto se decide que viaja: mandar el
+  /// objeto entero pisaria con valores viejos lo que otro haya cambiado.
   late final Map<String, Object?> _inicial = _instantanea();
 
   bool _guardando = false;
   Failure? _errorGuardado;
 
+  /// Ya se decidio salir (guardado o descartado): el aviso de cambios sin
+  /// guardar no tiene que saltar.
+  bool _saliendo = false;
+
   /// Cada hueco de imagen sube, falla y se reintenta por su cuenta.
   final _estadoFoto = <MarathonImageSlot, ImageSlotStatus>{};
 
-  /// El ultimo archivo elegido para cada hueco. Reintentar una subida que fallo
-  /// tiene que reenviar **ese** archivo, no abrir la galeria otra vez.
+  /// El ultimo archivo elegido para cada hueco: reintentar reenvia **ese**.
   final _ultimaFoto = <MarathonImageSlot, String>{};
 
-  /// El contenido del QR de cobro. De la foto que elige el organizador solo
-  /// queda esto: la imagen se lee y se tira, y lo que se guarda es el texto.
+  /// El contenido del QR de cobro. De la foto solo queda el texto.
   late String? _qrPayload = _m?.paymentQrPayload;
   bool _leyendoQr = false;
 
   bool _cambiandoEstado = false;
 
+  final _scroll = ScrollController();
+  final _vista = GlobalKey();
+  late final _anclas = {for (final s in _secciones) s: GlobalKey()};
+  late final _chips = {for (final s in _secciones) s: GlobalKey()};
+  _Seccion _activa = _Seccion.general;
+
   AdminMarathon? get _m => widget.original;
 
   bool get _esAlta => _m == null;
 
+  /// El estado de la carrera no existe en el alta.
+  List<_Seccion> get _secciones => [
+    for (final s in _Seccion.values)
+      if (s != _Seccion.estado || !_esAlta) s,
+  ];
+
   @override
   void initState() {
     super.initState();
-    // Se fuerza aqui a proposito. `_inicial` es `late final`, o sea perezoso:
-    // sin este toque se calcularia en el primer guardado —ya con los cambios
-    // dentro— y la comparacion no encontraria nunca nada que mandar.
+    // Se fuerza aqui a proposito: `_inicial` es perezoso y, sin este toque, se
+    // calcularia ya con los cambios dentro.
     _inicial;
+    for (final c in _controles) {
+      c.addListener(_refrescar);
+    }
+    _scroll.addListener(_seguirSeccion);
   }
 
   @override
   void dispose() {
-    _nombre.dispose();
-    _ciudad.dispose();
-    _descripcion.dispose();
-    _cupo.dispose();
-    _precio.dispose();
-    _distancia.dispose();
-    _vueltas.dispose();
-    _qrTexto.dispose();
+    for (final c in _controles) {
+      c.dispose();
+    }
+    _scroll.dispose();
     super.dispose();
   }
+
+  void _refrescar() => setState(() {});
 
   // ─── Lo que el formulario vale ahora ──────────────────────────────────────
 
@@ -180,15 +212,16 @@ class _FormularioState extends ConsumerState<_Formulario> {
     return metros / 1000;
   }
 
-  /// Metros de una vuelta. Es lo que espera la API en `distanceMeters`: el
-  /// total lo hace ella multiplicando por las vueltas.
+  /// Metros de una vuelta: el total lo hace la API multiplicando por vueltas.
   int get _metros =>
       ((double.tryParse(_distancia.text.trim()) ?? 0) * 1000).round();
 
   int get _numeroDeVueltas => int.tryParse(_vueltas.text.trim()) ?? 0;
 
-  /// Lo que acabara corriendo el inscrito, para pintarlo debajo de los campos.
   double get _totalKm => _metros * _numeroDeVueltas / 1000;
+
+  bool get _esCircular =>
+      isClosedLoop([for (final p in _ruta) (lat: p.lat, lng: p.lng)]);
 
   Map<String, Object?> _instantanea() => {
     'name': _nombre.text.trim(),
@@ -201,12 +234,10 @@ class _FormularioState extends ConsumerState<_Formulario> {
     'laps': _numeroDeVueltas,
     'paymentQrPayload': _qrPayload ?? '',
     'paymentQrInstructions': _qrTexto.text.trim(),
-    // Las listas se comparan por su JSON: es lo mismo que se va a mandar, y
-    // asi un `==` de String basta para saber si cambiaron.
+    // Las listas se comparan por su JSON: es lo mismo que se va a mandar.
     'schedule': jsonEncode([for (final i in _cronograma) i.toJson()]),
     'includes': jsonEncode(_incluye),
-    // El trazado se compara por su forma, no por la lista entera: son miles de
-    // puntos y basta con saber si cambio.
+    // El trazado se compara por su forma: son miles de puntos.
     'routeGeoJson': _huellaDeRuta(_ruta),
   };
 
@@ -217,34 +248,83 @@ class _FormularioState extends ConsumerState<_Formulario> {
     return '${puntos.length}:${a.lat},${a.lng}:${z.lat},${z.lng}';
   }
 
-  /// Solo lo que cambio. En el alta no hay contra que comparar, asi que va todo.
-  Map<String, dynamic> _cuerpo() {
+  /// Lo que cambio desde que se abrio. Tambien sirve en el alta: ahi decide
+  /// si salir pierde algo.
+  Map<String, Object?> get _cambios {
     final ahora = _instantanea();
-
-    if (_esAlta) {
-      return {
-        for (final e in ahora.entries)
-          if (e.key != 'routeGeoJson') e.key: _paraLaApi(e.key, e.value),
-        if (_ruta.length > 1) 'routeGeoJson': routeToGeoJson(_ruta),
-      };
-    }
-
-    final cambios = <String, dynamic>{};
-    for (final e in ahora.entries) {
-      if (e.value == _inicial[e.key]) continue;
-      cambios[e.key] = e.key == 'routeGeoJson'
-          ? (_ruta.length > 1 ? routeToGeoJson(_ruta) : null)
-          : _paraLaApi(e.key, e.value);
-    }
-    return cambios;
+    return {
+      for (final e in ahora.entries)
+        if (e.value != _inicial[e.key]) e.key: e.value,
+    };
   }
 
-  /// Las listas viven en la instantanea como JSON —para poder compararlas— y
-  /// salen de ella como listas, que es lo que espera la API.
+  /// Solo lo que cambio. En el alta no hay contra que comparar: va todo.
+  Map<String, dynamic> _cuerpo() {
+    final campos = _esAlta ? _instantanea() : _cambios;
+    return {
+      for (final e in campos.entries)
+        if (e.key != 'routeGeoJson') e.key: _paraLaApi(e.key, e.value),
+      if (campos.containsKey('routeGeoJson') && (!_esAlta || _ruta.length > 1))
+        'routeGeoJson': _ruta.length > 1 ? routeToGeoJson(_ruta) : null,
+    };
+  }
+
   static Object? _paraLaApi(String campo, Object? valor) =>
       const {'schedule', 'includes'}.contains(campo)
       ? jsonDecode(valor! as String)
       : valor;
+
+  // ─── Navegacion por secciones ─────────────────────────────────────────────
+
+  Duration get _movimiento =>
+      context.reduceMotion ? Duration.zero : AppDurations.slow;
+
+  Future<void> _irA(_Seccion s) async {
+    final destino = _anclas[s]!.currentContext;
+    if (destino == null) return;
+    setState(() => _activa = s);
+    await Scrollable.ensureVisible(
+      destino,
+      duration: _movimiento,
+      curve: AppDurations.curve,
+    );
+  }
+
+  /// La seccion activa es la ultima cuyo inicio ya paso bajo el borde de
+  /// arriba. Al final de la lista manda la ultima: la mas corta no llegaria
+  /// nunca a ese borde.
+  void _seguirSeccion() {
+    final vista = _vista.currentContext?.findRenderObject() as RenderBox?;
+    if (vista == null || !_scroll.hasClients) return;
+
+    var activa = _secciones.first;
+    if (_scroll.position.extentAfter < 4) {
+      activa = _secciones.last;
+    } else {
+      for (final s in _secciones) {
+        final caja =
+            _anclas[s]!.currentContext?.findRenderObject() as RenderBox?;
+        if (caja == null || !caja.attached) continue;
+        final y = caja.localToGlobal(Offset.zero, ancestor: vista).dy;
+        if (y <= _umbralDeSeccion) activa = s;
+      }
+    }
+    if (activa == _activa) return;
+    setState(() => _activa = activa);
+
+    // El chip de la seccion activa se trae a la vista en la tira de arriba.
+    final chip = _chips[activa]!.currentContext;
+    if (chip != null) {
+      Scrollable.ensureVisible(
+        chip,
+        alignment: 0.5,
+        duration: context.reduceMotion ? Duration.zero : AppDurations.base,
+        curve: AppDurations.curve,
+      );
+    }
+  }
+
+  static const _umbralDeSeccion = 96.0;
 
   // ─── Acciones ─────────────────────────────────────────────────────────────
 
@@ -282,22 +362,18 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
     setState(() {
       _ruta = trazado;
-      // La distancia sigue al trazado: un numero escrito a mano que no cuadre
-      // con la linea deja una carrera cuya meta no esta en el mapa. Se puede
-      // corregir despues a mano, pero el punto de partida es lo que se midio.
+      // La distancia sigue al trazado: un numero a mano que no cuadre con la
+      // linea deja una carrera cuya meta no esta en el mapa.
       if (trazado.length > 1) {
         _distancia.text = _distanciaDelTrazado.toStringAsFixed(2);
       }
     });
   }
 
-  /// Sube el afiche o uno de los logos.
-  ///
-  /// Con [fuente] abre camara o galeria; con [reintentar] reenvia el archivo
-  /// que ya se habia elegido. El estado no vuelve a `idle` hasta que el detalle
-  /// se releyo del servidor: asi lo que se ve al terminar es la imagen
-  /// guardada, y no la del telefono.
-  Future<void> _subirPortada(
+  /// Sube una imagen. Con [fuente] abre camara o galeria; con [reintentar]
+  /// reenvia el archivo ya elegido. No vuelve a `idle` hasta releer el
+  /// detalle: lo que se ve al terminar es la imagen guardada.
+  Future<void> _subirImagen(
     MarathonImageSlot hueco, {
     ImageSource? fuente,
     bool reintentar = false,
@@ -319,8 +395,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
 
     try {
       await ref.read(adminApiProvider).uploadMarathonImage(id, hueco, ruta);
-      // Se espera la relectura, no solo se pide: mientras no llegue, la URL
-      // que hay en pantalla sigue siendo la anterior.
       ref.invalidate(adminMarathonProvider(id));
       await ref.read(adminMarathonProvider(id).future);
       ref.invalidate(adminMarathonsProvider);
@@ -338,9 +412,8 @@ class _FormularioState extends ConsumerState<_Formulario> {
     }
   }
 
-  /// Quitar una imagen es vaciar su campo, y eso si va por la edicion normal:
-  /// no hay endpoint que borre un archivo, ni hace falta.
-  Future<void> _quitarPortada(MarathonImageSlot hueco) async {
+  /// Quitar una imagen es vaciar su campo por la edicion normal.
+  Future<void> _quitarImagen(MarathonImageSlot hueco) async {
     final id = _m?.id;
     if (id == null) return;
 
@@ -352,21 +425,15 @@ class _FormularioState extends ConsumerState<_Formulario> {
       await ref.read(adminMarathonProvider(id).future);
       ref.invalidate(adminMarathonsProvider);
     } on Failure catch (f) {
-      // Quitar no deja nada que reintentar —no hay archivo—, asi que el hueco
-      // vuelve a como estaba, con su imagen, y el fallo se cuenta aparte. El
-      // estado `failed` pintaria un boton de reintentar que no haria nada.
+      // Quitar no deja nada que reintentar: el hueco vuelve a como estaba.
       if (mounted) context.showSnack(f.localized(context.l10n));
     } finally {
       if (mounted) setState(() => _estadoFoto[hueco] = ImageSlotStatus.idle);
     }
   }
 
-  /// Lee el QR de una foto y se queda **solo con su texto**.
-  ///
-  /// La imagen no se sube ni se guarda en ningun sitio: es el vehiculo para
-  /// que el organizador no tenga que copiar a mano el contenido del QR que le
-  /// dio su banca. Lo que se guarda —y lo que luego se redibuja en el movil
-  /// del corredor— es el texto que llevaba dentro.
+  /// Lee el QR de una foto y se queda **solo con su texto**: la imagen no se
+  /// sube; lo que se redibuja en el movil del corredor es lo que llevaba.
   Future<void> _leerQr(ImageSource fuente) async {
     final foto = await ImagePicker().pickImage(source: fuente);
     if (foto == null || !mounted) return;
@@ -380,6 +447,23 @@ class _FormularioState extends ConsumerState<_Formulario> {
       if (texto != null) _qrPayload = texto;
     });
     if (texto == null) context.showSnack(context.l10n.adminQrUnreadable);
+  }
+
+  Future<void> _elegirQr() async {
+    final accion = await pickImageSource(
+      context,
+      canRemove: (_qrPayload ?? '').isNotEmpty,
+    );
+    switch (accion) {
+      case ImagePick.camera:
+        await _leerQr(ImageSource.camera);
+      case ImagePick.gallery:
+        await _leerQr(ImageSource.gallery);
+      case ImagePick.remove:
+        setState(() => _qrPayload = null);
+      case null:
+        break;
+    }
   }
 
   Future<void> _cambiarEstado({
@@ -439,12 +523,13 @@ class _FormularioState extends ConsumerState<_Formulario> {
         ref.invalidate(adminMarathonsProvider);
         if (!mounted) return;
         final id = creada['id'] as String?;
-        // Se entra directo a la edicion de la recien creada: la foto y el QR
-        // necesitan que exista, y devolver a la lista obligaria a buscarla
-        // para hacer lo unico que queda por hacer.
+        _saliendo = true;
+        // Se entra directo a la edicion de la recien creada: imagenes,
+        // categorias y QR necesitan que exista.
         if (id != null) {
-          context.pushReplacement(Routes.adminMarathonEditOf(id));
-          context.showSnack(context.l10n.adminMarathonCreated);
+          context
+            ..pushReplacement(Routes.adminMarathonEditOf(id))
+            ..showSnack(context.l10n.adminMarathonCreated);
         } else {
           context.pop();
         }
@@ -456,8 +541,10 @@ class _FormularioState extends ConsumerState<_Formulario> {
         ..invalidate(adminMarathonProvider(_m!.id))
         ..invalidate(adminMarathonsProvider);
       if (!mounted) return;
-      context.showSnack(context.l10n.adminMarathonSaved);
-      context.pop();
+      _saliendo = true;
+      context
+        ..showSnack(context.l10n.adminMarathonSaved)
+        ..pop();
     } on Failure catch (f) {
       if (mounted) setState(() => _errorGuardado = f);
     } finally {
@@ -470,6 +557,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     final confirmado = await _confirmar(
       t.adminDeleteMarathonTitle,
       t.adminDeleteMarathonBody,
+      t.adminDelete,
     );
     if (!confirmado || !mounted) return;
 
@@ -477,14 +565,29 @@ class _FormularioState extends ConsumerState<_Formulario> {
     try {
       await ref.read(adminApiProvider).deleteMarathon(_m!.id);
       ref.invalidate(adminMarathonsProvider);
+      _saliendo = true;
       if (mounted) context.pop();
     } on Failure catch (f) {
-      // El servidor niega el borrado si ya hay inscritos: el mensaje que trae
-      // explica por que mejor que cualquier texto de aqui.
+      // El servidor niega el borrado si ya hay inscritos: su mensaje lo explica.
       if (mounted) setState(() => _errorGuardado = f);
     } finally {
       if (mounted) setState(() => _guardando = false);
     }
+  }
+
+  /// Salir con cambios sin guardar pregunta antes: lo escrito no vive en
+  /// ningun otro sitio.
+  Future<void> _alSalir(bool didPop, Object? _) async {
+    if (didPop) return;
+    final t = context.l10n;
+    final descartar = await _confirmar(
+      t.editDiscardTitle,
+      t.editDiscardBody,
+      t.commonDiscard,
+    );
+    if (!descartar || !mounted) return;
+    setState(() => _saliendo = true);
+    context.pop();
   }
 
   // ─── Pintado ──────────────────────────────────────────────────────────────
@@ -492,119 +595,70 @@ class _FormularioState extends ConsumerState<_Formulario> {
   @override
   Widget build(BuildContext context) {
     final t = context.l10n;
+    final hayCambios = _cambios.isNotEmpty;
+    final barraVisible =
+        _esAlta || hayCambios || _errorGuardado != null || _guardando;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_esAlta ? t.adminNewMarathon : t.adminEditMarathon),
-        actions: [
-          if (!_esAlta)
-            IconButton(
-              onPressed: _guardando ? null : _borrar,
-              icon: const Icon(Icons.delete_outline_rounded),
-              tooltip: t.adminDelete,
-            ),
-        ],
-      ),
-      body: PageInsets(
-        maxWidth: AppSizes.wideMaxWidth,
-        builder: (context, inset) => LayoutBuilder(
-          builder: (context, box) {
-            final wide = box.maxWidth - inset * 2 >= _dosColumnasMinWidth;
-            // La carrera en si —afiche, datos, fecha y recorrido— y lo que se
-            // le cuelga —horario, kit, categorias, cobro—. En telefono van una
-            // detras de otra; en una tablet, cada mitad en su columna.
-            final carrera = <Widget>[
-              _seccionFoto(t),
-              const SizedBox(height: AppSpacing.lg),
-              _seccionDatos(t),
-              const SizedBox(height: AppSpacing.lg),
-              _seccionFechaYRuta(t),
-              if (_ruta.length > 1) ...[
-                const SizedBox(height: AppSpacing.md),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  child: SizedBox(
-                    height: wide ? _mapaAltoAncho : _mapaAlto,
-                    child: RouteMapView(
-                      route: const [],
-                      guideRoute: _ruta,
-                      interactive: false,
-                      // Previsualizacion de gestion: el trazado solo. Quien
-                      // edita la carrera ya sabe donde es, y las teselas aqui
-                      // solo son una descarga y un rato en gris.
-                      tiles: false,
-                    ),
-                  ),
-                ),
-              ],
-            ];
-            final detalles = <Widget>[
-              _seccionCronograma(t),
-              const SizedBox(height: AppSpacing.lg),
-              _seccionIncluye(t),
-              const SizedBox(height: AppSpacing.lg),
-              _seccionCategorias(t),
-              const SizedBox(height: AppSpacing.lg),
-              _seccionExtras(t),
-              if (!_esAlta) ...[
-                const SizedBox(height: AppSpacing.lg),
-                _seccionEstado(t),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              _seccionQr(t),
-            ];
-
-            return ListView(
-              padding: EdgeInsets.fromLTRB(
-                inset,
-                AppSpacing.md,
-                inset,
-                AppSpacing.xxl,
+    return PopScope(
+      canPop: !hayCambios || _saliendo,
+      onPopInvokedWithResult: _alSalir,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_esAlta ? t.adminNewMarathon : t.adminEditMarathon),
+          actions: [
+            if (!_esAlta)
+              IconButton(
+                onPressed: _guardando ? null : _borrar,
+                icon: const Icon(Icons.delete_outline_rounded),
+                tooltip: t.adminDelete,
               ),
+          ],
+        ),
+        body: LayoutBuilder(
+          builder: (context, box) {
+            final ancho = box.maxWidth >= _conIndiceLateral;
+            final contenido = _contenido(t, ancho: ancho);
+
+            return Stack(
               children: [
-                if (wide)
+                if (ancho)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: carrera,
+                      SizedBox(
+                        width: _indiceAncho,
+                        child: _IndiceLateral(
+                          secciones: _secciones,
+                          activa: _activa,
+                          onTap: _irA,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.xl),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: detalles,
-                        ),
-                      ),
+                      Expanded(child: contenido),
                     ],
                   )
-                else ...[
-                  ...carrera,
-                  const SizedBox(height: AppSpacing.lg),
-                  ...detalles,
-                ],
-                _BannerDeError(
-                  failure: _errorGuardado,
-                  onDismiss: () => setState(() => _errorGuardado = null),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                // Bajo las dos columnas el guardar no se estira a lo ancho de
-                // la tablet: queda a la derecha, donde termina el formulario.
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: AppSizes.contentMaxWidth,
-                    ),
-                    child: AppButton(
-                      label: _esAlta ? t.adminCreateMarathon : t.commonSave,
-                      icon: Icons.check_rounded,
-                      isLoading: _guardando,
-                      onPressed: _guardando ? null : _guardar,
-                    ),
+                else
+                  Column(
+                    children: [
+                      _TiraDeSecciones(
+                        secciones: _secciones,
+                        activa: _activa,
+                        claves: _chips,
+                        onTap: _irA,
+                      ),
+                      Expanded(child: contenido),
+                    ],
+                  ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _BarraDeGuardado(
+                    visible: barraVisible,
+                    esAlta: _esAlta,
+                    guardando: _guardando,
+                    failure: _errorGuardado,
+                    onSave: _guardar,
+                    onDismissError: () => setState(() => _errorGuardado = null),
                   ),
                 ),
               ],
@@ -615,74 +669,68 @@ class _FormularioState extends ConsumerState<_Formulario> {
     );
   }
 
-  /// Ancho util a partir del cual el formulario se parte en dos columnas.
-  static const _dosColumnasMinWidth = 760.0;
+  /// A partir de este ancho el indice va al costado en vez de arriba.
+  static const _conIndiceLateral = 960.0;
+  static const _indiceAncho = 232.0;
 
-  static const _mapaAlto = 180.0;
-  static const _mapaAltoAncho = 260.0;
+  Widget _contenido(AppLocalizations t, {required bool ancho}) {
+    final bloques = <Widget>[
+      for (final (i, s) in _secciones.indexed)
+        FadeInUp(
+          // Solo se escalona la entrada: al noveno ya se notaria como lentitud.
+          delay: AppDurations.fast * (i.clamp(0, 6) / 3),
+          child: Padding(
+            key: _anclas[s],
+            padding: const EdgeInsets.only(bottom: AppSpacing.base),
+            child: _seccion(t, s),
+          ),
+        ),
+    ];
 
-  Widget _seccionFoto(AppLocalizations t) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _Rotulo(title: t.adminCoverTitle, hint: t.adminCoverHint),
-      const SizedBox(height: AppSpacing.md),
-      _hueco(t, MarathonImageSlot.cover, _m?.coverUrl, 16 / 9),
-      const SizedBox(height: AppSpacing.lg),
-      _Rotulo(title: t.adminLogosTitle, hint: t.adminLogosHint),
-      const SizedBox(height: AppSpacing.md),
-      // Cada hueco con la forma de su logo: lo que se ve aqui es como quedara
-      // en la app, que es lo que el organizador tiene que juzgar.
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: _hueco(
-              t,
-              MarathonImageSlot.logoVertical,
-              _m?.logoVerticalUrl,
-              4 / 5,
-              label: t.adminLogoVertical,
-            ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSizes.readableMaxWidth),
+        child: SingleChildScrollView(
+          key: _vista,
+          controller: _scroll,
+          padding: EdgeInsets.fromLTRB(
+            ancho ? AppSpacing.screenHWide : AppSpacing.screenH,
+            AppSpacing.base,
+            ancho ? AppSpacing.screenHWide : AppSpacing.screenH,
+            // Lo que ocupa la barra de guardar, para que no tape lo ultimo.
+            AppSpacing.xxxl * 3,
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            flex: 3,
-            child: _hueco(
-              t,
-              MarathonImageSlot.logoHorizontal,
-              _m?.logoHorizontalUrl,
-              16 / 10,
-              label: t.adminLogoHorizontal,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Cabecera(
+                nombre: _nombre.text.trim(),
+                ciudad: _ciudad.text.trim(),
+                fecha: _fecha,
+                marathon: _m,
+              ),
+              const SizedBox(height: AppSpacing.base),
+              ...bloques,
+            ],
           ),
-        ],
+        ),
       ),
-    ],
-  );
+    );
+  }
 
-  Widget _hueco(
-    AppLocalizations t,
-    MarathonImageSlot hueco,
-    String? url,
-    double aspectRatio, {
-    String? label,
-  }) => MarathonImageField(
-    imageUrl: url,
-    status: _estadoFoto[hueco] ?? ImageSlotStatus.idle,
-    aspectRatio: aspectRatio,
-    isLogo: hueco != MarathonImageSlot.cover,
-    emptyLabel: label ?? t.adminCoverEmpty,
-    enabled: !_esAlta,
-    disabledHint: _esAlta ? t.adminCoverAfterSave : null,
-    onPick: (fuente) => _subirPortada(hueco, fuente: fuente),
-    onRetry: () => _subirPortada(hueco, reintentar: true),
-    onRemove: () => _quitarPortada(hueco),
-  );
+  Widget _seccion(AppLocalizations t, _Seccion s) => switch (s) {
+    _Seccion.general => _seccionGeneral(t),
+    _Seccion.imagenes => _seccionImagenes(t),
+    _Seccion.recorrido => _seccionRecorrido(t),
+    _Seccion.inscripcion => _seccionInscripcion(t),
+    _Seccion.programa => _seccionPrograma(t),
+    _Seccion.cobro => _seccionCobro(t),
+    _Seccion.estado => _seccionEstado(t),
+  };
 
-  Widget _seccionDatos(AppLocalizations t) => _Tarjeta(
+  Widget _seccionGeneral(AppLocalizations t) => _Bloque(
+    seccion: _Seccion.general,
     children: [
-      const SizedBox(height: AppSpacing.base),
       AppTextField(label: t.adminName, controller: _nombre),
       const SizedBox(height: AppSpacing.md),
       AppTextField(label: t.adminCity, controller: _ciudad),
@@ -690,9 +738,251 @@ class _FormularioState extends ConsumerState<_Formulario> {
       AppTextField(
         label: t.adminDescription,
         controller: _descripcion,
-        maxLines: 3,
+        maxLines: 4,
       ),
-      const SizedBox(height: AppSpacing.md),
+      const SizedBox(height: AppSpacing.xs),
+      StatRow(
+        icon: Icons.event_outlined,
+        title: t.adminStartsAt,
+        value: '${Fmt.fullDate(_fecha)} · ${Fmt.timeOfDay(_fecha)}',
+        onTap: _elegirFecha,
+        trailing: Icon(
+          Icons.edit_calendar_outlined,
+          size: 18,
+          color: context.colors.textSecondary,
+        ),
+      ),
+    ],
+  );
+
+  Widget _seccionImagenes(AppLocalizations t) {
+    final c = context.colors;
+    return _Bloque(
+      seccion: _Seccion.imagenes,
+      children: [
+        if (_esAlta) ...[
+          _Aviso(icon: Icons.info_outline_rounded, text: t.adminCoverAfterSave),
+          const SizedBox(height: AppSpacing.base),
+        ],
+        // Los dos cuadrados: el logo de las vistas previas y el del QR.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _ConRotulo(
+                title: t.adminCoverTitle,
+                hint: t.adminCoverHint,
+                child: _hueco(
+                  t,
+                  MarathonImageSlot.logo,
+                  _m?.coverUrl,
+                  1,
+                  t.adminCoverEmpty,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _ConRotulo(
+                title: t.adminQrLogoTitle,
+                hint: t.adminQrLogoHint,
+                child: _hueco(
+                  t,
+                  MarathonImageSlot.qrLogo,
+                  _m?.logoQrUrl,
+                  1,
+                  t.adminQrLogoEmpty,
+                  icon: Icons.qr_code_2_rounded,
+                ),
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.base),
+          child: Divider(height: 1, color: c.border),
+        ),
+        _ConRotulo(
+          title: t.adminLogosTitle,
+          hint: t.adminLogosHint,
+          // Cada hueco con la forma de su arte: lo que se ve aqui es como
+          // quedara en la app.
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: _hueco(
+                  t,
+                  MarathonImageSlot.logoVertical,
+                  _m?.logoVerticalUrl,
+                  4 / 5,
+                  t.adminLogoVertical,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                flex: 3,
+                child: _hueco(
+                  t,
+                  MarathonImageSlot.logoHorizontal,
+                  _m?.logoHorizontalUrl,
+                  16 / 10,
+                  t.adminLogoHorizontal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _hueco(
+    AppLocalizations t,
+    MarathonImageSlot hueco,
+    String? url,
+    double aspectRatio,
+    String label, {
+    IconData icon = Icons.add_photo_alternate_outlined,
+  }) => MarathonImageField(
+    imageUrl: url,
+    status: _estadoFoto[hueco] ?? ImageSlotStatus.idle,
+    aspectRatio: aspectRatio,
+    isLogo: true,
+    emptyLabel: label,
+    emptyIcon: icon,
+    enabled: !_esAlta,
+    onPick: (fuente) => _subirImagen(hueco, fuente: fuente),
+    onRetry: () => _subirImagen(hueco, reintentar: true),
+    onRemove: () => _quitarImagen(hueco),
+  );
+
+  Widget _seccionRecorrido(AppLocalizations t) {
+    final c = context.colors;
+    final tieneRuta = _ruta.length > 1;
+
+    return _Bloque(
+      seccion: _Seccion.recorrido,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: SizedBox(
+            height: _mapaAlto,
+            child: tieneRuta
+                ? RouteMapView(
+                    // La clave sigue al trazado: el mapa encuadra al montarse,
+                    // y uno nuevo tiene que volver a encuadrarse.
+                    key: ValueKey(_huellaDeRuta(_ruta)),
+                    route: const [],
+                    guideRoute: _ruta,
+                    interactive: false,
+                    // Previsualizacion de gestion: el trazado solo.
+                    tiles: false,
+                  )
+                : Material(
+                    color: c.surfaceElevated,
+                    child: InkWell(
+                      onTap: _marcarRuta,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add_location_alt_outlined,
+                              size: 28,
+                              color: c.primary,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              t.adminRouteMissing,
+                              style: context.text.labelSm.copyWith(
+                                color: c.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            if (tieneRuta)
+              AppBadge(
+                label: Fmt.distance(_distanciaDelTrazado),
+                icon: Icons.straighten_rounded,
+                tone: AppTone.neutral,
+              ),
+            if (tieneRuta && _esCircular)
+              AppBadge(
+                label: t.adminRouteModeLoop,
+                icon: Icons.loop_rounded,
+                tone: AppTone.info,
+              ),
+          ],
+        ),
+        if (tieneRuta) const SizedBox(height: AppSpacing.md),
+        AppButton(
+          label: tieneRuta ? t.adminRouteEdit : t.adminRouteDraw,
+          icon: Icons.edit_road_rounded,
+          variant: AppButtonVariant.outline,
+          size: AppButtonSize.md,
+          onPressed: _marcarRuta,
+        ),
+        const SizedBox(height: AppSpacing.base),
+        // Distancia y vueltas juntas, y debajo lo que suman: solo se entienden
+        // como pareja.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: AppTextField(
+                label: _numeroDeVueltas > 1
+                    ? t.adminDistancePerLap
+                    : t.adminDistance,
+                controller: _distancia,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: AppTextField(
+                label: t.adminLaps,
+                controller: _vueltas,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          _numeroDeVueltas > 1
+              ? t.adminCircuitTotal(
+                  Fmt.distance(_metros / 1000),
+                  '$_numeroDeVueltas',
+                  Fmt.distance(_totalKm),
+                )
+              : t.adminLapsSingle,
+          style: context.text.bodySm.copyWith(color: c.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  static const _mapaAlto = 200.0;
+
+  Widget _seccionInscripcion(AppLocalizations t) => _Bloque(
+    seccion: _Seccion.inscripcion,
+    children: [
       Row(
         children: [
           Expanded(
@@ -715,133 +1005,190 @@ class _FormularioState extends ConsumerState<_Formulario> {
           ),
         ],
       ),
-      const SizedBox(height: AppSpacing.md),
-      // Distancia y vueltas juntas, y debajo lo que suman: son dos campos que
-      // solo se entienden como pareja. Con una vuelta —el caso normal— la
-      // leyenda lo dice en una linea y nadie tiene que pensar en circuitos.
-      Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: AppTextField(
-              label: _numeroDeVueltas > 1
-                  ? t.adminDistancePerLap
-                  : t.adminDistance,
-              controller: _distancia,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+      const SizedBox(height: AppSpacing.lg),
+      _ListaEditable(
+        title: t.adminCategoriesTitle,
+        hint: t.adminCategoriesHint,
+        emptyLabel: t.adminCategoriesEmpty,
+        addLabel: t.adminCategoryAdd,
+        icon: Icons.groups_outlined,
+        enabled: !_esAlta && !_guardando,
+        disabledHint: _esAlta ? t.adminAfterSave : null,
+        onAdd: _editarCategoria,
+        rows: [
+          for (final c in _m?.categories ?? const <AdminCategory>[])
+            (
+              title: c.name,
+              subtitle: c.extraPriceCents == 0
+                  ? t.adminCategoryFree
+                  : '+ ${Fmt.money(c.extraPriceCents / 100, _moneda)}',
+              onEdit: () => _editarCategoria(actual: c),
+              onDelete: () => _borrarFila(
+                nombre: c.name,
+                cuerpo: t.adminDeleteCategoryBody,
+                borrar: (api) => api.deleteCategory(c.id),
               ),
-              onChanged: (_) => setState(() {}),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: AppTextField(
-              label: t.adminLaps,
-              controller: _vueltas,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
         ],
       ),
-      const SizedBox(height: AppSpacing.sm),
-      Text(
-        _numeroDeVueltas > 1
-            ? t.adminCircuitTotal(
-                Fmt.distance(_metros / 1000),
-                '$_numeroDeVueltas',
-                Fmt.distance(_totalKm),
-              )
-            : t.adminLapsSingle,
-        style: context.text.bodySm.copyWith(
-          color: context.colors.textSecondary,
+      const SizedBox(height: AppSpacing.lg),
+      _ListaEditable(
+        title: t.adminExtrasTitle,
+        hint: t.adminExtrasHint,
+        emptyLabel: t.adminExtrasEmpty,
+        addLabel: t.adminExtraAdd,
+        icon: Icons.shopping_bag_outlined,
+        enabled: !_esAlta && !_guardando,
+        disabledHint: _esAlta ? t.adminAfterSave : null,
+        onAdd: _editarExtra,
+        rows: [
+          for (final e in _m?.extras ?? const <AdminExtra>[])
+            (
+              title: e.name,
+              subtitle: [
+                Fmt.money(e.priceCents / 100, _moneda),
+                if (e.stock != null) t.adminExtraStockLeft(e.stock!),
+              ].join('  ·  '),
+              onEdit: () => _editarExtra(actual: e),
+              onDelete: () => _borrarFila(
+                nombre: e.name,
+                cuerpo: t.adminDeleteExtraBody,
+                borrar: (api) => api.deleteExtra(e.id),
+              ),
+            ),
+        ],
+      ),
+    ],
+  );
+
+  Widget _seccionPrograma(AppLocalizations t) => _Bloque(
+    seccion: _Seccion.programa,
+    children: [
+      _ListaEditable(
+        title: t.adminScheduleTitle,
+        hint: t.adminScheduleHint,
+        emptyLabel: t.adminScheduleEmpty,
+        addLabel: t.adminScheduleAdd,
+        icon: Icons.schedule_rounded,
+        onAdd: _editarActividad,
+        rows: [
+          for (final (i, item) in _cronograma.indexed)
+            (
+              title: [
+                item.time,
+                item.title,
+              ].where((x) => x.isNotEmpty).join('  ·  '),
+              subtitle: item.detail.isEmpty ? null : item.detail,
+              onEdit: () => _editarActividad(indice: i),
+              onDelete: () =>
+                  setState(() => _cronograma = [..._cronograma]..removeAt(i)),
+            ),
+        ],
+      ),
+      const SizedBox(height: AppSpacing.lg),
+      _ListaEditable(
+        title: t.adminIncludesTitle,
+        hint: t.adminIncludesHint,
+        emptyLabel: t.adminIncludesEmpty,
+        addLabel: t.adminIncludesAdd,
+        icon: Icons.check_circle_outline_rounded,
+        onAdd: _editarIncluye,
+        rows: [
+          for (final (i, linea) in _incluye.indexed)
+            (
+              title: linea,
+              subtitle: null,
+              onEdit: () => _editarIncluye(indice: i),
+              onDelete: () =>
+                  setState(() => _incluye = [..._incluye]..removeAt(i)),
+            ),
+        ],
+      ),
+    ],
+  );
+
+  /// El QR de cobro: la foto solo trae el texto, y lo que se ve es el QR
+  /// **redibujado** desde ese texto, con el logo encima — el mismo que vera el
+  /// corredor. Si este se escanea bien, el guardado tambien.
+  Widget _seccionCobro(AppLocalizations t) {
+    final c = context.colors;
+    return _Bloque(
+      seccion: _Seccion.cobro,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox.square(
+              dimension: _qrLado,
+              child: _QrSlot(
+                payload: _qrPayload,
+                logoUrl: _m?.logoQrUrl,
+                reading: _leyendoQr,
+                onTap: _leyendoQr ? null : _elegirQr,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: AppTextField(
+                label: t.adminQrInstructions,
+                controller: _qrTexto,
+                maxLines: 4,
+              ),
+            ),
+          ],
         ),
-      ),
-      const SizedBox(height: AppSpacing.base),
-    ],
-  );
+        const SizedBox(height: AppSpacing.md),
+        _Aviso(
+          icon: (_qrPayload ?? '').isEmpty
+              ? Icons.info_outline_rounded
+              : Icons.check_circle_outline_rounded,
+          text: (_qrPayload ?? '').isEmpty
+              ? t.adminQrPayloadMissing
+              : t.adminQrPayloadHelp,
+          tone: (_qrPayload ?? '').isEmpty ? c.textSecondary : c.success,
+        ),
+      ],
+    );
+  }
 
-  Widget _seccionFechaYRuta(AppLocalizations t) => _Tarjeta(
-    children: [
-      StatRow(
-        icon: Icons.event_outlined,
-        title: t.adminStartsAt,
-        value: '${Fmt.fullDate(_fecha)} · ${Fmt.timeOfDay(_fecha)}',
-        onTap: _elegirFecha,
-      ),
-      const AppDivider(),
-      StatRow(
-        icon: Icons.route_outlined,
-        title: t.adminRouteTitle,
-        value: _ruta.length < 2
-            ? t.adminRouteMissing
-            : Fmt.distance(_distanciaDelTrazado),
-        subtitle: t.adminRouteSubtitle,
-        onTap: _marcarRuta,
-      ),
-    ],
-  );
+  static const _qrLado = 132.0;
 
-  Widget _seccionEstado(AppLocalizations t) => _Tarjeta(
-    children: [
-      SwitchListTile.adaptive(
-        contentPadding: EdgeInsets.zero,
-        value: _m!.published,
-        onChanged: _cambiandoEstado
-            ? null
-            : (v) => _cambiarEstado(publicar: true, valor: v),
-        title: Text(t.adminPublishedSwitch, style: context.text.bodyMd),
-        subtitle: Text(
-          t.adminPublishedHint,
-          style: context.text.bodySm.copyWith(
-            color: context.colors.textSecondary,
+  Widget _seccionEstado(AppLocalizations t) {
+    final c = context.colors;
+    return _Bloque(
+      seccion: _Seccion.estado,
+      children: [
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          value: _m!.published,
+          // Un ensayo no se publica nunca: el servidor lo rechazaria.
+          onChanged: _cambiandoEstado || _m!.isRehearsal
+              ? null
+              : (v) => _cambiarEstado(publicar: true, valor: v),
+          title: Text(t.adminPublishedSwitch, style: context.text.bodyMd),
+          subtitle: Text(
+            t.adminPublishedHint,
+            style: context.text.bodySm.copyWith(color: c.textSecondary),
           ),
         ),
-      ),
-      const AppDivider(),
-      SwitchListTile.adaptive(
-        contentPadding: EdgeInsets.zero,
-        value: _m!.registrationsOpen,
-        onChanged: _cambiandoEstado
-            ? null
-            : (v) => _cambiarEstado(publicar: false, valor: v),
-        title: Text(t.adminRegistrationsSwitch, style: context.text.bodyMd),
-        subtitle: Text(
-          t.adminRegistrationsHint,
-          style: context.text.bodySm.copyWith(
-            color: context.colors.textSecondary,
+        const AppDivider(),
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          value: _m!.registrationsOpen,
+          onChanged: _cambiandoEstado
+              ? null
+              : (v) => _cambiarEstado(publicar: false, valor: v),
+          title: Text(t.adminRegistrationsSwitch, style: context.text.bodyMd),
+          subtitle: Text(
+            t.adminRegistrationsHint,
+            style: context.text.bodySm.copyWith(color: c.textSecondary),
           ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 
-  // ─── Cronograma, incluye, categorias y extras ─────────────────────────────
-
-  /// El programa del dia. Se guarda con el resto del formulario.
-  Widget _seccionCronograma(AppLocalizations t) => _ListaEditable(
-    title: t.adminScheduleTitle,
-    hint: t.adminScheduleHint,
-    emptyLabel: t.adminScheduleEmpty,
-    addLabel: t.adminScheduleAdd,
-    icon: Icons.schedule_rounded,
-    onAdd: _editarActividad,
-    rows: [
-      for (final (i, item) in _cronograma.indexed)
-        (
-          title: [
-            item.time,
-            item.title,
-          ].where((x) => x.isNotEmpty).join('  ·  '),
-          subtitle: item.detail.isEmpty ? null : item.detail,
-          onEdit: () => _editarActividad(indice: i),
-          onDelete: () =>
-              setState(() => _cronograma = [..._cronograma]..removeAt(i)),
-        ),
-    ],
-  );
+  // ─── Filas: cronograma, incluye, categorias y extras ──────────────────────
 
   Future<void> _editarActividad({int? indice}) async {
     final t = context.l10n;
@@ -887,25 +1234,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
     });
   }
 
-  /// Lo que la inscripcion incluye. Tambien viaja con el boton de guardar.
-  Widget _seccionIncluye(AppLocalizations t) => _ListaEditable(
-    title: t.adminIncludesTitle,
-    hint: t.adminIncludesHint,
-    emptyLabel: t.adminIncludesEmpty,
-    addLabel: t.adminIncludesAdd,
-    icon: Icons.check_circle_outline_rounded,
-    onAdd: _editarIncluye,
-    rows: [
-      for (final (i, linea) in _incluye.indexed)
-        (
-          title: linea,
-          subtitle: null,
-          onEdit: () => _editarIncluye(indice: i),
-          onDelete: () => setState(() => _incluye = [..._incluye]..removeAt(i)),
-        ),
-    ],
-  );
-
   Future<void> _editarIncluye({int? indice}) async {
     final t = context.l10n;
     final valores = await _pedirCampos(
@@ -931,35 +1259,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
       _incluye = lista;
     });
   }
-
-  /// Las categorias. A diferencia de las dos de arriba son filas de su propia
-  /// tabla, con su id: se crean y se borran al momento, no al guardar. Por eso
-  /// necesitan que la carrera exista antes, igual que el afiche.
-  Widget _seccionCategorias(AppLocalizations t) => _ListaEditable(
-    title: t.adminCategoriesTitle,
-    hint: t.adminCategoriesHint,
-    emptyLabel: t.adminCategoriesEmpty,
-    addLabel: t.adminCategoryAdd,
-    icon: Icons.groups_outlined,
-    enabled: !_esAlta && !_guardando,
-    disabledHint: _esAlta ? t.adminAfterSave : null,
-    onAdd: _editarCategoria,
-    rows: [
-      for (final c in _m?.categories ?? const <AdminCategory>[])
-        (
-          title: c.name,
-          subtitle: c.extraPriceCents == 0
-              ? t.adminCategoryFree
-              : '+ ${Fmt.money(c.extraPriceCents / 100, _moneda)}',
-          onEdit: () => _editarCategoria(actual: c),
-          onDelete: () => _borrarFila(
-            nombre: c.name,
-            cuerpo: t.adminDeleteCategoryBody,
-            borrar: (api) => api.deleteCategory(c.id),
-          ),
-        ),
-    ],
-  );
 
   Future<void> _editarCategoria({AdminCategory? actual}) async {
     final t = context.l10n;
@@ -995,34 +1294,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
     );
   }
 
-  /// Los adicionales comprables. Mismo trato que las categorias.
-  Widget _seccionExtras(AppLocalizations t) => _ListaEditable(
-    title: t.adminExtrasTitle,
-    hint: t.adminExtrasHint,
-    emptyLabel: t.adminExtrasEmpty,
-    addLabel: t.adminExtraAdd,
-    icon: Icons.shopping_bag_outlined,
-    enabled: !_esAlta && !_guardando,
-    disabledHint: _esAlta ? t.adminAfterSave : null,
-    onAdd: _editarExtra,
-    rows: [
-      for (final e in _m?.extras ?? const <AdminExtra>[])
-        (
-          title: e.name,
-          subtitle: [
-            Fmt.money(e.priceCents / 100, _moneda),
-            if (e.stock != null) t.adminExtraStockLeft(e.stock!),
-          ].join('  ·  '),
-          onEdit: () => _editarExtra(actual: e),
-          onDelete: () => _borrarFila(
-            nombre: e.name,
-            cuerpo: t.adminDeleteExtraBody,
-            borrar: (api) => api.deleteExtra(e.id),
-          ),
-        ),
-    ],
-  );
-
   Future<void> _editarExtra({AdminExtra? actual}) async {
     final t = context.l10n;
     final valores = await _pedirCampos(
@@ -1052,8 +1323,7 @@ class _FormularioState extends ConsumerState<_Formulario> {
     );
     if (valores == null) return;
 
-    // Stock vacio es `null`, no cero: uno significa "sin limite" y el otro
-    // "agotado", y confundirlos deja el adicional fuera de venta.
+    // Stock vacio es `null` ("sin limite"), no cero ("agotado").
     final stock = valores[2].trim();
     final cuerpo = <String, dynamic>{
       'name': valores[0],
@@ -1074,9 +1344,8 @@ class _FormularioState extends ConsumerState<_Formulario> {
     return valor == null ? null : (valor * 100).round();
   }
 
-  /// El ida y vuelta de guardar una categoria o un extra: manda, relee el
-  /// detalle y **espera** a que llegue, para que lo que se pinta sea la lista
-  /// del servidor y no una copia optimista que puede no haber cuajado.
+  /// Manda, relee el detalle y **espera** a que llegue: lo que se pinta es la
+  /// lista del servidor, no una copia optimista.
   Future<void> _guardarFila(
     Future<void> Function(AdminApi api, String marathonId) enviar,
   ) async {
@@ -1107,14 +1376,14 @@ class _FormularioState extends ConsumerState<_Formulario> {
     final confirmado = await _confirmar(
       context.l10n.adminDeleteRowTitle(nombre),
       cuerpo,
+      context.l10n.adminDelete,
     );
     if (!confirmado || !mounted) return;
     await _guardarFila((api, _) => borrar(api));
   }
 
-  /// Un si/no destructivo. Lo usan el borrado de la carrera y el de cada
-  /// categoria o extra: son la misma pregunta con distinto texto.
-  Future<bool> _confirmar(String titulo, String cuerpo) async {
+  /// Un si/no destructivo: borrar la carrera, una fila o descartar cambios.
+  Future<bool> _confirmar(String titulo, String cuerpo, String accion) async {
     final t = context.l10n;
     final respuesta = await showDialog<bool>(
       context: context,
@@ -1128,7 +1397,8 @@ class _FormularioState extends ConsumerState<_Formulario> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogo).pop(true),
-            child: Text(t.adminDelete),
+            style: TextButton.styleFrom(foregroundColor: context.colors.error),
+            child: Text(accion),
           ),
         ],
       ),
@@ -1136,10 +1406,6 @@ class _FormularioState extends ConsumerState<_Formulario> {
     return respuesta ?? false;
   }
 
-  /// El unico formulario emergente de la pantalla: una actividad, una linea de
-  /// "incluye", una categoria o un extra. Son cuatro formas de lo mismo —dos o
-  /// tres campos y aceptar—, y cuatro dialogos separados se habrian ido
-  /// pareciendo cada vez menos entre si.
   Future<List<String>?> _pedirCampos({
     required String title,
     required List<CampoDeDialogo> campos,
@@ -1147,90 +1413,521 @@ class _FormularioState extends ConsumerState<_Formulario> {
     context: context,
     builder: (_) => _DialogoDeCampos(title: title, campos: campos),
   );
+}
 
-  /// El QR de cobro. A diferencia del afiche, aqui no se sube nada: la foto
-  /// solo sirve para sacarle el texto, y el que se ve es un QR **redibujado**
-  /// desde ese texto —el mismo que vera el corredor—. Si el de la pantalla se
-  /// escanea bien, el guardado tambien.
-  Widget _seccionQr(AppLocalizations t) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _Rotulo(title: t.adminPaymentQr, hint: t.adminQrSubtitle),
-      const SizedBox(height: AppSpacing.md),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+// ─── Piezas ─────────────────────────────────────────────────────────────────
+
+extension on _Seccion {
+  IconData get icon => switch (this) {
+    _Seccion.general => Icons.badge_outlined,
+    _Seccion.imagenes => Icons.image_outlined,
+    _Seccion.recorrido => Icons.route_outlined,
+    _Seccion.inscripcion => Icons.confirmation_number_outlined,
+    _Seccion.programa => Icons.event_note_outlined,
+    _Seccion.cobro => Icons.qr_code_2_rounded,
+    _Seccion.estado => Icons.toggle_on_outlined,
+  };
+
+  String label(AppLocalizations t) => switch (this) {
+    _Seccion.general => t.adminSectionGeneral,
+    _Seccion.imagenes => t.adminSectionImages,
+    _Seccion.recorrido => t.adminRouteTitle,
+    _Seccion.inscripcion => t.adminSectionSales,
+    _Seccion.programa => t.adminSectionProgram,
+    _Seccion.cobro => t.adminSectionPayment,
+    _Seccion.estado => t.adminSectionStatus,
+  };
+}
+
+/// La carrera de un vistazo arriba del formulario: logo, nombre y estado. El
+/// nombre sigue a lo que se escribe, asi el titulo nunca miente.
+class _Cabecera extends StatelessWidget {
+  const _Cabecera({
+    required this.nombre,
+    required this.ciudad,
+    required this.fecha,
+    required this.marathon,
+  });
+
+  final String nombre;
+  final String ciudad;
+  final DateTime fecha;
+  final AdminMarathon? marathon;
+
+  static const _lado = 64.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final m = marathon;
+    final logo = m?.coverUrl ?? '';
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: c.border),
+        boxShadow: c.cardShadow,
+      ),
+      child: Row(
         children: [
-          SizedBox(
-            width: 116,
-            height: 116,
-            child: _QrSlot(
-              payload: _qrPayload,
-              reading: _leyendoQr,
-              onTap: _leyendoQr ? null : _elegirQr,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: SizedBox.square(
+              dimension: _lado,
+              child: logo.isEmpty
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(gradient: c.routeGradient),
+                      child: Icon(
+                        Icons.emoji_events_outlined,
+                        color: c.onPrimary,
+                      ),
+                    )
+                  : EventImage(
+                      imageUrl: logo,
+                      fit: BoxFit.contain,
+                      icon: Icons.image_outlined,
+                      background: c.logoBackdrop,
+                    ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.base),
           Expanded(
-            child: AppTextField(
-              label: t.adminQrInstructions,
-              controller: _qrTexto,
-              maxLines: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nombre.isEmpty ? t.adminNewMarathon : nombre,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.titleMd,
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  [
+                    Fmt.fullDate(fecha),
+                    if (ciudad.isNotEmpty) ciudad,
+                  ].join(' · '),
+                  style: context.text.bodySm.copyWith(color: c.textSecondary),
+                ),
+                if (m != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.xs + 2,
+                    runSpacing: AppSpacing.xs + 2,
+                    children: [
+                      if (m.isRehearsal)
+                        AppBadge(
+                          label: t.adminRehearsalBadge,
+                          icon: Icons.science_outlined,
+                        ),
+                      AppBadge(
+                        label: m.published ? t.adminPublished : t.adminDraft,
+                        icon: m.published
+                            ? Icons.visibility_outlined
+                            : Icons.edit_note_rounded,
+                        tone: m.published ? AppTone.info : AppTone.neutral,
+                      ),
+                      AppBadge(
+                        label: m.registrationsOpen
+                            ? t.adminRegistrationsOpen
+                            : t.adminRegistrationsClosed,
+                        icon: m.registrationsOpen
+                            ? Icons.how_to_reg_rounded
+                            : Icons.lock_outline_rounded,
+                        tone: m.registrationsOpen
+                            ? AppTone.brand
+                            : AppTone.warning,
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
           ),
         ],
       ),
-      const SizedBox(height: AppSpacing.sm),
+    );
+  }
+}
+
+/// El indice en telefono: una tira de chips fija bajo la barra.
+class _TiraDeSecciones extends StatelessWidget {
+  const _TiraDeSecciones({
+    required this.secciones,
+    required this.activa,
+    required this.claves,
+    required this.onTap,
+  });
+
+  final List<_Seccion> secciones;
+  final _Seccion activa;
+  final Map<_Seccion, GlobalKey> claves;
+  final ValueChanged<_Seccion> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.background,
+        border: Border(bottom: BorderSide(color: c.border)),
+      ),
+      child: SizedBox(
+        height: AppSizes.minTapTarget + AppSpacing.base,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenH,
+            vertical: AppSpacing.sm,
+          ),
+          itemCount: secciones.length,
+          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (_, i) {
+            final s = secciones[i];
+            return Center(
+              child: AppChip(
+                key: claves[s],
+                label: s.label(t),
+                icon: s.icon,
+                selected: s == activa,
+                onTap: () => onTap(s),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// El indice en tablet: una lista al costado, con una marca que se desliza
+/// hasta la seccion activa.
+class _IndiceLateral extends StatelessWidget {
+  const _IndiceLateral({
+    required this.secciones,
+    required this.activa,
+    required this.onTap,
+  });
+
+  final List<_Seccion> secciones;
+  final _Seccion activa;
+  final ValueChanged<_Seccion> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final duracion = context.reduceMotion ? Duration.zero : AppDurations.base;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: c.border)),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        children: [
+          for (final s in secciones)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Semantics(
+                button: true,
+                selected: s == activa,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    onTap: () => onTap(s),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    child: AnimatedContainer(
+                      duration: duracion,
+                      curve: AppDurations.curve,
+                      height: AppSizes.minTapTarget,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: s == activa
+                            ? c.primary.withValues(alpha: 0.12)
+                            : c.primary.withValues(alpha: 0),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            s.icon,
+                            size: 20,
+                            color: s == activa ? c.primary : c.textSecondary,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              s.label(t),
+                              style: context.text.labelSm.copyWith(
+                                color: s == activa ? c.primary : c.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Una seccion del formulario: tarjeta con su icono y su titulo.
+class _Bloque extends StatelessWidget {
+  const _Bloque({required this.seccion, required this.children});
+
+  final _Seccion seccion;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    // `Material` y no una caja pintada: dentro hay filas con salpicadura, que
+    // se dibuja en el `Material` mas cercano.
+    return Material(
+      color: c.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        side: BorderSide(color: c.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: c.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Icon(seccion.icon, size: 19, color: c.primary),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    seccion.label(context.l10n),
+                    style: context.text.headingMd,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.base),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Titulo y pista sobre un campo que no es de texto (imagenes, listas).
+class _ConRotulo extends StatelessWidget {
+  const _ConRotulo({
+    required this.title,
+    required this.hint,
+    required this.child,
+  });
+
+  final String title;
+  final String hint;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title, style: context.text.titleMd),
+      const SizedBox(height: AppSpacing.xxs),
       Text(
-        (_qrPayload ?? '').isEmpty
-            ? t.adminQrPayloadMissing
-            : t.adminQrPayloadHelp,
+        hint,
         style: context.text.bodySm.copyWith(
           color: context.colors.textSecondary,
         ),
       ),
+      const SizedBox(height: AppSpacing.md),
+      child,
     ],
   );
+}
 
-  Future<void> _elegirQr() async {
-    final accion = await pickImageSource(
-      context,
-      canRemove: (_qrPayload ?? '').isNotEmpty,
+/// Una linea informativa con icono, dentro de una seccion.
+class _Aviso extends StatelessWidget {
+  const _Aviso({required this.icon, required this.text, this.tone});
+
+  final IconData icon;
+  final String text;
+  final Color? tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final color = tone ?? c.textSecondary;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: c.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: context.text.bodySm.copyWith(color: color),
+            ),
+          ),
+        ],
+      ),
     );
-    switch (accion) {
-      case ImagePick.camera:
-        await _leerQr(ImageSource.camera);
-      case ImagePick.gallery:
-        await _leerQr(ImageSource.gallery);
-      case ImagePick.remove:
-        setState(() => _qrPayload = null);
-      case null:
-        break;
-    }
   }
 }
 
-/// El QR de cobro **redibujado desde su texto**, no la foto que se subio.
-///
-/// Es a proposito: la foto ya cumplio su papel —traer el contenido— y lo que
-/// hay que comprobar antes de guardar es que lo leido es lo correcto. Lo que
-/// se ve aqui es exactamente lo que se pintara en el movil del corredor.
-///
-/// El violeta de marca va sobre blanco **siempre**, en los dos temas: un QR es
-/// contraste antes que adorno, y el violeta claro del tema oscuro sobre fondo
-/// oscuro no lo lee ningun escaner.
+/// La barra de guardar. Entra desde abajo cuando hay algo que guardar y sale
+/// cuando no: un boton siempre visible no dice si queda trabajo pendiente.
+class _BarraDeGuardado extends StatelessWidget {
+  const _BarraDeGuardado({
+    required this.visible,
+    required this.esAlta,
+    required this.guardando,
+    required this.failure,
+    required this.onSave,
+    required this.onDismissError,
+  });
+
+  final bool visible;
+  final bool esAlta;
+  final bool guardando;
+  final Failure? failure;
+  final VoidCallback onSave;
+  final VoidCallback onDismissError;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final duracion = context.reduceMotion ? Duration.zero : AppDurations.base;
+
+    return IgnorePointer(
+      ignoring: !visible,
+      child: AnimatedSlide(
+        offset: visible ? Offset.zero : const Offset(0, 1.2),
+        duration: duracion,
+        curve: visible ? AppDurations.curve : Curves.easeInCubic,
+        child: AnimatedOpacity(
+          opacity: visible ? 1 : 0,
+          duration: duracion,
+          child: Container(
+            decoration: BoxDecoration(
+              color: c.surface,
+              border: Border(top: BorderSide(color: c.border)),
+              boxShadow: c.floatingShadow,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSizes.readableMaxWidth,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.screenH,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _BannerDeError(
+                          failure: failure,
+                          onDismiss: onDismissError,
+                        ),
+                        Row(
+                          children: [
+                            if (!esAlta) ...[
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: c.warning,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  t.adminUnsavedChanges,
+                                  style: context.text.labelSm.copyWith(
+                                    color: c.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                            ],
+                            Expanded(
+                              flex: esAlta ? 1 : 0,
+                              child: AppButton(
+                                label: esAlta
+                                    ? t.adminCreateMarathon
+                                    : t.commonSave,
+                                icon: Icons.check_rounded,
+                                size: AppButtonSize.md,
+                                isFullWidth: esAlta,
+                                isLoading: guardando,
+                                onPressed: guardando ? null : onSave,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// El QR de cobro **redibujado desde su texto**, con el logo encima: lo que se
+/// ve aqui es exactamente lo que se pintara en el movil del corredor.
 class _QrSlot extends StatelessWidget {
   const _QrSlot({
     required this.payload,
+    required this.logoUrl,
     required this.reading,
     required this.onTap,
   });
 
   final String? payload;
+  final String? logoUrl;
   final bool reading;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final t = context.l10n;
     final tiene = (payload ?? '').isNotEmpty;
 
@@ -1238,57 +1935,57 @@ class _QrSlot extends StatelessWidget {
       button: true,
       label: tiene ? t.adminImageChange : t.adminQrEmpty,
       child: Material(
-        color: tiene ? Colors.white : context.colors.surfaceElevated,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
+        // Blanco en los dos temas: un QR es contraste antes que adorno.
+        color: tiene ? Colors.white : c.surfaceElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(color: c.border),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: switch ((reading, tiene)) {
-              (true, _) => Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: context.colors.primary,
-                  ),
-                ),
-              ),
-              (_, true) => QrImageView(
-                data: payload!,
-                backgroundColor: Colors.white,
-                errorCorrectionLevel: QrErrorCorrectLevel.H,
-                padding: EdgeInsets.zero,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.circle,
-                  color: LightTokens.primary,
-                ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color: LightTokens.primary,
-                ),
-              ),
-              _ => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.qr_code_2_rounded,
-                    size: 28,
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    t.adminQrEmpty,
-                    textAlign: TextAlign.center,
-                    style: context.text.bodySm.copyWith(
-                      color: context.colors.textSecondary,
+            padding: const EdgeInsets.all(AppSpacing.sm + 2),
+            child: AnimatedSwitcher(
+              duration: context.reduceMotion
+                  ? Duration.zero
+                  : AppDurations.base,
+              child: switch ((reading, tiene)) {
+                (true, _) => Center(
+                  key: const ValueKey('leyendo'),
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: c.primary,
                     ),
                   ),
-                ],
-              ),
-            },
+                ),
+                (_, true) => BrandedQr(
+                  key: ValueKey('$payload|$logoUrl'),
+                  data: payload!,
+                  logoUrl: logoUrl,
+                ),
+                _ => Column(
+                  key: const ValueKey('vacio'),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.qr_code_scanner_rounded,
+                      size: 28,
+                      color: c.primary,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      t.adminQrEmpty,
+                      textAlign: TextAlign.center,
+                      style: context.text.labelSm.copyWith(color: c.primary),
+                    ),
+                  ],
+                ),
+              },
+            ),
           ),
         ),
       ),
@@ -1313,9 +2010,7 @@ typedef CampoDeDialogo = ({
 });
 
 /// Una lista corta que se edita a mano: cronograma, "que incluye", categorias
-/// y extras. Las cuatro se pintan igual porque son lo mismo —unas pocas filas,
-/// tocar para editar, un boton de anadir—, y lo unico que cambia es de donde
-/// salen las filas y adonde van al guardarse.
+/// y extras. Las cuatro se pintan igual; cambia de donde salen las filas.
 class _ListaEditable extends StatelessWidget {
   const _ListaEditable({
     required this.title,
@@ -1345,52 +2040,60 @@ class _ListaEditable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Rotulo(title: title, hint: hint),
-        const SizedBox(height: AppSpacing.md),
-        _Tarjeta(
-          children: [
-            if (rows.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: SizedBox(
-                  width: double.infinity,
+    return _ConRotulo(
+      title: title,
+      hint: hint,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surfaceElevated,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (rows.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.md),
                   child: Text(
                     disabledHint ?? emptyLabel,
                     style: context.text.bodySm.copyWith(color: c.textSecondary),
                   ),
                 ),
-              ),
-            for (final (i, fila) in rows.indexed) ...[
-              if (i > 0) const AppDivider(),
-              StatRow(
-                icon: icon,
-                title: fila.title,
-                subtitle: fila.subtitle,
-                onTap: enabled ? fila.onEdit : null,
-                trailing: IconButton(
-                  onPressed: enabled ? fila.onDelete : null,
-                  icon: const Icon(Icons.close_rounded, size: 18),
-                  color: c.textSecondary,
-                  tooltip: context.l10n.adminDelete,
+              for (final (i, fila) in rows.indexed) ...[
+                if (i > 0) const AppDivider(),
+                StatRow(
+                  icon: icon,
+                  title: fila.title,
+                  subtitle: fila.subtitle,
+                  onTap: enabled ? fila.onEdit : null,
+                  trailing: IconButton(
+                    onPressed: enabled ? fila.onDelete : null,
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    color: c.textSecondary,
+                    tooltip: context.l10n.adminDelete,
+                  ),
+                ),
+              ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  child: AppButton(
+                    label: addLabel,
+                    icon: Icons.add_rounded,
+                    variant: AppButtonVariant.ghost,
+                    size: AppButtonSize.sm,
+                    isFullWidth: false,
+                    onPressed: enabled ? onAdd : null,
+                  ),
                 ),
               ),
             ],
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: AppButton(
-                label: addLabel,
-                icon: Icons.add_rounded,
-                variant: AppButtonVariant.ghost,
-                size: AppButtonSize.sm,
-                onPressed: enabled ? onAdd : null,
-              ),
-            ),
-          ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -1412,9 +2115,8 @@ class _DialogoDeCamposState extends State<_DialogoDeCampos> {
     for (final campo in widget.campos) TextEditingController(text: campo.value),
   ];
 
-  /// Que campos se dejaron vacios siendo obligatorios. Solo se mira despues de
-  /// intentar aceptar: senalar en rojo algo que aun no se ha escrito es regana
-  /// antes de tiempo.
+  /// Obligatorios vacios. Solo se mira tras intentar aceptar: senalar en rojo
+  /// lo que aun no se escribio es reganar antes de tiempo.
   var _faltan = <int>{};
 
   @override
@@ -1442,22 +2144,25 @@ class _DialogoDeCamposState extends State<_DialogoDeCampos> {
     final t = context.l10n;
     return AlertDialog(
       title: Text(widget.title),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final (i, campo) in widget.campos.indexed) ...[
-              if (i > 0) const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: campo.label,
-                controller: _controles[i],
-                errorText: _faltan.contains(i) ? t.adminRequiredField : null,
-                keyboardType: campo.numeric
-                    ? const TextInputType.numberWithOptions(decimal: true)
-                    : TextInputType.text,
-              ),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSizes.dialogMaxWidth),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final (i, campo) in widget.campos.indexed) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.md),
+                AppTextField(
+                  label: campo.label,
+                  controller: _controles[i],
+                  errorText: _faltan.contains(i) ? t.adminRequiredField : null,
+                  keyboardType: campo.numeric
+                      ? const TextInputType.numberWithOptions(decimal: true)
+                      : TextInputType.text,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       actions: [
@@ -1471,29 +2176,7 @@ class _DialogoDeCamposState extends State<_DialogoDeCampos> {
   }
 }
 
-class _Rotulo extends StatelessWidget {
-  const _Rotulo({required this.title, required this.hint});
-
-  final String title;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(title, style: context.text.titleMd),
-      const SizedBox(height: AppSpacing.xxs),
-      Text(
-        hint,
-        style: context.text.bodySm.copyWith(
-          color: context.colors.textSecondary,
-        ),
-      ),
-    ],
-  );
-}
-
-/// El fallo de guardado, empujando el contenido en vez de apareciendo encima.
+/// El fallo de guardado, empujando la barra hacia arriba.
 class _BannerDeError extends StatelessWidget {
   const _BannerDeError({required this.failure, required this.onDismiss});
 
@@ -1504,15 +2187,15 @@ class _BannerDeError extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return AnimatedSize(
-      duration: AppDurations.fast,
+      duration: context.reduceMotion ? Duration.zero : AppDurations.fast,
       curve: AppDurations.curve,
-      alignment: Alignment.topCenter,
+      alignment: Alignment.bottomCenter,
       child: failure == null
           ? const SizedBox(width: double.infinity)
           : Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.md),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.only(left: AppSpacing.md),
                 decoration: BoxDecoration(
                   color: c.errorBg,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -1541,54 +2224,39 @@ class _BannerDeError extends StatelessWidget {
   }
 }
 
-class _Tarjeta extends StatelessWidget {
-  const _Tarjeta({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    // `Material` y no una caja pintada: dentro van filas de `ListTile`, que
-    // dibujan su fondo y su salpicadura en el `Material` mas cercano. Con una
-    // caja de color en medio, el toque no se veria.
-    return Material(
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: c.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-        child: Column(children: children),
-      ),
-    );
-  }
-}
-
-/// Carga con la forma del formulario: el afiche arriba y los campos debajo.
+/// Carga con la forma del formulario: la cabecera y las secciones.
 class _CargandoDetalle extends StatelessWidget {
   const _CargandoDetalle();
 
   @override
-  Widget build(BuildContext context) => PageListView(
-    top: AppSpacing.md,
-    bottom: AppSpacing.xxl,
-    children: [
-      const AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Skeleton(
-          width: double.infinity,
-          height: double.infinity,
-          radius: AppRadius.xl,
-        ),
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: AppSizes.readableMaxWidth),
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.screenH),
+        children: [
+          const Row(
+            children: [
+              Skeleton(width: 64, height: 64, radius: AppRadius.lg),
+              SizedBox(width: AppSpacing.base),
+              Expanded(child: SkeletonLines()),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          for (var i = 0; i < 3; i++) ...[
+            const Skeleton(width: 140, height: 24),
+            const SizedBox(height: AppSpacing.base),
+            for (var j = 0; j < 2; j++) ...[
+              const Skeleton(
+                width: double.infinity,
+                height: AppSizes.controlHeight,
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ],
       ),
-      const SizedBox(height: AppSpacing.lg),
-      for (var i = 0; i < 4; i++) ...[
-        const Skeleton(width: double.infinity, height: AppSizes.controlHeight),
-        const SizedBox(height: AppSpacing.md),
-      ],
-    ],
+    ),
   );
 }

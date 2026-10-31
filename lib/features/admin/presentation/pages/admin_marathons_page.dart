@@ -5,8 +5,10 @@ import 'package:camrun/core/formatters/formatters.dart';
 import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
+import 'package:camrun/features/admin/presentation/widgets/fade_in_up.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
 import 'package:camrun/shared/widgets/atoms/app_indicators.dart';
+import 'package:camrun/shared/widgets/atoms/app_text_field.dart';
 import 'package:camrun/shared/widgets/atoms/event_image.dart';
 import 'package:camrun/shared/widgets/atoms/skeleton.dart';
 import 'package:camrun/shared/widgets/layout/responsive.dart';
@@ -61,20 +63,44 @@ class AdminMarathonsPage extends ConsumerWidget {
   }
 }
 
-class _Lista extends ConsumerWidget {
-  const _Lista(this.carreras);
+class _Lista extends ConsumerStatefulWidget {
+  const _Lista(this.todas);
 
-  final List<AdminMarathon> carreras;
+  final List<AdminMarathon> todas;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Lista> createState() => _ListaState();
+}
+
+class _ListaState extends ConsumerState<_Lista> {
+  String _busqueda = '';
+
+  /// `null` = todas; si no, solo las publicadas (`true`) o los borradores.
+  bool? _publicadas;
+
+  /// Se filtra aqui y no en el servidor: la lista del panel llega entera.
+  List<AdminMarathon> get _filtradas {
+    final q = _busqueda.trim().toLowerCase();
+    return [
+      for (final m in widget.todas)
+        if ((_publicadas == null || m.published == _publicadas) &&
+            (q.isEmpty ||
+                m.name.toLowerCase().contains(q) ||
+                m.city.toLowerCase().contains(q)))
+          m,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final t = context.l10n;
+    final carreras = _filtradas;
 
     // Ya vienen ordenadas del provider; aqui solo se marca donde empieza el
     // archivo para que no parezca que la lista sigue teniendo carreras vivas.
     final corte = carreras.indexWhere((m) => m.past);
 
-    Widget fila(int i) => _Aparece(
+    Widget fila(int i) => FadeInUp(
       // La clave va por id y no por posicion: asi el estado de la fila
       // sigue a su carrera si la lista se reordena.
       key: ValueKey(carreras[i].id),
@@ -96,12 +122,63 @@ class _Lista extends ConsumerWidget {
       children: [for (var i = desde; i < hasta; i++) fila(i)],
     );
 
+    final filtros = Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.base),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppTextField(
+            label: t.adminSearchMarathons,
+            prefix: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Icon(
+                Icons.search_rounded,
+                size: 20,
+                color: context.colors.textSecondary,
+              ),
+            ),
+            onChanged: (v) => setState(() => _busqueda = v),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final (valor, label, icon) in [
+                (null, t.adminFilterAll, Icons.apps_rounded),
+                (true, t.adminPublished, Icons.visibility_outlined),
+                (false, t.adminDraft, Icons.edit_note_rounded),
+              ])
+                AppChip(
+                  label: label,
+                  icon: icon,
+                  selected: _publicadas == valor,
+                  onTap: () => setState(() => _publicadas = valor),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+
     final hijos = <Widget>[
+      filtros,
+      if (carreras.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+          child: Text(
+            t.adminNoMatches,
+            textAlign: TextAlign.center,
+            style: context.text.bodyMd.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+        ),
       // Los rotulos solo aparecen cuando hay dos mitades que separar. Con todo
       // por delante, un "PROXIMAS" solitario encabezando la lista entera no
       // dice nada que la lista no diga ya.
       if (corte > 0) _Cabecera(t.adminSectionUpcoming),
-      rejilla(0, corte < 0 ? carreras.length : corte),
+      if (carreras.isNotEmpty) rejilla(0, corte < 0 ? carreras.length : corte),
       if (corte >= 0) ...[
         _Cabecera(t.adminSectionPast, primera: corte == 0),
         rejilla(corte, carreras.length),
@@ -350,13 +427,10 @@ class _Resumen extends StatelessWidget {
                 tone: AppTone.warning,
               ),
             ),
-            AppBadge(
-              tone: AppTone.neutral,
-              label: t.adminSlots(marathon.slotsTaken, marathon.capacity),
-              icon: Icons.groups_outlined,
-            ),
           ],
         ),
+        const SizedBox(height: AppSpacing.md),
+        _Cupos(marathon: marathon),
       ],
     );
   }
@@ -407,18 +481,18 @@ class _Miniatura extends StatelessWidget {
 
   final AdminMarathon marathon;
 
-  static const _lado = 56.0;
+  static const _lado = 64.0;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // El logo que mejor cabe en un cuadrado, y si no el afiche. Entero siempre:
-    // con `cover` el cartel vertical quedaba cortado por arriba y por abajo.
-    final logo = [
+    // El logo pequeno, que existe para esto; si falta, el material
+    // promocional. Entero siempre: nunca `cover`, que recorta.
+    final url = [
+      marathon.coverUrl,
       marathon.logoHorizontalUrl,
       marathon.logoVerticalUrl,
     ].firstWhere((u) => (u ?? '').isNotEmpty, orElse: () => null);
-    final url = logo ?? marathon.coverUrl;
     final vacia = Icon(
       Icons.image_outlined,
       size: 20,
@@ -439,8 +513,7 @@ class _Miniatura extends StatelessWidget {
                 imageUrl: url!,
                 icon: Icons.image_outlined,
                 fit: BoxFit.contain,
-                blurBackdrop: logo == null,
-                background: logo == null ? null : c.logoBackdrop,
+                background: c.logoBackdrop,
               ),
       ),
     );
@@ -537,53 +610,47 @@ class _Accion extends StatelessWidget {
   }
 }
 
-/// Entrada escalonada. Es lo que hace que la lista se lea de arriba abajo en
-/// vez de aparecer de golpe.
-class _Aparece extends StatefulWidget {
-  const _Aparece({required this.child, required this.delay, super.key});
+/// Cuanto se lleno: la barra se lee de un vistazo donde un "84/120" obliga
+/// a hacer la cuenta.
+class _Cupos extends StatelessWidget {
+  const _Cupos({required this.marathon});
 
-  final Widget child;
-  final Duration delay;
-
-  @override
-  State<_Aparece> createState() => _ApareceState();
-}
-
-class _ApareceState extends State<_Aparece>
-    with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(
-    vsync: this,
-    duration: AppDurations.base,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(widget.delay, () {
-      if (mounted) _ctrl.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  final AdminMarathon marathon;
 
   @override
   Widget build(BuildContext context) {
-    if (context.reduceMotion) return widget.child;
-
-    final curva = CurvedAnimation(parent: _ctrl, curve: AppDurations.curve);
-    return FadeTransition(
-      opacity: curva,
-      child: SlideTransition(
-        position: Tween(
-          begin: const Offset(0, 0.06),
-          end: Offset.zero,
-        ).animate(curva),
-        child: widget.child,
-      ),
+    final c = context.colors;
+    final lleno = marathon.capacity == 0
+        ? 0.0
+        : (marathon.slotsTaken / marathon.capacity).clamp(0.0, 1.0);
+    return Row(
+      children: [
+        Icon(Icons.groups_outlined, size: 16, color: c.textSecondary),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(end: lleno),
+              duration: context.reduceMotion
+                  ? Duration.zero
+                  : AppDurations.slow,
+              curve: AppDurations.curve,
+              builder: (_, v, _) => LinearProgressIndicator(
+                value: v,
+                minHeight: 6,
+                backgroundColor: c.ringTrack,
+                color: lleno >= 1 ? c.warning : c.primary,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          context.l10n.adminSlots(marathon.slotsTaken, marathon.capacity),
+          style: context.text.labelSm.copyWith(color: c.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -614,7 +681,7 @@ class _Cargando extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Skeleton(width: 56, height: 56, radius: AppRadius.lg),
+                    Skeleton(width: 64, height: 64, radius: AppRadius.lg),
                     SizedBox(width: AppSpacing.md),
                     Expanded(child: SkeletonLines(lines: 2)),
                   ],

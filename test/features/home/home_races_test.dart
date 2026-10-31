@@ -64,15 +64,21 @@ void main() {
     test('el hueco alto lleva el vertical; el apaisado, el horizontal', () {
       expect(ambas.artworkFor(4 / 5), (url: 'v', isLogo: true));
       expect(ambas.artworkFor(16 / 10), (url: 'h', isLogo: true));
-      // Un cuadrado (las miniaturas) lo llena mejor el vertical.
+      // Un cuadrado grande lo llena mejor el vertical.
       expect(ambas.artworkFor(1), (url: 'v', isLogo: true));
     });
 
-    test('sin el logo de su forma, el otro; sin logos, el afiche', () {
+    test('las miniaturas llevan el logo pequeno', () {
+      expect(ambas.artworkFor(1, small: true), (url: 'cover', isLogo: true));
+      final sinLogo = _m('d', DateTime(2026, 11, 2), vertical: 'v');
+      expect(sinLogo.artworkFor(1, small: true), (url: 'v', isLogo: true));
+    });
+
+    test('sin el material de su forma, el otro; sin ninguno, el logo', () {
       final soloH = _m('b', DateTime(2026, 11, 2), horizontal: 'h');
       expect(soloH.artworkFor(4 / 5), (url: 'h', isLogo: true));
       final soloCover = _m('c', DateTime(2026, 11, 2), cover: 'cover');
-      expect(soloCover.artworkFor(1), (url: 'cover', isLogo: false));
+      expect(soloCover.artworkFor(1), (url: 'cover', isLogo: true));
     });
   });
 }

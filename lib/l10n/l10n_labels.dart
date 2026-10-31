@@ -7,7 +7,6 @@ import 'package:camrun/features/profile/domain/entities/user_profile.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
 import 'package:camrun/features/races/domain/entities/registration.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
-import 'package:camrun/features/train/presentation/providers/history_provider.dart';
 import 'package:camrun/l10n/gen/app_localizations.dart';
 
 /// Etiquetas de los tipos del dominio.
@@ -60,14 +59,6 @@ extension RunFeelingL10n on RunFeeling {
     RunFeeling.okay => t.feelingOkay,
     RunFeeling.good => t.feelingGood,
     RunFeeling.strong => t.feelingStrong,
-  };
-}
-
-extension DateRangeFilterL10n on DateRangeFilter {
-  String label(AppLocalizations t) => switch (this) {
-    DateRangeFilter.all => t.filterAllTime,
-    DateRangeFilter.last30 => t.filterLast30,
-    DateRangeFilter.last90 => t.filterLast90,
   };
 }
 

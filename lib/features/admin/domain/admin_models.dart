@@ -3,10 +3,16 @@ import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:meta/meta.dart';
 
 /// Las imagenes que se suben de una carrera, con el campo que las guarda.
+///
+/// [logo] sigue guardandose en `coverUrl`: es el mismo hueco del servidor, que
+/// paso de afiche a logo pequeno de las vistas previas. Los dos de "material
+/// promocional" son [logoVertical] y [logoHorizontal]; [qrLogo] va en el
+/// centro del QR de cobro.
 enum MarathonImageSlot {
-  cover('coverUrl', 'cover'),
+  logo('coverUrl', 'cover'),
   logoVertical('logoVerticalUrl', 'logo/vertical'),
-  logoHorizontal('logoHorizontalUrl', 'logo/horizontal');
+  logoHorizontal('logoHorizontalUrl', 'logo/horizontal'),
+  qrLogo('logoQrUrl', 'logo/qr');
 
   const MarathonImageSlot(this.field, this.path);
 
@@ -46,6 +52,7 @@ class AdminMarathon {
     this.coverUrl,
     this.logoVerticalUrl,
     this.logoHorizontalUrl,
+    this.logoQrUrl,
     this.paymentQrPayload,
     this.paymentQrInstructions,
     this.route = const [],
@@ -79,6 +86,7 @@ class AdminMarathon {
     coverUrl: json['coverUrl'] as String?,
     logoVerticalUrl: json['logoVerticalUrl'] as String?,
     logoHorizontalUrl: json['logoHorizontalUrl'] as String?,
+    logoQrUrl: json['logoQrUrl'] as String?,
     published: json['published'] as bool? ?? false,
     // La lista manda `intent`/`resolved` y el detalle `registrationStatus`. Lo
     // que le importa al panel es el interruptor: si el admin las cerro a mano.
@@ -134,13 +142,16 @@ class AdminMarathon {
   final bool registrationsOpen;
   final int registrations;
 
-  /// El afiche. Siempre una URL del servidor: desde que se sube en vez de
-  /// pegarse, no hay forma de que apunte a otro sitio.
+  /// El logo pequeno de las vistas previas. Se llama `coverUrl` porque es el
+  /// campo del servidor que antes guardaba el afiche.
   final String? coverUrl;
 
-  /// Los dos logos. La app elige el que encaja en cada hueco.
+  /// El material promocional. La app elige el que encaja en cada hueco.
   final String? logoVerticalUrl;
   final String? logoHorizontalUrl;
+
+  /// El logo del centro del QR de cobro.
+  final String? logoQrUrl;
 
   /// El **contenido** del QR de cobro, no su imagen: el movil lo redibuja
   /// desde este texto. Lo que el organizador sube es una foto, y de ella solo
@@ -246,6 +257,7 @@ class AdminMarathon {
         coverUrl: coverUrl,
         logoVerticalUrl: logoVerticalUrl,
         logoHorizontalUrl: logoHorizontalUrl,
+        logoQrUrl: logoQrUrl,
         paymentQrPayload: paymentQrPayload,
         paymentQrInstructions: paymentQrInstructions,
         route: route,

@@ -15,7 +15,10 @@ import 'package:camrun/features/profile/domain/repositories/profile_repository.d
 import 'package:camrun/features/races/data/datasources/races_api.dart';
 import 'package:camrun/features/races/data/repositories/remote_race_repository.dart';
 import 'package:camrun/features/races/domain/repositories/race_repository.dart';
+import 'package:camrun/features/train/data/datasources/workouts_api.dart';
+import 'package:camrun/features/train/data/repositories/remote_workout_log_repository.dart';
 import 'package:camrun/features/train/domain/repositories/training_repository.dart';
+import 'package:camrun/features/train/domain/repositories/workout_log_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The dependency container. Every provider here is typed against a domain
@@ -88,4 +91,16 @@ final trainingRepositoryProvider = Provider<TrainingRepository>(
   (ref) => throw StateError(
     'trainingRepositoryProvider must be overridden in bootstrap()',
   ),
+);
+
+final workoutsApiProvider = Provider<WorkoutsApi>(
+  (ref) => WorkoutsApi(ref.watch(dioProvider)),
+);
+
+/// El historial que vive en el servidor. No se solapa con
+/// [trainingRepositoryProvider]: alli cae la grabacion en curso hasta que la
+/// cola de sincronizacion la sube, aqui se lee lo que el servidor ya
+/// consolido con sus propias metricas.
+final workoutLogRepositoryProvider = Provider<WorkoutLogRepository>(
+  (ref) => RemoteWorkoutLogRepository(ref.watch(workoutsApiProvider)),
 );

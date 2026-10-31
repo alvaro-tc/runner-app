@@ -297,6 +297,7 @@ class PaymentInfo {
     required this.amount,
     this.failureReason,
     this.qrPayload,
+    this.qrLogoUrl,
     this.qrInstructions,
     this.qrReference,
     this.bankReference,
@@ -317,6 +318,9 @@ class PaymentInfo {
   /// vez de descargar una imagen: pesa bytes en lugar de cientos de KB, sale
   /// nitido a cualquier tamano y no depende de la red para pintarse.
   final String? qrPayload;
+
+  /// Logo que va en el centro del QR. `null` = QR liso.
+  final String? qrLogoUrl;
 
   /// Instrucciones del organizador junto al QR, y la glosa que hay que poner en
   /// la transferencia. **Temporal**, solo en `qr_manual`.
