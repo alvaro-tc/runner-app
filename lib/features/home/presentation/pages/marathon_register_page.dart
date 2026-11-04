@@ -753,7 +753,9 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                 RacePaymentMethod.qr => t.registerQrSubtitle,
                 RacePaymentMethod.bankTransfer =>
                   t.registerBankTransferSubtitle,
-                RacePaymentMethod.qrManual => t.registerQrManualSubtitle,
+                RacePaymentMethod.qrManual => marathon.paymentApi
+                    ? t.registerQrApiSubtitle
+                    : t.registerQrManualSubtitle,
               },
               selected: _method == method,
               onTap: () => setState(() => _method = method),
@@ -1136,6 +1138,17 @@ class _ManualQrPayment extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+        // QR de la API: uno por cobro. Se avisa para que nadie pague con el QR
+        // fijo de la carrera que pudo ver en otro lado.
+        if (payment.qrAuto && proof?.state != ProofState.inReview) ...[
+          const SizedBox(height: AppSpacing.md),
+          _ProofStatus(
+            icon: Icons.qr_code_2_rounded,
+            title: t.registerQrApiTitle,
+            detail: t.registerQrApiBody,
+            tone: c.textSecondary,
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         // Lo que subió, no solo que subió algo: sin la imagen a la vista no hay
         // forma de comprobar que se mandó la captura correcta.
@@ -1143,8 +1156,12 @@ class _ManualQrPayment extends StatelessWidget {
         if (proof?.state == ProofState.inReview)
           _ProofStatus(
             icon: Icons.hourglass_top_rounded,
-            title: t.registerProofInReviewTitle,
-            detail: t.registerProofInReviewBody,
+            title: payment.qrAuto
+                ? t.registerProofAutoTitle
+                : t.registerProofInReviewTitle,
+            detail: payment.qrAuto
+                ? t.registerProofAutoBody
+                : t.registerProofInReviewBody,
             tone: c.textSecondary,
           )
         else ...[

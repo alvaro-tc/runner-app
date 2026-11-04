@@ -252,6 +252,7 @@ PaymentInfo paymentFrom(Map<String, dynamic> j) {
     qrLogoUrl: qrManual?['logoUrl'] as String?,
     qrInstructions: qrManual?['instructions'] as String?,
     qrReference: qrManual?['reference'] as String?,
+    qrAuto: qrManual?['auto'] == true,
     bankReference: banco?['reference'] as String?,
     last4: detalles['last4'] as String?,
     proof: proofFrom(j['proof'] as Map<String, dynamic>?),

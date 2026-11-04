@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:camrun/core/network/live_socket.dart';
+import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/foreground_poller.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/features/races/presentation/providers/live_marathon_provider.dart';
@@ -7,6 +9,7 @@ import 'package:camrun/features/tracking/data/live_uploader.dart';
 import 'package:camrun/features/tracking/tracking_providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Empieza a mandar la posicion en cuanto el organizador pone la carrera "en
 /// preparacion", sin esperar a la largada.
@@ -41,11 +44,22 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
   LiveUploader? _uploader;
   int _generation = 0;
 
+  /// Presencia por el socket: el camino rapido. Traccar tarda —servicio
+  /// nativo, HTTP, cache de dispositivo en el servidor— y el organizador
+  /// necesita ver al corredor en cuanto abre la app. Ver [presentarse].
+  String? _presenteEn;
+  Timer? _presencia;
+  StreamSubscription<Position>? _gps;
+  Position? _ultimo;
+  VoidCallback? _soltarSocket;
+  LiveSocket? _socket;
+
   /// El permiso, o `null` mientras no haya nada que contar. Es lo que la sala
   /// de espera pinta para que el corredor sepa por que no sale en el mapa.
   @override
   LocationPermissionOutcome? build() {
     ref.onDispose(() {
+      retirarse();
       pararLatido();
       if (_encendido) unawaited(_uploader?.stop());
     });
@@ -60,6 +74,7 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
     if (!ref.mounted || generation != _generation) return;
     state = permiso;
     if (!permiso.isGranted || _encendido) return;
+    _seguirGps();
     _encendido = true;
     final subidor = _uploader = ref.read(liveUploaderProvider);
     if (subidor == null) return;
@@ -85,6 +100,73 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
     );
   }
 
+  /// "Tengo la app abierta", al instante y por el socket.
+  ///
+  /// Sale **antes** del permiso de ubicacion: el organizador cuenta a quien
+  /// tiene la app encendida aunque su GPS todavia no haya dado un punto. Con
+  /// permiso, ademas, cada lectura del GPS va directa al mapa.
+  ///
+  /// El latido de 5 s es lo que reengancha tras una reconexion del socket: el
+  /// servidor olvida la presencia al caerse la conexion.
+  void presentarse(String marathonId) {
+    if (_presenteEn == marathonId) return;
+    retirarse();
+    _presenteEn = marathonId;
+    final socket = ref.read(liveSocketProvider);
+    _socket = socket;
+    _soltarSocket = socket.watchPersonal();
+    void enviar() => socket.presence(
+      marathonId,
+      lat: _ultimo?.latitude,
+      lng: _ultimo?.longitude,
+    );
+    enviar();
+    _presencia = Timer.periodic(const Duration(seconds: 5), (_) => enviar());
+    if (state?.isGranted ?? false) _seguirGps();
+  }
+
+  /// GPS directo de la app, sin filtro de distancia: quien espera en la salida
+  /// no se mueve, y aun asi tiene que salir en el mapa.
+  void _seguirGps() {
+    final marathonId = _presenteEn;
+    final socket = _socket;
+    if (marathonId == null || socket == null || _gps != null) return;
+    void enviar(Position p) {
+      _ultimo = p;
+      if (_presenteEn == marathonId) {
+        socket.presence(marathonId, lat: p.latitude, lng: p.longitude);
+      }
+    }
+
+    // La ultima conocida es instantanea; el primer fix bueno puede tardar.
+    unawaited(
+      Geolocator.getLastKnownPosition()
+          .then((p) {
+            if (p != null && _ultimo == null) enviar(p);
+          })
+          .catchError((Object _) {}),
+    );
+    _gps = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    ).listen(enviar, onError: (Object _) {});
+  }
+
+  /// Sale de la sala de espera: largada, cancelacion o pantalla cerrada.
+  void retirarse() {
+    if (_presenteEn == null) return;
+    _presenteEn = null;
+    _ultimo = null;
+    _presencia?.cancel();
+    _presencia = null;
+    unawaited(_gps?.cancel());
+    _gps = null;
+    // Sin `ref`: esto corre tambien desde `onDispose`.
+    _socket?.leavePresence();
+    _socket = null;
+    _soltarSocket?.call();
+    _soltarSocket = null;
+  }
+
   /// Deja de pedir puntos a mano sin apagar el faro. Es lo que toca en la
   /// largada: de ahi en adelante sube la sesion de carrera, y un punto suelto
   /// mas entraria en el resultado oficial por otra puerta.
@@ -95,6 +177,7 @@ class PreRaceBeaconNotifier extends Notifier<LocationPermissionOutcome?> {
   }
 
   Future<void> apagar() async {
+    retirarse();
     _pedido = false;
     state = null;
     pararLatido();
@@ -137,10 +220,17 @@ class PreRaceBeacon extends ConsumerWidget {
     unawaited(
       Future.microtask(
         () => switch (puerta) {
-          GatePreparing() => faro.encender(),
+          GatePreparing(:final entry) => () {
+            faro.presentarse(entry.marathon.id);
+            return faro.encender();
+          }(),
           // La sesion de carrera se hace cargo del mismo Traccar. Apagarlo aqui
           // borraria al corredor del mapa justo en la largada.
-          GateRunning() => Future<void>.sync(faro.pararLatido),
+          GateRunning() => Future<void>.sync(() {
+            faro
+              ..retirarse()
+              ..pararLatido();
+          }),
           GateOpen() || GateFinished() => faro.apagar(),
         },
       ),

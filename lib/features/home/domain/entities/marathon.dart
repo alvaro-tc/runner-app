@@ -78,6 +78,7 @@ class Marathon {
     this.extras = const [],
     this.paymentQrPayload,
     this.paymentQrInstructions,
+    this.paymentApi = false,
     this.preparingAt,
     this.preparingMessage,
     this.liveStartedAt,
@@ -160,6 +161,10 @@ class Marathon {
 
   final String? paymentQrInstructions;
 
+  /// La carrera cobra por la API de pagos: el QR se genera en el checkout, uno
+  /// por cobro, y [paymentQrPayload] **no** se usa.
+  final bool paymentApi;
+
   /// Cuando el organizador puso la carrera "en preparacion". Ver
   /// [MarathonPhase.preparing].
   final DateTime? preparingAt;
@@ -186,7 +191,8 @@ class Marathon {
     return MarathonPhase.notStarted;
   }
 
-  bool get acceptsQrPayment => paymentQrPayload?.isNotEmpty ?? false;
+  bool get acceptsQrPayment =>
+      paymentApi || (paymentQrPayload?.isNotEmpty ?? false);
 
   String get location => '$city, $country';
   int get slotsLeft => slotsTotal - slotsTaken;

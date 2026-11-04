@@ -1,3 +1,5 @@
+import 'package:camrun/core/network/live_socket.dart';
+import 'package:camrun/core/network/network_providers.dart';
 import 'package:camrun/core/services/location_service.dart';
 import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/races/domain/entities/race_entry.dart';
@@ -19,6 +21,7 @@ void main() {
   late _FaroFalso faro;
   late _Puerta puerta;
   late _Ubicacion ubicacion;
+  late _SocketFalso socket;
 
   Future<void> montar(
     WidgetTester tester, {
@@ -28,11 +31,13 @@ void main() {
     faro = _FaroFalso();
     puerta = _Puerta(inicial);
     ubicacion = _Ubicacion(permiso);
+    socket = _SocketFalso();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           liveUploaderProvider.overrideWithValue(faro),
           locationServiceProvider.overrideWithValue(ubicacion),
+          liveSocketProvider.overrideWithValue(socket),
           marathonGateProvider.overrideWith(() => puerta),
         ],
         child: const PreRaceBeacon(child: SizedBox.shrink()),
@@ -70,6 +75,30 @@ void main() {
 
     await poner(tester, const GateOpen());
     expect(faro.apagados, 1);
+  });
+
+  // La presencia va por el socket al instante, sin esperar al permiso ni al
+  // GPS: es lo que el organizador cuenta para decidir si larga.
+  testWidgets('en preparacion avisa por el socket y se retira al largar', (
+    tester,
+  ) async {
+    await montar(
+      tester,
+      inicial: GatePreparing(entry: _entrada),
+      permiso: LocationPermissionOutcome.denied,
+    );
+    expect(socket.presencias, ['m1']);
+
+    await tester.pump(const Duration(seconds: 5));
+    expect(socket.presencias, ['m1', 'm1'], reason: 'latido tras reconexion');
+
+    await poner(
+      tester,
+      GateRunning(entry: _entrada, startedAt: DateTime(2026, 9, 2, 7)),
+    );
+    expect(socket.retiradas, 1);
+    await tester.pump(const Duration(seconds: 10));
+    expect(socket.presencias, hasLength(2));
   });
 
   // El corredor abre la app con la carrera ya en preparacion: no hay ningun
@@ -151,6 +180,24 @@ class _FaroFalso implements LiveUploader {
 
   @override
   Future<void> ping() async => puntos++;
+}
+
+class _SocketFalso implements LiveSocket {
+  final presencias = <String>[];
+  int retiradas = 0;
+
+  @override
+  void presence(String marathonId, {double? lat, double? lng}) =>
+      presencias.add(marathonId);
+
+  @override
+  void leavePresence() => retiradas++;
+
+  @override
+  VoidCallback watchPersonal() => () {};
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 class _Ubicacion implements LocationService {

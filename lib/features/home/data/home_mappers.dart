@@ -36,6 +36,7 @@ Marathon marathonFrom(
     logoHorizontalUrl: j['logoHorizontalUrl'] as String? ?? '',
     paymentQrPayload: j['paymentQrPayload'] as String?,
     paymentQrInstructions: j['paymentQrInstructions'] as String?,
+    paymentApi: j['paymentApi'] == true,
     distanceKm: _d(j['distanceMeters']) / 1000,
     laps: _i(j['laps']) < 1 ? 1 : _i(j['laps']),
     entryFee: Money(_i(j['priceCents']) / 100, moneda),

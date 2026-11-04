@@ -831,6 +831,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get raceAgeGroupRank => 'Puesto en tu categoría';
 
   @override
+  String get raceYourPosition => 'Tu puesto';
+
+  @override
+  String get racePodium => '¡Llegaste al podio!';
+
+  @override
+  String get raceWinner => '¡Ganaste la carrera!';
+
+  @override
+  String racePositionSemantics(int rank, int total) {
+    return 'Llegaste en el puesto $rank de $total';
+  }
+
+  @override
   String get raceStartsIn => 'Empieza en';
 
   @override
@@ -1475,6 +1489,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get registerPaymentNoteHelp =>
       'Escríbela en el detalle de la transferencia. Es lo que le permite al organizador ligar tu pago con esta inscripción.';
+
+  @override
+  String get registerQrApiSubtitle =>
+      'QR único para este pago: sube el comprobante y se confirma solo';
+
+  @override
+  String get registerQrApiTitle => 'Este QR es solo para este pago';
+
+  @override
+  String get registerQrApiBody =>
+      'Págalo por el monto exacto que indica y sube el comprobante. No uses otro QR de la carrera.';
+
+  @override
+  String get registerProofAutoTitle => 'Comprobante enviado';
+
+  @override
+  String get registerProofAutoBody =>
+      'Tu inscripción se confirma sola cuando el banco avise del pago.';
 
   @override
   String get registerProofInReviewTitle => 'Comprobante en revisión';

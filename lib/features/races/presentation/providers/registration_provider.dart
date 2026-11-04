@@ -202,8 +202,9 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
         // responda en segundos, hay una persona que va a mirar una imagen
         // cuando pueda. Sondear cada dos segundos durante cinco minutos solo
         // gastaria bateria para no ver ningun cambio.
+        // El QR de la API si se sondea: lo confirma el banco, no una persona.
         if (salida.payment.state == RacePaymentState.pending &&
-            !salida.payment.method.needsProof) {
+            (!salida.payment.method.needsProof || salida.payment.qrAuto)) {
           _sondear();
         }
         return false;
@@ -239,6 +240,7 @@ class RegistrationFlowNotifier extends Notifier<RegistrationFlowState> {
     return resultado.fold(
       (PaymentInfo actualizado) {
         state = state.copyWith(payment: actualizado, busy: false);
+        if (actualizado.qrAuto && !actualizado.isSettled) _sondear();
         return true;
       },
       (Failure fallo) {

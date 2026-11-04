@@ -284,6 +284,10 @@ class _Body extends ConsumerWidget {
     final c = context.colors;
     final t = context.l10n;
     return [
+      if (result.overallRank != null) ...[
+        _PositionHero(result: result),
+        const SizedBox(height: AppSpacing.lg),
+      ],
       ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.xl),
         child: SizedBox(
@@ -344,20 +348,6 @@ class _Body extends ConsumerWidget {
               compact: true,
               tone: c.success,
             ),
-          if (result.overallRank != null && result.totalParticipants != null)
-            MetricTile(
-              icon: Icons.leaderboard_outlined,
-              value: Fmt.rank(result.overallRank!, result.totalParticipants!),
-              label: t.raceOverallRank,
-              compact: true,
-            ),
-          if (result.ageGroupRank != null)
-            MetricTile(
-              icon: Icons.groups_outlined,
-              value: '#${result.ageGroupRank}',
-              label: t.raceAgeGroupRank,
-              compact: true,
-            ),
         ],
       ),
       const SizedBox(height: AppSpacing.xl),
@@ -409,5 +399,113 @@ class _Body extends ConsumerWidget {
         ),
       ),
     ];
+  }
+}
+
+/// En que lugar llego el corredor. Es lo primero que se busca al abrir una
+/// carrera terminada, asi que va arriba y en grande, no como una metrica mas.
+/// El puesto lo puede corregir el organizador despues: la pantalla siempre
+/// muestra el ultimo que mando el servidor.
+class _PositionHero extends StatelessWidget {
+  const _PositionHero({required this.result});
+
+  final RaceResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.l10n;
+    final rank = result.overallRank!;
+    final total = result.totalParticipants;
+    final podium = rank <= 3;
+    final fg = c.onPrimary;
+
+    return Semantics(
+      container: true,
+      label: total != null ? t.racePositionSemantics(rank, total) : null,
+      child: ExcludeSemantics(
+        excluding: total != null,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: c.primary,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: AppSizes.dayRing,
+                height: AppSizes.dayRing,
+                decoration: BoxDecoration(
+                  color: fg.withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  podium
+                      ? Icons.emoji_events_rounded
+                      : Icons.leaderboard_rounded,
+                  color: fg,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.base),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      rank == 1
+                          ? t.raceWinner
+                          : podium
+                          ? t.racePodium
+                          : t.raceYourPosition,
+                      style: context.text.labelSm.copyWith(color: fg),
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '#$rank',
+                            style: context.text.displayMd.copyWith(color: fg),
+                          ),
+                          if (total != null)
+                            TextSpan(
+                              text: '  ${t.racesOfTotal(total)}',
+                              style: context.text.bodyMd.copyWith(color: fg),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (result.ageGroupRank != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: fg.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '#${result.ageGroupRank}',
+                        style: context.text.headingMd.copyWith(color: fg),
+                      ),
+                      Text(
+                        t.raceAgeGroupRank,
+                        style: context.text.labelSm.copyWith(color: fg),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

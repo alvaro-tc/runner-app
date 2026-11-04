@@ -300,6 +300,7 @@ class PaymentInfo {
     this.qrLogoUrl,
     this.qrInstructions,
     this.qrReference,
+    this.qrAuto = false,
     this.bankReference,
     this.last4,
     this.proof,
@@ -326,6 +327,10 @@ class PaymentInfo {
   /// la transferencia. **Temporal**, solo en `qr_manual`.
   final String? qrInstructions;
   final String? qrReference;
+
+  /// QR generado por la API de pagos para este cobro: se confirma solo cuando
+  /// el banco avisa. El comprobante se sube igual y el servidor lo reenvia.
+  final bool qrAuto;
 
   final String? bankReference;
   final String? last4;

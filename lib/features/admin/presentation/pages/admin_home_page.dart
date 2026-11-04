@@ -5,6 +5,7 @@ import 'package:camrun/core/theme/app_spacing.dart';
 import 'package:camrun/features/admin/data/admin_api.dart';
 import 'package:camrun/features/admin/domain/admin_models.dart';
 import 'package:camrun/features/admin/presentation/providers/admin_providers.dart';
+import 'package:camrun/features/home/domain/entities/marathon.dart';
 import 'package:camrun/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:camrun/features/train/domain/entities/training_run.dart';
 import 'package:camrun/l10n/l10n_labels.dart';
@@ -396,6 +397,17 @@ class _Contador extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(label, style: context.text.labelSm),
+          // En preparacion: cuantos tienen la app abierta, salgan o no ya en
+          // el mapa (el GPS puede tardar en dar el primer punto).
+          if (board.phase == MarathonPhase.preparing) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Icon(Icons.smartphone_rounded, size: 14, color: c.primary),
+            const SizedBox(width: AppSpacing.xxs),
+            Text(
+              '${board.appOpen}',
+              style: context.text.labelSm.copyWith(color: c.primary),
+            ),
+          ],
           if (lap != null) ...[
             const SizedBox(width: AppSpacing.sm),
             Icon(Icons.loop_rounded, size: 14, color: c.textSecondary),

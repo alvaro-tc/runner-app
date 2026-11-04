@@ -1580,6 +1580,30 @@ abstract class AppLocalizations {
   /// **'Age group rank'**
   String get raceAgeGroupRank;
 
+  /// No description provided for @raceYourPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Your position'**
+  String get raceYourPosition;
+
+  /// No description provided for @racePodium.
+  ///
+  /// In en, this message translates to:
+  /// **'You made the podium!'**
+  String get racePodium;
+
+  /// No description provided for @raceWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'You won the race!'**
+  String get raceWinner;
+
+  /// No description provided for @racePositionSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished in position {rank} of {total}'**
+  String racePositionSemantics(int rank, int total);
+
   /// No description provided for @raceStartsIn.
   ///
   /// In en, this message translates to:
@@ -2737,6 +2761,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write it in the transfer detail. It is how the organiser links your payment to this entry.'**
   String get registerPaymentNoteHelp;
+
+  /// No description provided for @registerQrApiSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A QR just for this payment: upload the receipt and it confirms itself'**
+  String get registerQrApiSubtitle;
+
+  /// No description provided for @registerQrApiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This QR is only for this payment'**
+  String get registerQrApiTitle;
+
+  /// No description provided for @registerQrApiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the exact amount shown and upload the receipt. Do not use any other QR for this race.'**
+  String get registerQrApiBody;
+
+  /// No description provided for @registerProofAutoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt sent'**
+  String get registerProofAutoTitle;
+
+  /// No description provided for @registerProofAutoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your registration confirms itself once the bank reports the payment.'**
+  String get registerProofAutoBody;
 
   /// No description provided for @registerProofInReviewTitle.
   ///

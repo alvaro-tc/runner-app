@@ -222,6 +222,7 @@ LiveBoard liveBoardAfterServerState({
     preparingMessage: next.preparingMessage,
     startedAt: next.startedAt,
     finishedAt: next.finishedAt,
+    appOpen: current.appOpen,
     loading: false,
   );
 }
@@ -236,9 +237,14 @@ class LiveBoard {
     this.preparingMessage,
     this.startedAt,
     this.finishedAt,
+    this.appOpen = 0,
     this.loading = true,
     this.failure,
   });
+
+  /// Corredores con la app abierta en la sala de espera. Solo vale mientras la
+  /// carrera esta en preparacion: es lo que el organizador cuenta para largar.
+  final int appOpen;
 
   /// Por dorsal: una posicion nueva del mismo corredor **reemplaza** a la
   /// anterior. Guardar el historico haria crecer el mapa sin limite durante una
@@ -274,6 +280,7 @@ class LiveBoard {
     String? preparingMessage,
     DateTime? startedAt,
     DateTime? finishedAt,
+    int? appOpen,
     bool? loading,
     bool clearFinished = false,
     Failure? failure,
@@ -285,6 +292,7 @@ class LiveBoard {
     preparingMessage: preparingMessage ?? this.preparingMessage,
     startedAt: startedAt ?? this.startedAt,
     finishedAt: clearFinished ? null : (finishedAt ?? this.finishedAt),
+    appOpen: appOpen ?? this.appOpen,
     loading: loading ?? this.loading,
     failure: clearFailure ? null : (failure ?? this.failure),
   );
@@ -308,6 +316,9 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
     final posiciones = socket.positions.listen(_onPosicion);
     final estados = socket.states.listen(_onEstado);
     final llegadas = socket.finishes.listen(_onLlegada);
+    final presentes = socket.appOpen.listen((p) {
+      if (p.$1 == marathonId) state = state.copyWith(appOpen: p.$2);
+    });
 
     // La baja de la sala llega despues del primer await; si la pantalla se
     // cerro antes, hay que soltarla igual o quedaria mirando para siempre.
@@ -329,6 +340,7 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
       unawaited(posiciones.cancel());
       unawaited(estados.cancel());
       unawaited(llegadas.cancel());
+      unawaited(presentes.cancel());
     });
 
     unawaited(_cargarFoto(marathonId));
@@ -350,6 +362,7 @@ class LiveBoardNotifier extends Notifier<LiveBoard> {
         preparingMessage: json['preparingMessage'] as String?,
         startedAt: DateTime.tryParse(json['startedAt'] as String? ?? ''),
         finishedAt: DateTime.tryParse(json['finishedAt'] as String? ?? ''),
+        appOpen: (json['appOpen'] as num?)?.toInt() ?? 0,
         loading: false,
       );
     } catch (error) {

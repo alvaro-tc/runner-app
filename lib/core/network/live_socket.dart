@@ -137,6 +137,24 @@ class LiveSocket {
   final _llegadas = StreamController<RunnerFinish>.broadcast();
   final _inscripciones = StreamController<void>.broadcast();
   final _notificaciones = StreamController<Map<String, dynamic>>.broadcast();
+  final _presentes = StreamController<(String, int)>.broadcast();
+
+  /// `(marathonId, cuantos)`: corredores con la app abierta en la sala de
+  /// espera de una carrera en preparacion. Lo pinta el mapa del organizador.
+  Stream<(String, int)> get appOpen => _presentes.stream;
+
+  /// "Tengo la app abierta y estoy aqui". Va por el socket y no por Traccar
+  /// para que el organizador lo vea al instante. Sin coordenadas solo cuenta
+  /// como presente; con ellas, ademas, pinta el punto en el mapa.
+  void presence(String marathonId, {double? lat, double? lng}) {
+    _conectar().emit('presence', {
+      'marathonId': marathonId,
+      'lat': ?lat,
+      'lng': ?lng,
+    });
+  }
+
+  void leavePresence() => _socket?.emit('presence:leave');
 
   Stream<LivePosition> get positions => _posiciones.stream;
   Stream<MarathonLiveState> get states => _estados.stream;
@@ -232,6 +250,7 @@ class LiveSocket {
     await _llegadas.close();
     await _inscripciones.close();
     await _notificaciones.close();
+    await _presentes.close();
   }
 
   io.Socket _conectar() {
@@ -273,6 +292,14 @@ class LiveSocket {
         }
       })
       ..on('registration:state', (_) => _inscripciones.add(null))
+      ..on('marathon:presence', (data) {
+        if (data is Map && data['marathonId'] is String) {
+          _presentes.add((
+            data['marathonId'] as String,
+            (data['count'] as num?)?.toInt() ?? 0,
+          ));
+        }
+      })
       ..on('notification:new', (data) {
         if (data is Map) _notificaciones.add(data.cast<String, dynamic>());
       })
