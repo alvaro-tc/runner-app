@@ -44,6 +44,8 @@
 	<string>CamRun usa el sensor de movimiento durante la carrera para gastar menos batería cuando estás quieto.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>CamRun abre tu galería solo para que elijas el comprobante del pago de tu carrera. No lee nada más.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>CamRun guarda en tu galería el QR de pago de tu carrera para que puedas pagarlo desde tu banco.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>CamRun usa la cámara solo para que fotografíes el comprobante del pago de tu carrera.</string>
 	<key>UIBackgroundModes</key>

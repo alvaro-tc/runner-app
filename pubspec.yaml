@@ -1,7 +1,7 @@
 name: camrun
 description: "CamRun - training plans, live run tracking and race history."
 publish_to: 'none'
-version: 1.1.4+15
+version: 1.1.5+16
 
 environment:
   sdk: ^3.12.2
@@ -84,6 +84,9 @@ dependencies:
   printing: ^5.15.1
   sign_in_with_apple: ^8.2.0
   crypto: ^3.0.7
+  # Guarda el QR de cobro en la galeria como imagen: la captura de pantalla a
+  # veces sale borrosa o recortada y el banco no la lee.
+  gal: ^2.3.3
 
 # traccar_client_sdk aplica kotlin-android, asi que el proyecto va con
 # android.builtInKotlin=false. image_picker_android >=0.8.13+17 movio su

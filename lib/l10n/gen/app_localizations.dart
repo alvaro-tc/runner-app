@@ -2840,6 +2840,24 @@ abstract class AppLocalizations {
   /// **'Take a photo'**
   String get registerProofTakePhoto;
 
+  /// No description provided for @registerQrSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save QR to gallery'**
+  String get registerQrSave;
+
+  /// No description provided for @registerQrSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'QR saved to your gallery'**
+  String get registerQrSaved;
+
+  /// No description provided for @registerQrSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the QR. Check the photos permission.'**
+  String get registerQrSaveError;
+
   /// No description provided for @phoneSelectCountry.
   ///
   /// In en, this message translates to:

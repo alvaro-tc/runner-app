@@ -1521,6 +1521,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerProofTakePhoto => 'Take a photo';
 
   @override
+  String get registerQrSave => 'Save QR to gallery';
+
+  @override
+  String get registerQrSaved => 'QR saved to your gallery';
+
+  @override
+  String get registerQrSaveError =>
+      'Could not save the QR. Check the photos permission.';
+
+  @override
   String get phoneSelectCountry => 'Select a country';
 
   @override

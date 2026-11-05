@@ -25,6 +25,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- Map tiles and, later, the real API. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Guardar el QR de pago en la galeria. Desde Android 10 no hace falta. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
     <application
         android:label="CamRun"
         android:name="${applicationName}"

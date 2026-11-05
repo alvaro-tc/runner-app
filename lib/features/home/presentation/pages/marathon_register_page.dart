@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:camrun/app/router/app_routes.dart';
 import 'package:camrun/core/extensions/context_x.dart';
 import 'package:camrun/core/formatters/formatters.dart';
@@ -23,9 +25,12 @@ import 'package:camrun/shared/widgets/molecules/branded_qr.dart';
 import 'package:camrun/shared/widgets/molecules/phone_field.dart';
 import 'package:camrun/shared/widgets/molecules/states.dart';
 import 'package:camrun/shared/widgets/molecules/tiles.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -753,9 +758,10 @@ class _MarathonRegisterPageState extends ConsumerState<MarathonRegisterPage> {
                 RacePaymentMethod.qr => t.registerQrSubtitle,
                 RacePaymentMethod.bankTransfer =>
                   t.registerBankTransferSubtitle,
-                RacePaymentMethod.qrManual => marathon.paymentApi
-                    ? t.registerQrApiSubtitle
-                    : t.registerQrManualSubtitle,
+                RacePaymentMethod.qrManual =>
+                  marathon.paymentApi
+                      ? t.registerQrApiSubtitle
+                      : t.registerQrManualSubtitle,
               },
               selected: _method == method,
               onTap: () => setState(() => _method = method),
@@ -1222,23 +1228,77 @@ class _ManualQrPayment extends StatelessWidget {
 /// pagar.
 ///
 /// El color, el contraste y el logo del centro los pone [BrandedQr].
-class _QrCode extends StatelessWidget {
+///
+/// Se puede guardar en la galería: la captura de pantalla a veces sale con
+/// barras, recortada o escalada y el banco no la lee. Se guarda lo mismo que se
+/// ve —tarjeta blanca incluida, que es la zona silenciosa— a 4x.
+class _QrCode extends StatefulWidget {
   const _QrCode({required this.data, this.logoUrl});
 
   final String data;
   final String? logoUrl;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(AppSpacing.base),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-    ),
-    child: SizedBox.square(
-      dimension: 220,
-      child: BrandedQr(data: data, logoUrl: logoUrl),
-    ),
+  State<_QrCode> createState() => _QrCodeState();
+}
+
+class _QrCodeState extends State<_QrCode> {
+  final _boundary = GlobalKey();
+  bool _saving = false;
+
+  Future<void> _save() async {
+    final t = context.l10n;
+    setState(() => _saving = true);
+    try {
+      final render =
+          _boundary.currentContext!.findRenderObject()!
+              as RenderRepaintBoundary;
+      final image = await render.toImage(pixelRatio: 4);
+      final png = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      await Gal.putImageBytes(
+        png!.buffer.asUint8List(),
+        name: 'camrun-qr-${DateTime.now().millisecondsSinceEpoch}',
+      );
+      if (mounted) context.showSnack(t.registerQrSaved);
+    } on Object {
+      // GalException (permiso negado, sin espacio) o un fallo al pintar.
+      if (mounted) context.showSnack(t.registerQrSaveError);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      RepaintBoundary(
+        key: _boundary,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          child: SizedBox.square(
+            dimension: 220,
+            child: BrandedQr(data: widget.data, logoUrl: widget.logoUrl),
+          ),
+        ),
+      ),
+      // gal no tiene version web; en web basta con la captura o imprimir.
+      if (!kIsWeb) ...[
+        const SizedBox(height: AppSpacing.sm),
+        AppButton(
+          label: context.l10n.registerQrSave,
+          variant: AppButtonVariant.outline,
+          icon: Icons.download_rounded,
+          isLoading: _saving,
+          onPressed: _save,
+        ),
+      ],
+    ],
   );
 }
 
